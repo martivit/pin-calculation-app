@@ -2,13 +2,28 @@ import streamlit as st
 import pandas as pd
 #from calculate_PiN import calculate_pin  
 import subprocess
+import extra_streamlit_components as stx
 
 st.logo('pics/logos.png')
-
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico', layout='wide')
 st.title('Indicator Selection and severity categorization')
 
+
+if 'current_step' not in st.session_state:
+    st.session_state['current_step'] = 0
+
+# Define the steps for the stepper bar
+steps = ["Select correct data frame and language", "Select education indicators", "Define aggravating circumstances", "Define disaggregation variables"]
+current_step = st.session_state['current_step']
+new_step = stx.stepper_bar(steps=steps)
+
+if new_step is not None and new_step != st.session_state['current_step']:
+    st.session_state['current_step'] = new_step
+
+#if new_step != current_step:
+#    st.session_state['current_step'] = new_step
+#    current_step = new_step
 
 if 'init' not in st.session_state:
     st.session_state.update({
@@ -79,30 +94,36 @@ def handle_column_selection(suggestions, column_type):
     col1, col2 = st.columns(2)
     confirm_key = f'confirm_yes_{column_type}'
     select_key = f'{column_type}_selectbox'
+    edu_data = st.session_state['edu_data']
+    message_placeholder = st.empty()  # Place to show messages dynamically
+
     with col1:
         if st.button("Yes", key=confirm_key):
             if suggested_column != 'No selection':
                 st.session_state[f'selected_{column_type}_column'] = suggested_column
                 st.session_state[f'{column_type}_column_confirmed'] = True
-                st.success(f"{column_type.capitalize()} column '{suggested_column}' has been confirmed.")
+                #st.success(f"{column_type.capitalize()} column '{suggested_column}' has been confirmed.")                                
+                message_placeholder.success(f"{column_type.capitalize()} column '{suggested_column}' has been confirmed.")
+
     with col2:
         if st.button("No", key=f'confirm_no_{column_type}'):
             selected_column = st.selectbox(
                 f"Select the individual {column_type} column:",
                 ['No selection'] + edu_data.columns.tolist(),
                 key=select_key,
-                on_change=update_column_confirmation,
-                args=(column_type,)
+                #on_change=update_column_confirmation (column_type,message_placeholder)
+                #args=(column_type,)
             )
+            update_column_confirmation (column_type,message_placeholder)
 ##---------------------------------------------------------------------------------------------------------
-def update_column_confirmation(column_type):
+def update_column_confirmation(column_type, placeholder):
     select_key = f'{column_type}_selectbox'
     selected_column = st.session_state.get(select_key)
     if selected_column and selected_column != 'No selection':
         st.session_state[f'selected_{column_type}_column'] = selected_column
         st.session_state[f'{column_type}_column_confirmed'] = True
-        st.success(f"{column_type.capitalize()} column '{selected_column}' has been manually selected.")
-        display_status(f"{column_type.capitalize()} Column Confirmed", st.session_state[f'{column_type}_column_confirmed'])
+        placeholder.success(f"{column_type.capitalize()} column '{selected_column}' has been manually selected.")
+        #display_status(f"{column_type.capitalize()} Column Confirmed", st.session_state[f'{column_type}_column_confirmed'])
 
 ##---------------------------------------------------------------------------------------------------------
 def update_combined_indicator():
@@ -203,235 +224,279 @@ def update_other_parameters_status():
     display_status("Other Parameters Confirmed", st.session_state['other_parameters_confirmed'])
 
 ##---------------------------------------------------------------------------------------------------------
-# Function to call R script for calculating PiN
-def call_r_script():
-    command = [
-        "Rscript", 
-        "calculate_PiN.R",
-        st.session_state['access_var'],
-        st.session_state['teacher_disruption_var'],
-        st.session_state['idp_disruption_var'],
-        st.session_state['armed_disruption_var'],
-        st.session_state['barrier_var'],
-        ','.join(st.session_state['selected_severity_4_barriers']),
-        ','.join(st.session_state['selected_severity_5_barriers']),
-        st.session_state['admin_level'],
-        st.session_state['school_start_month'],
-        'edu_data.csv',
-        'survey_data.csv',
-        'household_data.csv',
-        'choice_data.csv'
-    ]
+def show_step_content(step):
+    if step == 0:
+        st.write("### Step 1: Select Correct Data Frame")
+        # Placeholder for data frame selection logic
+        st.write("Here you would include your UI for selecting and validating the data frame.")
+    elif step == 1:
+        st.write("### Step 2: Select Education Indicators")
+        # Placeholder for education indicators selection
+        st.write("This is where users would pick and validate education indicators.")
+    elif step == 2:
+        st.write("### Step 3: Define Aggravating Circumstances")
+        # Placeholder for defining aggravating circumstances
+        st.write("Users would define the severity of barriers here.")
+    elif step == 3:
+        st.write("### Step 4: Define Disaggregation Variable")
+        # Placeholder for disaggregation variables selection
+        st.write("Setup for disaggregation by variables like administrative area, school cycle, etc.")
 
-    # Execute the R script
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode == 0:
-        st.success("Calculation successful!")
-        return result.stdout
+###########################################################################################################
+##-----------------------------
+# Function to handle uploading and selecting data
+def upload_and_select_data():
+    if 'uploaded_data' in st.session_state:
+        st.subheader('Selection of the relevant sheets in the MSNA data file')
+        data = st.session_state['uploaded_data']
+        if isinstance(data, dict):
+            col1, col2 = st.columns(2)
+            with col1:
+                selected_sheet = st.selectbox('Select the Household data sheet:', ['No selection'] + list(data.keys()), key='household_key')
+                selected_survey_sheet = st.selectbox('Select the Survey/kobo sheet:', ['No selection'] + list(data.keys()), key='survey_key')
+            with col2:
+                selected_edu_sheet = st.selectbox('Select the Education loop (or individual loop) data sheet:', ['No selection'] + list(data.keys()), key='edu_key')
+                selected_choice_sheet = st.selectbox('Select the Kobo choice sheet:', ['No selection'] + list(data.keys()), key='choice_key')
+
+            if st.button('Confirm Data Selections') and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
+                st.session_state['household_data'] = data[selected_sheet]
+                st.session_state['survey_data'] = data[selected_survey_sheet]
+                st.session_state['edu_data'] = data[selected_edu_sheet]
+                st.session_state['choice_data'] = data[selected_choice_sheet]
+                st.session_state.data_selections_confirmed = True
+                st.success("Data selections updated successfully!")
+
+            if 'survey_data' in st.session_state:
+                survey_data = st.session_state['survey_data']
+                label_columns = [col for col in survey_data.columns if col.startswith('label::')]
+                if label_columns:
+                    selected_label = st.selectbox('Select the desired label column:', ['No selection'] + label_columns, key='selected_label')
+                    if selected_label != 'No selection':
+                        st.session_state['label'] = selected_label
+                        if st.button("Confirm Label Language"):
+                            st.session_state.label_selected = True
+                            st.success(f"Label column '{selected_label}' has been selected.")
+                            st.markdown("""
+                                        <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'>
+                                            <span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span>
+                                            <span style='color: #014bb4; font-style: italic; font-size: 20px;'>Select education indicators</span>
+                                        </div>
+                                        """, unsafe_allow_html=True)
     else:
-        st.error("Failed to execute R script: " + result.stderr)
-###########################################################################################################
-###########################################################################################################
-###########################################################################################################
-if 'uploaded_data' in st.session_state:
-    data = st.session_state['uploaded_data']
-    if isinstance(data, dict):
+        st.warning("No data uploaded. Please go to the previous page and upload data.")     
+##-----------------------------
+# Function to select indicators
+def select_indicators():
+    if 'edu_data' in st.session_state and st.session_state.get('label_selected', False) :
+        edu_data = st.session_state['edu_data']
+        st.subheader("Select the correct variables and indicators.")
+        st.markdown("""
+            <div style='background-color: #FDFD96; border-radius: 5px; padding: 10px; margin: 10px 0;'>
+            <h6 style='color: #162AFD; margin: 0; padding: 0;'>Please check carefully when selecting a variable. The choice of indicators directly impacts the PiN calculation.⚠️</h6>
+            </div>
+            """, unsafe_allow_html=True)
+
+        age_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['age', 'âge', 'year'])]
+        gender_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['sex', 'gender', 'sexe', 'genre'])]
+        education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole'])]
+
+        # Checkbox to show/hide the data header
+        if st.checkbox('Display Education Data Header (This can assist in inspecting the contents of the data frame)'):
+            st.dataframe(edu_data.head())
+        
+        if age_suggestions:
+            handle_column_selection(age_suggestions, 'age')
+        if gender_suggestions:
+            handle_column_selection(gender_suggestions, 'gender')
+
+        if education_indicator_suggestions:
+            st.session_state['access_var'] = handle_full_selection(education_indicator_suggestions, 'education_access', "% of children accessing education:")    
+            st.session_state['teacher_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_teacher', "% of children whose access to education was disrupted due to teacher strikes or absenteeism:") 
+            st.session_state['idp_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_idp', "% of children whose access to education was disrupted due the school being used as a shelter by displaced persons:") 
+            st.session_state['armed_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_armed', "% of children whose access to education was disrupted due the school being occupied by armed groups:") 
+            st.session_state['barrier_var'] = handle_full_selection(education_indicator_suggestions, 'barriers', "main barriers to access education:") 
+            check_for_duplicate_selections()
+        if st.button("Confirm Indicators"):
+            st.session_state.indicators_confirmed = True
+            st.success("Indicators confirmed!")
+            st.markdown("""
+            <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'>
+                <span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span>
+                <span style='color: #014bb4; font-style: italic; font-size: 20px;'>Define aggravating cicurmstances</span>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.warning("Please go to the previous step and first select the right sheets in the MSNA data file.") 
+##-----------------------------
+# Function to define severity of barriers
+def define_severity():
+    if 'survey_data' in st.session_state and 'choice_data' in st.session_state and 'edu_data' in st.session_state and st.session_state.get('indicators_confirmed', False):
+        survey_data = st.session_state['survey_data']
+        choices_data = st.session_state['choice_data']
+        edu_data = st.session_state['edu_data']
+
+        barrier_var = st.session_state.get('barrier_var', 'Default Value if not set')
+        selected_label = st.session_state['label'] 
+        barrier_options = find_barrier_details(barrier_var, survey_data, choices_data, selected_label)
+
+        # Encapsulate descriptions within a single box with a light gray background
+        st.markdown("""
+            <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ccc;'>
+                <h5 style='color: #c0474a;'>For the next part, please refer to the PiN methodology shared on the home page!</h5>
+                <h6 style='color: #014bb4;'>Severity 4 aggravating circumstances:</h6>
+                <ul>
+                    <li>Child marriage and child labour (work at home or on the household's own farm -- in income generating activities).</li>
+                    <li>Protection risks while traveling to/at the school (includes dangers and injuries, physical and emotional maltreatment, sexual and gender based violence, and verbal harassment, mental health and psychosocial distress).</li>
+                    <li>Lack of documentation for school enrollment: household is recently displaced and this is the reason why they do not have documentation.</li>
+                    <li>Discrimination or stigmatization affecting access to education.</li>
+                </ul>
+                <h6 style='color: #014bb4;'>Severity 5 aggravating circumstances:</h6>
+                <ul>
+                    <li>Children recruitment by armed groups.</li>
+                    <li>In some specific contexts, the presence of bans preventing children from attending education.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        selected_severity_4_barriers = select_severity_barriers(barrier_options, 4)
+        barrier_options_5 = [option for option in barrier_options if option not in selected_severity_4_barriers]
+        selected_severity_5_barriers = select_severity_barriers(barrier_options_5, 5)
+        if st.button("Confirm Severity Definitions"):
+            st.session_state.severity_confirmed = True
+            st.success("Severity definitions confirmed!")
+            st.markdown("""
+                    <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'>
+                        <span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span>
+                        <span style='color: #014bb4; font-style: italic; font-size: 20px;'>Define disaggregation variables</span>
+                    </div>
+                    """, unsafe_allow_html=True)  
+    else:
+        st.warning("Please return to the previous step and first select the correct variable referring to barriers to access education.")          
+##-----------------------------
+# Function to handle administrative details and final confirmations
+def finalize_details():
+    if st.session_state.get('severity_confirmed', False):
+        st.subheader("Choose the correct disaggregation variables and their values")
         col1, col2 = st.columns(2)
         with col1:
-            selected_sheet = st.selectbox('Select the Household data sheet:', ['No selection'] + list(data.keys()), key='household_key')
-            selected_survey_sheet = st.selectbox('Select the Survey/kobo sheet:', ['No selection'] + list(data.keys()), key='survey_key')
+            admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
+            selected_admin_level = st.selectbox(
+                "What is the smallest administrative level at which we can calculate the PiN to ensure the results are representative? Select:",
+                admin_level_options,
+                index=0,  # Default to 'No selection'
+                key='admin_target'
+            )
+            if st.button('Confirm Admin Level', key='confirm_admin_level'):
+                if selected_admin_level != 'No selection':
+                    selected_admin_level = st.session_state['admin_target']  
+                    st.session_state.admin_level_confirmed = True
+                    st.success("Administrative level confirmed!")
+                else:
+                    st.error("Please select a valid administrative level.")
+                #update_other_parameters_status()
         with col2:
-            selected_edu_sheet = st.selectbox('Select the Education loop (or individual loop) data sheet:', ['No selection'] + list(data.keys()), key='edu_key')
-            selected_choice_sheet = st.selectbox('Select the Kobo choice sheet:', ['No selection'] + list(data.keys()), key='choice_key')
+            months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 
+                    'July', 'August', 'September', 'October', 'November', 'December']
+            start_school = st.selectbox(
+                "When does the school year officially start? Needed for the estimate of the correct age",
+                months,
+                index=0,  # Default to 'No selection'
+                key='start_school'
+            )
+            if st.button('Confirm School Start Month', key='confirm_start_school'):
+                if start_school != 'No selection':
+                    start_school = st.session_state['start_school']
+                    st.session_state.school_start_month_confirmed = True
+                    st.success("School start month confirmed!")
+                else:
+                    st.error("Please select a valid month.")
+                #update_other_parameters_status()
 
-        if st.button('Confirm Data Selections') and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
-            st.session_state['household_data'] = data[selected_sheet]
-            st.session_state['survey_data'] = data[selected_survey_sheet]
-            st.session_state['edu_data'] = data[selected_edu_sheet]
-            st.session_state['choice_data'] = data[selected_choice_sheet]
-            st.session_state.data_selections_confirmed = True
-            st.success("Data selections updated successfully!")
+        upper_primary_start = st.session_state['lower_primary_end'] +1
+        
+        lower_primary_end = st.slider(
+            "Which is the age range for the lower primary school cycle?",
+            min_value=6, 
+            max_value=18, 
+            value=st.session_state['lower_primary_end'],
+            step=1,
+            key='lower_primary_end'
+        )
 
-        if 'survey_data' in st.session_state:
-            survey_data = st.session_state['survey_data']
-            label_columns = [col for col in survey_data.columns if col.startswith('label::')]
-            if label_columns:
-                selected_label = st.selectbox('Select the desired label column:', ['No selection'] + label_columns, key='selected_label')
-                if selected_label != 'No selection':
-                    st.session_state['label'] = selected_label
-                    st.session_state.label_selected = True
-                    st.success(f"Label column '{selected_label}' has been selected.")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button('OK'):
+                st.session_state.single_cycle = False
+                lower_primary_end = st.session_state['lower_primary_end'] 
+                upper_primary_start = lower_primary_end +1                   
 
-        if 'edu_data' in st.session_state:
-            edu_data = st.session_state['edu_data']
-            st.subheader("Now we need to select the correct variables and indicators.")
-            st.markdown("""
-                <div style='background-color: #FDFD96; border-radius: 5px; padding: 10px; margin: 10px 0;'>
-                <h6 style='color: #162AFD; margin: 0; padding: 0;'>Please check carefully when selecting a variable. The choice of indicators directly impacts the PiN calculation.⚠️</h6>
+        with col2:
+            if st.button('There is only one cycle of primary, followed by secondary school'):
+                st.session_state.single_cycle = True
+
+        # Depending on user selection, show different sliders or information
+        if 'single_cycle' in st.session_state and not st.session_state['single_cycle']:
+            # Slider for the upper primary school cycle age range
+            upper_primary_end = st.slider(
+                "Which is the age range for the upper primary school?",
+                min_value=upper_primary_start, 
+                max_value=18, 
+                value=st.session_state['upper_primary_end'],
+                step=1,
+                key='upper_primary_end'
+            )
+            upper_primary_start = st.session_state['lower_primary_end'] + 1
+            secondary_start = st.session_state['upper_primary_end'] + 1
+            # Button to confirm the final age ranges
+            if st.button('Confirm Age Ranges'):
+                st.session_state.upper_primary_end_confirmed = True
+                if upper_primary_end != st.session_state['upper_primary_end']:
+                    upper_primary_end = st.session_state['upper_primary_end'] 
+                st.markdown(f"""
+                <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
+                    <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
+                    <div><strong>Lower Primary School:</strong> 6 - {lower_primary_end}</div>
+                    <div><strong>Upper Primary School:</strong> {upper_primary_start} - {upper_primary_end}</div>
+                    <div><strong>Secondary School:</strong> {secondary_start} - 18</div>
                 </div>
                 """, unsafe_allow_html=True)
 
-            age_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['age', 'âge', 'year'])]
-            gender_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['sex', 'gender', 'sexe', 'genre'])]
-            education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole'])]
 
-            # Checkbox to show/hide the data header
-            if st.checkbox('Display Education Data Header (This can assist in inspecting the contents of the data frame)'):
-                st.dataframe(edu_data.head())
-            
-            if age_suggestions:
-                handle_column_selection(age_suggestions, 'age')
-            if gender_suggestions:
-                handle_column_selection(gender_suggestions, 'gender')
-
-            if education_indicator_suggestions:
-                access_var = handle_full_selection(education_indicator_suggestions, 'education_access', "% of children accessing education:")    
-                teacher_disruption_var =  handle_full_selection(education_indicator_suggestions, 'disruption_teacher', "% of children whose access to education was disrupted due to teacher strikes or absenteeism:") 
-                idp_disruption_var =  handle_full_selection(education_indicator_suggestions, 'disruption_idp', "% of children whose access to education was disrupted due the school being used as a shelter by displaced persons:") 
-                armed_disruption_var =  handle_full_selection(education_indicator_suggestions, 'disruption_armed', "% of children whose access to education was disrupted due the school being occupied by armed groups:") 
-                barrier_var = handle_full_selection(education_indicator_suggestions, 'barriers', "main barriers to access education:") 
-                check_for_duplicate_selections()
-            if st.session_state.get('barriers_column_confirmed', False):
-                if 'survey_data' in st.session_state and 'choice_data' in st.session_state and 'edu_data' in st.session_state:
-                    survey_data = st.session_state['survey_data']
-                    choices_data = st.session_state['choice_data']
-                    edu_data = st.session_state['edu_data']
-
-                    barrier_options = find_barrier_details(barrier_var, survey_data, choices_data, selected_label)
-
-                    # Encapsulate descriptions within a single box with a light gray background
-                    st.markdown("""
-                        <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ccc;'>
-                            <h5 style='color: #c0474a;'>For the next part, please refer to the PiN methodology shared on the home page!</h5>
-                            <h6 style='color: #014bb4;'>Severity 4 aggravating circumstances:</h6>
-                            <ul>
-                                <li>Child marriage and child labour (work at home or on the household's own farm -- in income generating activities).</li>
-                                <li>Protection risks while traveling to/at the school (includes dangers and injuries, physical and emotional maltreatment, sexual and gender based violence, and verbal harassment, mental health and psychosocial distress).</li>
-                                <li>Lack of documentation for school enrollment: household is recently displaced and this is the reason why they do not have documentation.</li>
-                                <li>Discrimination or stigmatization affecting access to education.</li>
-                            </ul>
-                            <h6 style='color: #014bb4;'>Severity 5 aggravating circumstances:</h6>
-                            <ul>
-                                <li>Children recruitment by armed groups.</li>
-                                <li>In some specific contexts, the presence of bans preventing children from attending education.</li>
-                            </ul>
+        elif 'single_cycle' in st.session_state and st.session_state['single_cycle']:
+            # Directly display age ranges for primary and secondary
+            primary_end = st.session_state['lower_primary_end']
+            secondary_start = primary_end + 1
+            st.markdown(f"""
+                <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
+                    <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
+                    <div><strong>Primary School:</strong> 6 - {primary_end}</div>
+                    <div><strong>Secondary School:</strong> {secondary_start} - 18</div>
+                </div>
+                """, unsafe_allow_html=True)
+        if st.button("Finalize and Confirm"):
+            st.session_state.final_confirmed = True
+            st.success("All details confirmed and finalized!")
+            st.markdown("""
+                        <div style='background-color: #90EE90; padding: 10px; border-radius: 5px;'>
+                            <span style='color: black; font-size: 20px;'><strong>Proceed to PiN calculation!!!</strong></span>
                         </div>
-                        """, unsafe_allow_html=True)
-                    
-                    selected_severity_4_barriers = select_severity_barriers(barrier_options, 4)
-                    barrier_options_5 = [option for option in barrier_options if option not in selected_severity_4_barriers]
-                    selected_severity_5_barriers = select_severity_barriers(barrier_options_5, 5)
-
-            st.markdown("---")  # Markdown horizontal rule
-            col1, col2 = st.columns(2)
-            with col1:
-                admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
-                selected_admin_level = st.selectbox(
-                    "What is the smallest administrative level at which we can calculate the PiN to ensure the results are representative? Select:",
-                    admin_level_options,
-                    index=0,  # Default to 'No selection'
-                    key='admin_target'
-                )
-                if st.button('Confirm Admin Level', key='confirm_admin_level'):
-                    if selected_admin_level != 'No selection':
-                        selected_admin_level = st.session_state['admin_target']  
-                        st.session_state.admin_level_confirmed = True
-                        st.success("Administrative level confirmed!")
-                    else:
-                        st.error("Please select a valid administrative level.")
-                    #update_other_parameters_status()
-            with col2:
-                months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 
-                        'July', 'August', 'September', 'October', 'November', 'December']
-                start_school = st.selectbox(
-                    "When does the school year officially start? Needed for the estimate of the correct age",
-                    months,
-                    index=0,  # Default to 'No selection'
-                    key='start_school'
-                )
-                if st.button('Confirm School Start Month', key='confirm_start_school'):
-                    if start_school != 'No selection':
-                        start_school = st.session_state['start_school']
-                        st.session_state.school_start_month_confirmed = True
-                        st.success("School start month confirmed!")
-                    else:
-                        st.error("Please select a valid month.")
-                    #update_other_parameters_status()
-
-            upper_primary_start = st.session_state['lower_primary_end'] +1
-            
-            lower_primary_end = st.slider(
-                "Which is the age range for the lower primary school cycle?",
-                min_value=6, 
-                max_value=18, 
-                value=st.session_state['lower_primary_end'],
-                step=1,
-                key='lower_primary_end'
-            )
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button('OK'):
-                    st.session_state.single_cycle = False
-                    lower_primary_end = st.session_state['lower_primary_end'] 
-                    upper_primary_start = lower_primary_end +1                   
-
-            with col2:
-                if st.button('There is only one cycle of primary, followed by secondary school'):
-                    st.session_state.single_cycle = True
-
-            # Depending on user selection, show different sliders or information
-            if 'single_cycle' in st.session_state and not st.session_state['single_cycle']:
-                # Slider for the upper primary school cycle age range
-                upper_primary_end = st.slider(
-                    "Which is the age range for the upper primary school?",
-                    min_value=upper_primary_start, 
-                    max_value=18, 
-                    value=st.session_state['upper_primary_end'],
-                    step=1,
-                    key='upper_primary_end'
-                )
-                upper_primary_start = st.session_state['lower_primary_end'] + 1
-                secondary_start = st.session_state['upper_primary_end'] + 1
-                # Button to confirm the final age ranges
-                if st.button('Confirm Age Ranges'):
-                    st.session_state.upper_primary_end_confirmed = True
-                    if upper_primary_end != st.session_state['upper_primary_end']:
-                        upper_primary_end = st.session_state['upper_primary_end'] 
-                    st.markdown(f"""
-                    <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
-                        <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
-                        <div><strong>Lower Primary School:</strong> 6 - {lower_primary_end}</div>
-                        <div><strong>Upper Primary School:</strong> {upper_primary_start} - {upper_primary_end}</div>
-                        <div><strong>Secondary School:</strong> {secondary_start} - 18</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-
-            elif 'single_cycle' in st.session_state and st.session_state['single_cycle']:
-                # Directly display age ranges for primary and secondary
-                primary_end = st.session_state['lower_primary_end']
-                secondary_start = primary_end + 1
-                st.markdown(f"""
-                    <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
-                        <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
-                        <div><strong>Primary School:</strong> 6 - {primary_end}</div>
-                        <div><strong>Secondary School:</strong> {secondary_start} - 18</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-
-
-                
-##----------------------------------------------------
+                        """, unsafe_allow_html=True)  
     else:
-        st.warning("Survey data or educational data is not available. Please upload and select the data.")
-else:
-    st.warning("No data uploaded. Please go to the previous page and upload data.")
+        st.warning("Please complete all the previous necessary steps.")    
+###########################################################################################################
+###########################################################################################################
 
+def display_step_content():
+    if st.session_state['current_step'] == 0:
+        upload_and_select_data()
+    elif st.session_state['current_step'] == 1:
+        select_indicators()
+    elif st.session_state['current_step'] == 2:
+        define_severity()
+    elif st.session_state['current_step'] == 3:
+        finalize_details()          
 
-
-
+display_step_content()
 
 
 st.markdown("---")  # Markdown horizontal rule

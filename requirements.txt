@@ -1,2 +1,3 @@
 streamlit
 openpyxl
+extra_streamlit_components
