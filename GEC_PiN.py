@@ -5,10 +5,10 @@ import streamlit as st
 if "shared" not in st.session_state:
    st.session_state["shared"] = True
 
-hide_github_icon = """ 
-    GithubIcon { visibility: hidden;} 
-    """
-st.markdown(hide_github_icon, unsafe_allow_html=True)
+# hide_github_icon = """ 
+#     GithubIcon { visibility: hidden;} 
+#     """
+# st.markdown(hide_github_icon, unsafe_allow_html=True)
 
 hide_streamlit_style = """
     <style>
