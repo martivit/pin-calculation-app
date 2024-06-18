@@ -381,7 +381,7 @@ def finalize_details():
         with col1:
             admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
             selected_admin_level = st.selectbox(
-                "What is the smallest administrative level at which we can calculate the PiN to ensure the results are representative? Select:",
+                "What is the smallest administrative level at which we can calculate the PiN to ensure the results are representative?",
                 admin_level_options,
                 index=0,  # Default to 'No selection'
                 key='admin_target'
