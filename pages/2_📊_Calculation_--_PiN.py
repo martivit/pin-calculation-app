@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-#from calculate_PiN import calculate_pin  
-import subprocess
 import extra_streamlit_components as stx
 
 st.logo('pics/logos.png')
@@ -476,11 +474,7 @@ def finalize_details():
         if st.button("Finalize and Confirm"):
             st.session_state.final_confirmed = True
             st.success("All details confirmed and finalized!")
-            st.markdown("""
-                        <div style='background-color: #90EE90; padding: 10px; border-radius: 5px;'>
-                            <span style='color: black; font-size: 20px;'><strong>Proceed to PiN calculation!!!</strong></span>
-                        </div>
-                        """, unsafe_allow_html=True)  
+           
     else:
         st.warning("Please complete all the previous necessary steps.")    
 ###########################################################################################################
@@ -513,3 +507,18 @@ update_combined_indicator()
 display_combined_severity_status()
 update_other_parameters_status()
 
+if all([
+    st.session_state.get('data_selections_confirmed', False),
+    st.session_state.get('label_selected', False),
+    st.session_state.get('age_column_confirmed', False),
+    st.session_state.get('gender_column_confirmed', False),
+    st.session_state.get('indicators_confirmed', False),
+    st.session_state.get('severity_4_confirmed', False),
+    st.session_state.get('severity_5_confirmed', False),
+    st.session_state.get('other_parameters_confirmed', False)
+]):
+    st.markdown("""
+                <div style='background-color: #90EE90; padding: 10px; border-radius: 5px;'>
+                    <span style='color: black; font-size: 20px;'><strong>Proceed to PiN calculation!!!</strong></span>
+                </div>
+                """, unsafe_allow_html=True)  
