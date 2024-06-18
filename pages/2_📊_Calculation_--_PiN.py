@@ -5,7 +5,7 @@ import extra_streamlit_components as stx
 st.logo('pics/logos.png')
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico', layout='wide')
-st.title('Indicator Selection and severity categorization')
+st.title('Indicator and Severity categorization')
 
 
 if 'current_step' not in st.session_state:
