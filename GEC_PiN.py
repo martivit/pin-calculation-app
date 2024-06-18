@@ -15,7 +15,7 @@ st.set_page_config(
     layout='wide')
 
 hide_github_icon = """ 
-    GithubIcon { visibility: hidden;} 
+    #GithubIcon { visibility: hidden; } 
     """
 st.markdown(hide_github_icon, unsafe_allow_html=True)
 
