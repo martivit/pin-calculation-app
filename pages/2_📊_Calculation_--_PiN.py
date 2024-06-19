@@ -303,9 +303,9 @@ def select_indicators():
             st.dataframe(edu_data.head())
         
         if age_suggestions:
-            handle_column_selection(age_suggestions, 'age')
+            st.session_state['age_var'] = handle_column_selection(age_suggestions, 'age')
         if gender_suggestions:
-            handle_column_selection(gender_suggestions, 'gender')
+            st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
         if education_indicator_suggestions:
             st.session_state['access_var'] = handle_full_selection(education_indicator_suggestions, 'education_access', "% of children accessing education:")    
