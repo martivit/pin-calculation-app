@@ -414,8 +414,8 @@ def finalize_details():
         
         lower_primary_end = st.slider(
             "Which is the age range for the lower primary school cycle?",
-            min_value=6, 
-            max_value=18, 
+            min_value=5, 
+            max_value=17, 
             value=st.session_state['lower_primary_end'],
             step=1,
             key='lower_primary_end'
