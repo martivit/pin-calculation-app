@@ -3,6 +3,7 @@ from fuzzywuzzy import process
 import numpy as np
 import datetime
 from pprint import pprint
+import samplics
 from samplics.categorical import Tabulation, CrossTabulation
 from samplics.utils.types import PopParam, RepMethod
 
@@ -112,14 +113,14 @@ def assign_dimension_pin(access, severity):
     no_answers = ['no', 'non']
 
     # Mapping severity to dimension labels
-    
-    if normalized_access in yes_answers:
+    if normalized_access not in yes_answers:
+        if severity in [4, 5]: return 'aggravating circumstances'
+        elif severity == 3: return 'access'
+    elif normalized_access in yes_answers:
         if severity == 3: return 'learning condition'
         if severity in [4, 5]: return 'protected environment'    
         if severity == 2: return 'not falling within the PiN dimensions'   
-    elif normalized_access in no_answers:
-        if severity in [4, 5]: return 'aggravating circumstances'
-        elif severity == 3: return 'access'
+    
     return 'no value'  # Default fallback in case none of the conditions are met         
 
 
@@ -255,23 +256,14 @@ gender_cat = edu_data[gender_var].to_numpy()
 startum_gender = edu_data[gender_var]
 startum_school_cycle = edu_data['school_cycle']
 
-print('-------------')
-
-pluto = edu_data[edu_data[gender_var] == 'female']
-edu_count = Tabulation(param=PopParam.prop)
-edu_count.tabulate(pluto[["severity_category", "school_cycle", "dimension_pin"]],
-    samp_weight=pluto['weights'],
-    remove_nan=True)
-print(edu_count)
 
 
 
 df = pd.DataFrame(edu_data)
 
-print('-------------')
+print('------===================================================-------')
 
 
-# Calculate the weighted proportion of each score by stratum_gender
 
 # Calculate weighted proportions for each category within each stratum_gender
 severity_by_admin = edu_data.groupby([admin_var, 'severity_category']).agg(
@@ -315,15 +307,6 @@ weighted_by_gender_severity4 = df.groupby([admin_var, gender_var, 'severity_cate
 print("\nWeighted proportion of each score by stratum_gender:2")
 print(weighted_by_gender_severity4)
 
-
-unweighted_by_gendeder_severity2 = df.groupby([admin_var, 'severity_category']).agg(
-    total_weight=('weight', 'sum')
-).groupby(level=0).apply(
-    lambda x: x / x.sum()
-).unstack(fill_value=0)
-
-print("\nUnWeighted proportion of each score by stratum_gender:2")
-print(unweighted_by_gendeder_severity2)
 
 
 
