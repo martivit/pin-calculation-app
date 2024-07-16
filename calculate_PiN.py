@@ -1,4 +1,5 @@
 import pandas as pd
+import fuzzywuzzy
 from fuzzywuzzy import process
 import numpy as np
 import datetime
@@ -77,8 +78,9 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     # Normalize to handle English and French variations of "yes" and "no"
     yes_answers = ['yes', 'oui']
     no_answers = ['no', 'non']
+    
 
-    if normalized_access not in yes_answers:
+    if normalized_access in no_answers:
         if barrier in names_severity_5:
             return 5
         elif barrier in names_severity_4:
@@ -113,7 +115,7 @@ def assign_dimension_pin(access, severity):
     no_answers = ['no', 'non']
 
     # Mapping severity to dimension labels
-    if normalized_access not in yes_answers:
+    if normalized_access in no_answers:
         if severity in [4, 5]: return 'aggravating circumstances'
         elif severity == 3: return 'access'
     elif normalized_access in yes_answers:
@@ -123,9 +125,37 @@ def assign_dimension_pin(access, severity):
     
     return 'no value'  # Default fallback in case none of the conditions are met         
 
+##--------------------------------------------------------------------------------------------
+def print_subtables(severity_admin_status, pop_group_var):
+    # Get the level number for pop_group_var
+    level_number = severity_admin_status.index.names.index(pop_group_var)
+    
+    # Get unique groups
+    unique_groups = severity_admin_status.index.get_level_values(level_number).unique()
+    
+    # Iterate and print subtables
+    for group in unique_groups:
+        subtable = severity_admin_status.xs(group, level=level_number)
+        print(f"\nSubtable for {pop_group_var} = {group}")
+        print(subtable)
+        print("\n" + "-"*50 + "\n")
 
-
-
+##--------------------------------------------------------------------------------------------
+def save_subtables_to_excel(severity_admin_status, pop_group_var, file_path):
+    # Get the level number for pop_group_var
+    level_number = severity_admin_status.index.names.index(pop_group_var)
+    
+    # Get unique groups
+    unique_groups = severity_admin_status.index.get_level_values(level_number).unique()
+    
+    # Create a Pandas Excel writer using XlsxWriter as the engine
+    with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
+        # Iterate and save subtables
+        for group in unique_groups:
+            subtable = severity_admin_status.xs(group, level=level_number)
+            subtable.to_excel(writer, sheet_name=f"{pop_group_var}_{group}")
+            print(f"Subtable for {pop_group_var} = {group} saved to sheet {pop_group_var}_{group}")
+        
 
 ##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
@@ -162,6 +192,8 @@ upper_primary_end = 14
 
 # Path to your Excel file
 excel_path = 'input/SOM2404_MSNA_Tool_-_all_versions_-_False_-_2024-06-04-16-23-53 (1).xlsx'
+excel_path_ocha = 'input/ocha_pop.xlsx'
+
 # Load the Excel file
 xls = pd.ExcelFile(excel_path, engine='openpyxl')
 # Print all sheet names (optional)
@@ -177,6 +209,8 @@ edu_data = dfs['edu_ind']
 household_data = dfs['SOM2404_MSNA_Tool']
 survey = dfs['survey']
 choices = dfs['choices']
+
+ocha_pop_data = pd.read_excel(pd.ExcelFile(excel_path_ocha, engine='openpyxl') )
 
 #######   ------ manipulation and join between H and edu data   ------   #######
 # Find the UUID columns, assuming they exist and taking only the first match for simplicity
@@ -307,6 +341,26 @@ weighted_by_gender_severity4 = df.groupby([admin_var, gender_var, 'severity_cate
 print("\nWeighted proportion of each score by stratum_gender:2")
 print(weighted_by_gender_severity4)
 
+
+
+severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
+    total_weight=('weights', 'sum')
+).groupby(level=[0, 1]).apply(
+    lambda x: x / x.sum()
+).unstack(fill_value=0)
+
+print("\nSeverity per admin and pop group")
+print(severity_admin_status)
+
+
+# Call the function to print subtables
+print_subtables(severity_admin_status, pop_group_var)
+        
+# Define the output file path
+output_file_path = 'output/severity_admin_status_subtables.xlsx'
+
+# Call the function to save subtables to Excel
+save_subtables_to_excel(severity_admin_status, pop_group_var, output_file_path)
 
 
 
