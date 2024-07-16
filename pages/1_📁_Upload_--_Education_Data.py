@@ -74,9 +74,19 @@ else:
             bar.progress(0)
 
 
+st.markdown("---")  # Markdown horizontal rule
 
-# Provide a message and download button for the OCHA data template
-st.write("You can download the template and fill it with the population figures given by OCHA. Please follow the template and its format.")
+# Provide a message and download button for the OCHA data template with a highlighted section
+st.markdown(
+    """
+    <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
+        <p style="color: #00529B;">
+            You can download the template and fill it with the population figures provided by OCHA.
+            Please ensure that you follow the template format.
+        </p>
+    </div>
+    """, unsafe_allow_html=True
+)
 
 # Function to load the existing template from the file system
 def load_template():
