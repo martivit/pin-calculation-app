@@ -7,17 +7,13 @@ st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layo
 st.title('Upload MSNA and OCHA data')
 
 
-# Define the function at the beginning of your script
 def check_conditions_and_proceed():
     if selected_country != 'no selection' and 'uploaded_data' in st.session_state:
-        if has_ocha_data:
-            if 'uploaded_ocha_data' in st.session_state:
-                st.session_state.ready_to_proceed = True
-            else:
-                st.session_state.ready_to_proceed = False
-                st.warning("Please upload the OCHA data to proceed.")
-        else:
+        if 'uploaded_ocha_data' in st.session_state:
             st.session_state.ready_to_proceed = True
+        else:
+            st.session_state.ready_to_proceed = False
+            st.warning("Please upload the OCHA data to proceed.")
     else:
         st.session_state.ready_to_proceed = False
         if selected_country == 'no selection':
@@ -77,38 +73,39 @@ else:
             st.error(f"Failed to process the uploaded file: {e}")
             bar.progress(0)
 
-# Checkbox to ask if the user has OCHA data
-has_ocha_data = st.checkbox('I want to upload OCHA population data', value=st.session_state.get('has_ocha_data', False))
-st.session_state['has_ocha_data'] = has_ocha_data
 
-if has_ocha_data:
-    # Display an example DataFrame structure for OCHA data
-    example_data = {
-        "admin": ["Region A", "Region B"],
-        "adminPcode": ["A01", "B01"],
-        "tot Population": [10000, 20000],
-        "boys (6-17)": [5000, 10000],
-        "girls (6-17)": [5000, 10000]
-    }
-    example_df = pd.DataFrame(example_data)
-    st.write("Example of the required OCHA population data structure:")
-    st.dataframe(example_df)
 
+# Provide a message and download button for the OCHA data template
+st.write("You can download the template and fill it with the population figures given by OCHA. Please follow the template and its format.")
+
+# Function to load the existing template from the file system
+def load_template():
+    with open('input/Template_Population_figures.xlsx', 'rb') as f:
+        template = f.read()
+    return template
+
+# Add a download button for the existing template
+st.download_button(label="Download OCHA Population Data Template",
+                   data=load_template(),
+                   file_name='Template_Population_figures.xlsx',
+                   mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+# OCHA data uploader appears mandatory after MSNA data upload
+if 'uploaded_data' in st.session_state:
     if 'uploaded_ocha_data' in st.session_state:
         ocha_data = st.session_state['uploaded_ocha_data']
         st.write("OCHA Data already uploaded.")
         st.dataframe(ocha_data.head())  # Show a preview of the data
     else:
-        # OCHA data uploader appears only if checkbox is checked
+        # OCHA data uploader
         uploaded_ocha_file = st.file_uploader("Upload OCHA population data file", type=["csv", "xlsx"])
         if uploaded_ocha_file is not None:
             ocha_data = pd.read_excel(uploaded_ocha_file, engine='openpyxl')
             st.session_state['uploaded_ocha_data'] = ocha_data
             st.success("OCHA Data uploaded successfully!")
 
-
-
 # Check conditions to allow proceeding
 check_conditions_and_proceed()
+
 
 st.page_link("pages/2_📊_Calculation_--_PiN.py", label="If you have successfully uploaded the necessary data, proceed to the PiN Calculation page 	:arrow_forward:", icon='📊')
