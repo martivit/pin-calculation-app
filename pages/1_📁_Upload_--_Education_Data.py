@@ -82,7 +82,7 @@ st.markdown(
     <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
         <p style="color: #00529B;">
             You can download the template and fill it with the population figures provided by OCHA.
-            Please ensure that you follow the template format.
+            Please ensure that you follow the template format. YELLOW COLUMNS ARE MANDATORY
         </p>
         <a href="input/Template_Population_figures.xlsx" download="Template_Population_figures.xlsx">
             <button style="background-color: #00529B; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
