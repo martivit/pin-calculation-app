@@ -82,16 +82,27 @@ st.markdown(
     <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
         <p style="color: #00529B;">
             You can download the template and fill it with the population figures provided by OCHA.
-            Please ensure that you follow the template format. YELLOW COLUMNS ARE MANDATORY
+            Please ensure that you follow the template format.
         </p>
-        <a href="input/Template_Population_figures.xlsx" download="Template_Population_figures.xlsx">
-            <button style="background-color: #00529B; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                Download OCHA Population Data Template
-            </button>
-        </a>
+         <p style="color: red; margin-top: 0;">
+            YELLOW COLUMNS ARE MANDATORY
+        </p>
     </div>
     """, unsafe_allow_html=True
 )
+
+# Function to load the existing template from the file system
+def load_template():
+    with open('input/Template_Population_figures.xlsx', 'rb') as f:
+        template = f.read()
+    return template
+
+# Add a download button for the existing template
+st.download_button(label="Download OCHA Population Data Template",
+                   data=load_template(),
+                   file_name='Template_Population_figures.xlsx',
+                   mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
 
 # OCHA data uploader appears mandatory after MSNA data upload
 if 'uploaded_data' in st.session_state:
