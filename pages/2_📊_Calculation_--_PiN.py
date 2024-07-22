@@ -240,6 +240,54 @@ def show_step_content(step):
         # Placeholder for disaggregation variables selection
         st.write("Setup for disaggregation by variables like administrative area, school cycle, etc.")
 
+##---------------------------------------------------------------------------------------------------------
+def find_matching_columns(dataframe, keywords):
+    return [col for col in dataframe.columns if any(kw in col.lower() for kw in keywords)]
+ 
+##---------------------------------------------------------------------------------------------------------
+def handle_displacement_column_selection():
+    if 'household_data' in st.session_state:
+        household_data = st.session_state['household_data']
+        displacement_keywords = [
+            'hh_displaced', 'pop_group', 'i_type_pop', 'statut', 'hh_forcibly_displaced',
+            'demo_situation_menage', 'pop_group_name', 'residency_status', 'pop_group',
+            'statut_menage', 'population_group', 'd_statut_deplacement', 'B_1_hh_primary_residence',
+            'statutMenage', 'B_1_hh_primary_residence', 'status', 'displacement'
+        ]
+        displacement_suggestions = find_matching_columns(household_data, displacement_keywords)
+
+        if 'show_manual_select' not in st.session_state:
+            st.session_state['show_manual_select'] = False
+
+        if displacement_suggestions and not st.session_state['show_manual_select']:
+            selected_displacement = st.selectbox(
+                'Select the variable that corresponds to the status (host community, IDP, returnee) of the household:',
+                ['No selection'] + displacement_suggestions,
+                key='displacement_selectbox'
+            )
+            col1, col2 = st.columns(2)
+            with col1:
+                if selected_displacement != 'No selection' and st.button("Confirm Displacement Column"):
+                    st.session_state['status_var'] = selected_displacement
+                    st.session_state['displacement_column_confirmed'] = True
+                    st.success(f"Displacement column '{selected_displacement}' has been confirmed.")
+
+            with col2:
+                if st.button("It is not listed, select manually"):
+                    st.session_state['show_manual_select'] = True
+
+        if st.session_state['show_manual_select']:
+            selected_displacement = st.selectbox(
+                f"Select the variable that corresponds to the status (host community, IDP, returnee) of the household:",
+                ['No selection'] + household_data.columns.tolist(),
+                key='manual_displacement_selectbox'
+            )
+            if selected_displacement != 'No selection' and st.button("Confirm Selected Column"):
+                st.session_state['status_var'] = selected_displacement
+                st.success(f"Displacement column '{selected_displacement}' has been manually selected.")
+                st.session_state['displacement_column_confirmed'] = True
+                    
+
 ###########################################################################################################
 ##-----------------------------
 # Function to handle uploading and selecting data
@@ -471,12 +519,23 @@ def finalize_details():
                     <div><strong>Secondary School:</strong> {secondary_start} - 18</div>
                 </div>
                 """, unsafe_allow_html=True)
+        if st.button("Confirm school-age ranges"):
+            st.session_state.final_confirmed = True
+            st.success("School-age ranges confirmed")
+
+        handle_displacement_column_selection()
+
+        if st.session_state.get('displacement_column_confirmed', False):
+            st.success(f"Displacement column confirmed: {st.session_state['status_var']}")
+            pippo = st.session_state['status_var']
+            st.write(f"Selected Displacement Column: {pippo}")
+
         if st.button("Finalize and Confirm"):
             st.session_state.final_confirmed = True
             st.success("All details confirmed and finalized!")
-           
-    else:
-        st.warning("Please complete all the previous necessary steps.")    
+
+        st.markdown("---")
+  
 ###########################################################################################################
 ###########################################################################################################
 
