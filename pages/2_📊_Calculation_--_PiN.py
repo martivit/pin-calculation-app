@@ -19,9 +19,6 @@ new_step = stx.stepper_bar(steps=steps)
 if new_step is not None and new_step != st.session_state['current_step']:
     st.session_state['current_step'] = new_step
 
-#if new_step != current_step:
-#    st.session_state['current_step'] = new_step
-#    current_step = new_step
 
 if 'init' not in st.session_state:
     st.session_state.update({
@@ -49,6 +46,30 @@ if 'lower_primary_end' not in st.session_state:
     st.session_state['lower_primary_end'] = 11  # Default end age for lower primary
 if 'upper_primary_end' not in st.session_state:
     st.session_state['upper_primary_end'] = 16  # Default end age for upper primary
+
+
+
+## INFO ADMIN PER COUNTRY ##
+admin_levels_per_country = {
+    'Afghanistan -- AFG': ['Adm1: Province', 'Adm2: District', 'Adm3: Subdistrict'],
+    'Burkina Faso -- BFA': ['Adm1: Regions (Région)', 'Adm2: Province', 'Adm3: Department (Département)'],
+    'Central African Republic -- CAR': ['Adm1: Prefectures (préfectures)', 'Adm2: Sub-prefectures (sous-préfectures)', 'Adm3: Communes'],
+    'Democratic Republic of the Congo -- DRC': ['Adm1: Provinces', 'Adm2: Territories', 'Adm3: Sectors/chiefdoms/communes'],
+    'Haiti -- HTI': ['Adm1: Departments (départements)', 'Adm2: Arrondissements', 'Adm3: Communes'],
+    'Iraq -- IRQ': ['Adm1: Governorates', 'Adm2: Districts (aqḍyat)', 'Adm3: Sub-districts (naḥiyat)'],
+    'Kenya -- KEN': ['Adm1: Counties', 'Adm2: Sub-counties (kaunti ndogo)', 'Adm3: Wards (mtaa)'],
+    'Bangladesh -- BGD': ['Adm1: Divisions (bibhag)', 'Adm2: Districts (zila)', 'Adm3: Upazilas'],
+    'Lebanon -- LBN': ['Adm1: Governorates', 'Adm2: Districts (qaḍya)', 'Adm3: Municipalities'],
+    'Moldova -- MDA': ['Adm1: Districts', 'Adm2: Cities', 'Adm3: Communes'],
+    'Mali -- MLI': ['Adm1: Régions', 'Adm2: Cercles', 'Adm3: Arrondissements'],
+    'Mozambique -- MOZ': ['Adm1: Provinces (provincias)', 'Adm2: Districts (distritos)', 'Adm3: Postos'],
+    'Myanmar -- MMR': ['Adm1: States/Regions', 'Adm2: Districts', 'Adm3: Townships'],
+    'Niger -- NER': ['Adm1: Régions ', 'Adm2: Départements', 'Adm3: Communes'],
+    'Syria -- SYR': ['Adm1: Governorates', 'Adm2: Districts (mintaqah)', 'Adm3: Subdistricts (nawaḥi)'],
+    'Ukraine -- UKR': ['Adm1: Oblasts', 'Adm2: Raions', 'Adm3: Hromadas'],
+    'Somalia -- SOM': ['Adm1: States', 'Adm2: Regions', 'Adm3: Districts']
+}
+
 
 
 ##---------------------------------------------------------------------------------------------------------
@@ -252,7 +273,7 @@ def handle_displacement_column_selection():
             'hh_displaced', 'pop_group', 'i_type_pop', 'statut', 'hh_forcibly_displaced',
             'demo_situation_menage', 'pop_group_name', 'residency_status', 'pop_group',
             'statut_menage', 'population_group', 'd_statut_deplacement', 'B_1_hh_primary_residence',
-            'statutMenage', 'B_1_hh_primary_residence', 'status', 'displacement'
+            'statutMenage', 'B_1_hh_primary_residence', 'status', 'displacement', 'origin'
         ]
         displacement_suggestions = find_matching_columns(household_data, displacement_keywords)
 
@@ -294,6 +315,7 @@ def handle_displacement_column_selection():
 def upload_and_select_data():
     if 'uploaded_data' in st.session_state:
         st.subheader('Selection of the relevant sheets in the MSNA data file')
+
         data = st.session_state['uploaded_data']
         if isinstance(data, dict):
             col1, col2 = st.columns(2)
@@ -423,46 +445,68 @@ def define_severity():
 def finalize_details():
     if st.session_state.get('severity_confirmed', False):
         st.subheader("Choose the correct disaggregation variables and their values")
-        col1, col2 = st.columns(2)
-        with col1:
-            admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
-            selected_admin_level = st.selectbox(
-                "What is the smallest administrative level at which we can calculate the PiN to ensure the results are representative?",
-                admin_level_options,
-                index=0,  # Default to 'No selection'
-                key='admin_target'
-            )
-            if st.button('Confirm Admin Level', key='confirm_admin_level'):
-                if selected_admin_level != 'No selection':
-                    selected_admin_level = st.session_state['admin_target']  
-                    st.session_state.admin_level_confirmed = True
-                    st.success("Administrative level confirmed!")
-                else:
-                    st.error("Please select a valid administrative level.")
-                #update_other_parameters_status()
-        with col2:
-            months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 
-                    'July', 'August', 'September', 'October', 'November', 'December']
-            start_school = st.selectbox(
-                "When does the school year officially start? Needed for the estimate of the correct age",
-                months,
-                index=0,  # Default to 'No selection'
-                key='start_school'
-            )
-            if st.button('Confirm School Start Month', key='confirm_start_school'):
-                if start_school != 'No selection':
-                    start_school = st.session_state['start_school']
-                    st.session_state.school_start_month_confirmed = True
-                    st.success("School start month confirmed!")
-                else:
-                    st.error("Please select a valid month.")
-                #update_other_parameters_status()
+
+
+
+        #admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
+
+        # Check if the country has been selected on the first page
+            # Check if the country has been selected on the first page
+        if 'country' in st.session_state and st.session_state['country'] != 'no selection':
+            selected_country = st.session_state['country']
+            # Get the administrative levels for the selected country
+            admin_level_options = ['No selection'] + admin_levels_per_country.get(selected_country, [])
+        else:
+            # Default to a generic or empty option if no country is selected
+            selected_country = "No selection"
+            admin_level_options = ['No selection']
+
+        # Display the selectbox with an integrated markdown for instructions
+        st.markdown(
+            f"What is the smallest administrative level in **{selected_country}** at which we can calculate the PiN to ensure the results are representative? <span style='color: darkred; font-weight: bold;'>Please ensure that the selected administrative level corresponds to the same administrative level as that of the OCHA population data.</span>",
+            unsafe_allow_html=True
+        )
+
+
+        selected_admin_level = st.selectbox(
+            "Select",
+            admin_level_options,
+            index=0,  # Default to 'No selection'
+            key='admin_target'
+        )
+
+        if st.button('Confirm Admin Level', key='confirm_admin_level'):
+            if selected_admin_level != 'No selection':
+                st.session_state.admin_level_confirmed = True
+                st.success(f"Administrative level '{selected_admin_level}' confirmed!")
+            else:
+                st.error("Please select a valid administrative level.")
+
+
+
+
+        months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 
+                'July', 'August', 'September', 'October', 'November', 'December']
+        start_school = st.selectbox(
+            "When does the school year officially start? Needed for the estimate of the correct age",
+            months,
+            index=0,  # Default to 'No selection'
+            key='start_school'
+        )
+        if st.button('Confirm School Start Month', key='confirm_start_school'):
+            if start_school != 'No selection':
+                start_school = st.session_state['start_school']
+                st.session_state.school_start_month_confirmed = True
+                st.success("School start month confirmed!")
+            else:
+                st.error("Please select a valid month.")
+            #update_other_parameters_status()
 
         upper_primary_start = st.session_state['lower_primary_end'] +1
         
         lower_primary_end = st.slider(
             "Which is the age range for the lower primary school cycle?",
-            min_value=5, 
+            min_value=6, 
             max_value=17, 
             value=st.session_state['lower_primary_end'],
             step=1,
@@ -486,7 +530,7 @@ def finalize_details():
             upper_primary_end = st.slider(
                 "Which is the age range for the upper primary school?",
                 min_value=upper_primary_start, 
-                max_value=18, 
+                max_value=17, 
                 value=st.session_state['upper_primary_end'],
                 step=1,
                 key='upper_primary_end'
@@ -503,7 +547,7 @@ def finalize_details():
                     <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
                     <div><strong>Lower Primary School:</strong> 6 - {lower_primary_end}</div>
                     <div><strong>Upper Primary School:</strong> {upper_primary_start} - {upper_primary_end}</div>
-                    <div><strong>Secondary School:</strong> {secondary_start} - 18</div>
+                    <div><strong>Secondary School:</strong> {secondary_start} - 17</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -516,7 +560,7 @@ def finalize_details():
                 <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
                     <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
                     <div><strong>Primary School:</strong> 6 - {primary_end}</div>
-                    <div><strong>Secondary School:</strong> {secondary_start} - 18</div>
+                    <div><strong>Secondary School:</strong> {secondary_start} - 17</div>
                 </div>
                 """, unsafe_allow_html=True)
         if st.button("Confirm school-age ranges"):

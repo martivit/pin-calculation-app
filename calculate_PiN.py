@@ -184,7 +184,14 @@ lower_primary_end = 10
 upper_primary_end = 14
 
 
-
+##--------------------------------------------------------------------------------------------
+## status definition/suggestion:
+host_suggestion = ["always_lived",'host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
+IDP_suggestion = ["displaced", 'pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
+returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
+refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
+ndsp_suggestion = ['ndsp']
+status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
 
 ##--------------------------------------------------------------------------------------------
 ##--------------------------------------------------------------------------------------------
@@ -212,16 +219,17 @@ choices = dfs['choices']
 
 ocha_pop_data = pd.read_excel(pd.ExcelFile(excel_path_ocha, engine='openpyxl') )
 
+
+
+
 #######   ------ manipulation and join between H and edu data   ------   #######
+
 # Find the UUID columns, assuming they exist and taking only the first match for simplicity
 edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
 household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
 
-household_data['weight'] = 1
-#household_data['weights'] = np.random.rand(len(household_data))
-
-household_data['start'] = pd.to_datetime(household_data['start'])
 # Extract the month from the 'start_time' column
+household_data['start'] = pd.to_datetime(household_data['start'])
 household_data['month'] = household_data['start'].dt.month
 
 # Find the most similar column to "Admin2" in household_data
