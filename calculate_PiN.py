@@ -303,13 +303,69 @@ edu_data['dimension_pin'] = edu_data.apply(lambda row: assign_dimension_pin(
 ## finding the match between the OCHA status cathegory and the country status. 
 status_allvalues = edu_data[pop_group_var].unique()
 status_values = [status for status in status_allvalues if status.lower() not in status_to_be_excluded]
-
-
 mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
-
 # Print results
 for key, value in mapped_statuses.items():
     print(f"{key}: {value}")
+
+
+
+def extract_status_data(ocha_data, mapped_statuses, pop_group_var):
+    # Data frames dictionary to store each category's DataFrame
+    data_frames = {}
+
+    # Special handling for the 'ToT' overall data as its own category
+    overall_category = 'ToT'
+    overall_columns = {
+        f'{overall_category} -- Children/Enfants (5-17)': 'Children (5-17) - Overall',
+        f'{overall_category} -- Girls/Filles (5-17)': 'Girls (5-17) - Overall',
+        f'{overall_category} -- Boys/Garcons (5-17)': 'Boys (5-17) - Overall'
+    }
+
+    # Check and add 'ToT' data if columns exist
+    if all(col in ocha_data.columns for col in overall_columns.keys()):
+        overall_data = ocha_data[['Admin', 'Admin Pcode'] + list(overall_columns.keys())].copy()
+        overall_data.rename(columns=overall_columns, inplace=True)
+        data_frames[overall_category] = overall_data
+    else:
+        print("Some 'ToT' columns are missing in the OCHA data.")
+
+    for category, status in mapped_statuses.items():
+        if status != 'No match found':
+            # Prepare the column names to extract based on the matched status
+            children_col = f"{category} -- Children/Enfants (5-17)"
+            girls_col = f"{category} -- Girls/Filles (5-17)"
+            boys_col = f"{category} -- Boys/Garcons (5-17)"
+            
+            # Check if these columns exist in the DataFrame
+            if all(col in ocha_data.columns for col in [children_col, girls_col, boys_col]):
+                # Create a new DataFrame for this category
+                category_df = ocha_data[['Admin', 'Admin Pcode', children_col, girls_col, boys_col]].copy()
+                # Rename the columns to be more generic for easier processing later
+                category_df.rename(columns={
+                    children_col: 'Children (5-17)',
+                    girls_col: 'Girls (5-17)',
+                    boys_col: 'Boys (5-17)'
+                }, inplace=True)
+                # Add category column
+                category_df['Category'] = category
+                # Add the matched status column
+                category_df[pop_group_var] = status
+                data_frames[category] = category_df
+            else:
+                print(f"Columns for {category} not found in OCHA data.")
+
+    return data_frames
+
+# Usage of the updated function
+category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)
+
+# Iterate over each category and print the corresponding DataFrame's head
+for category, df in category_data_frames.items():
+    print(f"Category: {category}")
+    print(df.head())  # Display the first few rows of the DataFrame
+    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
+
 #############################################################################################################
 ################################################## ANALYSIS #################################################
 #############################################################################################################
