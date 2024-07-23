@@ -154,7 +154,7 @@ def save_subtables_to_excel(severity_admin_status, pop_group_var, file_path):
         for group in unique_groups:
             subtable = severity_admin_status.xs(group, level=level_number)
             subtable.to_excel(writer, sheet_name=f"{pop_group_var}_{group}")
-            print(f"Subtable for {pop_group_var} = {group} saved to sheet {pop_group_var}_{group}")
+            print(f"-------------------- Subtable for {pop_group_var} = {group} saved to sheet {pop_group_var}_{group}")
 ##--------------------------------------------------------------------------------------------        
 def map_template_to_status(template_values, suggestions_mapping, status_values):
     # Dictionary to hold the results
@@ -171,6 +171,76 @@ def map_template_to_status(template_values, suggestions_mapping, status_values):
             results[template] = 'No match found'
 
     return results
+
+##--------------------------------------------------------------------------------------------        
+def extract_status_data(ocha_data, mapped_statuses, pop_group_var):
+    # Data frames dictionary to store each category's DataFrame
+    data_frames = {}
+    # Special handling for the 'ToT' overall data as its own category
+    overall_category = 'ToT'
+    overall_columns = {
+        f'{overall_category} -- Children/Enfants (5-17)': 'Children (5-17) - Overall',
+        f'{overall_category} -- Girls/Filles (5-17)': 'Girls (5-17) - Overall',
+        f'{overall_category} -- Boys/Garcons (5-17)': 'Boys (5-17) - Overall'
+    }
+
+    # Check and add 'ToT' data if columns exist
+    if all(col in ocha_data.columns for col in overall_columns.keys()):
+        overall_data = ocha_data[['Admin', 'Admin Pcode'] + list(overall_columns.keys())].copy()
+        overall_data.rename(columns=overall_columns, inplace=True)
+        data_frames[overall_category] = overall_data
+    else:
+        print("Some 'ToT' columns are missing in the OCHA data.")
+
+    for category, status in mapped_statuses.items():
+        if status != 'No match found':
+            # Prepare the column names to extract based on the matched status
+            children_col = f"{category} -- Children/Enfants (5-17)"
+            girls_col = f"{category} -- Girls/Filles (5-17)"
+            boys_col = f"{category} -- Boys/Garcons (5-17)"
+            
+            # Check if these columns exist in the DataFrame
+            if all(col in ocha_data.columns for col in [children_col, girls_col, boys_col]):
+                # Create a new DataFrame for this category
+                category_df = ocha_data[['Admin', 'Admin Pcode', children_col, girls_col, boys_col]].copy()
+                # Rename the columns to be more generic for easier processing later
+                category_df.rename(columns={
+                    children_col: 'Children (5-17)',
+                    girls_col: 'Girls (5-17)',
+                    boys_col: 'Boys (5-17)'
+                }, inplace=True)
+                # Add category column
+                category_df['Category'] = category
+                # Add the matched status column
+                category_df[pop_group_var] = status
+                data_frames[category] = category_df
+            else:
+                print(f"Columns for {category} not found in OCHA data.")
+
+    return data_frames
+##--------------------------------------------------------------------------------------------
+def extract_subtables(df, index_level):
+    # Validate index_level type and adjust if necessary
+    if isinstance(index_level, str):
+        if index_level in df.index.names:
+            level_number = df.index.names.index(index_level)
+        else:
+            raise ValueError("Specified index_level does not exist in DataFrame index.")
+    elif isinstance(index_level, int):
+        if index_level >= len(df.index.names):
+            raise ValueError("Specified index_level is out of range for DataFrame index.")
+        level_number = index_level
+    else:
+        raise TypeError("index_level must be either an integer or a string corresponding to the DataFrame index level name.")
+
+    subtables = {}
+    # Iterate through each unique group in the specified index level
+    unique_groups = df.index.get_level_values(level_number).unique()
+    for group in unique_groups:
+        # Extract the subtable for the group
+        subtable = df.xs(group, level=level_number)
+        subtables[group] = subtable
+    return subtables
 ##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
 admin_target = 'Admin_2: Regions'
@@ -304,64 +374,15 @@ edu_data['dimension_pin'] = edu_data.apply(lambda row: assign_dimension_pin(
 status_allvalues = edu_data[pop_group_var].unique()
 status_values = [status for status in status_allvalues if status.lower() not in status_to_be_excluded]
 mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
-# Print results
-for key, value in mapped_statuses.items():
-    print(f"{key}: {value}")
-
-
-
-def extract_status_data(ocha_data, mapped_statuses, pop_group_var):
-    # Data frames dictionary to store each category's DataFrame
-    data_frames = {}
-
-    # Special handling for the 'ToT' overall data as its own category
-    overall_category = 'ToT'
-    overall_columns = {
-        f'{overall_category} -- Children/Enfants (5-17)': 'Children (5-17) - Overall',
-        f'{overall_category} -- Girls/Filles (5-17)': 'Girls (5-17) - Overall',
-        f'{overall_category} -- Boys/Garcons (5-17)': 'Boys (5-17) - Overall'
-    }
-
-    # Check and add 'ToT' data if columns exist
-    if all(col in ocha_data.columns for col in overall_columns.keys()):
-        overall_data = ocha_data[['Admin', 'Admin Pcode'] + list(overall_columns.keys())].copy()
-        overall_data.rename(columns=overall_columns, inplace=True)
-        data_frames[overall_category] = overall_data
-    else:
-        print("Some 'ToT' columns are missing in the OCHA data.")
-
-    for category, status in mapped_statuses.items():
-        if status != 'No match found':
-            # Prepare the column names to extract based on the matched status
-            children_col = f"{category} -- Children/Enfants (5-17)"
-            girls_col = f"{category} -- Girls/Filles (5-17)"
-            boys_col = f"{category} -- Boys/Garcons (5-17)"
-            
-            # Check if these columns exist in the DataFrame
-            if all(col in ocha_data.columns for col in [children_col, girls_col, boys_col]):
-                # Create a new DataFrame for this category
-                category_df = ocha_data[['Admin', 'Admin Pcode', children_col, girls_col, boys_col]].copy()
-                # Rename the columns to be more generic for easier processing later
-                category_df.rename(columns={
-                    children_col: 'Children (5-17)',
-                    girls_col: 'Girls (5-17)',
-                    boys_col: 'Boys (5-17)'
-                }, inplace=True)
-                # Add category column
-                category_df['Category'] = category
-                # Add the matched status column
-                category_df[pop_group_var] = status
-                data_frames[category] = category_df
-            else:
-                print(f"Columns for {category} not found in OCHA data.")
-
-    return data_frames
-
-# Usage of the updated function
+## finding the population figures and create population dataset to be joint with the anlaysis results
 category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)
 
+# debugging 
+for key, value in mapped_statuses.items():
+    print(f"{key}: {value}")
 # Iterate over each category and print the corresponding DataFrame's head
 for category, df in category_data_frames.items():
+    df.rename(columns={'Admin': admin_var}, inplace=True)
     print(f"Category: {category}")
     print(df.head())  # Display the first few rows of the DataFrame
     print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
@@ -371,9 +392,9 @@ for category, df in category_data_frames.items():
 #############################################################################################################
 pippo= edu_data.groupby(gender_var)
 weight = edu_data["weights"]
-severity_cat = edu_data["severity_category"].to_numpy()
-dimension_cat = edu_data["dimension_pin"].to_numpy()
-gender_cat = edu_data[gender_var].to_numpy()
+#severity_cat = edu_data["severity_category"].to_numpy()
+#dimension_cat = edu_data["dimension_pin"].to_numpy()
+#gender_cat = edu_data[gender_var].to_numpy()
 
 startum_gender = edu_data[gender_var]
 startum_school_cycle = edu_data['school_cycle']
@@ -440,16 +461,25 @@ severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category
 print("\nSeverity per admin and pop group")
 print(severity_admin_status)
 
+print('------===================================================-------')
 
 # Call the function to print subtables
-print_subtables(severity_admin_status, pop_group_var)
+#print_subtables(severity_admin_status, pop_group_var)
         
 # Define the output file path
 output_file_path = 'output/severity_admin_status_subtables.xlsx'
 
 # Call the function to save subtables to Excel
-save_subtables_to_excel(severity_admin_status, pop_group_var, output_file_path)
+#save_subtables_to_excel(severity_admin_status, pop_group_var, output_file_path)
 
+
+## results divided disaggregated by status and admin --> subtable according to the status!
+subtables = extract_subtables(severity_admin_status, pop_group_var)
+
+for key, table in subtables.items():
+    print(f"Subtable for {key}:")
+    print(table)
+    print("\n" + "-"*50 + "\n")
 
 
 
