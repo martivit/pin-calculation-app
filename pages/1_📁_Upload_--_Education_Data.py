@@ -121,7 +121,7 @@ if 'uploaded_data' in st.session_state:
 # Check conditions to allow proceeding
 check_conditions_and_proceed()
 
-col1, col2 = st.columns([0.65, 0.35])
+col1, col2 = st.columns([0.60, 0.40])
 
 with col2: 
-    st.page_link("pages/2_📊_Calculation_--_PiN.py", label="Proceed to the PiN Calculation page 	:arrow_forward:", icon='📊')
+    st.page_link("pages/2_📊_Calculation_--_PiN.py", label="Proceed to the PiN Calculation page 	:arrow_right:", icon='📊')
