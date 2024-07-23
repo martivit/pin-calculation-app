@@ -51,23 +51,23 @@ if 'upper_primary_end' not in st.session_state:
 
 ## INFO ADMIN PER COUNTRY ##
 admin_levels_per_country = {
-    'Afghanistan -- AFG': ['Adm1: Province', 'Adm2: District', 'Adm3: Subdistrict'],
-    'Burkina Faso -- BFA': ['Adm1: Regions (Région)', 'Adm2: Province', 'Adm3: Department (Département)'],
-    'Central African Republic -- CAR': ['Adm1: Prefectures (préfectures)', 'Adm2: Sub-prefectures (sous-préfectures)', 'Adm3: Communes'],
-    'Democratic Republic of the Congo -- DRC': ['Adm1: Provinces', 'Adm2: Territories', 'Adm3: Sectors/chiefdoms/communes'],
-    'Haiti -- HTI': ['Adm1: Departments (départements)', 'Adm2: Arrondissements', 'Adm3: Communes'],
-    'Iraq -- IRQ': ['Adm1: Governorates', 'Adm2: Districts (aqḍyat)', 'Adm3: Sub-districts (naḥiyat)'],
-    'Kenya -- KEN': ['Adm1: Counties', 'Adm2: Sub-counties (kaunti ndogo)', 'Adm3: Wards (mtaa)'],
-    'Bangladesh -- BGD': ['Adm1: Divisions (bibhag)', 'Adm2: Districts (zila)', 'Adm3: Upazilas'],
-    'Lebanon -- LBN': ['Adm1: Governorates', 'Adm2: Districts (qaḍya)', 'Adm3: Municipalities'],
-    'Moldova -- MDA': ['Adm1: Districts', 'Adm2: Cities', 'Adm3: Communes'],
-    'Mali -- MLI': ['Adm1: Régions', 'Adm2: Cercles', 'Adm3: Arrondissements'],
-    'Mozambique -- MOZ': ['Adm1: Provinces (provincias)', 'Adm2: Districts (distritos)', 'Adm3: Postos'],
-    'Myanmar -- MMR': ['Adm1: States/Regions', 'Adm2: Districts', 'Adm3: Townships'],
-    'Niger -- NER': ['Adm1: Régions ', 'Adm2: Départements', 'Adm3: Communes'],
-    'Syria -- SYR': ['Adm1: Governorates', 'Adm2: Districts (mintaqah)', 'Adm3: Subdistricts (nawaḥi)'],
-    'Ukraine -- UKR': ['Adm1: Oblasts', 'Adm2: Raions', 'Adm3: Hromadas'],
-    'Somalia -- SOM': ['Adm1: States', 'Adm2: Regions', 'Adm3: Districts']
+    'Afghanistan -- AFG': ['Admin_1: Province', 'Admin_2: District', 'Admin_3: Subdistrict'],
+    'Burkina Faso -- BFA': ['Admin_1: Regions (Région)', 'Admin_2: Province', 'Admin_3: Department (Département)'],
+    'Central African Republic -- CAR': ['Admin_1: Prefectures (préfectures)', 'Admin_2: Sub-prefectures (sous-préfectures)', 'Admin_3: Communes'],
+    'Democratic Republic of the Congo -- DRC': ['Admin_1: Provinces', 'Admin_2: Territories', 'Admin_3: Sectors/chiefdoms/communes'],
+    'Haiti -- HTI': ['Admin_1: Departments (départements)', 'Admin_2: Arrondissements', 'Admin_3: Communes'],
+    'Iraq -- IRQ': ['Admin_1: Governorates', 'Admin_2: Districts (aqḍyat)', 'Admin_3: Sub-districts (naḥiyat)'],
+    'Kenya -- KEN': ['Admin_1: Counties', 'Admin_2: Sub-counties (kaunti ndogo)', 'Admin_3: Wards (mtaa)'],
+    'Bangladesh -- BGD': ['Admin_1: Divisions (bibhag)', 'Admin_2: Districts (zila)', 'Admin_3: Upazilas'],
+    'Lebanon -- LBN': ['Admin_1: Governorates', 'Admin_2: Districts (qaḍya)', 'Admin_3: Municipalities'],
+    'Moldova -- MDA': ['Admin_1: Districts', 'Admin_2: Cities', 'Admin_3: Communes'],
+    'Mali -- MLI': ['Admin_1: Régions', 'Admin_2: Cercles', 'Admin_3: Arrondissements'],
+    'Mozambique -- MOZ': ['Admin_1: Provinces (provincias)', 'Admin_2: Districts (distritos)', 'Admin_3: Postos'],
+    'Myanmar -- MMR': ['Admin_1: States/Regions', 'Admin_2: Districts', 'Admin_3: Townships'],
+    'Niger -- NER': ['Admin_1: Régions ', 'Admin_2: Départements', 'Admin_3: Communes'],
+    'Syria -- SYR': ['Admin_1: Governorates', 'Admin_2: Districts (mintaqah)', 'Admin_3: Subdistricts (nawaḥi)'],
+    'Ukraine -- UKR': ['Admin_1: Oblasts', 'Admin_2: Raions', 'Admin_3: Hromadas'],
+    'Somalia -- SOM': ['Admin_1: States', 'Admin_2: Regions', 'Admin_3: Districts']
 }
 
 

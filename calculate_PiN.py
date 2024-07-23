@@ -159,7 +159,7 @@ def save_subtables_to_excel(severity_admin_status, pop_group_var, file_path):
 
 ##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
-admin_target = 'Admin2'
+admin_target = 'Admin_2: Regions'
 pop_group_var = 'place_of_origin'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
@@ -227,6 +227,8 @@ ocha_pop_data = pd.read_excel(pd.ExcelFile(excel_path_ocha, engine='openpyxl') )
 # Find the UUID columns, assuming they exist and taking only the first match for simplicity
 edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
 household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
+
+household_data['weight'] = 1
 
 # Extract the month from the 'start_time' column
 household_data['start'] = pd.to_datetime(household_data['start'])
