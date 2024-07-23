@@ -23,7 +23,7 @@ def check_conditions_and_proceed():
 
     # Display success message if ready to proceed
     if st.session_state.get('ready_to_proceed', False):
-        st.success("You have completed all necessary steps. Please proceed to the next page from the sidebar.")
+        st.success("You have completed all necessary steps!")
 
 
 # Country selection setup
@@ -121,5 +121,7 @@ if 'uploaded_data' in st.session_state:
 # Check conditions to allow proceeding
 check_conditions_and_proceed()
 
+col1, col2 = st.columns([0.65, 0.35])
 
-st.page_link("pages/2_📊_Calculation_--_PiN.py", label="If you have successfully uploaded the necessary data, proceed to the PiN Calculation page 	:arrow_forward:", icon='📊')
+with col2: 
+    st.page_link("pages/2_📊_Calculation_--_PiN.py", label="Proceed to the PiN Calculation page 	:arrow_forward:", icon='📊')
