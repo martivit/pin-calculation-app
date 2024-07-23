@@ -155,8 +155,22 @@ def save_subtables_to_excel(severity_admin_status, pop_group_var, file_path):
             subtable = severity_admin_status.xs(group, level=level_number)
             subtable.to_excel(writer, sheet_name=f"{pop_group_var}_{group}")
             print(f"Subtable for {pop_group_var} = {group} saved to sheet {pop_group_var}_{group}")
-        
+##--------------------------------------------------------------------------------------------        
+def map_template_to_status(template_values, suggestions_mapping, status_values):
+    # Dictionary to hold the results
+    results = {}
 
+    # Iterate over each template value
+    for template in template_values:
+        suggestions = suggestions_mapping.get(template, [])
+        # Search for the first matching status
+        match = next((status for status in status_values if status.lower() in suggestions), None)
+        if match:
+            results[template] = match
+        else:
+            results[template] = 'No match found'
+
+    return results
 ##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
 admin_target = 'Admin_2: Regions'
@@ -192,7 +206,14 @@ returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH'
 refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
 ndsp_suggestion = ['ndsp']
 status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
-
+template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiee', 'Other']
+suggestions_mapping = {
+    'Host/Hôte': host_suggestion,
+    'IDP/PDI': IDP_suggestion,
+    'Returnees/Retournés': returnee_suggestion,
+    'Refugees/Refugiee': refugee_suggestion,
+    'Other': ndsp_suggestion
+}
 ##--------------------------------------------------------------------------------------------
 ##--------------------------------------------------------------------------------------------
 ##--------------------------------------------------------------------------------------------
@@ -223,12 +244,11 @@ ocha_pop_data = pd.read_excel(pd.ExcelFile(excel_path_ocha, engine='openpyxl') )
 
 
 #######   ------ manipulation and join between H and edu data   ------   #######
+household_data['weight'] = 1
 
 # Find the UUID columns, assuming they exist and taking only the first match for simplicity
 edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
 household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
-
-household_data['weight'] = 1
 
 # Extract the month from the 'start_time' column
 household_data['start'] = pd.to_datetime(household_data['start'])
@@ -240,8 +260,7 @@ admin_var = process.extractOne(admin_target, household_data.columns.tolist())[0]
 # Columns to include in the merge
 columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight']
 
-
-# Perform the joint_by
+# ----> Perform the joint_by
 edu_data = pd.merge(edu_data, household_data[columns_to_include], left_on=edu_uuid_column, right_on=household_uuid_column, how='left')
 
 ##refining for school age-children
@@ -263,12 +282,6 @@ severity_5_matches = find_matching_choices(choices, selected_severity_5_barriers
 names_severity_4 = [entry['name'] for entry in severity_4_matches]
 names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
-print("Names for Severity 4 Barriers:", names_severity_4)
-print("Names for Severity 5 Barriers:", names_severity_5)
-
-names_for_target_label = [entry['name'] for entry in severity_4_matches if entry['label'] == 'Unable to enroll in school due to lack of documentation']
-
-
 # Apply the conditions and choices to create the new 'severity_category' column
 edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
     access=row[access_var], 
@@ -287,7 +300,16 @@ edu_data['dimension_pin'] = edu_data.apply(lambda row: assign_dimension_pin(
     ), axis=1)
 
 
+## finding the match between the OCHA status cathegory and the country status. 
+status_allvalues = edu_data[pop_group_var].unique()
+status_values = [status for status in status_allvalues if status.lower() not in status_to_be_excluded]
 
+
+mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
+
+# Print results
+for key, value in mapped_statuses.items():
+    print(f"{key}: {value}")
 #############################################################################################################
 ################################################## ANALYSIS #################################################
 #############################################################################################################
