@@ -249,7 +249,7 @@ gender_var = 'edu_ind_gender'
 start_month = 'september'
 
 
-vector_cycle = [12,0]
+vector_cycle = [9,14]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
