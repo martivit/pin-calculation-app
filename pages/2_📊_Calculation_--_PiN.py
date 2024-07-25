@@ -181,9 +181,13 @@ def select_severity_barriers(barrier_options, severity):
     """
     Allow the user to select barriers that correspond to a specified severity.
     """
-    #prompt_message = f"Select aggravating circumstances falling under **severity {severity}**:"
     confirm_button_label = f"Confirm Severity {severity} Barriers"
     prompt_message = f"Select aggravating circumstances falling under **severity {severity}**, you can select multiple choices:"
+
+    # Add special option for severity 5
+    if severity == 5:
+        barrier_options = barrier_options + ['---> None of the listed barriers <---']
+
     selected_barriers = st.multiselect(
             prompt_message,
             barrier_options,
@@ -197,6 +201,10 @@ def select_severity_barriers(barrier_options, severity):
         elif severity == 5:
             st.session_state.selected_severity_5_barriers = selected_barriers
             st.session_state['severity_5_confirmed'] = True
+            # Handle the special case when 'None of the listed barriers' is selected
+            if '---> None of the listed barriers <---' in selected_barriers:
+                selected_barriers = ['---> None of the listed barriers <---']
+                st.session_state.selected_severity_5_barriers = selected_barriers
 
         st.success(f"Selected severity {severity} barriers have been confirmed.")
         st.write(f"Confirmed severity {severity} barriers:", selected_barriers)
