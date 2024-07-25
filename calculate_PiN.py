@@ -429,50 +429,67 @@ print(pin_dimension_by_admin)
 print("\nknowing the demographic")
 print(weighted_by_admingender)
 
-
-weighted_by_gender_severity4 = df.groupby([admin_var, gender_var, 'severity_category']).agg(
+print('                             ')
+print('                             ')
+print('               -------- GENDER DISAGGREGATION  ---------           ')
+severity_by_gender = df.groupby([admin_var, pop_group_var,gender_var, 'severity_category']).agg(
     total_weight=('weights', 'sum')
 ).groupby(level=[0, 1]).apply(
     lambda x: x / x.sum()
 ).unstack(fill_value=0)
 
-print("\nWeighted proportion of each score by stratum_gender:2")
-print(weighted_by_gender_severity4)
+print(severity_by_gender)
 
+print('                             ')
+print('               -------- school-cycle DISAGGREGATION  ---------           ')
+severity_by_cycle = df.groupby([admin_var, pop_group_var,startum_school_cycle, 'severity_category']).agg(
+    total_weight=('weights', 'sum')
+).groupby(level=[0, 1]).apply(
+    lambda x: x / x.sum()
+).unstack(fill_value=0)
 
+print(severity_by_cycle)
 
+print('                             ')
+print('            -------    CORRECT PIN    -------             ')
 severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
     total_weight=('weights', 'sum')
 ).groupby(level=[0, 1]).apply(
     lambda x: x / x.sum()
 ).unstack(fill_value=0)
 
-print("\nSeverity per admin and pop group")
 print(severity_admin_status)
 
 
 print('***********************************************************')
-severity_admin_status2 = severity_admin_status
-severity_admin_status2.columns = severity_admin_status2.columns.get_level_values(1)
-severity_admin_status2=severity_admin_status2.droplevel(0, axis=0) 
-severity_admin_status2=severity_admin_status2.droplevel(0, axis=0) 
-severity_admin_status2 = severity_admin_status2.reset_index( level = [0 , 1] ) 
+def reduce_index(df, level):
+    df.columns = df.columns.get_level_values(1)
+    df=df.droplevel(0, axis=0) 
+    df=df.droplevel(0, axis=0) 
+    if level == 0: df = df.reset_index( level = [0 , 1] ) 
+    if level == 1: df = df.reset_index( level = [0 , 1, 2] ) 
 
-# Splitting the DataFrame based on pop_group_var
-groups = severity_admin_status2.groupby(pop_group_var)
-severity_admin_status_list = {name: group for name, group in groups}
+    # Splitting the DataFrame based on pop_group_var
+    groups = df.groupby(pop_group_var)
+    df_list = {name: group for name, group in groups}
 
+    return df_list
 
-print(severity_admin_status_list['Host Community'])
+severity_admin_status_list = reduce_index(severity_admin_status, 0)
+severity_by_gender_list = reduce_index(severity_by_gender, 1)
+severity_by_cycle_list = reduce_index(severity_by_cycle, 1)
 
+output_file_path_test_strata_gender = 'output/severity_with_additional_strata_gender.xlsx'
+output_file_path_test_strata_cycle = 'output/severity_with_additional_strata_cycle.xlsx'
 
-
-for category, df in category_data_frames.items():
-    df.rename(columns={'Admin': admin_var}, inplace=True)
-    print(f"Category: {category}")
-    print(df.head())  # Display the first few rows of the DataFrame
-    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
-
+with pd.ExcelWriter(output_file_path_test_strata_gender, engine='openpyxl') as writer:
+    for group_name, df_group in severity_by_gender_list.items():
+        # Each DataFrame is written to a separate sheet named after the group
+        df_group.to_excel(writer, sheet_name=str(group_name), index=False)
+with pd.ExcelWriter(output_file_path_test_strata_cycle, engine='openpyxl') as writer:
+    for group_name, df_group in severity_by_cycle_list.items():
+        # Each DataFrame is written to a separate sheet named after the group
+        df_group.to_excel(writer, sheet_name=str(group_name), index=False)
 
 print('=========================================')
 label_perc2 = '% 1-2'
@@ -488,8 +505,8 @@ label_tot = '# Tot PiN'
 label_admin_severity = 'Area severity'
 excel_path = 'output/severity_by_admin_and_pop_group.xlsx'
 
-with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
 
+with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
     # Assume category_data_frames is a dictionary of DataFrames, indexed by category
     for category, df in category_data_frames.items():
         
