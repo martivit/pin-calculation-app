@@ -585,3 +585,31 @@ edu_data.to_excel(file_path, index=False, engine='openpyxl')
  
 
 
+
+
+
+
+# Check if these columns exist in the DataFrame
+category_df = ocha_pop_data[['Admin', 'Admin Pcode', children_tot_col]].copy()
+category_df.rename(columns={children_tot_col: 'TotN'}, inplace=True)
+category_df['Category'] = category_tot  # Set the category name to the matched status
+category_df[pop_group_var] = 'All pop group'
+category_data_frames[category_tot] = category_df
+
+category_df_girl = ocha_pop_data[['Admin', 'Admin Pcode', girls_tot_col]].copy()
+category_df_girl.rename(columns={girls_tot_col: 'TotN'}, inplace=True)
+category_df_girl['Category'] = category_girl  # Set the category name to the matched status
+category_df_girl[pop_group_var] = 'All pop group -- GIRL'
+category_data_frames[category_girl] = category_df_girl
+
+category_df_boy = ocha_pop_data[['Admin', 'Admin Pcode', boys_tot_col]].copy()
+category_df_boy.rename(columns={boys_tot_col: 'TotN'}, inplace=True)
+category_df_boy['Category'] = category_boy  # Set the category name to the matched status
+category_df_boy[pop_group_var] = 'All pop group -- BOY'
+category_data_frames[category_boy] = category_df_boy
+
+category_df_ece = ocha_pop_data[['Admin', 'Admin Pcode', ece_tot_col]].copy()
+category_df_ece.rename(columns={ece_tot_col: 'TotN'}, inplace=True)
+category_df_ece['Category'] = category_ECE  # Set the category name to the matched status
+category_df_ece[pop_group_var] = 'All pop group -- ECE'
+category_data_frames[category_ECE] = category_df_ece

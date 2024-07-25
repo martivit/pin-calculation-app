@@ -103,8 +103,47 @@ st.download_button(label="Download OCHA Population Data Template",
                    file_name='Template_Population_figures.xlsx',
                    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+def perform_ocha_data_checks(ocha_data):
+    # Check if all mandatory columns are present
+    mandatory_columns = [
+        'Admin', 'ToT -- Children/Enfants (5-17)', 'ToT -- Girls/Filles (5-17)',
+        'ToT -- Boys/Garcons (5-17)', '5yo -- Children/Enfants',
+        'Host/Hôte -- Children/Enfants (5-17)'
+    ]
+    missing_columns = [col for col in mandatory_columns if col not in ocha_data.columns]
+    if missing_columns:
+        return f"Missing mandatory columns: {', '.join(missing_columns)}"
 
-# OCHA data uploader appears mandatory after MSNA data upload
+    # Prepare the data by replacing NaN with 0 and rounding to the nearest whole number
+    filled_ocha_data = ocha_data.fillna(0)
+
+    # Prepare to collect error messages
+    errors = []
+
+    # Check if the sum of values matches for specified columns
+    for index, row in filled_ocha_data.iterrows():
+        children_total = row['ToT -- Children/Enfants (5-17)']
+        children_sum = row[['Host/Hôte -- Children/Enfants (5-17)', 'IDP/PDI -- Children/Enfants (5-17)',
+                            'Returnees/Retournés -- Children/Enfants (5-17)', 'Refugees/Refugiees -- Children/Enfants (5-17)',
+                            'Other -- Children/Enfants (5-17)']].sum()
+        girls_boys_total = row['ToT -- Girls/Filles (5-17)'] + row['ToT -- Boys/Garcons (5-17)']
+
+        if abs(children_total - children_sum) > 0.5:
+            errors.append(f"Row {index} (Admin: {row['Admin']}): The sum of the individual population-group categories does not match 'ToT -- Children/Enfants (5-17)'")
+
+        if abs(children_total - girls_boys_total) > 0.5:
+            errors.append(f"Row {index} (Admin: {row['Admin']}): Sum of 'Girls' and 'Boys' does not match 'ToT -- Children/Enfants (5-17)'")
+
+    if errors:
+        return "\n".join(errors)  # Return all errors at once
+
+    # If all checks pass
+    return "Data is valid"
+
+
+
+
+# Add or modify the section where OCHA data is uploaded
 if 'uploaded_data' in st.session_state:
     if 'uploaded_ocha_data' in st.session_state:
         ocha_data = st.session_state['uploaded_ocha_data']
@@ -115,8 +154,12 @@ if 'uploaded_data' in st.session_state:
         uploaded_ocha_file = st.file_uploader("Upload OCHA population data file", type=["csv", "xlsx"])
         if uploaded_ocha_file is not None:
             ocha_data = pd.read_excel(uploaded_ocha_file, engine='openpyxl')
-            st.session_state['uploaded_ocha_data'] = ocha_data
-            st.success("OCHA Data uploaded successfully!")
+            check_message = perform_ocha_data_checks(ocha_data)
+            if check_message == "Data is valid":
+                st.session_state['uploaded_ocha_data'] = ocha_data
+                st.success("OCHA Data uploaded successfully!")
+            else:
+                st.error(check_message)  # Display the error message if checks fail
 
 # Check conditions to allow proceeding
 check_conditions_and_proceed()

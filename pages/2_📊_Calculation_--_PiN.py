@@ -46,7 +46,8 @@ if 'lower_primary_end' not in st.session_state:
     st.session_state['lower_primary_end'] = 11  # Default end age for lower primary
 if 'upper_primary_end' not in st.session_state:
     st.session_state['upper_primary_end'] = 16  # Default end age for upper primary
-
+if 'vector_cycle' not in st.session_state:
+    st.session_state['vector_cycle'] = [11,16]  # vector
 
 
 ## INFO ADMIN PER COUNTRY ##
@@ -510,8 +511,10 @@ def finalize_details():
                 st.error("Please select a valid month.")
             #update_other_parameters_status()
 
+
+
+        ## -------------------- school cycle -----------------------------------
         upper_primary_start = st.session_state['lower_primary_end'] +1
-        
         lower_primary_end = st.slider(
             "Which is the age range for the lower primary school cycle?",
             min_value=6, 
@@ -550,6 +553,9 @@ def finalize_details():
                 st.session_state.upper_primary_end_confirmed = True
                 if upper_primary_end != st.session_state['upper_primary_end']:
                     upper_primary_end = st.session_state['upper_primary_end'] 
+                vect1 =  st.session_state['lower_primary_end']  
+                vect2 =  st.session_state['upper_primary_end']
+                st.session_state['vector_cycle'] = [vect1,vect2]
                 st.markdown(f"""
                 <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
                     <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
@@ -564,6 +570,9 @@ def finalize_details():
             # Directly display age ranges for primary and secondary
             primary_end = st.session_state['lower_primary_end']
             secondary_start = primary_end + 1
+            vect1 =  st.session_state['lower_primary_end']  
+            vect2 =  0
+            st.session_state['vector_cycle'] = [vect1,vect2]
             st.markdown(f"""
                 <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
                     <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
@@ -571,8 +580,11 @@ def finalize_details():
                     <div><strong>Secondary School:</strong> {secondary_start} - 17</div>
                 </div>
                 """, unsafe_allow_html=True)
+            
         if st.button("Confirm school-age ranges"):
             st.session_state.final_confirmed = True
+            #vector_cycle = st.session_state['vector_cycle']
+            #st.write (vector_cycle)
             st.success("School-age ranges confirmed")
 
         handle_displacement_column_selection()
