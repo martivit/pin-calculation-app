@@ -336,7 +336,7 @@ def upload_and_select_data():
 
             if 'survey_data' in st.session_state:
                 survey_data = st.session_state['survey_data']
-                label_columns = [col for col in survey_data.columns if col.startswith('label::')]
+                label_columns = [col for col in survey_data.columns if col.startswith('label')]
                 if label_columns:
                     selected_label = st.selectbox('Select the desired label column:', ['No selection'] + label_columns, key='selected_label')
                     if selected_label != 'No selection':
