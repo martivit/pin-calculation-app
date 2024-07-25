@@ -202,28 +202,30 @@ def extract_status_data(ocha_data, mapped_statuses, pop_group_var):
 
     return data_frames
 ##--------------------------------------------------------------------------------------------
-def extract_subtables(df, index_level):
-    # Validate index_level type and adjust if necessary
-    if isinstance(index_level, str):
-        if index_level in df.index.names:
-            level_number = df.index.names.index(index_level)
-        else:
-            raise ValueError("Specified index_level does not exist in DataFrame index.")
-    elif isinstance(index_level, int):
-        if index_level >= len(df.index.names):
-            raise ValueError("Specified index_level is out of range for DataFrame index.")
-        level_number = index_level
-    else:
-        raise TypeError("index_level must be either an integer or a string corresponding to the DataFrame index level name.")
+def extract_subtables(df, pop_group_var):
+    # Ensure the DataFrame has a MultiIndex and includes the population group variable
+    if not isinstance(df.index, pd.MultiIndex) or pop_group_var not in df.index.names:
+        raise ValueError("DataFrame must have a MultiIndex and include the specified population group variable.")
 
-    subtables = {}
-    # Iterate through each unique group in the specified index level
-    unique_groups = df.index.get_level_values(level_number).unique()
+    # Get unique population groups from the specified level of the index
+    unique_groups = df.index.get_level_values(pop_group_var).unique()
+
+    # Dictionary to store each sub-DataFrame
+    subtables_dict = {}
+
+    # Extract subtables for each unique group
     for group in unique_groups:
-        # Extract the subtable for the group
-        subtable = df.xs(group, level=level_number)
-        subtables[group] = subtable
-    return subtables
+        # Extract data for the current group
+        sub_df = df.xs(group, level=pop_group_var)
+        
+        # Reset the index to turn MultiIndex into regular columns
+        sub_df = sub_df.reset_index()
+        
+        # Set new DataFrame with simplified headers
+        subtables_dict[group] = sub_df.rename(columns=lambda x: x if isinstance(x, str) else str(x))
+
+    return subtables_dict
+
 ##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
 admin_target = 'Admin_2: Regions'
@@ -271,6 +273,7 @@ suggestions_mapping = {
 ##--------------------------------------------------------------------------------------------
 ##--------------------------------------------------------------------------------------------
 
+
 # Path to your Excel file
 excel_path = 'input/REACH_MSNA_2024_clean dataset_template_final.xlsx'
 excel_path_ocha = 'input/ocha_pop.xlsx'
@@ -294,8 +297,6 @@ choices = dfs['choices']
 ocha_pop_data = pd.read_excel(pd.ExcelFile(excel_path_ocha, engine='openpyxl') )
 
 
-
-
 #######   ------ manipulation and join between H and edu data   ------   #######
 household_data['weight'] = 1
 
@@ -311,19 +312,12 @@ household_data['month'] = household_data['start'].dt.month
 # Find the most similar column to "Admin2" in household_data
 admin_var = process.extractOne(admin_target, household_data.columns.tolist())[0]  # Take the string directly
 
-
 # Columns to include in the merge
 columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight']
-
 edu_data = edu_data.drop(columns=[col for col in columns_to_include if col in edu_data.columns], errors='ignore')
-
-
 
 # ----> Perform the joint_by
 edu_data = pd.merge(edu_data, household_data[columns_to_include], left_on=edu_uuid_column, right_on=household_uuid_column, how='left')
-
-
-
 
 ##refining for school age-children
 #edu_data = edu_data[(edu_data[age_var] >= 5) & (edu_data[age_var] <= 18)]
@@ -366,31 +360,21 @@ edu_data['dimension_pin'] = edu_data.apply(lambda row: assign_dimension_pin(
 
 ## finding the match between the OCHA status cathegory and the country status. 
 status_allvalues = edu_data[pop_group_var].unique()
-# Retrieve unique values directly without converting to lowercase
-status_values = [status for status in edu_data[pop_group_var].unique() if status not in status_to_be_excluded]
-
-# Do not change the case of suggestions in the mapping
+status_values = [status for status in edu_data[pop_group_var].unique() if status not in status_to_be_excluded]# Retrieve unique values directly without converting to lowercase
 for key, suggestions in suggestions_mapping.items():
     suggestions_mapping[key] = suggestions  # keeping original case
 
 mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
-for key, value in mapped_statuses.items():
-    print(f"{key}: {value}")
-
-# Extract population figures based on mapped statuses without modifying the case
-category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)
+category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)# Extract population figures based on mapped statuses without modifying the case
 
 # Debugging and data inspection
+for key, value in mapped_statuses.items():
+    print(f"{key}: {value}")
 for category, df in category_data_frames.items():
     df.rename(columns={'Admin': admin_var}, inplace=True)
     print(f"Category: {category}")
     print(df.head())  # Display the first few rows of the DataFrame
     print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
-
-
-
-
-
 
 #############################################################################################################
 ################################################## ANALYSIS #################################################
@@ -445,113 +429,159 @@ print(pin_dimension_by_admin)
 print("\nknowing the demographic")
 print(weighted_by_admingender)
 
-
-weighted_by_gender_severity4 = df.groupby([admin_var, gender_var, 'severity_category']).agg(
+print('                             ')
+print('                             ')
+print('               -------- GENDER DISAGGREGATION  ---------           ')
+severity_by_gender = df.groupby([admin_var, pop_group_var,gender_var, 'severity_category']).agg(
     total_weight=('weights', 'sum')
 ).groupby(level=[0, 1]).apply(
     lambda x: x / x.sum()
 ).unstack(fill_value=0)
 
-print("\nWeighted proportion of each score by stratum_gender:2")
-print(weighted_by_gender_severity4)
+print(severity_by_gender)
 
+print('                             ')
+print('               -------- school-cycle DISAGGREGATION  ---------           ')
+severity_by_cycle = df.groupby([admin_var, pop_group_var,startum_school_cycle, 'severity_category']).agg(
+    total_weight=('weights', 'sum')
+).groupby(level=[0, 1]).apply(
+    lambda x: x / x.sum()
+).unstack(fill_value=0)
 
+print(severity_by_cycle)
 
+print('                             ')
+print('            -------    CORRECT PIN    -------             ')
 severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
     total_weight=('weights', 'sum')
 ).groupby(level=[0, 1]).apply(
     lambda x: x / x.sum()
 ).unstack(fill_value=0)
 
-print("\nSeverity per admin and pop group")
 print(severity_admin_status)
 
-print('------===================================================-------')
+
+print('***********************************************************')
+def reduce_index(df, level):
+    df.columns = df.columns.get_level_values(1)
+    df=df.droplevel(0, axis=0) 
+    df=df.droplevel(0, axis=0) 
+    if level == 0: df = df.reset_index( level = [0 , 1] ) 
+    if level == 1: df = df.reset_index( level = [0 , 1, 2] ) 
+
+    # Splitting the DataFrame based on pop_group_var
+    groups = df.groupby(pop_group_var)
+    df_list = {name: group for name, group in groups}
+
+    return df_list
+
+severity_admin_status_list = reduce_index(severity_admin_status, 0)
+severity_by_gender_list = reduce_index(severity_by_gender, 1)
+severity_by_cycle_list = reduce_index(severity_by_cycle, 1)
+
+output_file_path_test_strata_gender = 'output/severity_with_additional_strata_gender.xlsx'
+output_file_path_test_strata_cycle = 'output/severity_with_additional_strata_cycle.xlsx'
+
+with pd.ExcelWriter(output_file_path_test_strata_gender, engine='openpyxl') as writer:
+    for group_name, df_group in severity_by_gender_list.items():
+        # Each DataFrame is written to a separate sheet named after the group
+        df_group.to_excel(writer, sheet_name=str(group_name), index=False)
+with pd.ExcelWriter(output_file_path_test_strata_cycle, engine='openpyxl') as writer:
+    for group_name, df_group in severity_by_cycle_list.items():
+        # Each DataFrame is written to a separate sheet named after the group
+        df_group.to_excel(writer, sheet_name=str(group_name), index=False)
+
+print('=========================================')
+# Constants for labels
+LABELS_PERC = {2: '% 1-2', 3: '% 3', 4: '% 4', 5: '% 5'}
+LABELS_TOT = {2: '# 1-2', 3: '# 3', 4: '# 4', 5: '# 5'}
+LABEL_PERC_TOT = '% Tot PiN'
+LABEL_TOT = '# Tot PiN'
+LABEL_ADMIN_SEVERITY = 'Area severity'
+excel_path = 'output_prova/severity_by_admin_and_pop_group.xlsx'
+
+
+def rename_and_reorder(df, pop_group_var, admin_var):
+    # Renaming numeric severity columns to string labels
+    severity_columns = {2.0: LABELS_PERC[2], 3.0: LABELS_PERC[3], 4.0: LABELS_PERC[4], 5.0: LABELS_PERC[5]}
+    df = df.rename(columns=severity_columns)
+    df = df.rename(columns={pop_group_var: 'Population group'})
+
+    # Explicitly reorder columns to the specified order
+    desired_order = [
+        'admin_2', 'Admin Pcode', 'Population group',
+        LABELS_PERC[2], LABELS_TOT[2], LABELS_PERC[3], LABELS_TOT[3],
+        LABELS_PERC[4], LABELS_TOT[4], LABELS_PERC[5], LABELS_TOT[5],
+        LABEL_PERC_TOT, LABEL_TOT, LABEL_ADMIN_SEVERITY,
+        'Children (5-17)', 'Girls (5-17)', 'Boys (5-17)'
+    ]
+
+    # Ensure only columns that exist in the DataFrame are reordered; this prevents KeyErrors
+    df = df[[col for col in desired_order if col in df.columns]]
+    return df
+
+
+def calculate_totals(df):
+    for severity in [2, 3, 4, 5]:
+        perc_column = LABELS_PERC[severity]
+        tot_column = LABELS_TOT[severity]
+        if perc_column in df.columns:
+            df[tot_column] = df[perc_column] * df['Children (5-17)']
+        else:
+            print(f"Column {perc_column} not found in DataFrame.")
+            df[tot_column] = 0  # Default to 0 if the column isn't found
+        
+    df[LABEL_PERC_TOT] = df[[LABELS_PERC[3], LABELS_PERC[4], LABELS_PERC[5]]].sum(axis=1, skipna=True)
+    df[LABEL_TOT] = df[[LABELS_TOT[3], LABELS_TOT[4], LABELS_TOT[5]]].sum(axis=1, skipna=True)
+    
+    conditions = [df[LABELS_PERC[5]] > 0.2, (df[LABELS_PERC[5]] + df[LABELS_PERC[4]]) > 0.2, (df[LABELS_PERC[5]] + df[LABELS_PERC[4]]+ df[LABELS_PERC[3]]) > 0.2, (df[LABELS_PERC[5]] + df[LABELS_PERC[4]]+ df[LABELS_PERC[3]]+  df[LABELS_PERC[2]]) > 0.2]
+    choices = ['5', '4','3', '1-2']
+    df[LABEL_ADMIN_SEVERITY] = np.select(conditions, choices, default='0')
+    
+    return df
+
+def save_excel(category_data_frames, severity_admin_status_list, admin_var, pop_group_var, excel_path):
+    with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
+        for category, df in category_data_frames.items():
+            if category in severity_admin_status_list:
+                grouped_df = severity_admin_status_list[category]
+                merged_df = pd.merge(grouped_df, df, on=[admin_var, pop_group_var])
+                merged_df = rename_and_reorder(merged_df, pop_group_var, admin_var)
+                merged_df = calculate_totals(merged_df)
+                merged_df.to_excel(writer, sheet_name=category)
+                print(f"Processed and saved {category} to Excel.")
 
 
 
 
+excel_path = 'output_prova/severity_by_admin_and_pop_group.xlsx'
+save_excel(category_data_frames, severity_admin_status_list, admin_var, pop_group_var, excel_path)
 
 
 # Call the function to print subtables
 #print_subtables(severity_admin_status, pop_group_var)
         
 # Define the output file path
-output_file_path = 'output/severity_admin_status_subtables.xlsx'
+output_file_path = 'output_prova/severity_admin_status.xlsx'
+severity_admin_status.to_excel(output_file_path, index=False, engine='openpyxl')
 
 # Call the function to save subtables to Excel
 #save_subtables_to_excel(severity_admin_status, pop_group_var, output_file_path)
 
 
-## results divided disaggregated by status and admin --> subtable according to the status!
-subtables = extract_subtables(severity_admin_status, pop_group_var)
 
-for key, table in subtables.items():
-    print(f"Subtable for {key}:")
-    print(table)
-    print("\n" + "-"*50 + "\n")
+# Path for the Excel file
 
-for category, df in category_data_frames.items():
-    df.rename(columns={'Admin': admin_var}, inplace=True)
-    print(f"Category: {category}")
-    print(df.head())  # Display the first few rows of the DataFrame
-    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
+
+print(f"All categories have been saved to {excel_path}")
 
 
 
 
-
-
-def merge_data(subtables, category_data_frames, admin_var, pop_group_var):
-    merged_data_frames = {}
-
-    for key, sub_df in subtables.items():
-        # Check if the key exists in the category data frames
-        if key in category_data_frames:
-            # If 'sub_df' has any indices, reset them only if they are not already columns
-            if sub_df.index.names.count(None) == 0:  # This checks if there are named indices
-                sub_df = sub_df.reset_index()
-            elif sub_df.index.names.count(None) != len(sub_df.index.names):  # Some indices are named
-                sub_df = sub_df.reset_index(drop=True)
-            
-            # Check for repeated columns after index reset and remove if necessary
-            cols_to_use = category_data_frames[key].columns.difference(sub_df.columns)
-            final_cols = cols_to_use.append(pd.Index([admin_var, pop_group_var]))
-
-            # Perform the merge
-            merged_df = pd.merge(
-                sub_df,
-                category_data_frames[key][final_cols],
-                on=[admin_var, pop_group_var],
-                how='left'
-            )
-            merged_data_frames[key] = merged_df
-        else:
-            print(f"No matching category dataframe found for {key}")
-
-    return merged_data_frames
-
-
-
-# Call the merging function
-merged_results = merge_data(subtables, category_data_frames, admin_var, pop_group_var)
-
-# Example to print results
-for key, df in merged_results.items():
-    print(f"Merged Data for {key}:")
-    print(df.head())  # Show the first few rows of the merged dataframes
-    print("\n" + "-"*50 + "\n")
-
-
-
-
-
-
-
-
-
-file_path = 'output/edu_data_filtered.xlsx'
+file_path = 'output_prova/edu_data_filtered.xlsx'
 
 # Save the DataFrame to an Excel file
 edu_data.to_excel(file_path, index=False, engine='openpyxl')
  
+
+

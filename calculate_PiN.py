@@ -615,6 +615,8 @@ with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
             print(f"Processed and saved {category} to Excel.")
 
 
+
+
 # Call the function to print subtables
 #print_subtables(severity_admin_status, pop_group_var)
         
