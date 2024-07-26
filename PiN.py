@@ -227,6 +227,80 @@ def extract_subtables(df, pop_group_var):
     return subtables_dict
 
 ##--------------------------------------------------------------------------------------------
+def calculate_category_factors(df, total_col, category_col, category_name):
+    """
+    Calculate ratios for specific categories and filter the DataFrame to include only necessary columns.
+    Returns a dictionary of DataFrames.
+    """
+    result_df = df.copy()
+    result_df[category_name] = result_df[category_col] / result_df[total_col].replace(0, pd.NA)
+    result_df['Category'] = category_name
+    columns_to_keep = ['Admin', 'Admin Pcode', category_name, 'Category']
+    
+    # Wrap the result in a dictionary using category_name as the key
+    return {category_name: result_df[columns_to_keep]}
+
+##--------------------------------------------------------------------------------------------
+def calculate_cycle_factors(df, factor_cycle, primary_start, secondary_end, vector_cycle, single_cycle):
+
+    if single_cycle:
+        factor_cycle[0] = (vector_cycle[0] - primary_start + 1) / (secondary_end - primary_start + 1)
+        factor_cycle[1] =0
+        factor_cycle[2] =  (secondary_end - vector_cycle[0]) / (secondary_end - primary_start + 1)
+    else:
+        factor_cycle[0] = (vector_cycle[0] - primary_start + 1) / (secondary_end - primary_start + 1)
+        factor_cycle[1] = (vector_cycle[1] - vector_cycle[0]) / (secondary_end - primary_start + 1)
+        factor_cycle[2] = (secondary_end - vector_cycle[1]) / (secondary_end - primary_start + 1)
+
+    # Create dictionaries to hold the categories and their respective factors
+    categories = {
+        'primary': factor_cycle[0],
+        'upper_primary': factor_cycle[1],
+        'secondary': factor_cycle[2]
+    }
+    # Create DataFrames for each category
+    result = {}
+    for category, factor in categories.items():
+        temp_df = df.copy()
+        temp_df[category] = factor
+        temp_df['Category'] = category
+        columns_to_keep = ['Admin', 'Admin Pcode', category, 'Category']
+        result[category] = temp_df[columns_to_keep]
+    return result
+##--------------------------------------------------------------------------------------------
+def reduce_index(df, level):
+    df.columns = df.columns.get_level_values(1)
+    df=df.droplevel(0, axis=0) 
+    df=df.droplevel(0, axis=0) 
+    if level == 0: df = df.reset_index( level = [0 , 1] ) 
+    if level == 1: df = df.reset_index( level = [0 , 1, 2] ) 
+
+    # Splitting the DataFrame based on pop_group_var
+    groups = df.groupby(pop_group_var)
+    df_list = {name: group for name, group in groups}
+
+    return df_list
+
+##--------------------------------------------------------------------------------------------
+def add_disability_factor(df,factor=0.1, category = 'Disability'):
+    # Copy the dataframe to avoid altering the original data
+    result_df = df.copy()
+    
+    # Create the disability factor column
+    category_name = category
+    result_df[category_name] = factor
+    
+    # Add a category label
+    result_df['Category'] = category_name
+    
+    # Define columns to keep
+    columns_to_keep = ['Admin', 'Admin Pcode', category_name, 'Category']
+    
+    # Return the filtered DataFrame
+    return {category_name: result_df[columns_to_keep]}
+
+
+##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
 admin_target = 'Admin_2: Regions'
 pop_group_var = 'place_of_origin'
@@ -258,9 +332,9 @@ secondary_end = 17
 ## status definition/suggestion:
 host_suggestion = ["always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
 IDP_suggestion = ["displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
-returnee_suggestion = ['displaced_previously' ,'Protracted IDPs','cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
+returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
 refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
-ndsp_suggestion = ['ndsp']
+ndsp_suggestion = ['ndsp','Protracted IDPs']
 status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
 template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiee', 'Other']
 suggestions_mapping = {
@@ -273,7 +347,6 @@ suggestions_mapping = {
 ##--------------------------------------------------------------------------------------------
 ##--------------------------------------------------------------------------------------------
 ##--------------------------------------------------------------------------------------------
-
 
 # Path to your Excel file
 excel_path = 'input/REACH_MSNA_2024_clean dataset_template_final.xlsx'
@@ -300,9 +373,8 @@ ocha_pop_data = pd.read_excel(pd.ExcelFile(excel_path_ocha, engine='openpyxl') )
 
 
 
-#######   ------ manipulation and join between H and edu data   ------   #######
+####### ** 1 **       ------------------------------ manipulation and join between H and edu data   ------------------------------------------     #######
 household_data['weight'] = 1
-
 # Find the UUID columns, assuming they exist and taking only the first match for simplicity
 edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
 household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
@@ -325,7 +397,6 @@ edu_data = pd.merge(edu_data, household_data[columns_to_include], left_on=edu_uu
 ##refining for school age-children
 #edu_data = edu_data[(edu_data[age_var] >= 5) & (edu_data[age_var] <= 18)]
 
-
 edu_data['edu_age_corrected'] = edu_data.apply(lambda row: row[age_var] - 1 if calculate_age_correction(start_month, row['month']) else row[age_var], axis=1)
 edu_data['school_cycle'] = edu_data['edu_age_corrected'].apply(
     lambda x: assign_school_cycle(
@@ -337,6 +408,9 @@ edu_data['school_cycle'] = edu_data['edu_age_corrected'].apply(
     )
 )
 edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
+
+
+####### ** 2 **       ------------------------------ severity definition and calculation ------------------------------------------     #######
 
 severity_4_matches = find_matching_choices(choices, selected_severity_4_barriers)
 severity_5_matches = find_matching_choices(choices, selected_severity_5_barriers)
@@ -360,7 +434,47 @@ edu_data['dimension_pin'] = edu_data.apply(lambda row: assign_dimension_pin(
     severity= row['severity_category']
     ), axis=1)
 
+####### ** 3 **       ------------------------------ Analysis per ADMIN AND POPULATION GROUP ------------------------------------------     #######
 
+df = pd.DataFrame(edu_data)
+startum_gender = edu_data[gender_var]
+startum_school_cycle = edu_data['school_cycle']
+print('               -------- GENDER DISAGGREGATION  ---------           ')
+severity_by_gender = df.groupby([admin_var, pop_group_var,gender_var, 'severity_category']).agg(
+    total_weight=('weights', 'sum')
+).groupby(level=[0, 1]).apply(
+    lambda x: x / x.sum()
+).unstack(fill_value=0)
+print(severity_by_gender)
+
+print('                             ')
+print('               -------- school-cycle DISAGGREGATION  ---------           ')
+severity_by_cycle = df.groupby([admin_var, pop_group_var,startum_school_cycle, 'severity_category']).agg(
+    total_weight=('weights', 'sum')
+).groupby(level=[0, 1]).apply(
+    lambda x: x / x.sum()
+).unstack(fill_value=0)
+print(severity_by_cycle)
+
+print('                             ')
+print('            -------    CORRECT PIN    -------             ')
+severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
+    total_weight=('weights', 'sum')
+).groupby(level=[0, 1]).apply(
+    lambda x: x / x.sum()
+).unstack(fill_value=0)
+print(severity_admin_status)
+
+## reducing the multiindex of the panda dataframe
+severity_admin_status_list = reduce_index(severity_admin_status, 0)
+severity_by_gender_list = reduce_index(severity_by_gender, 1)
+severity_by_cycle_list = reduce_index(severity_by_cycle, 1)
+
+
+
+
+
+####### ** 4 **       ------------------------------ matching between the admin and the ocha population data ------------------------------------------     #######
 
 ## finding the match between the OCHA status cathegory and the country status. 
 status_allvalues = edu_data[pop_group_var].unique()
@@ -374,64 +488,186 @@ category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_g
 # Debugging and data inspection
 for key, value in mapped_statuses.items():
     print(f"{key}: {value}")
+for category, df in category_data_frames.items():
+    df.rename(columns={'Admin': admin_var}, inplace=True)
+    print(f"Category: {category}")
+    print(df.head())  # Display the first few rows of the DataFrame
+    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
 
 
-## adding and modifying the OCHA category_data_frames to add different disaggregation
-# Prepare the column names to extract based on the matched status
+####### ** 5 **       ------------------------------ creating tables with factors for the gender and school-cycle categories ------------------------------------------     #######
+
+## calculate the difference population group per school-cycle according to the country and the tot-children population 
+factor_cycle = [0.5,0.5,0]
+factor_disability = 0.1
+## create table per strata
 category_tot = 'All'
 category_girl = 'Girl'
 category_boy = 'Boy'
-category_ECE= 'ECE'
+category_ece= 'ECE'
+category_primary= 'primary'
+category_upper_primary= 'upper_primary'
+category_secondary= 'secondary'
+category_disability = 'Disability'
 
 children_tot_col = 'ToT -- Children/Enfants (5-17)'
 girls_tot_col = 'ToT -- Girls/Filles (5-17)'
 boys_tot_col = 'ToT -- Boys/Garcons (5-17)'
 ece_tot_col = '5yo -- Children/Enfants'
-# Columns and categories mapping
-categories_info = {
-    'All': (children_tot_col, ''),
-    'Girl': (girls_tot_col, 'GIRL'),
-    'Boy': (boys_tot_col, 'BOY'),
-    'ECE': (ece_tot_col, 'ECE')
+
+
+# Calculate category factors
+category_factors = {
+    **calculate_category_factors(ocha_pop_data, children_tot_col, girls_tot_col, category_girl),
+    **calculate_category_factors(ocha_pop_data, children_tot_col, boys_tot_col, category_boy),
+    **calculate_category_factors(ocha_pop_data, children_tot_col, ece_tot_col, category_ece)
 }
+# Calculate factors for each school cycle
+school_cycle_factors = calculate_cycle_factors(ocha_pop_data, factor_cycle, primary_start, secondary_end, vector_cycle, single_cycle)
+# Combine all factors into one dictionary
+factor_category = {**category_factors, **school_cycle_factors}
+disability_factors = add_disability_factor(ocha_pop_data, factor_disability,category_disability )
+# Update the factor_category dictionary with the new disability category
+factor_category.update(disability_factors)
+
+# Print results
+for key, df in factor_category.items():
+    print(f"{key} factors:\n{df}\n")
 
 
+####### ** 6 **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
 
-def create_category_df(source_df, admin_col, pcode_col, data_col, category_name, pop_group_suffix):
-    # Ensure the data column exists to prevent KeyError
-    if data_col in source_df.columns:
-        df = source_df[[admin_col, pcode_col, data_col]].copy()
-        df.rename(columns={data_col: 'TotN'}, inplace=True)
-        df['Category'] = category_name
-        df[pop_group_var] = f'All pop group -- {pop_group_suffix}'
-        return df
-    else:
-        print(f"Column {data_col} not found in DataFrame.")
-        return None
+label_perc2 = '% 1-2'
+label_perc3 = '% 3'
+label_perc4 = '% 4'
+label_perc5 = '% 5'
+label_tot2 = '# 1-2'
+label_tot3 = '# 3'
+label_tot4 = '# 4'
+label_tot5 = '# 5'
+label_perc_tot = '% Tot PiN (3+)'
+label_tot = '# Tot PiN (3+)'
+label_admin_severity = 'Area severity'
+excel_path = 'output/severity_by_admin_and_pop_group.xlsx'
+label_tot_population = 'TotN'
 
-# Process each category
-for category, (col_name, suffix) in categories_info.items():
-    df = create_category_df(ocha_pop_data, 'Admin', 'Admin Pcode', col_name, category, suffix)
-    if df is not None:
-        category_data_frames[category] = df
+pin_per_admin_status = {}
 
-
-
-## calculate the difference population group per school-cycle according to the country and the tot-children population 
-factor_cycle = [0.5,0.5,0]
-if single_cycle:
-    factor_cycle[0] = (vector_cycle[0]-primary_start +1) / (secondary_end-primary_start+1)
-    factor_cycle[1] = (secondary_end - vector_cycle[0]) / (secondary_end-primary_start+1)
-else: 
-    factor_cycle[0] = (vector_cycle[0]-primary_start +1) / (secondary_end-primary_start+1)
-    factor_cycle[1] = (vector_cycle[1]-vector_cycle[0] ) / (secondary_end-primary_start+1)
-    factor_cycle[2] = (secondary_end - vector_cycle[1]) / (secondary_end-primary_start+1)
-
-
-print(factor_cycle)
-print('///////////////')    
+# Assume category_data_frames is a dictionary of DataFrames, indexed by category
 for category, df in category_data_frames.items():
-    df.rename(columns={'Admin': admin_var}, inplace=True)
+    # Ensure both DataFrames are ready to merge
+    if category in severity_admin_status_list:
+        # Fetch the corresponding DataFrame from the grouped data
+        grouped_df = severity_admin_status_list[category]     
+        # Merge on specified columns
+        pop_group_df = pd.merge(grouped_df, df, on=[admin_var, pop_group_var])
+        pop_group_df.columns = [str(col) for col in pop_group_df.columns]
+
+        ## arranging columns 
+        pop_group_df = pop_group_df.rename(columns={pop_group_var: 'Population group'})
+        del pop_group_df['Category']
+        cols = list(pop_group_df.columns)
+        cols.remove('Admin Pcode')
+        cols.insert( cols.index(admin_var) + 1, 'Admin Pcode')
+        pop_group_df = pop_group_df[cols]
+
+
+        ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   calculation of the tot Pin and admin severity -->
+        # Step 1: Create the new column with initial zeros
+        pop_group_df = pop_group_df.rename(columns={'2.0': label_perc2})
+        pop_group_df = pop_group_df.rename(columns={'3.0': label_perc3})
+        pop_group_df = pop_group_df.rename(columns={'4.0': label_perc4})
+        pop_group_df = pop_group_df.rename(columns={'5.0': label_perc5})
+
+        pop_group_df[label_tot2] = 0
+        pop_group_df[label_tot3] = 0
+        pop_group_df[label_tot4] = 0
+        pop_group_df[label_tot5] = 0
+
+        cols = list(pop_group_df.columns)
+        # Move the newly added column to the desired position
+        cols.insert(cols.index(label_perc2) + 1, cols.pop(cols.index(label_tot2)))
+        cols.insert(cols.index(label_perc3) + 1, cols.pop(cols.index(label_tot3)))
+        cols.insert(cols.index(label_perc4) + 1, cols.pop(cols.index(label_tot4)))
+        cols.insert(cols.index(label_perc5) + 1, cols.pop(cols.index(label_tot5)))
+
+        # Step 3: Update '# PiN severity 2' based on the product of '2.0' and 'Children (5-17)'
+        pop_group_df[label_tot2] = pop_group_df[label_perc2] * pop_group_df[label_tot_population]
+        pop_group_df[label_tot3] = pop_group_df[label_perc3] * pop_group_df[label_tot_population]
+        pop_group_df[label_tot4] = pop_group_df[label_perc4] * pop_group_df[label_tot_population]
+        pop_group_df[label_tot5] = pop_group_df[label_perc5] * pop_group_df[label_tot_population]
+
+        cols.remove(label_tot_population)
+        cols.insert( cols.index('Population group') + 1, label_tot_population)
+        pop_group_df = pop_group_df[cols]
+
+        # Save modified DataFrame back into the dictionary under the category key
+        pin_per_admin_status[category] = pop_group_df
+
+
+for category, df in pin_per_admin_status.items():
+    print(f"Category: {category}")
+    print(df.head())  # Display the first few rows of the DataFrame
+    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
+
+
+
+####### ** 7 **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP for the strata: GENDER, SCHOOL-CYCLE ------------------------------------------     #######
+
+def adjust_pin_by_gender_factor(pin_df, factor_df, category_label):
+    # Merge the pin DataFrame with the factor DataFrame on the 'Admin_2' column
+    factorized_df = pd.merge(pin_df, factor_df, left_on=admin_var, right_on="Admin", how='left')
+    factorized_df = pd.merge(
+        pin_df, factor_df, 
+        left_on=[admin_var, 'Admin Pcode'], 
+        right_on=["Admin", 'Admin Pcode'], 
+        how='left'
+    )
+   # Columns that need to be adjusted by the factor
+    columns_to_adjust = [col for col in factorized_df.columns if col.startswith('#') or col == label_tot_population]
+    del factorized_df['Admin']
+
+    # Apply the multiplication for each column that needs adjustment
+    for col in columns_to_adjust:
+        factorized_df[col] *= factorized_df[category_label]
+
+    # Drop the now unneeded factor column
+    factorized_df.drop(columns=[category_label], inplace=True)
+    return factorized_df
+
+# Create a new dictionary to store the adjusted DataFrames
+pin_per_admin_status_girl = {}
+pin_per_admin_status_boy = {}
+pin_per_admin_status_ece = {}
+pin_per_admin_status_primary = {}
+pin_per_admin_status_upper_primary = {}
+pin_per_admin_status_secondary = {}
+pin_per_admin_status_disabilty = {}
+
+
+for category, df in pin_per_admin_status.items():
+    pin_per_admin_status_girl[category] = adjust_pin_by_gender_factor(df, factor_category[category_girl], category_girl)
+    pin_per_admin_status_boy[category] = adjust_pin_by_gender_factor(df, factor_category[category_boy], category_boy)
+    pin_per_admin_status_ece[category] = adjust_pin_by_gender_factor(df, factor_category[category_ece], category_ece)
+    pin_per_admin_status_primary[category] = adjust_pin_by_gender_factor(df, factor_category[category_primary], category_primary)
+    pin_per_admin_status_upper_primary[category] = adjust_pin_by_gender_factor(df, factor_category[category_upper_primary], category_upper_primary)
+    pin_per_admin_status_secondary[category] = adjust_pin_by_gender_factor(df, factor_category[category_secondary], category_secondary)
+    pin_per_admin_status_disabilty[category] = adjust_pin_by_gender_factor(df, factor_category[category_disability], category_disability)
+
+
+print('giiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiirrrlllllllllllllllllllllllllllllllll')
+for category, df in pin_per_admin_status_girl.items():
+    print(f"Category: {category}")
+    print(df.head())  # Display the first few rows of the DataFrame
+    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
+print('ece')
+for category, df in pin_per_admin_status_ece.items():
+    print(f"Category: {category}")
+    print(df.head())  # Display the first few rows of the DataFrame
+    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
+
+print('upper_primary')
+for category, df in pin_per_admin_status_upper_primary.items():
     print(f"Category: {category}")
     print(df.head())  # Display the first few rows of the DataFrame
     print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
@@ -440,7 +676,36 @@ for category, df in category_data_frames.items():
 
 
 
+
+
+
+
+
+
+
+
+
+
+## saving excel 
+
+
+
+
 file_path = 'output/edu_data_filtered_test.xlsx'
 
 # Save the DataFrame to an Excel file
 edu_data.to_excel(file_path, index=False, engine='openpyxl')
+
+
+
+output_file_path_test_strata_gender = 'output/severity_with_additional_strata_gender.xlsx'
+output_file_path_test_strata_cycle = 'output/severity_with_additional_strata_cycle.xlsx'
+
+with pd.ExcelWriter(output_file_path_test_strata_gender, engine='openpyxl') as writer:
+    for group_name, df_group in severity_by_gender_list.items():
+        # Each DataFrame is written to a separate sheet named after the group
+        df_group.to_excel(writer, sheet_name=str(group_name), index=False)
+with pd.ExcelWriter(output_file_path_test_strata_cycle, engine='openpyxl') as writer:
+    for group_name, df_group in severity_by_cycle_list.items():
+        # Each DataFrame is written to a separate sheet named after the group
+        df_group.to_excel(writer, sheet_name=str(group_name), index=False)

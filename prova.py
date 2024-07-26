@@ -613,3 +613,132 @@ category_df_ece.rename(columns={ece_tot_col: 'TotN'}, inplace=True)
 category_df_ece['Category'] = category_ECE  # Set the category name to the matched status
 category_df_ece[pop_group_var] = 'All pop group -- ECE'
 category_data_frames[category_ECE] = category_df_ece
+
+
+
+
+
+factor_girl = ocha_pop_data
+factor_girl[category_girl] = ocha_pop_data[girls_tot_col]/ocha_pop_data[children_tot_col]
+factor_girl['Category'] = category_girl
+columns_to_keep = ['Admin', 'Admin Pcode',category_girl, 'Category']
+factor_girl = factor_girl[columns_to_keep]
+
+factor_boy = ocha_pop_data
+factor_boy[category_boy] = ocha_pop_data[boys_tot_col]/ocha_pop_data[children_tot_col]
+factor_boy['Category'] = category_boy
+columns_to_keep = ['Admin', 'Admin Pcode',category_boy, 'Category']
+factor_boy = factor_boy[columns_to_keep]
+
+factor_ece = ocha_pop_data
+factor_ece[category_ece] = ocha_pop_data[ece_tot_col]/ocha_pop_data[children_tot_col]
+factor_ece['Category'] = category_ece
+columns_to_keep = ['Admin', 'Admin Pcode',category_ece, 'Category']
+factor_ece = factor_ece[columns_to_keep]
+
+
+
+if single_cycle:
+    factor_cycle[0] = (vector_cycle[0]-primary_start +1) / (secondary_end-primary_start+1)
+    factor_cycle[1] = (secondary_end - vector_cycle[0]) / (secondary_end-primary_start+1)
+else: 
+    factor_cycle[0] = (vector_cycle[0]-primary_start +1) / (secondary_end-primary_start+1)
+    factor_cycle[1] = (vector_cycle[1]-vector_cycle[0] ) / (secondary_end-primary_start+1)
+    factor_cycle[2] = (secondary_end - vector_cycle[1]) / (secondary_end-primary_start+1)
+print(factor_cycle)
+
+
+if single_cycle:
+    factor_primary = ocha_pop_data
+    factor_primary[category_primary] = factor_cycle[0]
+    factor_primary['Category'] = category_primary
+    columns_to_keep = ['Admin', 'Admin Pcode',category_primary, 'Category']
+    factor_primary = factor_primary[columns_to_keep]
+
+    factor_secondary = ocha_pop_data
+    factor_secondary[category_secondary] = factor_cycle[1]
+    factor_secondary['Category'] = category_secondary
+    columns_to_keep = ['Admin', 'Admin Pcode',category_secondary, 'Category']
+    factor_secondary = factor_secondary[columns_to_keep]
+    factor_upper_primary = ocha_pop_data
+    factor_upper_primary[category_upper_primary] = 0
+    factor_upper_primary['Category'] = category_upper_primary
+    columns_to_keep = ['Admin', 'Admin Pcode',category_upper_primary, 'Category']
+    factor_upper_primary = factor_upper_primary[columns_to_keep]
+else:
+    factor_primary = ocha_pop_data
+    factor_primary[category_primary] = factor_cycle[0]
+    factor_primary['Category'] = category_primary
+    columns_to_keep = ['Admin', 'Admin Pcode',category_primary, 'Category']
+    factor_primary = factor_primary[columns_to_keep]
+
+    factor_secondary = ocha_pop_data
+    factor_secondary[category_secondary] = factor_cycle[2]
+    factor_secondary['Category'] = category_secondary
+    columns_to_keep = ['Admin', 'Admin Pcode',category_secondary, 'Category']
+    factor_secondary = factor_secondary[columns_to_keep]
+
+    factor_upper_primary = ocha_pop_data
+    factor_upper_primary[category_upper_primary] = factor_cycle[1]
+    factor_upper_primary['Category'] = category_upper_primary
+    columns_to_keep = ['Admin', 'Admin Pcode',category_upper_primary, 'Category']
+    factor_upper_primary = factor_upper_primary[columns_to_keep]
+
+
+print(factor_girl)
+print(factor_boy)
+print(factor_ece)
+print(factor_primary)
+print(factor_upper_primary)
+print(factor_secondary)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## sum for PiN == 3+
+        pop_group_df[label_perc_tot] = 0
+        pop_group_df[label_tot] = 0
+        pop_group_df[label_admin_severity] = 0
+        cols = list(pop_group_df.columns)
+        cols.insert(cols.index(label_tot5) + 1, cols.pop(cols.index(label_perc_tot)))
+        cols.insert(cols.index(label_perc_tot) + 1, cols.pop(cols.index(label_tot)))
+        cols.insert(cols.index(label_tot) + 1, cols.pop(cols.index(label_admin_severity)))
+
+        # 3+
+        pop_group_df[label_perc_tot] = pop_group_df[label_perc3] + pop_group_df[label_perc4] + pop_group_df[label_perc5] # 3+
+        pop_group_df[label_tot] = pop_group_df[label_tot3] + pop_group_df[label_tot4] + pop_group_df[label_tot5] # 3+
+
+        # Conditions based on your specifications
+        conditions = [
+            pop_group_df[label_perc5] > 0.2,
+            (pop_group_df[label_perc5] + pop_group_df[label_perc4]) > 0.2,
+            (pop_group_df[label_perc5] + pop_group_df[label_perc4] + pop_group_df[label_perc3]) > 0.2,
+            (pop_group_df[label_perc5] + pop_group_df[label_perc4] + pop_group_df[label_perc3] + pop_group_df[label_perc2]) > 0.2
+        ]
+
+        # Corresponding values for each condition as strings
+        choices = ['5', '4', '3', '1-2']
+
+        # Applying the conditions and choices to the DataFrame with a string default
+        pop_group_df[label_admin_severity] = np.select(conditions, choices, default='0')  
+
+
+
+
+        #for col in pop_group_df.columns:
+            #if col.startswith('#'):
+                #pop_group_df[col] = pop_group_df[col].round(0)  # One digit after the decimal
+            #elif col.startswith('%'):
+                #pop_group_df[col] = pop_group_df[col].round(2)  # Two digits after the decimal
+
+        #pop_group_df[label_tot_population] = pop_group_df[label_tot_population].round(0)
