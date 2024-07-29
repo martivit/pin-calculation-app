@@ -1,6 +1,5 @@
 import streamlit as st
-import hashlib
-#from hashlib import sha256
+from hashlib import sha256
 
 st.logo('pics/logos.png')
 
@@ -25,7 +24,7 @@ def check_password():
  
     def password_entered():
         """Checks whether a password entered by the user is correct."""
-        h = hashlib.sha256()
+        h = sha256()
         pasw = st.session_state["password"]
         h.update(pasw.encode('utf-8'))
         hash = h.hexdigest()
