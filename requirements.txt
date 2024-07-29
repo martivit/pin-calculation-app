@@ -1,7 +1,5 @@
-streamlit==1.37.0
-openpyxl==3.1.5
-extra_streamlit_components==0.1.71
+streamlit
+openpyxl
+extra_streamlit_components
 panda
 #streamlit-authenticator==0.1.5
-hashlib
-hmac
