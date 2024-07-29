@@ -28,8 +28,8 @@ def check_password():
         pasw = st.session_state["password"]
         h.update(pasw.encode('utf-8'))
         hash = h.hexdigest()
-        print(st.session_state["username"])
-        if st.session_state["username"] in st.secrets["passwords"] and hash in st.secrets.passwords[st.session_state["username"]]:
+        print(list(st.secrets.passwords.keys()))
+        if st.session_state["username"] in list(st.secrets.passwords.keys()) and hash in st.secrets.passwords[st.session_state["username"]]:
         # and hmac.compare_digest(   
             st.session_state["password_correct"] = True
             del st.session_state["password"]  # Don't store the username or password.
