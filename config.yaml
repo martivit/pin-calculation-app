@@ -4,7 +4,7 @@ cookie:
   name: some_cookie_name
 credentials:
   usernames:
-    vit:
+    rbriggs:
       email: jsmith@gmail.com
       logged_in: False
       name: John Smith
