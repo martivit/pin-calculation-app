@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import time
+import streamlit_authenticator as stauth
 
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
