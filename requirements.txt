@@ -2,3 +2,4 @@ streamlit
 openpyxl
 extra_streamlit_components
 panda
+streamlit_authenticator
