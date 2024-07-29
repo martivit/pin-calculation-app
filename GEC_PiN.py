@@ -43,8 +43,6 @@ if authentication_status:
 
 
 
-
-
     spacer1, spacer2 = st.sidebar.empty(), st.sidebar.empty()
 
     for _ in range(150):  # You might need to adjust this number
