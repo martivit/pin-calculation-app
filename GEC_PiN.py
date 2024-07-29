@@ -39,7 +39,7 @@ if authentication_status == False:
 
 if authentication_status == None:
     st.session_state.authentication_status = None
-    st.warning("Please enter your username and password")
+    st.warning("Please enter your username and password, if you don't have them contact martina.vit@impact.initiatives.org")
 
 if authentication_status:
     st.session_state.authentication_status = True
