@@ -34,12 +34,16 @@ name, authentication_status, username = authenticator.login("Login", "main")
    #st.session_state["shared"] = True
 
 if authentication_status == False:
+    st.session_state.authentication_status = False
     st.error("Username/password is incorrect")
 
 if authentication_status == None:
+    st.session_state.authentication_status = None
     st.warning("Please enter your username and password")
 
 if authentication_status:
+    st.session_state.authentication_status = True
+
 
 
 
@@ -53,7 +57,8 @@ if authentication_status:
     st.sidebar.image(logo_path_1, width=200)  # Adjust width as necessary
     st.sidebar.image(logo_path_2, width=200)  # Adjust width as necessary
 
-
+    authenticator.logout("Logout", "sidebar")
+    st.sidebar.title(f"Welcome {name}")
     st.image('pics/pinheader.jpg')
 
 
