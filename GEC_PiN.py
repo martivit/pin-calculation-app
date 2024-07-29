@@ -6,8 +6,6 @@ from pathlib import Path
 import hmac
 from hashlib import sha256
 
-
-
 st.logo('pics/logos.png')
 
 
@@ -58,9 +56,6 @@ def check_password():
  
 if not check_password():
     st.stop()
-
-
-
 
 spacer1, spacer2 = st.sidebar.empty(), st.sidebar.empty()
 

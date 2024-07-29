@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import time
-import streamlit_authenticator as stauth
 
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
@@ -26,12 +25,9 @@ def check_conditions_and_proceed():
     if st.session_state.get('ready_to_proceed', False):
         st.success("You have completed all necessary steps!")
 
-
-
 if 'password_correct' not in st.session_state:
     st.error('Please Login from the Home page and try again.')
     st.stop()
-
 
 
 # Country selection setup
