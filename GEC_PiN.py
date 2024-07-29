@@ -1,7 +1,4 @@
 import streamlit as st
-#import numpy as np
-#import pandas as pd
-import streamlit_authenticator as stauth
 from pathlib import Path
 import hmac
 from hashlib import sha256
