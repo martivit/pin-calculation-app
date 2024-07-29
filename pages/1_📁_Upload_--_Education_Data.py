@@ -27,6 +27,11 @@ def check_conditions_and_proceed():
         st.success("You have completed all necessary steps!")
 
 
+if not st.session_state.authentication_status:
+    st.info('Please Login from the Home page and try again.')
+    st.stop()
+
+
 # Country selection setup
 countries = ['no selection',
     'Afghanistan -- AFG', 'Burkina Faso -- BFA', 'Central African Republic -- CAR', 
