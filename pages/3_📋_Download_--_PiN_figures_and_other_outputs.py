@@ -5,6 +5,11 @@ st.logo('pics/logos.png')
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
 
+if 'password_correct' not in st.session_state:
+    st.error('Please Login from the Home page and try again.')
+    st.stop()
+
+
 hide_github_icon = """ 
     #GithubIcon { visibility: hidden; } 
     """

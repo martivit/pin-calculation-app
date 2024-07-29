@@ -27,9 +27,11 @@ def check_conditions_and_proceed():
         st.success("You have completed all necessary steps!")
 
 
-if not st.session_state.authentication_status:
-    st.info('Please Login from the Home page and try again.')
+
+if 'password_correct' not in st.session_state:
+    st.error('Please Login from the Home page and try again.')
     st.stop()
+
 
 
 # Country selection setup

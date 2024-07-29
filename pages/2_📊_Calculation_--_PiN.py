@@ -8,6 +8,10 @@ st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico', layou
 st.title('Indicator and Severity categorization')
 
 
+if 'password_correct' not in st.session_state:
+    st.error('Please Login from the Home page and try again.')
+    st.stop()
+
 if 'current_step' not in st.session_state:
     st.session_state['current_step'] = 0
 
