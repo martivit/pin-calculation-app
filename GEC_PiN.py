@@ -29,7 +29,7 @@ def check_password():
         user =  st.session_state["username"]
         print(user)
         if user in list_user:
-            if hmac.compare_digest( st.session_state["password"], st.secrets[user]['pwd']):
+            if hmac.compare_digest( st.session_state["password"], st.secrets[user]['pwd'],):
                 st.session_state["password_correct"] = True
                 del st.session_state["password"]  # Don't store the username or password.
                 del st.session_state["username"]
