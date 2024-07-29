@@ -742,3 +742,42 @@ print(factor_secondary)
                 #pop_group_df[col] = pop_group_df[col].round(2)  # Two digits after the decimal
 
         #pop_group_df[label_tot_population] = pop_group_df[label_tot_population].round(0)
+
+
+
+
+
+
+        def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        h = sha256()
+        pasw = st.session_state["password_user"]
+        h.update(pasw.encode('utf-8'))
+        hash = h.hexdigest()
+        print(pasw)
+        print(hash)
+        
+        if st.session_state["username"] in list(st.secrets.passwords.keys()) and hash in st.secrets.passwords[st.session_state["username"]]:
+        # and hmac.compare_digest(   
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store the username or password.
+            del st.session_state["username"]
+        else:
+            st.session_state["password_correct"] = False
+ 
+
+
+        if st.session_state["username"]:
+            user = st.session_state["username"]
+            print(user)
+            if user in st.secrets.passwords_assigned
+
+    # Return True if the username + password is validated.
+    if st.session_state.get("password_correct", False):
+        return True
+ 
+    # Show inputs for username + password.
+    login_form()
+    if "password_correct" in st.session_state:
+        st.error("😕 User not known or password incorrect")
+    return False
