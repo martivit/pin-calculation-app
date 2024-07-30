@@ -13,7 +13,13 @@ st.set_page_config(
 
 ## ----- user authenthicator ------
 # Load the configuration from 'test.yaml' safely
-list_user = ('vit', 'grand')
+# Define user credentials
+users = {
+    "vit": "pintool",
+    "grand": "grand"
+}
+
+# Utility function to validate passwords
 def check_password():
     """Returns `True` if the user had a correct password."""
 
@@ -26,15 +32,17 @@ def check_password():
 
     def password_entered():
         """Checks whether a password entered by the user is correct."""
-        user =  st.session_state["username"]
-        print(user)
-        if user in list_user:
-            if hmac.compare_digest( st.session_state["password"], st.secrets[user]['pwd'],):
+        user = st.session_state["username"]
+        if user in users:
+            # Verify password using HMAC to avoid timing attacks
+            if hmac.compare_digest(st.session_state["password"], users[user]):
                 st.session_state["password_correct"] = True
                 del st.session_state["password"]  # Don't store the username or password.
                 del st.session_state["username"]
             else:
                 st.session_state["password_correct"] = False
+        else:
+            st.session_state["password_correct"] = False
 
     # Return True if the username + password is validated.
     if st.session_state.get("password_correct", False):
@@ -42,7 +50,7 @@ def check_password():
 
     # Show inputs for username + password.
     login_form()
-    if "password_correct" in st.session_state:
+    if "password_correct" in st.session_state and not st.session_state["password_correct"]:
         st.error("😕 User not known or password incorrect")
     return False
 
