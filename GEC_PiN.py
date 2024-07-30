@@ -22,6 +22,10 @@ except KeyError as e:
     st.error(f"Error loading user credentials: {e}")
     st.stop()
 
+SECRET_KEY = b'supersecretkey'
+def hmac_hash(password):
+    return hmac.new(SECRET_KEY, password.encode('utf-8'), 'sha256').hexdigest()
+
 # Utility function to validate passwords
 def check_password():
     """Returns `True` if the user has entered a correct password."""
@@ -37,8 +41,9 @@ def check_password():
         """Checks whether a password entered by the user is correct."""
         user = st.session_state["username"]
         if user in users:
+            entered_password_hash = hmac_hash(st.session_state["password"])
             # Compare the entered password with the stored password
-            if hmac.compare_digest(st.session_state["password"], users[user]):
+            if hmac.compare_digest(entered_password_hash, users[user]):
                 st.session_state["password_correct"] = True
                 del st.session_state["password"]  # Don't store the username or password.
                 del st.session_state["username"]
