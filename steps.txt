@@ -2,3 +2,10 @@
 pip install streamlit 
 streamlit run app.py
 streamlit run your_script.py [-- script args]
+
+
+gatherUsageStats = false
+
+
+
+pyarrow.parquet

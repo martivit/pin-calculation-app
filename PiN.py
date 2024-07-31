@@ -7,6 +7,10 @@ from pprint import pprint
 import samplics
 from samplics.categorical import Tabulation, CrossTabulation
 from samplics.utils.types import PopParam, RepMethod
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
+from openpyxl.cell.cell import MergedCell  # Import MergedCell
+
 
 
 ##--------------------------------------------------------------------------------------------
@@ -300,6 +304,92 @@ def add_disability_factor(df,factor=0.1, category = 'Disability'):
     return {category_name: result_df[columns_to_keep]}
 
 
+
+##--------------------------------------------------------------------------------------------
+# %PiN AND #PiN PER ADMIN AND POPULATION GROUP for the strata: GENDER, SCHOOL-CYCLE 
+def adjust_pin_by_strata_factor(pin_df, factor_df, category_label):
+    # Merge the pin DataFrame with the factor DataFrame on the 'Admin_2' column
+    factorized_df = pd.merge(pin_df, factor_df, left_on=admin_var, right_on="Admin", how='left')
+    factorized_df = pd.merge(
+        pin_df, factor_df, 
+        left_on=[admin_var, 'Admin Pcode'], 
+        right_on=["Admin", 'Admin Pcode'], 
+        how='left'
+    )
+   # Columns that need to be adjusted by the factor
+    columns_to_adjust = [col for col in factorized_df.columns if col.startswith('#') or col == label_tot_population]
+    del factorized_df['Admin']
+
+    # Apply the multiplication for each column that needs adjustment
+    for col in columns_to_adjust:
+        factorized_df[col] *= factorized_df[category_label]
+
+    # Drop the now unneeded factor column
+    factorized_df.drop(columns=[category_label], inplace=True)
+    return factorized_df
+
+
+##--------------------------------------------------------------------------------------------
+# preparation for overview--> SUM all the admin per population group and per strata 
+def collapse_and_summarize(pin_per_admin_status_strata, category_str):
+    collapsed_results = {}
+    
+    # Iterate over the input dictionary
+    for category, df in pin_per_admin_status_strata.items():
+        # Create a copy of the first row to preserve the structure
+        summed_df = df.iloc[0:1].copy()
+
+        # Identify columns to skip from summation and columns to set to zero
+        columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Admin Pcode' or col == 'Population group' or col == 'Category' or col == 'Area severity']
+        columns_to_zero = [col for col in df.columns if col.startswith('%')]
+
+        # Sum all numerical columns except the skipped ones
+        for col in df.columns:
+            if col not in columns_to_skip:
+                summed_df[col] = df[col].sum()
+
+        # Set non-sum columns with fixed values
+        summed_df['admin_2'] = 'whole country'
+        summed_df['Admin Pcode'] = '0'
+        summed_df['Population group'] = category
+        if 'Area severity' in summed_df.columns:
+            del summed_df['Area severity']
+
+        # Set percentage columns to zero
+        for col in columns_to_zero:
+            summed_df[col] = 0
+
+        # Add the modified DataFrame to the results dictionary
+        summed_df = summed_df.iloc[:1]
+        collapsed_results[category] = summed_df
+
+
+    # Initialize the overview DataFrame with the first entry
+    first_key = next(iter(collapsed_results))  # Get the first key from the dictionary
+    overview_strata = collapsed_results[first_key].copy()
+
+    # Iterate through all DataFrames in the dictionary and add their values to the overview DataFrame
+    for category, df in collapsed_results.items():
+        if category != first_key:  # Skip the initial DataFrame used for initialization
+            overview_strata += df
+
+    # Set final summary values
+    overview_strata[admin_var] = 'Whole country'
+    overview_strata['Admin Pcode'] = 0
+    overview_strata['Population group'] = 'All population groups'
+    overview_strata['Category'] = category_str
+
+    overview_strata[label_perc_tot] = 0
+    overview_strata[label_tot] = (overview_strata[label_tot3] +
+                               overview_strata[label_tot4] +
+                               overview_strata[label_tot5])
+
+    cols = list(overview_strata.columns)
+    cols.insert(cols.index(label_tot) + 1, cols.pop(cols.index('Category')))
+    overview_strata = overview_strata[cols]
+
+    return overview_strata
+
 ##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
 admin_target = 'Admin_2: Regions'
@@ -321,6 +411,7 @@ selected_severity_5_barriers = ["Child is associated with armed forces or armed 
 age_var = 'edu_ind_age'
 gender_var = 'edu_ind_gender'
 start_month = 'september'
+country= 'Somalia -- SOM'
 
 
 vector_cycle = [9,14]
@@ -464,15 +555,22 @@ severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category
     lambda x: x / x.sum()
 ).unstack(fill_value=0)
 print(severity_admin_status)
+print('                             ')
+print('            -------    CORRECT TARGETTING    -------             ')
+dimension_admin_status = df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+    total_weight=('weights', 'sum')
+).groupby(level=[0, 1]).apply(
+    lambda x: x / x.sum()
+).unstack(fill_value=0)
+print(dimension_admin_status)
+
 
 ## reducing the multiindex of the panda dataframe
 severity_admin_status_list = reduce_index(severity_admin_status, 0)
 severity_by_gender_list = reduce_index(severity_by_gender, 1)
 severity_by_cycle_list = reduce_index(severity_by_cycle, 1)
 
-
-
-
+dimension_admin_status_list = reduce_index(dimension_admin_status, 0)
 
 ####### ** 4 **       ------------------------------ matching between the admin and the ocha population data ------------------------------------------     #######
 
@@ -536,7 +634,10 @@ for key, df in factor_category.items():
 
 
 ####### ** 6 **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
-
+int_2 = '2.0'
+int_3 = '3.0'
+int_4 = '4.0'
+int_5 = '5.0'
 label_perc2 = '% 1-2'
 label_perc3 = '% 3'
 label_perc4 = '% 4'
@@ -548,7 +649,6 @@ label_tot5 = '# 5'
 label_perc_tot = '% Tot PiN (3+)'
 label_tot = '# Tot PiN (3+)'
 label_admin_severity = 'Area severity'
-excel_path = 'output/severity_by_admin_and_pop_group.xlsx'
 label_tot_population = 'TotN'
 
 pin_per_admin_status = {}
@@ -564,8 +664,6 @@ for category, df in category_data_frames.items():
         pop_group_df.columns = [str(col) for col in pop_group_df.columns]
 
         ## arranging columns 
-        pop_group_df = pop_group_df.rename(columns={pop_group_var: 'Population group'})
-        del pop_group_df['Category']
         cols = list(pop_group_df.columns)
         cols.remove('Admin Pcode')
         cols.insert( cols.index(admin_var) + 1, 'Admin Pcode')
@@ -574,28 +672,41 @@ for category, df in category_data_frames.items():
 
         ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   calculation of the tot Pin and admin severity -->
         # Step 1: Create the new column with initial zeros
-        pop_group_df = pop_group_df.rename(columns={'2.0': label_perc2})
-        pop_group_df = pop_group_df.rename(columns={'3.0': label_perc3})
-        pop_group_df = pop_group_df.rename(columns={'4.0': label_perc4})
-        pop_group_df = pop_group_df.rename(columns={'5.0': label_perc5})
+        pop_group_df = pop_group_df.rename(columns={
+            pop_group_var: 'Population group',
+            int_2: label_perc2,
+            int_3: label_perc3,
+            int_4: label_perc4,
+            int_5: label_perc5
+        })
+        del pop_group_df['Category']
 
-        pop_group_df[label_tot2] = 0
-        pop_group_df[label_tot3] = 0
-        pop_group_df[label_tot4] = 0
-        pop_group_df[label_tot5] = 0
+        # Initialize total columns with zeros
+        for label in [label_tot2, label_tot3, label_tot4, label_tot5]:
+            pop_group_df[label] = 0
 
+        
         cols = list(pop_group_df.columns)
         # Move the newly added column to the desired position
         cols.insert(cols.index(label_perc2) + 1, cols.pop(cols.index(label_tot2)))
         cols.insert(cols.index(label_perc3) + 1, cols.pop(cols.index(label_tot3)))
         cols.insert(cols.index(label_perc4) + 1, cols.pop(cols.index(label_tot4)))
         cols.insert(cols.index(label_perc5) + 1, cols.pop(cols.index(label_tot5)))
+        pop_group_df = pop_group_df[cols]     
 
-        # Step 3: Update '# PiN severity 2' based on the product of '2.0' and 'Children (5-17)'
-        pop_group_df[label_tot2] = pop_group_df[label_perc2] * pop_group_df[label_tot_population]
-        pop_group_df[label_tot3] = pop_group_df[label_perc3] * pop_group_df[label_tot_population]
-        pop_group_df[label_tot4] = pop_group_df[label_perc4] * pop_group_df[label_tot_population]
-        pop_group_df[label_tot5] = pop_group_df[label_perc5] * pop_group_df[label_tot_population]
+        # Calculate total PiN for each severity level
+        for perc_label, total_label in [(label_perc2, label_tot2), 
+                                        (label_perc3, label_tot3), 
+                                        (label_perc4, label_tot4), 
+                                        (label_perc5, label_tot5)]:
+            pop_group_df[total_label] = pop_group_df[perc_label] * pop_group_df[label_tot_population]
+
+        
+        # Reorder columns as needed
+        cols = list(pop_group_df.columns)
+        cols.insert(cols.index('Population group') + 1, cols.pop(cols.index(label_tot_population)))
+        pop_group_df = pop_group_df[cols]     
+
 
         cols.remove(label_tot_population)
         cols.insert( cols.index('Population group') + 1, label_tot_population)
@@ -605,37 +716,19 @@ for category, df in category_data_frames.items():
         pin_per_admin_status[category] = pop_group_df
 
 
-for category, df in pin_per_admin_status.items():
-    print(f"Category: {category}")
-    print(df.head())  # Display the first few rows of the DataFrame
-    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
+# Define the output Excel file path
+output_excel_path = 'output_test/pin_per_admin_status_test0.xlsx'
 
+# Create an Excel writer object
+with pd.ExcelWriter(output_excel_path) as writer:
+    # Iterate over each category and DataFrame in the dictionary
+    for category, df in pin_per_admin_status.items():
+        # Write the DataFrame to a sheet named after the category
+        df.to_excel(writer, sheet_name=category, index=False)
 
+print(f"Data has been saved to {output_excel_path}")
 
 ####### ** 7 **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP for the strata: GENDER, SCHOOL-CYCLE ------------------------------------------     #######
-
-def adjust_pin_by_gender_factor(pin_df, factor_df, category_label):
-    # Merge the pin DataFrame with the factor DataFrame on the 'Admin_2' column
-    factorized_df = pd.merge(pin_df, factor_df, left_on=admin_var, right_on="Admin", how='left')
-    factorized_df = pd.merge(
-        pin_df, factor_df, 
-        left_on=[admin_var, 'Admin Pcode'], 
-        right_on=["Admin", 'Admin Pcode'], 
-        how='left'
-    )
-   # Columns that need to be adjusted by the factor
-    columns_to_adjust = [col for col in factorized_df.columns if col.startswith('#') or col == label_tot_population]
-    del factorized_df['Admin']
-
-    # Apply the multiplication for each column that needs adjustment
-    for col in columns_to_adjust:
-        factorized_df[col] *= factorized_df[category_label]
-
-    # Drop the now unneeded factor column
-    factorized_df.drop(columns=[category_label], inplace=True)
-    return factorized_df
-
-# Create a new dictionary to store the adjusted DataFrames
 pin_per_admin_status_girl = {}
 pin_per_admin_status_boy = {}
 pin_per_admin_status_ece = {}
@@ -646,60 +739,478 @@ pin_per_admin_status_disabilty = {}
 
 
 for category, df in pin_per_admin_status.items():
-    pin_per_admin_status_girl[category] = adjust_pin_by_gender_factor(df, factor_category[category_girl], category_girl)
-    pin_per_admin_status_boy[category] = adjust_pin_by_gender_factor(df, factor_category[category_boy], category_boy)
-    pin_per_admin_status_ece[category] = adjust_pin_by_gender_factor(df, factor_category[category_ece], category_ece)
-    pin_per_admin_status_primary[category] = adjust_pin_by_gender_factor(df, factor_category[category_primary], category_primary)
-    pin_per_admin_status_upper_primary[category] = adjust_pin_by_gender_factor(df, factor_category[category_upper_primary], category_upper_primary)
-    pin_per_admin_status_secondary[category] = adjust_pin_by_gender_factor(df, factor_category[category_secondary], category_secondary)
-    pin_per_admin_status_disabilty[category] = adjust_pin_by_gender_factor(df, factor_category[category_disability], category_disability)
-
-
-print('giiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiirrrlllllllllllllllllllllllllllllllll')
-for category, df in pin_per_admin_status_girl.items():
-    print(f"Category: {category}")
-    print(df.head())  # Display the first few rows of the DataFrame
-    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
-print('ece')
-for category, df in pin_per_admin_status_ece.items():
-    print(f"Category: {category}")
-    print(df.head())  # Display the first few rows of the DataFrame
-    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
-
-print('upper_primary')
-for category, df in pin_per_admin_status_upper_primary.items():
-    print(f"Category: {category}")
-    print(df.head())  # Display the first few rows of the DataFrame
-    print("\n" + "-"*50 + "\n")  # Print a separator for better readability between categories
+    pin_per_admin_status_girl[category] = adjust_pin_by_strata_factor(df, factor_category[category_girl], category_girl)
+    pin_per_admin_status_boy[category] = adjust_pin_by_strata_factor(df, factor_category[category_boy], category_boy)
+    pin_per_admin_status_ece[category] = adjust_pin_by_strata_factor(df, factor_category[category_ece], category_ece)
+    pin_per_admin_status_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_primary], category_primary)
+    pin_per_admin_status_upper_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_upper_primary], category_upper_primary)
+    pin_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary)
+    pin_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability)
 
 
 
 
+####### ** 8 **       ------------------------------ calculate tot PiN --> 3+ and admin severity for pin_per_admin_status ------------------------------------------     #######
+Tot_PiN_JIAF = pin_per_admin_status
+
+
+# Iterate over the pin_per_admin_status dictionary to apply the new operations
+for category, pop_group_df in Tot_PiN_JIAF.items():
+    # Initialize new columns for percentage total, total PiN, and admin severity
+    pop_group_df[label_perc_tot] = 0
+    pop_group_df[label_tot] = 0
+    pop_group_df[label_admin_severity] = 0
+
+    # Reorder columns to place new columns at desired positions
+    cols = list(pop_group_df.columns)
+    cols.insert(cols.index(label_tot5) + 1, cols.pop(cols.index(label_perc_tot)))
+    cols.insert(cols.index(label_perc_tot) + 1, cols.pop(cols.index(label_tot)))
+    cols.insert(cols.index(label_tot) + 1, cols.pop(cols.index(label_admin_severity)))
+    pop_group_df = pop_group_df[cols]
+
+    # Calculate the total percentage and total PiN for severity levels 3+
+    pop_group_df[label_perc_tot] = (pop_group_df[label_perc3] +
+                                    pop_group_df[label_perc4] +
+                                    pop_group_df[label_perc5])
+
+    pop_group_df[label_tot] = (pop_group_df[label_tot3] +
+                               pop_group_df[label_tot4] +
+                               pop_group_df[label_tot5])
+
+    # Define conditions based on specified logic
+    conditions = [
+        pop_group_df[label_perc5] > 0.2,
+        (pop_group_df[label_perc5] + pop_group_df[label_perc4]) > 0.2,
+        (pop_group_df[label_perc5] + pop_group_df[label_perc4] + pop_group_df[label_perc3]) > 0.2,
+        (pop_group_df[label_perc5] + pop_group_df[label_perc4] + pop_group_df[label_perc3] + pop_group_df[label_perc2]) > 0.2
+    ]
+
+    # Corresponding values for each condition
+    choices = ['5', '4', '3', '1-2']
+
+    # Apply the conditions to determine admin severity
+    pop_group_df[label_admin_severity] = np.select(conditions, choices, default='0')
+
+    # Save the updated DataFrame back to the dictionary
+    Tot_PiN_JIAF[category] = pop_group_df
+
+
+# Define the output Excel file path
+output_excel_path_JIAF = 'output_test/pin_per_admin_status_test_JIAF.xlsx'
+
+# Create an Excel writer object
+with pd.ExcelWriter(output_excel_path_JIAF) as writer:
+    # Iterate over each category and DataFrame in the dictionary
+    for category, df in Tot_PiN_JIAF.items():
+        # Write the DataFrame to a sheet named after the category
+        df.to_excel(writer, sheet_name=category, index=False)
+
+print(f"Data has been saved to {output_excel_path_JIAF}")
+
+
+####### ** 9 **       ------------------------------  preparation for overview--> SUM all the admin per population group and per strata ------------------------------------------     #######
+overview_ToT = collapse_and_summarize(pin_per_admin_status, 'TOTAL (5-17 y.o.)')
+overview_girl = collapse_and_summarize(pin_per_admin_status_girl, 'Girls')
+overview_boy = collapse_and_summarize(pin_per_admin_status_boy, 'Boys')
+overview_ece = collapse_and_summarize(pin_per_admin_status_ece, 'ECE (5 y.o.)')
+overview_primary = collapse_and_summarize(pin_per_admin_status_primary, 'Primary school')
+overview_upper_primary = collapse_and_summarize(pin_per_admin_status_upper_primary, 'Upper primary school')
+overview_secondary = collapse_and_summarize(pin_per_admin_status_secondary, 'Secondary school')
+overview_disabilty = collapse_and_summarize(pin_per_admin_status_disabilty, 'Children with disability')
+
+collapsed_results_pop = {}
+for category, df in pin_per_admin_status.items():
+        # Create a copy of the first row to preserve the structure
+        summed_df = df.iloc[0:1].copy()
+
+        # Identify columns to skip from summation and columns to set to zero
+        columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Admin Pcode' or col == 'Population group' or col == 'Category' or col== 'Area severity']
+        columns_to_zero = [col for col in df.columns if col.startswith('%')]
+
+        # Sum all numerical columns except the skipped ones
+        for col in df.columns:
+            if col not in columns_to_skip:
+                summed_df[col] = df[col].sum()
+
+        # Set non-sum columns with fixed values
+        summed_df['admin_2'] = 'whole country'
+        summed_df['Admin Pcode'] = '0'
+        summed_df['Population group'] = category
+        del summed_df['Area severity']
+
+        # Set percentage columns to zero
+        for col in columns_to_zero:
+            summed_df[col] = 0
+
+        # Add the modified DataFrame to the results dictionary
+        summed_df = summed_df.iloc[:1]
+        collapsed_results_pop[category] = summed_df
+
+
+
+####### ** 10 **       ------------------------------  Creating OVERVIEW file ------------------------------------------     #######
+
+dfs = []
+dfs.append(overview_ToT)
+
+# Add the single-row entries from collapsed_results_pop
+for category, df in collapsed_results_pop.items():
+    single_row = df.iloc[0].copy()
+    single_row['Category'] = f"{category} (5-17 y.o.)"
+    # Convert the Series to a DataFrame with a single row and append it to the list
+    single_row_df = single_row.to_frame().T
+    dfs.append(single_row_df)
+
+# Determine the strata_summarized_data based on the value of single_cycle
+if single_cycle:
+    strata_summarized_data = [
+        overview_girl,
+        overview_boy,
+        overview_ece,
+        overview_primary,
+        overview_secondary,
+        overview_disabilty
+    ]
+else:
+    strata_summarized_data = [
+        overview_girl,
+        overview_boy,
+        overview_ece,
+        overview_primary,
+        overview_upper_primary,
+        overview_secondary,
+        overview_disabilty
+    ]
+
+# Add the remaining summarized data to the list
+dfs.extend(strata_summarized_data)
+# Concatenate all DataFrames in the list into a single DataFrame
+final_overview_df = pd.concat(dfs, ignore_index=True)
+
+## organization and manipulation 
+cols = list(final_overview_df.columns)
+cols.insert(cols.index(admin_var) + 1, cols.pop(cols.index('Category')))
+final_overview_df = final_overview_df[cols]
+del final_overview_df[admin_var]
+del final_overview_df['Admin Pcode']
+final_overview_df = final_overview_df.rename(columns={'Category': 'Strata'})
+
+final_overview_df[label_perc2] = final_overview_df[label_tot2]/final_overview_df[label_tot_population]
+final_overview_df[label_perc3] = final_overview_df[label_tot3]/final_overview_df[label_tot_population]
+final_overview_df[label_perc4] = final_overview_df[label_tot4]/final_overview_df[label_tot_population]
+final_overview_df[label_perc5] = final_overview_df[label_tot5]/final_overview_df[label_tot_population]
+final_overview_df[label_perc_tot] = final_overview_df[label_tot]/final_overview_df[label_tot_population]
+
+columns_perc = [col for col in final_overview_df.columns if col.startswith('%')]
+for col in final_overview_df.columns:
+    if col in columns_perc:
+        final_overview_df[col] = final_overview_df[col].apply(lambda x: f"{x * 100:.1f}%")
+
+
+print('')
+print('')
+print('')
+print('')
+print(final_overview_df)
 
 
 
 
+####### ** 11 **       ------------------------------  Rounding and Saving the JIAF AND OCHA OUTPUT ------------------------------------------     #######
+## ROUNDING
+percentage_round = 1
+figures_round = 0
+
+for category, df in Tot_PiN_JIAF.items():
+    for col in df.columns:
+        if col.startswith('#'):
+            df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)  # Convert to numeric and round
+        elif col.startswith('%'):
+            df[col] = df[col].apply(lambda x: f"{x * 100:.1f}%")
+    df[label_tot_population] = df[label_tot_population].round(figures_round)
+
+
+for col in final_overview_df.columns:
+    if col.startswith('#'):
+        print(col)
+        final_overview_df[col] = pd.to_numeric(final_overview_df[col], errors='coerce').round(figures_round)  # Convert to numeric and round
+        
+final_overview_df[label_tot_population] = pd.to_numeric(final_overview_df[label_tot_population], errors='coerce').round(figures_round)  # Convert to numeric and round
+
+## -----------------------------  saving
+# Replace spaces and special characters in the country name if necessary
+country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
+# Output file paths with the country included
+output_JIAF = f'output/PiN_JIAF_{country_label}.xlsx'
+output_OCHA = f'output/PiN_overview_OCHA_{country_label}.xlsx'
+
+
+# 1)
+with pd.ExcelWriter(output_JIAF) as writer:
+    for category, df in Tot_PiN_JIAF.items():
+        # Write the DataFrame to a sheet named after the category
+        sheet_name = f"PIN -- {category}"
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+print(f"PiN output tailored for JIAF has been saved to {output_JIAF}")
+
+
+
+# 2)
+with pd.ExcelWriter(output_OCHA) as writer:
+    # Write the final_overview_df to the first sheet named "PiN TOTAL"
+    final_overview_df.to_excel(writer, sheet_name="PiN TOTAL", index=False)
+
+    # Write each category DataFrame to a separate sheet
+    for category, df in Tot_PiN_JIAF.items():
+        # Write the DataFrame to a sheet named after the category
+        sheet_name = f"PIN -- {category}"
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+print(f"PiN output tailored for OCHA has been saved to {output_OCHA}")
 
 
 
 
+####### ** 12 **       ------------------------------  COSMESI ------------------------------------------     #######
 
 
+# Define the colors
+colors = {
+    "light_beige": "FFF2CC",
+    "light_orange": "F4B183",
+    "dark_orange": "ED7D31",
+    "darker_orange": "C65911",
+    "light_blue": "DDEBF7",
+    "light_pink": "b3b389",
+    "light_yellow": "ffffc5",
+    "white": "FFFFFF",
+    "bluepin": "004bb4",
+    'gray': 'e0e0e0'
+}
+
+# Define the columns to color
+color_mapping = {
+    label_perc2: colors["light_beige"],
+    label_tot2: colors["light_beige"],
+    label_perc3: colors["light_orange"],
+    label_tot3: colors["light_orange"],
+    label_perc4: colors["dark_orange"],
+    label_tot4: colors["dark_orange"],
+    label_perc5: colors["darker_orange"],
+    label_tot5: colors["darker_orange"],
+    label_perc_tot: colors["light_blue"],
+    label_admin_severity: colors["light_blue"],
+    label_tot: colors["light_blue"]
+}
+
+# List of columns that require specific alignment
+alignment_columns = list(color_mapping.keys())
+def apply_formatting(file_path, color_mapping, alignment_columns):
+    # Load the workbook and iterate through sheets
+    wb = load_workbook(file_path)
+    for ws in wb.worksheets:
+        # Add empty rows at the top
+        ws.insert_rows(1, 4)
+        # Add empty columns to the left
+        ws.insert_cols(1, 4)
+
+        # Add the sheet name as a title in the first row
+        title = ws.title
+        if ws.title != "PiN TOTAL":
+            title += " (5-17 y.o.)"
+        max_col = ws.max_column
+        ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
+        title_cell = ws.cell(row=1, column=5)
+        title_cell.value = title
+        title_cell.font = Font(bold=True, size=14)
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        # Set column widths based on content
+        for column in ws.columns:
+            max_length = 0
+            column_letter = None
+            for cell in column:
+                if cell.value and not isinstance(cell, MergedCell):
+                    try:
+                        max_length = max(max_length, len(str(cell.value)))
+                        column_letter = cell.column_letter  # Get the column letter
+                    except Exception as e:
+                        print(f"Error: {e}, Cell: {cell}")
+
+            if column_letter:
+                adjusted_width = max_length + 2
+                ws.column_dimensions[column_letter].width = adjusted_width
+
+        # Bold specific columns
+        for row in ws.iter_rows(min_row=6, max_col=ws.max_column, max_row=ws.max_row):  # Start from the data row
+            for cell in row:
+                col_name = ws.cell(row=5, column=cell.column).value  # Row 5 contains the headers
+                if col_name in [label_perc_tot, label_admin_severity, label_tot, admin_var]:
+                    cell.font = Font(bold=True)  # Apply bold font
+
+        # Check if the worksheet is "PiN TOTAL"
+        if ws.title == "PiN TOTAL":
+            for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+                for cell in row:
+                    col_name = ws.cell(row=5, column=cell.column).value
+                    if col_name in alignment_columns:
+                        cell.alignment = Alignment(horizontal='right', vertical='center')
+
+            # Iterate through the rows starting from the first data row
+            for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+                strata_value = row[4].value  # 'Strata' column should be the 5th column after inserting 4 empty columns
+
+                # Determine the fill color based on 'Strata' value
+                if strata_value == "TOTAL (5-17 y.o.)":
+                    fill_color = colors["bluepin"]
+                    for cell in row:
+                        cell.font = Font(color=colors["white"], bold=True)  # Set text color to white and bold
+                elif strata_value in ["Girls", "Boys"]:
+                    fill_color = colors["gray"]
+                elif strata_value == "ECE (5 y.o.)":
+                    fill_color = colors["light_pink"]
+                elif "school" in strata_value.lower():
+                    fill_color = colors["light_yellow"]
+                elif strata_value == "Strata":
+                    fill_color = colors["white"]   
+                elif "disability" in strata_value.lower():
+                    fill_color = colors["white"]         
+                else:
+                    fill_color = colors["light_blue"] 
+
+                # Apply fill color to the entire row if a color is determined
+                if fill_color:
+                    for cell in row:
+                        cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
+
+                # Set first four columns to white
+                for cell in row[:4]:
+                    cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")
+                    cell.border = None  # No border for the first four columns
+
+        else:
+            # Apply formatting to the headers
+            for cell in ws[5]:  # Header row is now the 5th row
+                cell.font = Font(bold=True)
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Apply color to specific columns and make borders visible
+            for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+                for cell in row:
+                    col_name = ws.cell(row=5, column=cell.column).value
+                    # Apply color based on mapping
+                    if col_name in color_mapping:
+                        cell.fill = PatternFill(start_color=color_mapping[col_name], end_color=color_mapping[col_name], fill_type="solid", patternType='solid')
+                    # Apply alignment
+                    if col_name in alignment_columns:
+                        cell.alignment = Alignment(horizontal='right', vertical='center')
+
+                    # Apply border, but skip the first four columns
+                    if cell.column > 4:
+                        if row[0].row == 5:  # Bold top border for header
+                            cell.border = Border(
+                                top=Side(style="medium"),
+                                left=Side(style="thin"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="thin"),
+                            )
+                        elif cell == row[0]:  # Bold left border for each row
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="medium"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="thin"),
+                            )
+                        elif cell == row[-1]:  # Bold right border for each row
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="thin"),
+                                right=Side(style="medium"),
+                                bottom=Side(style="thin"),
+                            )
+                        elif row[0].row == ws.max_row:  # Bold bottom border for last row
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="thin"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="medium"),
+                            )
+                        else:
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="thin"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="thin"),
+                            )
+                    else:
+                        cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")  # White background for the first four columns
+                        cell.border = None  # No border for the first four columns
+
+        # Apply borders around the table for "PiN TOTAL"
+        if ws.title == "PiN TOTAL":
+            for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+                for cell in row:
+                    if cell.column > 4:
+                        if row[0].row == 5:  # Bold top border for header
+                            cell.border = Border(
+                                top=Side(style="medium"),
+                                left=Side(style="thin"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="thin"),
+                            )
+                        elif cell == row[0]:  # Bold left border for each row
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="medium"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="thin"),
+                            )
+                        elif cell == row[-1]:  # Bold right border for each row
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="thin"),
+                                right=Side(style="medium"),
+                                bottom=Side(style="thin"),
+                            )
+                        elif row[0].row == ws.max_row:  # Bold bottom border for last row
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="thin"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="medium"),
+                            )
+                        else:
+                            cell.border = Border(
+                                top=Side(style="thin"),
+                                left=Side(style="thin"),
+                                right=Side(style="thin"),
+                                bottom=Side(style="thin"),
+                            )
+
+    # Save the formatted workbook
+    wb.save(file_path)
+
+# Apply formatting to both output files
+apply_formatting(output_JIAF, color_mapping, alignment_columns)
+apply_formatting(output_OCHA, color_mapping, alignment_columns)
+
+print(f"Formatting applied and files saved to {output_JIAF} and {output_OCHA}.")
 
 ## saving excel 
 
 
 
 
-file_path = 'output/edu_data_filtered_test.xlsx'
+file_path = 'output_test/edu_data_filtered_test.xlsx'
 
 # Save the DataFrame to an Excel file
 edu_data.to_excel(file_path, index=False, engine='openpyxl')
 
 
 
-output_file_path_test_strata_gender = 'output/severity_with_additional_strata_gender.xlsx'
-output_file_path_test_strata_cycle = 'output/severity_with_additional_strata_cycle.xlsx'
+output_file_path_test_strata_gender = 'output_test/severity_with_additional_strata_gender.xlsx'
+output_file_path_test_strata_cycle = 'output_test/severity_with_additional_strata_cycle.xlsx'
 
 with pd.ExcelWriter(output_file_path_test_strata_gender, engine='openpyxl') as writer:
     for group_name, df_group in severity_by_gender_list.items():
