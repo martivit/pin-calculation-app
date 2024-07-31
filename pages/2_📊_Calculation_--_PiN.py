@@ -330,14 +330,17 @@ def upload_and_select_data():
         st.subheader('Selection of the relevant sheets in the MSNA data file')
 
         data = st.session_state['uploaded_data']
+
         if isinstance(data, dict):
             col1, col2 = st.columns(2)
+            
             with col1:
                 selected_sheet = st.selectbox('Select the Household data sheet:', ['No selection'] + list(data.keys()), key='household_key')
                 selected_survey_sheet = st.selectbox('Select the Survey/kobo sheet:', ['No selection'] + list(data.keys()), key='survey_key')
             with col2:
                 selected_edu_sheet = st.selectbox('Select the Education loop (or individual loop) data sheet:', ['No selection'] + list(data.keys()), key='edu_key')
                 selected_choice_sheet = st.selectbox('Select the Kobo choice sheet:', ['No selection'] + list(data.keys()), key='choice_key')
+
 
             if st.button('Confirm Data Selections') and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
                 st.session_state['household_data'] = data[selected_sheet]
