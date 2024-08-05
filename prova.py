@@ -781,3 +781,38 @@ print(factor_secondary)
     if "password_correct" in st.session_state:
         st.error("😕 User not known or password incorrect")
     return False
+
+
+
+
+
+        cols = list(pop_group_df.columns)
+        # Move the newly added column to the desired position
+        cols.insert( cols.index(int_perc_penv) + 1, int_perc_out)
+
+        cols.insert(cols.index(int_perc_acc) + 1, cols.pop(cols.index(int_tot_acc)))
+        cols.insert(cols.index(int_perc_agg) + 1, cols.pop(cols.index(int_tot_agg)))
+        cols.insert(cols.index(int_perc_lc) + 1, cols.pop(cols.index(int_tot_lc)))
+        cols.insert(cols.index(int_perc_penv) + 1, cols.pop(cols.index(int_tot_penv)))
+        cols.insert(cols.index(int_perc_out) + 1, cols.pop(cols.index(int_tot_out)))
+
+        pop_group_df = pop_group_df[cols]     
+
+        # Calculate total PiN for each severity level
+        for perc_label, total_label in [(int_perc_acc, int_tot_acc), 
+                                        (int_perc_agg, int_tot_agg), 
+                                        (int_perc_lc, int_tot_lc), 
+                                        (int_perc_penv, int_tot_penv),
+                                        (int_perc_out, int_tot_out)]:
+            pop_group_df[total_label] = pop_group_df[perc_label] * pop_group_df[label_dimension_tot_population]
+
+        
+        # Reorder columns as needed
+        cols = list(pop_group_df.columns)
+        cols.insert(cols.index('Population group') + 1, cols.pop(cols.index(label_dimension_tot_population)))
+        pop_group_df = pop_group_df[cols]     
+
+
+        cols.remove(label_dimension_tot_population)
+        cols.insert( cols.index('Population group') + 1, label_dimension_tot_population)
+        pop_group_df = pop_group_df[cols]

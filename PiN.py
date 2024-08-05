@@ -131,7 +131,7 @@ def assign_dimension_pin(access, severity):
         if severity in [4, 5]: return 'protected environment'    
         if severity == 2: return 'not falling within the PiN dimensions'   
     
-    return 'no value'  # Default fallback in case none of the conditions are met         
+    return None  # Default fallback in case none of the conditions are met         
 
 ##--------------------------------------------------------------------------------------------
 def print_subtables(severity_admin_status, pop_group_var):
@@ -307,7 +307,7 @@ def add_disability_factor(df,factor=0.1, category = 'Disability'):
 
 ##--------------------------------------------------------------------------------------------
 # %PiN AND #PiN PER ADMIN AND POPULATION GROUP for the strata: GENDER, SCHOOL-CYCLE 
-def adjust_pin_by_strata_factor(pin_df, factor_df, category_label):
+def adjust_pin_by_strata_factor(pin_df, factor_df, category_label, tot_column):
     # Merge the pin DataFrame with the factor DataFrame on the 'Admin_2' column
     factorized_df = pd.merge(pin_df, factor_df, left_on=admin_var, right_on="Admin", how='left')
     factorized_df = pd.merge(
@@ -317,7 +317,7 @@ def adjust_pin_by_strata_factor(pin_df, factor_df, category_label):
         how='left'
     )
    # Columns that need to be adjusted by the factor
-    columns_to_adjust = [col for col in factorized_df.columns if col.startswith('#') or col == label_tot_population]
+    columns_to_adjust = [col for col in factorized_df.columns if col.startswith('#') or col == tot_column]
     del factorized_df['Admin']
 
     # Apply the multiplication for each column that needs adjustment
@@ -327,6 +327,7 @@ def adjust_pin_by_strata_factor(pin_df, factor_df, category_label):
     # Drop the now unneeded factor column
     factorized_df.drop(columns=[category_label], inplace=True)
     return factorized_df
+
 
 
 ##--------------------------------------------------------------------------------------------
@@ -739,13 +740,13 @@ pin_per_admin_status_disabilty = {}
 
 
 for category, df in pin_per_admin_status.items():
-    pin_per_admin_status_girl[category] = adjust_pin_by_strata_factor(df, factor_category[category_girl], category_girl)
-    pin_per_admin_status_boy[category] = adjust_pin_by_strata_factor(df, factor_category[category_boy], category_boy)
-    pin_per_admin_status_ece[category] = adjust_pin_by_strata_factor(df, factor_category[category_ece], category_ece)
-    pin_per_admin_status_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_primary], category_primary)
-    pin_per_admin_status_upper_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_upper_primary], category_upper_primary)
-    pin_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary)
-    pin_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability)
+    pin_per_admin_status_girl[category] = adjust_pin_by_strata_factor(df, factor_category[category_girl], category_girl, tot_column= label_tot_population)
+    pin_per_admin_status_boy[category] = adjust_pin_by_strata_factor(df, factor_category[category_boy], category_boy, tot_column= label_tot_population)
+    pin_per_admin_status_ece[category] = adjust_pin_by_strata_factor(df, factor_category[category_ece], category_ece, tot_column= label_tot_population)
+    pin_per_admin_status_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_primary], category_primary, tot_column= label_tot_population)
+    pin_per_admin_status_upper_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_upper_primary], category_upper_primary, tot_column= label_tot_population)
+    pin_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary, tot_column= label_tot_population)
+    pin_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability, tot_column= label_tot_population)
 
 
 
