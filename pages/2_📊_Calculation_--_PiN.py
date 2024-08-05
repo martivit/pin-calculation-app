@@ -333,13 +333,17 @@ def upload_and_select_data():
 
         if isinstance(data, dict):
             col1, col2 = st.columns(2)
+
+            survey_sheet_guess = [col for col in list(data.keys()) if any(kw in col.lower() for kw in ['survey', 'questionnaire', 'enquête'])]
+            choice_sheet_guess = [col for col in list(data.keys()) if any(kw in col.lower() for kw in ['choice', 'choix'])]
             
             with col1:
                 selected_sheet = st.selectbox('Select the Household data sheet:', ['No selection'] + list(data.keys()), key='household_key')
-                selected_survey_sheet = st.selectbox('Select the Survey/kobo sheet:', ['No selection'] + list(data.keys()), key='survey_key')
+                selected_survey_sheet = survey_sheet_guess[0] if survey_sheet_guess else st.selectbox('Select the Survey/kobo sheet:', ['No selection'] + list(data.keys()), key='survey_key')
+
             with col2:
                 selected_edu_sheet = st.selectbox('Select the Education loop (or individual loop) data sheet:', ['No selection'] + list(data.keys()), key='edu_key')
-                selected_choice_sheet = st.selectbox('Select the Kobo choice sheet:', ['No selection'] + list(data.keys()), key='choice_key')
+                selected_choice_sheet = choice_sheet_guess[0] if choice_sheet_guess else st.selectbox('Select the Kobo choice sheet:', ['No selection'] + list(data.keys()), key='choice_key')
 
 
             if st.button('Confirm Data Selections') and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
