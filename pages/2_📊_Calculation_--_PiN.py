@@ -131,7 +131,7 @@ def handle_column_selection(suggestions, column_type):
 
     with col2:
         if st.button("No", key=f'confirm_no_{column_type}'):
-            selected_column = st.selectbox(
+            suggested_column = st.selectbox(
                 f"Select the individual {column_type} column:",
                 ['No selection'] + edu_data.columns.tolist(),
                 key=select_key,
@@ -139,6 +139,7 @@ def handle_column_selection(suggestions, column_type):
                 #args=(column_type,)
             )
             update_column_confirmation (column_type,message_placeholder)
+    return suggested_column
 ##---------------------------------------------------------------------------------------------------------
 def update_column_confirmation(column_type, placeholder):
     select_key = f'{column_type}_selectbox'
@@ -393,7 +394,8 @@ def select_indicators():
             st.dataframe(edu_data.head())
         
         if age_suggestions:
-            st.session_state['age_var'] = handle_column_selection(age_suggestions, 'age')
+            age_found = handle_column_selection(age_suggestions, 'age')
+            st.session_state['age_var'] = age_found
         if gender_suggestions:
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
@@ -488,7 +490,7 @@ def finalize_details():
         )
 
 
-        admin_var = st.selectbox(
+        admin_target = st.selectbox(
             "Select",
             admin_level_options,
             index=0,  # Default to 'No selection'
@@ -496,10 +498,10 @@ def finalize_details():
         )
 
         if st.button('Confirm Admin Level', key='confirm_admin_level'):
-            if admin_var != 'No selection':
-                #admin_var = st.session_state['admin_var']
+            if admin_target != 'No selection':
+                st.session_state['admin_var'] = admin_target
                 st.session_state.admin_level_confirmed = True
-                st.success(f"Administrative level '{admin_var}' confirmed!")
+                st.success(f"Administrative level '{admin_target}' confirmed!")
             else:
                 st.error("Please select a valid administrative level.")
 
@@ -666,7 +668,14 @@ if all([
     st.markdown("---")  # Markdown horizontal rule
     st.write ('test session state')
 
+    st.write("Start School:", st.session_state.get('start_school'))
+    st.write("Vector Cycle:", st.session_state.get('vector_cycle'))
     st.write("Country:", st.session_state.get('country'))
+    #st.write("Education Data (as dict):", st.session_state.get('edu_data').to_dict())
+    #st.write("Household Data (as dict):", st.session_state.get('household_data').to_dict())
+    st.write("Status Variable:", st.session_state.get('status_var'))
+    #st.write("Survey Data (as dict):", st.session_state.get('survey_data').to_dict())
+    #st.write("Choice Data (as dict):", st.session_state.get('choice_data').to_dict())
     st.write("Label:", st.session_state.get('label'))
     st.write("Age Variable:", st.session_state.get('age_var'))
     st.write("Gender Variable:", st.session_state.get('gender_var'))
@@ -678,8 +687,24 @@ if all([
     st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
     st.write("Selected Severity 5 Barriers:", st.session_state.get('selected_severity_5_barriers', []))
     st.write("Admin Variable:", st.session_state.get('admin_target'))
-    st.write("Vector Cycle:", st.session_state.get('vector_cycle'))
-    st.write("Country:", st.session_state.get('country'))
-    #st.write("Education Data (as dict):", st.session_state.get('edu_data').to_dict())
-    #st.write("Household Data (as dict):", st.session_state.get('household_data').to_dict())
-    st.write("Start School:", st.session_state.get('start_school'))
+
+
+    start_school =  st.session_state.get('start_school')
+    vector_cycle =  st.session_state.get('vector_cycle')
+    country =  st.session_state.get('country')
+    edu_data =  st.session_state.get('edu_data').to_dict()  # Convert DataFrame to dict
+    household_data =  st.session_state.get('household_data').to_dict()  # Convert DataFrame to dict
+    status_var =  st.session_state.get('status_var')
+    survey_data =  st.session_state.get('survey_data')  # Convert DataFrame to dict
+    choice_data =  st.session_state.get('choice_data') # Convert DataFrame to dict
+    label =  st.session_state.get('label')
+    age_var =  st.session_state.get('age_var')
+    gender_var =  st.session_state.get('gender_var')
+    access_var =  st.session_state.get('access_var')
+    teacher_disruption_var =  st.session_state.get('teacher_disruption_var')
+    idp_disruption_var =  st.session_state.get('idp_disruption_var')
+    armed_disruption_var =  st.session_state.get('armed_disruption_var')
+    barrier_var =  st.session_state.get('barrier_var')
+    selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
+    selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])
+    admin_var =  st.session_state.get('admin_target')
