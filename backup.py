@@ -1,5 +1,5 @@
 import pandas as pd
-import fuzzywuzzy
+#import fuzzywuzzy
 from fuzzywuzzy import process
 import numpy as np
 import datetime
@@ -7,9 +7,7 @@ from pprint import pprint
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
-import json
-import sys
-import streamlit as st
+
 
 def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_start_var=6, lower_primary_end_var=13, upper_primary_end_var=None):
     if single_cycle:
