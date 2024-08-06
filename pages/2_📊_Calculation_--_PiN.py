@@ -1,11 +1,6 @@
 import streamlit as st
 import pandas as pd
 import extra_streamlit_components as stx
-import subprocess
-import sys
-import json
-import tempfile
-
 
 st.logo('pics/logos.png')
 
