@@ -670,3 +670,15 @@ if all([
     st.markdown("---")  # Markdown horizontal rule
     st.write ('test session state')
 
+    st.write("Country:", st.session_state.get('country'))
+    st.write("Label:", st.session_state.get('label'))
+    st.write("Age Variable:", st.session_state.get('age_var'))
+    st.write("Gender Variable:", st.session_state.get('gender_var'))
+    st.write("Access Variable:", st.session_state.get('access_var'))
+    st.write("Teacher Disruption Variable:", st.session_state.get('teacher_disruption_var'))
+    st.write("IDP Disruption Variable:", st.session_state.get('idp_disruption_var'))
+    st.write("Armed Disruption Variable:", st.session_state.get('armed_disruption_var'))
+    st.write("Barrier Variable:", st.session_state.get('barrier_var'))
+    #st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
+    #st.write("Selected Severity 5 Barriers:", st.session_state.get('selected_severity_5_barriers', []))
+    st.write("Admin Variable:", st.session_state.get('admin_target'))
