@@ -679,6 +679,6 @@ if all([
     st.write("IDP Disruption Variable:", st.session_state.get('idp_disruption_var'))
     st.write("Armed Disruption Variable:", st.session_state.get('armed_disruption_var'))
     st.write("Barrier Variable:", st.session_state.get('barrier_var'))
-    #st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
+    st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
     #st.write("Selected Severity 5 Barriers:", st.session_state.get('selected_severity_5_barriers', []))
     st.write("Admin Variable:", st.session_state.get('admin_target'))
