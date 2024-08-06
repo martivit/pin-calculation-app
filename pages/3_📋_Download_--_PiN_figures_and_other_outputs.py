@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from backup import provatest
+from backup import calculatePIN
 
 st.logo('pics/logos.png')
 
@@ -54,5 +54,11 @@ barrier_var =  st.session_state.get('barrier_var')
 selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
 selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])
 admin_var =  st.session_state.get('admin_var')
+ocha_data = st.session_state.get['uploaded_ocha_data']
 
-provatest (country, edu_data,household_data, age_var, start_school, admin_var, status_var, vector_cycle)
+calculatePIN (country, edu_data, household_data, choice_data, survey_data, ocha_data,
+                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                age_var, gender_var,
+                label, 
+                admin_var, vector_cycle, start_school, status_var)
