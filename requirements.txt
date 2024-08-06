@@ -5,5 +5,4 @@ panda
 fuzzywuzzy
 numpy
 datetime
-pprint
 openpyxl
