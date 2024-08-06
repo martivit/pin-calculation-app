@@ -1,6 +1,11 @@
 import streamlit as st
 import pandas as pd
 import extra_streamlit_components as stx
+import subprocess
+import sys
+import json
+import tempfile
+
 
 st.logo('pics/logos.png')
 
@@ -488,7 +493,7 @@ def finalize_details():
         )
 
 
-        selected_admin_level = st.selectbox(
+        admin_var = st.selectbox(
             "Select",
             admin_level_options,
             index=0,  # Default to 'No selection'
@@ -496,9 +501,10 @@ def finalize_details():
         )
 
         if st.button('Confirm Admin Level', key='confirm_admin_level'):
-            if selected_admin_level != 'No selection':
+            if admin_var != 'No selection':
+                #admin_var = st.session_state['admin_var']
                 st.session_state.admin_level_confirmed = True
-                st.success(f"Administrative level '{selected_admin_level}' confirmed!")
+                st.success(f"Administrative level '{admin_var}' confirmed!")
             else:
                 st.error("Please select a valid administrative level.")
 
@@ -507,17 +513,20 @@ def finalize_details():
 
         months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 
                 'July', 'August', 'September', 'October', 'November', 'December']
-        start_school = st.selectbox(
+        start_school_selection = st.selectbox(
             "When does the school year officially start? Needed for the estimate of the correct age",
             months,
             index=0,  # Default to 'No selection'
-            key='start_school'
+            key='start_school_selection'
         )
         if st.button('Confirm School Start Month', key='confirm_start_school'):
-            if start_school != 'No selection':
-                start_school = st.session_state['start_school']
+            if start_school_selection != 'No selection':
                 st.session_state.school_start_month_confirmed = True
+                st.session_state['start_school'] = start_school_selection 
+
                 st.success("School start month confirmed!")
+                pluto =  st.session_state['start_school']
+                st.write(pluto)
             else:
                 st.error("Please select a valid month.")
             #update_other_parameters_status()
@@ -641,6 +650,8 @@ update_combined_indicator()
 display_combined_severity_status()
 update_other_parameters_status()
 
+
+
 if all([
     st.session_state.get('data_selections_confirmed', False),
     st.session_state.get('label_selected', False),
@@ -651,8 +662,59 @@ if all([
     st.session_state.get('severity_5_confirmed', False),
     st.session_state.get('other_parameters_confirmed', False)
 ]):
+
     st.markdown("""
                 <div style='background-color: #90EE90; padding: 10px; border-radius: 5px;'>
                     <span style='color: black; font-size: 20px;'><strong>Proceed to PiN calculation!!!</strong></span>
                 </div>
                 """, unsafe_allow_html=True)  
+    #if st.button('Calculate PiN'):
+
+    st.markdown("---")  # Markdown horizontal rule
+    st.markdown("---")  # Markdown horizontal rule
+    st.markdown("---")  # Markdown horizontal rule
+    st.write ('test session state')
+
+
+    start_school =  st.session_state.get('start_school')
+    vector_cycle =  st.session_state.get('vector_cycle')
+    country =  st.session_state.get('country')
+    edu_data =  st.session_state.get('edu_data').to_dict()  # Convert DataFrame to dict
+    household_data =  st.session_state.get('household_data').to_dict()  # Convert DataFrame to dict
+    status_var =  st.session_state.get('status_var')
+    survey_data =  st.session_state.get('survey_data').to_dict()  # Convert DataFrame to dict
+    choice_data =  st.session_state.get('choice_data').to_dict() # Convert DataFrame to dict
+    label =  st.session_state.get('label')
+    age_var =  st.session_state.get('age_var')
+    gender_var =  st.session_state.get('gender_var')
+    access_var =  st.session_state.get('access_var')
+    teacher_disruption_var =  st.session_state.get('teacher_disruption_var')
+    idp_disruption_var =  st.session_state.get('idp_disruption_var')
+    armed_disruption_var =  st.session_state.get('armed_disruption_var')
+    barrier_var =  st.session_state.get('barrier_var')
+    selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
+    selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])
+    admin_var =  st.session_state.get('admin_target')
+
+
+    # Assuming st.session_state.get variables are defined and have the necessary values
+
+    st.write("Start School:", st.session_state.get('start_school'))
+    st.write("Vector Cycle:", st.session_state.get('vector_cycle'))
+    st.write("Country:", st.session_state.get('country'))
+    st.write("Education Data (as dict):", st.session_state.get('edu_data').to_dict())
+    st.write("Household Data (as dict):", st.session_state.get('household_data').to_dict())
+    st.write("Status Variable:", st.session_state.get('status_var'))
+    st.write("Survey Data (as dict):", st.session_state.get('survey_data').to_dict())
+    st.write("Choice Data (as dict):", st.session_state.get('choice_data').to_dict())
+    st.write("Label:", st.session_state.get('label'))
+    st.write("Age Variable:", st.session_state.get('age_var'))
+    st.write("Gender Variable:", st.session_state.get('gender_var'))
+    st.write("Access Variable:", st.session_state.get('access_var'))
+    st.write("Teacher Disruption Variable:", st.session_state.get('teacher_disruption_var'))
+    st.write("IDP Disruption Variable:", st.session_state.get('idp_disruption_var'))
+    st.write("Armed Disruption Variable:", st.session_state.get('armed_disruption_var'))
+    st.write("Barrier Variable:", st.session_state.get('barrier_var'))
+    st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
+    st.write("Selected Severity 5 Barriers:", st.session_state.get('selected_severity_5_barriers', []))
+    st.write("Admin Variable:", st.session_state.get('admin_target'))

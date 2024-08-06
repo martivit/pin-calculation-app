@@ -3,3 +3,6 @@ openpyxl
 extra_streamlit_components
 panda
 #streamlit-authenticator==0.1.5
+subprocess
+sys
+json

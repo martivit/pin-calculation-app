@@ -816,3 +816,26 @@ print(factor_secondary)
         cols.remove(label_dimension_tot_population)
         cols.insert( cols.index('Population group') + 1, label_dimension_tot_population)
         pop_group_df = pop_group_df[cols]
+
+
+
+
+
+
+
+import pickle
+def calculate_pin():
+    edu_data = st.session_state['edu_data']
+    country =  st.session_state['country']
+    edu_data_dict = edu_data.to_dict(orient='records')
+
+    passing = json.dumps({'edu': edu_data_dict, 'country': country})
+
+    subprocess.call(['python', 'backup.py'], input=pickle.dumps(edu_data), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #returned_df = pickle.loads(result.stdout)
+    #assert edu_data == returned_df
+
+
+    #command = ["python", "backup.py",country, edu_data]
+    #subprocess.call( ["python", "backup.py",passing])
+
