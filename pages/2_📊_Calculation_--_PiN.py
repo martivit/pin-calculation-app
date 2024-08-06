@@ -596,11 +596,7 @@ def finalize_details():
                 </div>
                 """, unsafe_allow_html=True)
             
-        if st.button("Confirm school-age ranges"):
-            st.session_state.final_confirmed = True
-            #vector_cycle = st.session_state['vector_cycle']
-            #st.write (vector_cycle)
-            st.success("School-age ranges confirmed")
+        
 
         handle_displacement_column_selection()
 
