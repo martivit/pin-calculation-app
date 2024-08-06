@@ -682,3 +682,7 @@ if all([
     st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
     st.write("Selected Severity 5 Barriers:", st.session_state.get('selected_severity_5_barriers', []))
     st.write("Admin Variable:", st.session_state.get('admin_target'))
+    st.write("Vector Cycle:", st.session_state.get('vector_cycle'))
+    st.write("Country:", st.session_state.get('country'))
+    st.write("Education Data (as dict):", st.session_state.get('edu_data').to_dict())
+    st.write("Household Data (as dict):", st.session_state.get('household_data').to_dict())
