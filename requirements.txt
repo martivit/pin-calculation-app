@@ -1,9 +1,9 @@
-streamlit==1.29.0
+streamlit
 openpyxl
 extra_streamlit_components
-panda==2.1.4
+panda
 fuzzywuzzy
-numpy==1.26.2
+numpy
 datetime
 openpyxl
 tempfile
