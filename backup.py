@@ -122,14 +122,14 @@ def calculate_age_correction(start_month, collection_month):
     return age_correction
 
 ##--------------------------------------------------------------------------------------------
-def find_matching_choices(choices_df, barriers_list):
+def find_matching_choices(choices_df, barriers_list, label_var):
     # List to hold the results
     results = []
     
     # Iterate over each barrier in the list
     for barrier in barriers_list:
         # Filter choices where 'label::english' matches the current barrier
-        matched_choices = choices_df[choices_df['label::english'] == barrier]
+        matched_choices = choices_df[choices_df[label_var] == barrier]
         
         # For each matched choice, create an entry in the results list
         for _, choice in matched_choices.iterrows():
@@ -1010,8 +1010,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     ####### ** 2 **       ------------------------------ severity definition and calculation ------------------------------------------     #######
-    severity_4_matches = find_matching_choices(choice_data, selected_severity_4_barriers)
-    severity_5_matches = find_matching_choices(choice_data, selected_severity_5_barriers)
+    severity_4_matches = find_matching_choices(choices, selected_severity_4_barriers, label_var=label)
+    severity_5_matches = find_matching_choices(choices, selected_severity_5_barriers, label_var=label)
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
