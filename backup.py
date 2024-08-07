@@ -971,13 +971,14 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     ####### ** 1 **       ------------------------------ manipulation and join between H and edu data   ------------------------------------------     #######
+        
     household_data['weight'] = 1
     # Find the UUID columns, assuming they exist and taking only the first match for simplicity
     edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
     household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
+
     household_start_column = [col for col in household_data.columns if 'start' in col.lower()][0]  # Take the first item directly
 
-    print(household_start_column)
 
     # Extract the month from the 'start_time' column
     household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
@@ -985,14 +986,14 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     # Find the most similar column to "Admin2" in household_data
     admin_var = process.extractOne(admin_target, household_data.columns.tolist())[0]  # Take the string directly
-
     # Columns to include in the merge
     columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight']
-    edu_data = edu_data.drop(columns=[col for col in columns_to_include if col in edu_data.columns], errors='ignore')
+
+
+    columns_to_drop = [col for col in columns_to_include if col in edu_data.columns and col != edu_uuid_column and col != household_uuid_column]
 
     # ----> Perform the joint_by
     edu_data = pd.merge(edu_data, household_data[columns_to_include], left_on=edu_uuid_column, right_on=household_uuid_column, how='left')
-
     ##refining for school age-children
     #edu_data = edu_data[(edu_data[age_var] >= 5) & (edu_data[age_var] <= 18)]
 
