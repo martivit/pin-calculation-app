@@ -991,6 +991,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     columns_to_drop = [col for col in columns_to_include if col in edu_data.columns and col != edu_uuid_column and col != household_uuid_column]
+    edu_data = edu_data.drop(columns=columns_to_drop, errors='ignore')
 
     # ----> Perform the joint_by
     edu_data = pd.merge(edu_data, household_data[columns_to_include], left_on=edu_uuid_column, right_on=household_uuid_column, how='left')
@@ -1011,8 +1012,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     ####### ** 2 **       ------------------------------ severity definition and calculation ------------------------------------------     #######
-    severity_4_matches = find_matching_choices(choices, selected_severity_4_barriers, label_var=label)
-    severity_5_matches = find_matching_choices(choices, selected_severity_5_barriers, label_var=label)
+    severity_4_matches = find_matching_choices(choice_data, selected_severity_4_barriers, label_var=label)
+    severity_5_matches = find_matching_choices(choice_data, selected_severity_5_barriers, label_var=label)
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
