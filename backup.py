@@ -7,6 +7,102 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
 
+int_2 = '2.0'
+int_3 = '3.0'
+int_4 = '4.0'
+int_5 = '5.0'
+label_perc2 = '% 1-2'
+label_perc3 = '% 3'
+label_perc4 = '% 4'
+label_perc5 = '% 5'
+label_tot2 = '# 1-2'
+label_tot3 = '# 3'
+label_tot4 = '# 4'
+label_tot5 = '# 5'
+label_perc_tot = '% Tot PiN (3+)'
+label_tot = '# Tot PiN (3+)'
+label_admin_severity = 'Area severity'
+label_tot_population = 'TotN'
+
+int_acc = 'access'
+int_agg= 'aggravating circumstances'
+int_lc = 'learning condition'
+int_penv = 'protected environment'
+int_out = 'not falling within the PiN dimensions'
+label_perc_acc = '% Access'
+label_perc_agg= '% Aggravating circumstances'
+label_perc_lc = '% Learning conditions'
+label_perc_penv = '% Protected environment'
+label_perc_out = '% Not falling within the PiN dimensions'
+label_tot_acc = '# Access'
+label_tot_agg= '# Aggravating circumstances'
+label_tot_lc = '# Learning conditions'
+label_tot_penv = '# Protected environment'
+label_tot_out = '# Not falling within the PiN dimensions'
+
+label_dimension_perc_tot = '% Tot in PiN Dimensions'
+label_dimension_tot = '# Tot in PiN Dimensions'
+
+label_dimension_tot_population = 'TotN'
+
+
+
+# Define the colors
+colors = {
+    "light_beige": "FFF2CC",
+    "light_orange": "F4B183",
+    "dark_orange": "ED7D31",
+    "darker_orange": "C65911",
+    "light_blue": "DDEBF7",
+    "light_pink": "b3b389",
+    "light_yellow": "ffffc5",
+    "white": "FFFFFF",
+    "bluepin": "004bb4",
+    'gray': 'e0e0e0'
+}
+# Define the columns to color
+color_mapping = {
+    label_perc2: colors["light_beige"],
+    label_tot2: colors["light_beige"],
+    label_perc3: colors["light_orange"],
+    label_tot3: colors["light_orange"],
+    label_perc4: colors["dark_orange"],
+    label_tot4: colors["dark_orange"],
+    label_perc5: colors["darker_orange"],
+    label_tot5: colors["darker_orange"],
+    label_perc_tot: colors["light_blue"],
+    label_admin_severity: colors["light_blue"],
+    label_tot: colors["light_blue"]
+}
+# Define the colors
+colors_dimension = {
+    "light_beige": "ebecc7",
+    "light_orange": "c7ebec",
+    "dark_orange": "c7d9ec",
+    "darker_orange": "c7ecdb",
+    'darker2_orange':'b3d3d4',
+    "light_blue": "DDEBF7",
+    "light_pink": "b3b389",
+    "light_yellow": "ffffc5",
+    "white": "FFFFFF",
+    "bluepin": "004bb4",
+    'gray': 'e0e0e0'
+}
+# Define the columns to color
+color_mapping_dimension = {
+    label_perc_out: colors_dimension["light_beige"],
+    label_tot_out: colors_dimension["light_beige"],
+    label_perc_acc: colors_dimension["light_orange"],
+    label_tot_acc: colors_dimension["light_orange"],
+    label_perc_agg: colors_dimension["dark_orange"],
+    label_tot_agg: colors_dimension["dark_orange"],
+    label_perc_lc: colors_dimension["darker_orange"],
+    label_tot_lc: colors_dimension["darker_orange"],
+    label_perc_penv: colors_dimension["darker2_orange"],
+    label_tot_penv: colors_dimension["darker2_orange"],
+    label_dimension_perc_tot: colors_dimension["light_blue"],
+    label_dimension_tot: colors_dimension["light_blue"]
+}
 
 
 ##--------------------------------------------------------------------------------------------
@@ -268,7 +364,7 @@ def calculate_cycle_factors(df, factor_cycle, primary_start, secondary_end, vect
         result[category] = temp_df[columns_to_keep]
     return result
 ##--------------------------------------------------------------------------------------------
-def reduce_index(df, level):
+def reduce_index(df, level, pop_group_var):
     df.columns = df.columns.get_level_values(1)
     df=df.droplevel(0, axis=0) 
     df=df.droplevel(0, axis=0) 
@@ -303,7 +399,7 @@ def add_disability_factor(df,factor=0.1, category = 'Disability'):
 
 ##--------------------------------------------------------------------------------------------
 # %PiN AND #PiN PER ADMIN AND POPULATION GROUP for the strata: GENDER, SCHOOL-CYCLE 
-def adjust_pin_by_strata_factor(pin_df, factor_df, category_label, tot_column):
+def adjust_pin_by_strata_factor(pin_df, factor_df, category_label, tot_column, admin_var):
     # Merge the pin DataFrame with the factor DataFrame on the 'Admin_2' column
     factorized_df = pd.merge(pin_df, factor_df, left_on=admin_var, right_on="Admin", how='left')
     factorized_df = pd.merge(
@@ -328,7 +424,7 @@ def adjust_pin_by_strata_factor(pin_df, factor_df, category_label, tot_column):
 
 ##--------------------------------------------------------------------------------------------
 # preparation for overview--> SUM all the admin per population group and per strata 
-def collapse_and_summarize(pin_per_admin_status_strata, category_str):
+def collapse_and_summarize(pin_per_admin_status_strata, category_str, admin_var):
     collapsed_results = {}
     
     # Iterate over the input dictionary
@@ -346,7 +442,7 @@ def collapse_and_summarize(pin_per_admin_status_strata, category_str):
                 summed_df[col] = df[col].sum()
 
         # Set non-sum columns with fixed values
-        summed_df['admin_2'] = 'whole country'
+        summed_df[admin_var] = 'whole country'
         summed_df['Admin Pcode'] = '0'
         summed_df['Population group'] = category
         if 'Area severity' in summed_df.columns:
@@ -390,7 +486,7 @@ def collapse_and_summarize(pin_per_admin_status_strata, category_str):
 
 ##--------------------------------------------------------------------------------------------
 # preparation for overview--> SUM all the admin per population group and per strata 
-def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str):
+def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str, admin_var):
     collapsed_results = {}
     
     # Iterate over the input dictionary
@@ -408,7 +504,7 @@ def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str):
                 summed_df[col] = df[col].sum()
 
         # Set non-sum columns with fixed values
-        summed_df['admin_2'] = 'whole country'
+        summed_df[admin_var] = 'whole country'
         summed_df['Admin Pcode'] = '0'
         summed_df['Population group'] = category
         if 'Area severity' in summed_df.columns:
@@ -452,7 +548,7 @@ def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str):
 
 
 ##--------------------------------------------------------------------------------------------
-def apply_formatting(file_path, color_mapping, alignment_columns):
+def apply_formatting(file_path, color_mapping, alignment_columns, admin_var):
     # Load the workbook and iterate through sheets
     wb = load_workbook(file_path)
     for ws in wb.worksheets:
@@ -641,7 +737,7 @@ def apply_formatting(file_path, color_mapping, alignment_columns):
 
 ##--------------------------------------------------------------------------------------------
 
-def apply_formatting_dimension(file_path, color_mapping, alignment_columns):
+def apply_formatting_dimension(file_path, color_mapping, alignment_columns, admin_var):
     # Load the workbook and iterate through sheets
     wb = load_workbook(file_path)
     for ws in wb.worksheets:
@@ -942,8 +1038,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ).unstack(fill_value=0)
 
     ## reducing the multiindex of the panda dataframe
-    severity_admin_status_list = reduce_index(severity_admin_status, 0)
-    dimension_admin_status_list = reduce_index(dimension_admin_status, 0)
+    severity_admin_status_list = reduce_index(severity_admin_status, 0, pop_group_var)
+    dimension_admin_status_list = reduce_index(dimension_admin_status, 0, pop_group_var)
 
 
     ####### ** 4 **       ------------------------------ matching between the admin and the ocha population data ------------------------------------------     #######
@@ -956,7 +1052,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
     category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)# Extract population figures based on mapped statuses without modifying the case
 
-
+    for category, df in category_data_frames.items():
+        df.rename(columns={'Admin': admin_var}, inplace=True)
 
     ####### ** 5 **       ------------------------------ creating tables with factors for the gender and school-cycle categories ------------------------------------------     #######
 
@@ -1020,6 +1117,12 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             # Fetch the corresponding DataFrame from the grouped data
             grouped_df = severity_admin_status_list[category]     
             # Merge on specified columns
+            print('                                              ==================================================')
+            print('                                            ==================================================')
+            print(grouped_df)
+            print('**************************************************==================================================')
+            print('**************************************************==================================================')
+            print(df)
             pop_group_df = pd.merge(grouped_df, df, on=[admin_var, pop_group_var])
             pop_group_df.columns = [str(col) for col in pop_group_df.columns]
 
@@ -1185,13 +1288,13 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     pin_per_admin_status_disabilty = {}
 
     for category, df in pin_per_admin_status.items():
-        pin_per_admin_status_girl[category] = adjust_pin_by_strata_factor(df, factor_category[category_girl], category_girl, tot_column= label_tot_population)
-        pin_per_admin_status_boy[category] = adjust_pin_by_strata_factor(df, factor_category[category_boy], category_boy, tot_column= label_tot_population)
-        pin_per_admin_status_ece[category] = adjust_pin_by_strata_factor(df, factor_category[category_ece], category_ece, tot_column= label_tot_population)
-        pin_per_admin_status_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_primary], category_primary, tot_column= label_tot_population)
-        pin_per_admin_status_upper_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_upper_primary], category_upper_primary, tot_column= label_tot_population)
-        pin_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary, tot_column= label_tot_population)
-        pin_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability, tot_column= label_tot_population)
+        pin_per_admin_status_girl[category] = adjust_pin_by_strata_factor(df, factor_category[category_girl], category_girl, tot_column= label_tot_population, admin_var=admin_var)
+        pin_per_admin_status_boy[category] = adjust_pin_by_strata_factor(df, factor_category[category_boy], category_boy, tot_column= label_tot_population, admin_var=admin_var)
+        pin_per_admin_status_ece[category] = adjust_pin_by_strata_factor(df, factor_category[category_ece], category_ece, tot_column= label_tot_population, admin_var=admin_var)
+        pin_per_admin_status_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_primary], category_primary, tot_column= label_tot_population, admin_var=admin_var)
+        pin_per_admin_status_upper_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_upper_primary], category_upper_primary, tot_column= label_tot_population, admin_var=admin_var)
+        pin_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary, tot_column= label_tot_population, admin_var=admin_var)
+        pin_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability, tot_column= label_tot_population, admin_var=admin_var)
 
     ## dimension
     dimension_per_admin_status_girl = {}
@@ -1203,13 +1306,13 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     dimension_per_admin_status_disabilty = {}
 
     for category, df in dimension_per_admin_status.items():
-        dimension_per_admin_status_girl[category] = adjust_pin_by_strata_factor(df, factor_category[category_girl], category_girl, tot_column= label_dimension_tot_population)
-        dimension_per_admin_status_boy[category] = adjust_pin_by_strata_factor(df, factor_category[category_boy], category_boy, tot_column= label_dimension_tot_population)
-        dimension_per_admin_status_ece[category] = adjust_pin_by_strata_factor(df, factor_category[category_ece], category_ece, tot_column= label_dimension_tot_population)
-        dimension_per_admin_status_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_primary], category_primary, tot_column= label_dimension_tot_population)
-        dimension_per_admin_status_upper_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_upper_primary], category_upper_primary, tot_column= label_dimension_tot_population)
-        dimension_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary, tot_column= label_dimension_tot_population)
-        dimension_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability, tot_column= label_dimension_tot_population)
+        dimension_per_admin_status_girl[category] = adjust_pin_by_strata_factor(df, factor_category[category_girl], category_girl, tot_column= label_dimension_tot_population, admin_var=admin_var)
+        dimension_per_admin_status_boy[category] = adjust_pin_by_strata_factor(df, factor_category[category_boy], category_boy, tot_column= label_dimension_tot_population, admin_var=admin_var)
+        dimension_per_admin_status_ece[category] = adjust_pin_by_strata_factor(df, factor_category[category_ece], category_ece, tot_column= label_dimension_tot_population, admin_var=admin_var)
+        dimension_per_admin_status_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_primary], category_primary, tot_column= label_dimension_tot_population, admin_var=admin_var)
+        dimension_per_admin_status_upper_primary[category] = adjust_pin_by_strata_factor(df, factor_category[category_upper_primary], category_upper_primary, tot_column= label_dimension_tot_population, admin_var=admin_var)
+        dimension_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary, tot_column= label_dimension_tot_population, admin_var=admin_var)
+        dimension_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability, tot_column= label_dimension_tot_population, admin_var=admin_var)
 
 
 
@@ -1281,14 +1384,14 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         Tot_Dimension_JIAF[category] = pop_group_df
 
     ####### ** 9 **       ------------------------------  preparation for overview--> SUM all the admin per population group and per strata ------------------------------------------     #######
-    overview_ToT = collapse_and_summarize(pin_per_admin_status, 'TOTAL (5-17 y.o.)')
-    overview_girl = collapse_and_summarize(pin_per_admin_status_girl, 'Girls')
-    overview_boy = collapse_and_summarize(pin_per_admin_status_boy, 'Boys')
-    overview_ece = collapse_and_summarize(pin_per_admin_status_ece, 'ECE (5 y.o.)')
-    overview_primary = collapse_and_summarize(pin_per_admin_status_primary, 'Primary school')
-    overview_upper_primary = collapse_and_summarize(pin_per_admin_status_upper_primary, 'Upper primary school')
-    overview_secondary = collapse_and_summarize(pin_per_admin_status_secondary, 'Secondary school')
-    overview_disabilty = collapse_and_summarize(pin_per_admin_status_disabilty, 'Children with disability')
+    overview_ToT = collapse_and_summarize(pin_per_admin_status, 'TOTAL (5-17 y.o.)', admin_var=admin_var)
+    overview_girl = collapse_and_summarize(pin_per_admin_status_girl, 'Girls', admin_var=admin_var)
+    overview_boy = collapse_and_summarize(pin_per_admin_status_boy, 'Boys', admin_var=admin_var)
+    overview_ece = collapse_and_summarize(pin_per_admin_status_ece, 'ECE (5 y.o.)', admin_var=admin_var)
+    overview_primary = collapse_and_summarize(pin_per_admin_status_primary, 'Primary school', admin_var=admin_var)
+    overview_upper_primary = collapse_and_summarize(pin_per_admin_status_upper_primary, 'Upper primary school', admin_var=admin_var)
+    overview_secondary = collapse_and_summarize(pin_per_admin_status_secondary, 'Secondary school', admin_var=admin_var)
+    overview_disabilty = collapse_and_summarize(pin_per_admin_status_disabilty, 'Children with disability', admin_var=admin_var)
 
     collapsed_results_pop = {}
     for category, df in pin_per_admin_status.items():
@@ -1305,7 +1408,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                     summed_df[col] = df[col].sum()
 
             # Set non-sum columns with fixed values
-            summed_df['admin_2'] = 'whole country'
+            summed_df[admin_var] = 'whole country'
             summed_df['Admin Pcode'] = '0'
             summed_df['Population group'] = category
             del summed_df['Area severity']
@@ -1318,14 +1421,14 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             collapsed_results_pop[category] = summed_df
 
 
-    overview_dimension_ToT = collapse_and_summarize_dimension(dimension_per_admin_status, 'TOTAL (5-17 y.o.)')
-    overview_dimension_girl = collapse_and_summarize_dimension(dimension_per_admin_status_girl, 'Girls')
-    overview_dimension_boy = collapse_and_summarize_dimension(dimension_per_admin_status_boy, 'Boys')
-    overview_dimension_ece = collapse_and_summarize_dimension(dimension_per_admin_status_ece, 'ECE (5 y.o.)')
-    overview_dimension_primary = collapse_and_summarize_dimension(dimension_per_admin_status_primary, 'Primary school')
-    overview_dimension_upper_primary = collapse_and_summarize_dimension(dimension_per_admin_status_upper_primary, 'Upper primary school')
-    overview_dimension_secondary = collapse_and_summarize_dimension(dimension_per_admin_status_secondary, 'Secondary school')
-    overview_dimension_disabilty = collapse_and_summarize_dimension(dimension_per_admin_status_disabilty, 'Children with disability')
+    overview_dimension_ToT = collapse_and_summarize_dimension(dimension_per_admin_status, 'TOTAL (5-17 y.o.)', admin_var=admin_var)
+    overview_dimension_girl = collapse_and_summarize_dimension(dimension_per_admin_status_girl, 'Girls', admin_var=admin_var)
+    overview_dimension_boy = collapse_and_summarize_dimension(dimension_per_admin_status_boy, 'Boys', admin_var=admin_var)
+    overview_dimension_ece = collapse_and_summarize_dimension(dimension_per_admin_status_ece, 'ECE (5 y.o.)', admin_var=admin_var)
+    overview_dimension_primary = collapse_and_summarize_dimension(dimension_per_admin_status_primary, 'Primary school', admin_var=admin_var)
+    overview_dimension_upper_primary = collapse_and_summarize_dimension(dimension_per_admin_status_upper_primary, 'Upper primary school', admin_var=admin_var)
+    overview_dimension_secondary = collapse_and_summarize_dimension(dimension_per_admin_status_secondary, 'Secondary school', admin_var=admin_var)
+    overview_dimension_disabilty = collapse_and_summarize_dimension(dimension_per_admin_status_disabilty, 'Children with disability', admin_var=admin_var)
 
     collapsed_results_dimension_pop = {}
     for category, df in dimension_per_admin_status.items():
@@ -1341,7 +1444,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                     summed_dimension_df[col] = df[col].sum()
 
             # Set non-sum columns with fixed values
-            summed_dimension_df['admin_2'] = 'whole country'
+            summed_dimension_df[admin_var] = 'whole country'
             summed_dimension_df['Admin Pcode'] = '0'
             summed_dimension_df['Population group'] = category
             if 'Area severity' in summed_dimension_df.columns:
@@ -1508,65 +1611,11 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
 
-####### ** 12 **       ------------------------------  COSMESI ------------------------------------------     #######
-    # Define the colors
-    colors = {
-        "light_beige": "FFF2CC",
-        "light_orange": "F4B183",
-        "dark_orange": "ED7D31",
-        "darker_orange": "C65911",
-        "light_blue": "DDEBF7",
-        "light_pink": "b3b389",
-        "light_yellow": "ffffc5",
-        "white": "FFFFFF",
-        "bluepin": "004bb4",
-        'gray': 'e0e0e0'
-    }
-    # Define the columns to color
-    color_mapping = {
-        label_perc2: colors["light_beige"],
-        label_tot2: colors["light_beige"],
-        label_perc3: colors["light_orange"],
-        label_tot3: colors["light_orange"],
-        label_perc4: colors["dark_orange"],
-        label_tot4: colors["dark_orange"],
-        label_perc5: colors["darker_orange"],
-        label_tot5: colors["darker_orange"],
-        label_perc_tot: colors["light_blue"],
-        label_admin_severity: colors["light_blue"],
-        label_tot: colors["light_blue"]
-    }
-    # Define the colors
-    colors_dimension = {
-        "light_beige": "ebecc7",
-        "light_orange": "c7ebec",
-        "dark_orange": "c7d9ec",
-        "darker_orange": "c7ecdb",
-        'darker2_orange':'b3d3d4',
-        "light_blue": "DDEBF7",
-        "light_pink": "b3b389",
-        "light_yellow": "ffffc5",
-        "white": "FFFFFF",
-        "bluepin": "004bb4",
-        'gray': 'e0e0e0'
-    }
-    # Define the columns to color
-    color_mapping_dimension = {
-        label_perc_out: colors_dimension["light_beige"],
-        label_tot_out: colors_dimension["light_beige"],
-        label_perc_acc: colors_dimension["light_orange"],
-        label_tot_acc: colors_dimension["light_orange"],
-        label_perc_agg: colors_dimension["dark_orange"],
-        label_tot_agg: colors_dimension["dark_orange"],
-        label_perc_lc: colors_dimension["darker_orange"],
-        label_tot_lc: colors_dimension["darker_orange"],
-        label_perc_penv: colors_dimension["darker2_orange"],
-        label_tot_penv: colors_dimension["darker2_orange"],
-        label_dimension_perc_tot: colors_dimension["light_blue"],
-        label_dimension_tot: colors_dimension["light_blue"]
-    }
-    # List of columns that require specific alignment
-    alignment_columns = list(color_mapping.keys())
+
+
+
+    country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
+    return Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df, final_overview_dimension_df, country_label
 
 
 

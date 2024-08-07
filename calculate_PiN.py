@@ -347,7 +347,7 @@ def collapse_and_summarize(pin_per_admin_status_strata, category_str):
                 summed_df[col] = df[col].sum()
 
         # Set non-sum columns with fixed values
-        summed_df['admin_2'] = 'whole country'
+        summed_df[admin_var] = 'whole country'
         summed_df['Admin Pcode'] = '0'
         summed_df['Population group'] = category
         if 'Area severity' in summed_df.columns:
@@ -409,7 +409,7 @@ def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str):
                 summed_df[col] = df[col].sum()
 
         # Set non-sum columns with fixed values
-        summed_df['admin_2'] = 'whole country'
+        summed_df[admin_var] = 'whole country'
         summed_df['Admin Pcode'] = '0'
         summed_df['Population group'] = category
         if 'Area severity' in summed_df.columns:
@@ -836,7 +836,7 @@ def apply_formatting_dimension(file_path, color_mapping, alignment_columns):
 
 ##--------------------------------------------------------------------------------------------
 # what should arrive from the user selection
-admin_target = 'Admin_2: Regions'
+admin_target = 'Admin_2: Regions'#'Admin_2: Regions' 
 pop_group_var = 'place_of_origin'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
@@ -921,7 +921,7 @@ household_data['month'] = household_data['start'].dt.month
 
 # Find the most similar column to "Admin2" in household_data
 admin_var = process.extractOne(admin_target, household_data.columns.tolist())[0]  # Take the string directly
-
+print(admin_var)
 # Columns to include in the merge
 columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight']
 edu_data = edu_data.drop(columns=[col for col in columns_to_include if col in edu_data.columns], errors='ignore')
@@ -1102,6 +1102,12 @@ for category, df in category_data_frames.items():
         # Fetch the corresponding DataFrame from the grouped data
         grouped_df = severity_admin_status_list[category]     
         # Merge on specified columns
+        print('                                              ==================================================')
+        print('                                            ==================================================')
+        print(grouped_df)
+        print('**************************************************==================================================')
+        print('**************************************************==================================================')
+        print(df)
         pop_group_df = pd.merge(grouped_df, df, on=[admin_var, pop_group_var])
         pop_group_df.columns = [str(col) for col in pop_group_df.columns]
 
@@ -1463,7 +1469,7 @@ for category, df in pin_per_admin_status.items():
                 summed_df[col] = df[col].sum()
 
         # Set non-sum columns with fixed values
-        summed_df['admin_2'] = 'whole country'
+        summed_df[admin_var] = 'whole country'
         summed_df['Admin Pcode'] = '0'
         summed_df['Population group'] = category
         del summed_df['Area severity']
@@ -1503,7 +1509,7 @@ for category, df in dimension_per_admin_status.items():
                 summed_dimension_df[col] = df[col].sum()
 
         # Set non-sum columns with fixed values
-        summed_dimension_df['admin_2'] = 'whole country'
+        summed_dimension_df[admin_var] = 'whole country'
         summed_dimension_df['Admin Pcode'] = '0'
         summed_dimension_df['Population group'] = category
         if 'Area severity' in summed_dimension_df.columns:

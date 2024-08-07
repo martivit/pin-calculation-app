@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from backup import calculatePIN
+from io import BytesIO
+
 
 st.logo('pics/logos.png')
 
@@ -10,6 +12,11 @@ st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layo
 if 'password_correct' not in st.session_state:
     st.error('Please Login from the Home page and try again.')
     st.stop()
+
+
+## ====================================================================================================
+## ===================================== calculate and download the PiN
+## ====================================================================================================
 
 
 st.write ('test session state')
@@ -54,11 +61,73 @@ barrier_var =  st.session_state.get('barrier_var')
 selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
 selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])
 admin_var =  st.session_state.get('admin_var')
-ocha_data = st.session_state.get['uploaded_ocha_data']
+ocha_data = st.session_state.get('uploaded_ocha_data')
 
-calculatePIN (country, edu_data, household_data, choice_data, survey_data, ocha_data,
+
+
+
+
+
+
+
+
+
+
+
+(Tot_PiN_JIAF, Tot_Dimension_JIAF, 
+ final_overview_df, final_overview_dimension_df, country_label) = calculatePIN (country, edu_data, household_data, choice_data, survey_data, ocha_data,
                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
                 label, 
                 admin_var, vector_cycle, start_school, status_var)
+
+
+
+# Function to create an Excel file and return it as a BytesIO object
+def create_excel_file(dataframes, overview_df, overview_sheet_name):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
+        for category, df in dataframes.items():
+            sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+    output.seek(0)
+    return output
+
+# Create the Excel files
+jiaf_excel = create_excel_file(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL")
+ocha_excel = create_excel_file(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL")
+dimension_jiaf_excel = create_excel_file(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL")
+dimension_ocha_excel = create_excel_file(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL")
+
+# Streamlit app layout
+st.title("PiN Calculation Results")
+
+st.download_button(
+    label="Download PiN JIAF Excel",
+    data=jiaf_excel.getvalue(),
+    file_name=f"PiN_JIAF_{country_label}.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
+st.download_button(
+    label="Download PiN OCHA Excel",
+    data=ocha_excel.getvalue(),
+    file_name=f"PiN_overview_OCHA_{country_label}.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
+st.download_button(
+    label="Download Dimension JIAF Excel",
+    data=dimension_jiaf_excel.getvalue(),
+    file_name=f"Dimension_JIAF_{country_label}.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
+st.download_button(
+    label="Download Dimension OCHA Excel",
+    data=dimension_ocha_excel.getvalue(),
+    file_name=f"Dimension_overview_OCHA_{country_label}.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
