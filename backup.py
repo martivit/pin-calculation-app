@@ -970,6 +970,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
     household_start_column = [col for col in household_data.columns if 'start' in col.lower()][0]  # Take the first item directly
 
+    print(household_start_column)
 
     # Extract the month from the 'start_time' column
     household_data[household_start_column] = pd.to_datetime(household_data[household_start_column])
