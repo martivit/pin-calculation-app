@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from backup import calculatePIN
+from xlsxwriter import Workbook
 
 
 st.logo('pics/logos.png')
@@ -85,7 +86,7 @@ ocha_data = st.session_state.get('uploaded_ocha_data')
 
 # Function to create an Excel file in memory and return the content as bytes
 def create_excel_file(dataframes, overview_df, overview_sheet_name):
-    with pd.ExcelWriter("output.xlsx", engine='xlsxwriter') as writer:
+    with pd.ExcelWriter("output.xlsx") as writer:
         overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
         for category, df in dataframes.items():
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
