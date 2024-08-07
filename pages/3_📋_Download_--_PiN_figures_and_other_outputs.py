@@ -4,7 +4,6 @@ import pandas as pd
 from backup import calculatePIN
 import tempfile
 
-
 st.logo('pics/logos.png')
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
@@ -81,6 +80,8 @@ ocha_data = st.session_state.get('uploaded_ocha_data')
                 age_var, gender_var,
                 label, 
                 admin_var, vector_cycle, start_school, status_var)
+
+
 
 
 # Function to create an Excel file and return the file path
