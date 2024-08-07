@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from backup import calculatePIN
-import tempfile
+
 
 st.logo('pics/logos.png')
 
@@ -80,7 +80,6 @@ ocha_data = st.session_state.get('uploaded_ocha_data')
                 age_var, gender_var,
                 label, 
                 admin_var, vector_cycle, start_school, status_var)
-
 
 
 
