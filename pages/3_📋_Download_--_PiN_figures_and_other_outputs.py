@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from backup import calculatePIN
-from io import BytesIO
+import tempfile
 
 
 st.logo('pics/logos.png')
