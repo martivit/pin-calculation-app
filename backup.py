@@ -972,8 +972,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     # Extract the month from the 'start_time' column
-    household_data[household_start_column[0]] = pd.to_datetime(household_data[household_start_column[0]])
-    household_data['month'] = household_data[household_start_column[0]].dt.month
+    household_data[household_start_column] = pd.to_datetime(household_data[household_start_column])
+    household_data['month'] = household_data[household_start_column].dt.month
 
     # Find the most similar column to "Admin2" in household_data
     admin_var = process.extractOne(admin_target, household_data.columns.tolist())[0]  # Take the string directly
