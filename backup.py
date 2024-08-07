@@ -923,7 +923,14 @@ def apply_formatting_dimension(file_path, color_mapping, alignment_columns, admi
     # Save the formatted workbook
     wb.save(file_path)
 
-
+def custom_to_datetime(date_str):
+    try:
+        return pd.to_datetime(date_str, errors='coerce')
+    except:
+        try:
+            return pd.to_datetime(date_str, format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
+        except:
+            return pd.NaT
 
 ########################################################################################################################################
 ########################################################################################################################################
@@ -973,7 +980,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     print(household_start_column)
 
     # Extract the month from the 'start_time' column
-    household_data[household_start_column] = pd.to_datetime(household_data[household_start_column])
+    household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
     household_data['month'] = household_data[household_start_column].dt.month
 
     # Find the most similar column to "Admin2" in household_data
