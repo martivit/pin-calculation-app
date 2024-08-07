@@ -87,7 +87,7 @@ ocha_data = st.session_state.get('uploaded_ocha_data')
 # Function to create an Excel file and return it as a BytesIO object
 def create_excel_file(dataframes, overview_df, overview_sheet_name):
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+    with pd.ExcelWriter(output) as writer:
         overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
         for category, df in dataframes.items():
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
