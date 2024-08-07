@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from backup import calculatePIN
-from xlsxwriter import Workbook
 
 
 st.logo('pics/logos.png')
