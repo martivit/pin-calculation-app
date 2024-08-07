@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from backup import calculatePIN
+from io import BytesIO
 
 
 st.logo('pics/logos.png')
@@ -83,50 +84,50 @@ ocha_data = st.session_state.get('uploaded_ocha_data')
 
 
 
-# Function to create Excel content in memory and return it
-def create_excel_content(dataframes, overview_df, overview_sheet_name):
-    with pd.ExcelWriter("output.xlsx") as writer:
+# Function to create an Excel file and return it as a BytesIO object
+def create_excel_file(dataframes, overview_df, overview_sheet_name):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
         for category, df in dataframes.items():
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
             df.to_excel(writer, sheet_name=sheet_name, index=False)
-        writer.save()
-        content = writer.book.xlsx
-    return content
+    output.seek(0)
+    return output
 
-# Create the Excel files in memory
-jiaf_content = create_excel_content(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL")
-ocha_content = create_excel_content(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL")
-dimension_jiaf_content = create_excel_content(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL")
-dimension_ocha_content = create_excel_content(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL")
+# Create the Excel files
+jiaf_excel = create_excel_file(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL")
+ocha_excel = create_excel_file(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL")
+dimension_jiaf_excel = create_excel_file(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL")
+dimension_ocha_excel = create_excel_file(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL")
 
 # Streamlit app layout
 st.title("PiN Calculation Results")
 
 st.download_button(
     label="Download PiN JIAF Excel",
-    data=jiaf_content,
+    data=jiaf_excel.getvalue(),
     file_name=f"PiN_JIAF_{country_label}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 
 st.download_button(
     label="Download PiN OCHA Excel",
-    data=ocha_content,
+    data=ocha_excel.getvalue(),
     file_name=f"PiN_overview_OCHA_{country_label}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 
 st.download_button(
     label="Download Dimension JIAF Excel",
-    data=dimension_jiaf_content,
+    data=dimension_jiaf_excel.getvalue(),
     file_name=f"Dimension_JIAF_{country_label}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 
 st.download_button(
     label="Download Dimension OCHA Excel",
-    data=dimension_ocha_content,
+    data=dimension_ocha_excel.getvalue(),
     file_name=f"Dimension_overview_OCHA_{country_label}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )

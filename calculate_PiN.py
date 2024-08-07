@@ -854,7 +854,7 @@ selected_severity_4_barriers = [
 selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
 age_var = 'edu_ind_age'
 gender_var = 'edu_ind_gender'
-start_month = 'september'
+start_month = 'September'
 country= 'Somalia -- SOM'
 
 
