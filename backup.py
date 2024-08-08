@@ -118,8 +118,8 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     normalized_teacher_disruption = normalize(teacher_disruption)
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui']
-    no_answers = ['no', 'non']
+    yes_answers = ['yes', 'oui', '1']
+    no_answers = ['no', 'non', '0']
     
 
     if normalized_access in no_answers:
