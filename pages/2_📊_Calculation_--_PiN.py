@@ -556,7 +556,7 @@ def finalize_details():
         if 'single_cycle' in st.session_state and not st.session_state['single_cycle']:
             # Slider for the upper primary school cycle age range
             upper_primary_end = st.slider(
-                "Which is the age range for the upper primary school?",
+                "Which is the age range for the intermediate level (upper primary school / lower secondary)?",
                 min_value=upper_primary_start, 
                 max_value=17, 
                 value=st.session_state['upper_primary_end'],
