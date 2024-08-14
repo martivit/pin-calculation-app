@@ -298,11 +298,15 @@ def apply_formatting(workbook, color_mapping, alignment_columns, colors, admin_v
 #engine='openpyxl'
 # Function to create an Excel file and return it as a BytesIO object
 
-# Function to create an Excel file and return it as a BytesIO object
-def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimension=True):
+
+def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimension=True, ocha= True):
     output = BytesIO()
     with pd.ExcelWriter(output) as writer:
-        overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
+        # Only write the overview sheet if dimension is False
+        if  ocha:
+            overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
+        
+        # Write the category sheets
         for category, df in dataframes.items():
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
             df.to_excel(writer, sheet_name=sheet_name, index=False)
@@ -321,6 +325,7 @@ def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimen
     formatted_output.seek(0)
 
     return formatted_output
+
 
 
 
