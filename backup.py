@@ -282,13 +282,13 @@ def calculate_category_factors(df, total_col, category_col, category_name):
 def calculate_cycle_factors(df, factor_cycle, primary_start, secondary_end, vector_cycle, single_cycle):
 
     if single_cycle:
-        factor_cycle[0] = (vector_cycle[0] - primary_start + 1) / (secondary_end - primary_start + 1)
+        factor_cycle[0] = (vector_cycle[0] - primary_start +1) / (secondary_end - primary_start + 2)
         factor_cycle[1] =0
-        factor_cycle[2] =  (secondary_end - vector_cycle[0]) / (secondary_end - primary_start + 1)
+        factor_cycle[2] =  (secondary_end - vector_cycle[0]) / (secondary_end - primary_start + 2)
     else:
-        factor_cycle[0] = (vector_cycle[0] - primary_start + 1) / (secondary_end - primary_start + 1)
-        factor_cycle[1] = (vector_cycle[1] - vector_cycle[0]) / (secondary_end - primary_start + 1)
-        factor_cycle[2] = (secondary_end - vector_cycle[1]) / (secondary_end - primary_start + 1)
+        factor_cycle[0] = (vector_cycle[0] - primary_start +1) / (secondary_end - primary_start + 2)
+        factor_cycle[1] = (vector_cycle[1] - vector_cycle[0]) / (secondary_end - primary_start + 2)
+        factor_cycle[2] = (secondary_end - vector_cycle[1]) / (secondary_end - primary_start + 2)
 
     # Create dictionaries to hold the categories and their respective factors
     categories = {
@@ -671,8 +671,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     ####### ** 6.A **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
-
-
     pin_per_admin_status = {}
 
     # Assume category_data_frames is a dictionary of DataFrames, indexed by category
@@ -1115,22 +1113,27 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     ####### ** 11 **       ------------------------------  Rounding and Saving the JIAF AND OCHA OUTPUT ------------------------------------------     #######
     ## ROUNDING
+    # Define rounding parameters
     percentage_round = 1
     figures_round = 0
 
+    # Iterate over the dictionaries in Tot_PiN_JIAF
     for category, df in Tot_PiN_JIAF.items():
         for col in df.columns:
             if col.startswith('#'):
-                df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)  # Convert to numeric and round
+                df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)
             elif col.startswith('%'):
-                df[col] = df[col].apply(lambda x: f"{x * 100:.1f}%")
-        df[label_tot_population] = df[label_tot_population].round(figures_round)
+                df[col] = pd.to_numeric(df[col], errors='coerce').apply(lambda x: round(x * 100, percentage_round))
+        
+        df[label_tot_population] = pd.to_numeric(df[label_tot_population], errors='coerce').round(figures_round)
 
     for col in final_overview_df.columns:
         if col.startswith('#'):
             print(col)
-            final_overview_df[col] = pd.to_numeric(final_overview_df[col], errors='coerce').round(figures_round)  # Convert to numeric and round       
-    final_overview_df[label_tot_population] = pd.to_numeric(final_overview_df[label_tot_population], errors='coerce').round(figures_round)  # Convert to numeric and round
+            final_overview_df[col] = pd.to_numeric(final_overview_df[col], errors='coerce').round(figures_round)
+            
+    final_overview_df[label_tot_population] = pd.to_numeric(final_overview_df[label_tot_population], errors='coerce').round(figures_round)
+
 
     ## dimension
     for category, df in Tot_Dimension_JIAF.items():
@@ -1146,7 +1149,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             print(col)
             final_overview_dimension_df[col] = pd.to_numeric(final_overview_dimension_df[col], errors='coerce').round(figures_round)  # Convert to numeric and round           
     final_overview_dimension_df[label_dimension_tot_population] = pd.to_numeric(final_overview_dimension_df[label_dimension_tot_population], errors='coerce').round(figures_round)  # Convert to numeric and round
-
 
 
 
