@@ -544,6 +544,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     ####### ** 3 **       ------------------------------ Analysis per ADMIN AND POPULATION GROUP ------------------------------------------     #######
     admin_var = process.extractOne(admin_target, household_data.columns.tolist())[0]  # Take the string directly
+    edu_data = edu_data[edu_data[access_var].notna()]
+    edu_data = edu_data[edu_data['severity_category'].notna()]
+
 
     df = pd.DataFrame(edu_data)
     female_df = edu_data[edu_data[gender_var].isin(['female', 'femme'])]
@@ -581,6 +584,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ).groupby(level=[0, 1]).apply(
         lambda x: x / x.sum()
     ).unstack(fill_value=0)
+
 
 
     ## reducing the multiindex of the panda dataframe

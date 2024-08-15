@@ -87,7 +87,7 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 file_path = 'output_validation/00_edu_data_with_severity.xlsx'
 # Save the DataFrame to an Excel file
-edu_data.to_excel(file_path, index=False, engine='openpyxl')
+edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
 
 
 
