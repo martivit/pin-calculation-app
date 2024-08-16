@@ -16,7 +16,9 @@ st.set_page_config(
 try:
     users = {
         "vit": st.secrets["users"]["vit"]["pwd"],
-        "grand": st.secrets["users"]["grand"]["pwd"]
+        "grand": st.secrets["users"]["grand"]["pwd"],
+        "impact": st.secrets["users"]["imapct"]["pwd"],
+        "cluster": st.secrets["users"]["cluster"]["pwd"]
     }
 except KeyError as e:
     st.error(f"Error loading user credentials: {e}")

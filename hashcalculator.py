@@ -1,7 +1,7 @@
 import hmac
 
 # Example password and secret key
-password = 'validation'
+password = 'test'
 SECRET_KEY = b'supersecretkey'
 
 # Create the HMAC hash using the secret key and the password
