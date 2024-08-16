@@ -549,8 +549,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     df = pd.DataFrame(edu_data)
-    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme'])]
-    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme'])]
+    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl'])]
+    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy'])]
     #------    CORRECT PIN    -------            
     severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
         total_weight=('weights', 'sum')
