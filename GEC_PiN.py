@@ -17,7 +17,7 @@ try:
     users = {
         "vit": st.secrets["users"]["vit"]["pwd"],
         "grand": st.secrets["users"]["grand"]["pwd"],
-        "impact": st.secrets["users"]["imapct"]["pwd"],
+        "impact": st.secrets["users"]["impact"]["pwd"],
         "cluster": st.secrets["users"]["cluster"]["pwd"]
     }
 except KeyError as e:
