@@ -103,69 +103,6 @@ def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_sta
         else:
             return 'out of school range'
         
-##--------------------------------------------------------------------------------------------
-def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption, names_severity_4, names_severity_5):
-    # Helper function to safely normalize string inputs
-    def normalize(input_string):
-        if isinstance(input_string, str):
-            return input_string.lower()
-        return ""  # Default to empty string if input is not a string
-    
-    # Normalize the input to handle different cases and languages
-    normalized_access = normalize(access)
-    normalized_armed_disruption = normalize(armed_disruption)
-    normalized_idp_disruption = normalize(idp_disruption)
-    normalized_teacher_disruption = normalize(teacher_disruption)
-
-    # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', '1']
-    no_answers = ['no', 'non', '0']
-    
-
-    if normalized_access in no_answers:
-        if barrier in names_severity_5:
-            return 5
-        elif barrier in names_severity_4:
-            return 4
-        else:
-            return 3
-    elif normalized_access in yes_answers:
-        if normalized_armed_disruption in yes_answers:
-            return 5
-        elif normalized_idp_disruption in yes_answers:
-            return 4
-        elif normalized_teacher_disruption in yes_answers:
-            return 3
-        else:
-            return 2
-    return None  # Default fallback in case none of the conditions are met
-
-
-##--------------------------------------------------------------------------------------------
-def assign_dimension_pin(access, severity):
-    # Normalize access status
-    def normalize(input_string):
-        if isinstance(input_string, str):
-            return input_string.lower()
-        return ""  # Default to empty string if input is not a string
-    
-    # Normalize the input to handle different cases and languages
-    normalized_access = normalize(access)
-
-    # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui']
-    no_answers = ['no', 'non']
-
-    # Mapping severity to dimension labels
-    if normalized_access in no_answers:
-        if severity in [4, 5]: return 'aggravating circumstances'
-        elif severity == 3: return 'access'
-    elif normalized_access in yes_answers:
-        if severity == 3: return 'learning condition'
-        if severity in [4, 5]: return 'protected environment'    
-        if severity == 2: return 'not falling within the PiN dimensions'   
-    
-    return None  # Default fallback in case none of the conditions are met         
 
 ##--------------------------------------------------------------------------------------------
 def print_subtables(severity_admin_status, pop_group_var):

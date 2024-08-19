@@ -69,13 +69,18 @@ def find_matching_choices(choices_df, barriers_list, label_var):
     
     # Iterate over each barrier in the list
     for barrier in barriers_list:
-        # Filter choices where 'label::english' matches the current barrier
+        # Filter choices where the label_var matches the current barrier
         matched_choices = choices_df[choices_df[label_var] == barrier]
         
-        # For each matched choice, create an entry in the results list
-        for _, choice in matched_choices.iterrows():
-            result_entry = {'name': choice['name'], 'label': barrier}
+        # If no matches are found, add a 'notfound' entry
+        if matched_choices.empty:
+            result_entry = {'name': 'notfound', 'label': barrier}
             results.append(result_entry)
+        else:
+            # For each matched choice, create an entry in the results list
+            for _, choice in matched_choices.iterrows():
+                result_entry = {'name': choice['name'], 'label': barrier}
+                results.append(result_entry)
     
     return results
 
@@ -83,10 +88,12 @@ def find_matching_choices(choices_df, barriers_list, label_var):
 ##--------------------------------------------------------------------------------------------
 def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption, names_severity_4, names_severity_5):
     # Helper function to safely normalize string inputs
-    def normalize(input_string):
-        if isinstance(input_string, str):
-            return input_string.lower()
-        return ""  # Default to empty string if input is not a string
+    def normalize(input_value):
+        if isinstance(input_value, str):
+            return input_value.lower()
+        elif isinstance(input_value, (int, float)):  # Handle numeric values directly
+            return input_value
+        return ""  # Default to empty string if input is not a string or number
     
     # Normalize the input to handle different cases and languages
     normalized_access = normalize(access)
@@ -95,8 +102,8 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     normalized_teacher_disruption = normalize(teacher_disruption)
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', '1']
-    no_answers = ['no', 'non', '0']
+    yes_answers = ['yes', 'oui', '1', 1]
+    no_answers = ['no', 'non', '0', 0]
     
 
     if normalized_access in no_answers:
