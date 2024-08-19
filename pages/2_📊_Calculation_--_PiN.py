@@ -631,6 +631,18 @@ display_step_content()
 
 st.markdown("---")  # Markdown horizontal rule
 
+if all([
+    st.session_state.get('data_selections_confirmed', False),
+    st.session_state.get('label_selected', False),
+    st.session_state.get('age_column_confirmed', False),
+    st.session_state.get('gender_column_confirmed', False),
+    st.session_state.get('indicators_confirmed', False),
+    st.session_state.get('severity_4_confirmed', False),
+    st.session_state.get('severity_5_confirmed', False),
+    st.session_state.get('other_parameters_confirmed', False)
+]):
+  
+    st.page_link("pages/3_📋_Download_--_PiN_figures_and_other_outputs.py", label="Proceed to the PiN Calculation and downloading page 	:arrow_right:", icon='📋')
 
 # Always show status indicators
 # Always show status indicators
@@ -645,22 +657,7 @@ update_other_parameters_status()
 
 
 
-if all([
-    st.session_state.get('data_selections_confirmed', False),
-    st.session_state.get('label_selected', False),
-    st.session_state.get('age_column_confirmed', False),
-    st.session_state.get('gender_column_confirmed', False),
-    st.session_state.get('indicators_confirmed', False),
-    st.session_state.get('severity_4_confirmed', False),
-    st.session_state.get('severity_5_confirmed', False),
-    st.session_state.get('other_parameters_confirmed', False)
-]):
 
-    st.markdown("""
-                <div style='background-color: #90EE90; padding: 10px; border-radius: 5px;'>
-                    <span style='color: black; font-size: 20px;'><strong>Proceed to PiN calculation!!!</strong></span>
-                </div>
-                """, unsafe_allow_html=True)  
     #if st.button('Calculate PiN'):
 
     st.markdown("---")  # Markdown horizontal rule
