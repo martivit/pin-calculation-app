@@ -643,21 +643,7 @@ if all([
 ]):
   
     st.page_link("pages/3_📋_Download_--_PiN_figures_and_other_outputs.py", label="Proceed to the PiN Calculation and downloading page 	:arrow_right:", icon='📋')
-
-# Always show status indicators
-# Always show status indicators
-display_status("Data Selections Confirmed", st.session_state.data_selections_confirmed)
-display_status("Label Selected", st.session_state.label_selected)
-display_status("Age Column Confirmed", st.session_state.age_column_confirmed)
-display_status("Gender Column Confirmed", st.session_state.gender_column_confirmed)
-
-update_combined_indicator()
-display_combined_severity_status()
-update_other_parameters_status()
-
-
-
-
+    
     #if st.button('Calculate PiN'):
 
     st.markdown("---")  # Markdown horizontal rule
@@ -705,3 +691,17 @@ update_other_parameters_status()
     selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
     selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])
     admin_var =  st.session_state.get('admin_target')
+
+# Always show status indicators
+# Always show status indicators
+display_status("Data Selections Confirmed", st.session_state.data_selections_confirmed)
+display_status("Label Selected", st.session_state.label_selected)
+display_status("Age Column Confirmed", st.session_state.age_column_confirmed)
+display_status("Gender Column Confirmed", st.session_state.gender_column_confirmed)
+
+update_combined_indicator()
+display_combined_severity_status()
+update_other_parameters_status()
+
+
+
