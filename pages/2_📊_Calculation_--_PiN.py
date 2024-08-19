@@ -630,6 +630,8 @@ display_step_content()
 
 
 st.markdown("---")  # Markdown horizontal rule
+update_combined_indicator()
+update_other_parameters_status()
 
 if all([
     st.session_state.get('data_selections_confirmed', False),
@@ -641,7 +643,11 @@ if all([
     st.session_state.get('severity_5_confirmed', False),
     st.session_state.get('other_parameters_confirmed', False)
 ]):
-  
+    st.markdown("""
+            <div style='background-color: #90EE90; padding: 10px; border-radius: 5px;'>
+                <span style='color: black; font-size: 20px;'><strong>Completed!</strong></span>
+            </div>
+            """, unsafe_allow_html=True)  
     st.page_link("pages/3_📋_Download_--_PiN_figures_and_other_outputs.py", label="Proceed to the PiN Calculation and downloading page 	:arrow_right:", icon='📋')
     
     #if st.button('Calculate PiN'):
@@ -699,9 +705,7 @@ display_status("Label Selected", st.session_state.label_selected)
 display_status("Age Column Confirmed", st.session_state.age_column_confirmed)
 display_status("Gender Column Confirmed", st.session_state.gender_column_confirmed)
 
-update_combined_indicator()
 display_combined_severity_status()
-update_other_parameters_status()
 
 
 
