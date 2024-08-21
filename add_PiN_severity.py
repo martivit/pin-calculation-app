@@ -137,8 +137,8 @@ def assign_dimension_pin(access, severity):
     normalized_access = normalize(access)
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui']
-    no_answers = ['no', 'non']
+    yes_answers = ['yes', 'oui', 1, '1']
+    no_answers = ['no', 'non', 0, '0']
 
     # Mapping severity to dimension labels
     if normalized_access in no_answers:
