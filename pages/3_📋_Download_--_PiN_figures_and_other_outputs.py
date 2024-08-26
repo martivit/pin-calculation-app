@@ -9,7 +9,6 @@ from add_PiN_severity import add_severity
 from calculation_for_PiN_Dimension import calculatePIN
 from vizualize_PiN import create_output
 from snapshot_PiN import create_snapshot_PiN
-from docx import Document
 
 st.logo('pics/logos.png')
 
@@ -19,6 +18,9 @@ if 'password_correct' not in st.session_state:
     st.error('Please Login from the Home page and try again.')
     st.stop()
 
+if 'uploaded_data' not in st.session_state:
+    st.warning("No data uploaded. Please go to the 'Upload' page and upload data.")  
+    st.stop()
 
 ## ====================================================================================================
 ## ===================================== calculate and download the PiN
