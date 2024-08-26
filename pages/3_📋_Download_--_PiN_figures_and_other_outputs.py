@@ -8,7 +8,7 @@ from openpyxl.cell.cell import MergedCell  # Import MergedCell
 from add_PiN_severity import add_severity
 from calculation_for_PiN_Dimension import calculatePIN
 from vizualize_PiN import create_output
-from snapshot_PiN import create_snapshot
+from snapshot_PiN import create_snapshot_PiN
 from docx import Document
 
 st.logo('pics/logos.png')
@@ -101,7 +101,7 @@ ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df,  "PiN TOTAL",   admi
 #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
 #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
 
-doc_output = create_snapshot(country_label, final_overview_df, final_overview_dimension_df)
+doc_snapshot = create_snapshot_PiN(country_label, final_overview_df, final_overview_dimension_df)
 
 
 

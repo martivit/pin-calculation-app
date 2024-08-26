@@ -14,7 +14,7 @@ from docx import Document
 from docx.shared import Pt, RGBColor
 import matplotlib.pyplot as plt
 from docx.shared import Inches
-from snapshot_PiN import create_snapshot
+from snapshot_PiN import create_snapshot_PiN
 
 
 
@@ -118,7 +118,7 @@ jiaf_excel = create_output(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL",   admin
 ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df,  "PiN TOTAL",   admin_var, dimension= False, ocha= True, tot_severity=Tot_PiN_by_admin)
 dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
 dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
-doc_output = create_snapshot(country_label, final_overview_df, final_overview_dimension_df)
+doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_dimension_df)
 
 
 
