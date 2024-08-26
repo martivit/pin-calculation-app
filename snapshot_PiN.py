@@ -194,7 +194,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_dimensi
     doc.add_heading('Population groups', level=2)
 
     excluded_strata = ['TOTAL (5-17 y.o.)',
-        "Girls", "Boys", "Female (MSNA)", "Male (MSNA)", "ECE (5 y.o.)", 
+        "Girls", "Boys", "Female", "Male", "ECE (5 y.o.)", 
         "Primary school", "Upper primary school", "Secondary school", "Children with disability"
     ]
 
@@ -259,7 +259,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_dimensi
     )
 
     # Retrieve data for the total row
-    row_girl = final_overview_df.loc[final_overview_df['Strata'] == 'Female (MSNA)']
+    row_girl = final_overview_df.loc[final_overview_df['Strata'] == 'Female']
     total_population_girl = row_girl[label_tot_population].values[0]
     percentage_in_need_girl = row_girl[label_perc_tot].values[0]
     tot_in_need_girl = row_girl[label_tot].values[0]
@@ -305,7 +305,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_dimensi
 
 
     # Retrieve data for the total row
-    row_boy = final_overview_df.loc[final_overview_df['Strata'] == 'Male (MSNA)']
+    row_boy = final_overview_df.loc[final_overview_df['Strata'] == 'Male']
     total_population_boy = row_boy[label_tot_population].values[0]
     percentage_in_need_boy = row_boy[label_perc_tot].values[0]
     tot_in_need_boy = row_boy[label_tot].values[0]

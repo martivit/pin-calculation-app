@@ -1054,8 +1054,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     overview_upper_primary = collapse_and_summarize(pin_per_admin_status_upper_primary, 'Upper primary school', admin_var=admin_var)
     overview_secondary = collapse_and_summarize(pin_per_admin_status_secondary, 'Secondary school', admin_var=admin_var)
     overview_disabilty = collapse_and_summarize(pin_per_admin_status_disabilty, 'Children with disability', admin_var=admin_var)
-    overview_girl_strata = collapse_and_summarize(female_pin_per_admin_status, 'Female (MSNA)', admin_var=admin_var) ## with the proper gender anlysis 
-    overview_boy_strata = collapse_and_summarize(male_pin_per_admin_status, 'Male (MSNA)', admin_var=admin_var)## with the proper gender anlysis 
+    overview_girl_strata = collapse_and_summarize(female_pin_per_admin_status, 'Female', admin_var=admin_var) ## with the proper gender anlysis 
+    overview_boy_strata = collapse_and_summarize(male_pin_per_admin_status, 'Male', admin_var=admin_var)## with the proper gender anlysis 
 
 
     collapsed_results_pop = {}
@@ -1140,8 +1140,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # Determine the strata_summarized_data based on the value of single_cycle
     if single_cycle:
         strata_summarized_data = [
-            overview_girl,
-            overview_boy,
+            #overview_girl,
+            #overview_boy,
             overview_girl_strata,
             overview_boy_strata,
             overview_ece,
@@ -1151,8 +1151,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         ]
     else:
         strata_summarized_data = [
-            overview_girl,
-            overview_boy,
+            #overview_girl,
+            #overview_boy,
             overview_girl_strata,
             overview_boy_strata,
             overview_ece,

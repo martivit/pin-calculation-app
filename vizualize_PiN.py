@@ -166,7 +166,7 @@ def apply_formatting(workbook, color_mapping, alignment_columns, colors, admin_v
                         cell.font = Font(color=colors["white"], bold=True)  # Set text color to white and bold
                 elif strata_value in ["Girls", "Boys"]:
                     fill_color = colors["gray"]
-                elif strata_value in ['Female (MSNA)', 'Male (MSNA)']:
+                elif strata_value in ['Female', 'Male']:
                     fill_color = colors["stratagray"]
                 elif strata_value == "ECE (5 y.o.)":
                     fill_color = colors["light_pink"]
