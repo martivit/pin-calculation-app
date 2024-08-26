@@ -138,7 +138,7 @@ st.download_button(
 
 st.download_button(
     label="Download Country Snapshot: Children in Need Profile and Overview of Needs",
-    data=doc_output.getvalue(),
+    data=doc_snapshot.getvalue(),
     file_name="pin_snapshot.docx",
     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )

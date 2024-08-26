@@ -6,6 +6,6 @@ fuzzywuzzy
 numpy
 datetime
 openpyxl
-docx
+python-docx
 
 

@@ -7,9 +7,8 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
 import docx
-from docx.shared import Pt, RGBColor
+from docx.shared import Pt, RGBColor,Inches
 import matplotlib.pyplot as plt
-from docx.shared import Inches
 from io import BytesIO
 
 
