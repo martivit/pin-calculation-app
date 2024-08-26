@@ -29,20 +29,7 @@ if 'uploaded_data' not in st.session_state:
 st.title("PiN Calculation Results")
 st.write('The PiN is currently being calculated (please be patient, as this may take some time) using the selected input variables. The outputs include PiN result tables suitable for submission to OCHA and a specific snapshot that can be integrated with contextual analysis.')
 
-st.subheader("Guidelines for Humanitarian Needs Overview (HNO)")
-st.write(
-    """
-    For the HNO, it is expected that Education Clusters will provide a detailed breakdown of PiN covering:
-    
-    - **Geographical Area**: Breakdown by specific geographic regions.
-    - **Affected Groups**: Detailed PiN for different humanitarian profiles (e.g., IDPs, residents, returnees, refugees).
-    - **Severity of Education Conditions**: Based on the unmet needs across four key dimensions. Data should show the number of children by severity level in each affected group, across geographic areas.
-    - **Sex Disaggregation**: Ensure the data is split by gender.
-    - **Age Range**: The PiN should cover at least compulsory education levels, in line with national education policies.
-    
-    Once preliminary PiN and severity levels have been estimated, it is important to review and adjust based on secondary data and expert opinion. If adjustments are made, ensure they are evidence-based and clearly documented. Where discrepancies arise, consider reviewing the entire methodology rather than simply adjusting the numbers.
-    """
-)
+
 
 start_school =  st.session_state.get('start_school')
 vector_cycle =  st.session_state.get('vector_cycle')
@@ -141,4 +128,19 @@ st.download_button(
     data=doc_snapshot.getvalue(),
     file_name="pin_snapshot.docx",
     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+)
+
+st.subheader("Guidelines for Humanitarian Needs Overview (HNO)")
+st.write(
+    """
+    For the HNO, it is expected that Education Clusters will provide a detailed breakdown of PiN covering:
+    
+    - **Geographical Area**: Breakdown by specific geographic regions.
+    - **Affected Groups**: Detailed PiN for different humanitarian profiles (e.g., IDPs, residents, returnees, refugees).
+    - **Severity of Education Conditions**: Based on the unmet needs across four key dimensions. Data should show the number of children by severity level in each affected group, across geographic areas.
+    - **Sex Disaggregation**: Ensure the data is split by gender.
+    - **Age Range**: The PiN should cover at least compulsory education levels, in line with national education policies.
+    
+    Once preliminary PiN and severity levels have been estimated, it is important to review and adjust based on secondary data and expert opinion. If adjustments are made, ensure they are evidence-based and clearly documented. Where discrepancies arise, consider reviewing the entire methodology rather than simply adjusting the numbers.
+    """
 )
