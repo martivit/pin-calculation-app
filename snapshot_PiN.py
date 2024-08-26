@@ -6,7 +6,7 @@ import datetime
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
-from docx import Document as DocxDocument
+import docx
 from docx.shared import Pt, RGBColor
 import matplotlib.pyplot as plt
 from docx.shared import Inches
@@ -98,7 +98,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_dimensi
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
 
     # Initialize the Word document
-    doc = DocxDocument()
+    doc = docx.Document()
 
     # Main title style
     title = doc.add_paragraph(f'{country_name} – PiN snapshot')
