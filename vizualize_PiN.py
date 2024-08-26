@@ -299,13 +299,17 @@ def apply_formatting(workbook, color_mapping, alignment_columns, colors, admin_v
 # Function to create an Excel file and return it as a BytesIO object
 
 
-def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimension=True, ocha= True):
+def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimension=True, ocha=True, tot_severity=None):
     output = BytesIO()
     with pd.ExcelWriter(output) as writer:
-        # Only write the overview sheet if dimension is False
-        if  ocha:
+        # Only write the overview sheet if ocha is True
+        if ocha:
             overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
-        
+
+        # Write the tot_severity sheet if it is provided
+        if tot_severity is not None:
+            tot_severity.to_excel(writer, sheet_name='Area of severity', index=False)
+
         # Write the category sheets
         for category, df in dataframes.items():
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"

@@ -424,10 +424,34 @@ def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str, 
     overview_strata = overview_strata[cols]
 
     return overview_strata
+##--------------------------------------------------------------------------------------------
+def aggregate_pin_per_admin_status(pin_per_admin_status, admin_var):
+    # Concatenate all DataFrames from the pin_per_admin_status dictionary into a single DataFrame
+    combined_df = pd.concat(pin_per_admin_status.values(), ignore_index=True)
+    columns_to_zero = [col for col in combined_df.columns if col.startswith('%')]
+    for col in columns_to_zero:
+        combined_df[col] = 0
 
+    # Group by 'admin_var' and 'Admin Pcode', summing the numeric columns
+    grouped_df = combined_df.groupby([admin_var, 'Admin Pcode']).agg({
+        label_tot_population: 'sum',
+        label_perc2: 'sum',
+        label_tot2: 'sum',
+        label_perc3: 'sum',
+        label_tot3: 'sum',
+        label_perc4: 'sum',
+        label_tot4: 'sum',
+        label_perc5: 'sum',
+        label_tot5: 'sum',
+    }).reset_index()
+    
+    # After summing, calculate the total PiN (3+) across severity levels
+    #grouped_df[label_tot] = grouped_df[label_tot3] + grouped_df[label_tot4] + grouped_df[label_tot5]
+    #grouped_df[label_perc_tot] = 0
 
+    return grouped_df
 
-
+##--------------------------------------------------------------------------------------------
 def custom_to_datetime(date_str):
     try:
         return pd.to_datetime(date_str, errors='coerce')
@@ -641,8 +665,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
             # Save modified DataFrame back into the dictionary under the category key
             pin_per_admin_status[category] = pop_group_df
-
-
 
 
     ####### ** 6.B **       ------------------------------ %dimension AND #dimension PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
@@ -911,8 +933,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         dimension_per_admin_status_secondary[category] = adjust_pin_by_strata_factor(df, factor_category[category_secondary], category_secondary, tot_column= label_dimension_tot_population, admin_var=admin_var)
         dimension_per_admin_status_disabilty[category] = adjust_pin_by_strata_factor(df, factor_category[category_disability], category_disability, tot_column= label_dimension_tot_population, admin_var=admin_var)
 
-
-
+    ####### ** 8.0 **       ------------------------------ aggregagte the popupulation group pin in 1 output by admin ------------------------------------------     #######
+    overall_pin_per_admin_df = aggregate_pin_per_admin_status(pin_per_admin_status, admin_var)
 
     ####### ** 8.A **       ------------------------------ calculate tot PiN --> 3+ and admin severity for pin_per_admin_status ------------------------------------------     #######
     Tot_PiN_JIAF = pin_per_admin_status
@@ -980,6 +1002,48 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
         # Save the updated DataFrame back to the dictionary
         Tot_Dimension_JIAF[category] = pop_group_df
+
+
+    ####### ** 8.C **       ------------------------------ calculate tot PiN --> 3+ and admin severity for overall_pin_per_admin_df ------------------------------------------     #######
+    Tot_PiN_by_admin = overall_pin_per_admin_df
+    # Iterate over the pin_per_admin_status dictionary to apply the new operations
+        # Initialize new columns for percentage total, total PiN, and admin severity
+    Tot_PiN_by_admin[label_perc_tot] = 0
+    Tot_PiN_by_admin[label_tot] = 0
+    Tot_PiN_by_admin[label_admin_severity] = 0
+
+    Tot_PiN_by_admin[label_perc2] = Tot_PiN_by_admin[label_tot2]/Tot_PiN_by_admin[label_tot_population]
+    Tot_PiN_by_admin[label_perc3] = Tot_PiN_by_admin[label_tot3]/Tot_PiN_by_admin[label_tot_population]
+    Tot_PiN_by_admin[label_perc4] = Tot_PiN_by_admin[label_tot4]/Tot_PiN_by_admin[label_tot_population]
+    Tot_PiN_by_admin[label_perc5] = Tot_PiN_by_admin[label_tot5]/Tot_PiN_by_admin[label_tot_population]
+
+    # Reorder columns to place new columns at desired positions
+    cols = list(Tot_PiN_by_admin.columns)
+    cols.insert(cols.index(label_tot5) + 1, cols.pop(cols.index(label_perc_tot)))
+    cols.insert(cols.index(label_perc_tot) + 1, cols.pop(cols.index(label_tot)))
+    cols.insert(cols.index(label_tot) + 1, cols.pop(cols.index(label_admin_severity)))
+    Tot_PiN_by_admin = Tot_PiN_by_admin[cols]
+
+    # Calculate the total percentage and total PiN for severity levels 3+
+    Tot_PiN_by_admin[label_perc_tot] = (Tot_PiN_by_admin[label_perc3] +
+                                    Tot_PiN_by_admin[label_perc4] +
+                                    Tot_PiN_by_admin[label_perc5])
+
+    Tot_PiN_by_admin[label_tot] = (Tot_PiN_by_admin[label_tot3] +
+                            Tot_PiN_by_admin[label_tot4] +
+                            Tot_PiN_by_admin[label_tot5])
+
+    # Define conditions based on specified logic
+    conditions = [
+        Tot_PiN_by_admin[label_perc5] > 0.2,
+        (Tot_PiN_by_admin[label_perc5] + Tot_PiN_by_admin[label_perc4]) > 0.2,
+        (Tot_PiN_by_admin[label_perc5] + Tot_PiN_by_admin[label_perc4] + Tot_PiN_by_admin[label_perc3]) > 0.2,
+        (Tot_PiN_by_admin[label_perc5] + Tot_PiN_by_admin[label_perc4] + Tot_PiN_by_admin[label_perc3] + Tot_PiN_by_admin[label_perc2]) > 0.2
+    ]
+    # Corresponding values for each condition
+    choices = ['5', '4', '3', '1-2']
+    # Apply the conditions to determine admin severity
+    Tot_PiN_by_admin[label_admin_severity] = np.select(conditions, choices, default='0')
 
     ####### ** 9 **       ------------------------------  preparation for overview--> SUM all the admin per population group and per strata ------------------------------------------     #######
     overview_ToT = collapse_and_summarize(pin_per_admin_status, 'TOTAL (5-17 y.o.)', admin_var=admin_var)
@@ -1199,14 +1263,19 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         process_dataframe(df)
         df[label_tot_population] = pd.to_numeric(df[label_tot_population], errors='coerce').round(figures_round)
 
-    # Process final_overview_df
-    process_dataframe(final_overview_df)
-    final_overview_df[label_tot_population] = pd.to_numeric(final_overview_df[label_tot_population], errors='coerce').round(figures_round)
-
+    process_dataframe(Tot_PiN_by_admin)
+    Tot_PiN_by_admin[label_tot_population] = pd.to_numeric(Tot_PiN_by_admin[label_tot_population], errors='coerce').round(figures_round)
+    
     # Process Tot_Dimension_JIAF DataFrames
     for category, df in Tot_Dimension_JIAF.items():
         process_dataframe(df)
         df[label_dimension_tot_population] = pd.to_numeric(df[label_dimension_tot_population], errors='coerce').round(figures_round)
+
+
+    # Process final_overview_df
+    process_dataframe(final_overview_df)
+    final_overview_df[label_tot_population] = pd.to_numeric(final_overview_df[label_tot_population], errors='coerce').round(figures_round)
+
 
     # Process final_overview_dimension_df
     process_dataframe(final_overview_dimension_df)
@@ -1405,4 +1474,4 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
 
-    return severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df, final_overview_dimension_df, country_label
+    return severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df, final_overview_dimension_df,Tot_PiN_by_admin, country_label
