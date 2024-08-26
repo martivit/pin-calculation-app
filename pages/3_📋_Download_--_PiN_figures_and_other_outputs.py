@@ -9,6 +9,7 @@ from add_PiN_severity import add_severity
 from calculation_for_PiN_Dimension import calculatePIN
 from vizualize_PiN import create_output
 from snapshot_PiN import create_snapshot
+from docx import Document
 
 st.logo('pics/logos.png')
 
