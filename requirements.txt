@@ -7,5 +7,6 @@ numpy
 datetime
 openpyxl
 python-docx
+matplotlib
 
 
