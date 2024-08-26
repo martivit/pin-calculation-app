@@ -22,29 +22,24 @@ if 'password_correct' not in st.session_state:
 ## ====================================================================================================
 ## ===================================== calculate and download the PiN
 ## ====================================================================================================
+# Streamlit app layout
+st.title("PiN Calculation Results")
+st.write('The PiN is currently being calculated (please be patient, as this may take some time) using the selected input variables. The outputs include PiN result tables suitable for submission to OCHA and a specific snapshot that can be integrated with contextual analysis.')
 
-st.write ('test session state')
-
-st.write("Start School:", st.session_state.get('start_school'))
-st.write("Vector Cycle:", st.session_state.get('vector_cycle'))
-st.write("Country:", st.session_state.get('country'))
-#st.write("Education Data (as dict):", st.session_state.get('edu_data').to_dict())
-#st.write("Household Data (as dict):", st.session_state.get('household_data').to_dict())
-st.write("Status Variable:", st.session_state.get('status_var'))
-#st.write("Survey Data (as dict):", st.session_state.get('survey_data').to_dict())
-#st.write("Choice Data (as dict):", st.session_state.get('choice_data').to_dict())
-st.write("Label:", st.session_state.get('label'))
-st.write("Age Variable:", st.session_state.get('age_var'))
-st.write("Gender Variable:", st.session_state.get('gender_var'))
-st.write("Access Variable:", st.session_state.get('access_var'))
-st.write("Teacher Disruption Variable:", st.session_state.get('teacher_disruption_var'))
-st.write("IDP Disruption Variable:", st.session_state.get('idp_disruption_var'))
-st.write("Armed Disruption Variable:", st.session_state.get('armed_disruption_var'))
-st.write("Barrier Variable:", st.session_state.get('barrier_var'))
-st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
-st.write("Selected Severity 5 Barriers:", st.session_state.get('selected_severity_5_barriers', []))
-st.write("Admin Variable:", st.session_state.get('admin_var'))
-
+st.subheader("Guidelines for Humanitarian Needs Overview (HNO)")
+st.write(
+    """
+    For the HNO, it is expected that Education Clusters will provide a detailed breakdown of PiN covering:
+    
+    - **Geographical Area**: Breakdown by specific geographic regions.
+    - **Affected Groups**: Detailed PiN for different humanitarian profiles (e.g., IDPs, residents, returnees, refugees).
+    - **Severity of Education Conditions**: Based on the unmet needs across four key dimensions. Data should show the number of children by severity level in each affected group, across geographic areas.
+    - **Sex Disaggregation**: Ensure the data is split by gender.
+    - **Age Range**: The PiN should cover at least compulsory education levels, in line with national education policies.
+    
+    Once preliminary PiN and severity levels have been estimated, it is important to review and adjust based on secondary data and expert opinion. If adjustments are made, ensure they are evidence-based and clearly documented. Where discrepancies arise, consider reviewing the entire methodology rather than simply adjusting the numbers.
+    """
+)
 
 start_school =  st.session_state.get('start_school')
 vector_cycle =  st.session_state.get('vector_cycle')
@@ -108,8 +103,7 @@ ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df,  "PiN TOTAL",   admi
 doc_output = create_snapshot(country_label, final_overview_df, final_overview_dimension_df)
 
 
-# Streamlit app layout
-st.title("PiN Calculation Results")
+
 
 #st.download_button(
 #    label="Download PiN JIAF Excel",
