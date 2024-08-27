@@ -1,10 +1,20 @@
 import streamlit as st
 import pandas as pd
 import time
+from shared_utils import language_selector
 
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
-st.title('Upload MSNA and OCHA data')
+
+
+# Call the language selector function
+language_selector()
+
+# Access the translations
+translations = st.session_state.translations
+
+
+st.title(translations["title_page1"])
 
 
 def check_conditions_and_proceed():
@@ -13,20 +23,20 @@ def check_conditions_and_proceed():
             st.session_state.ready_to_proceed = True
         else:
             st.session_state.ready_to_proceed = False
-            st.warning("Please upload the OCHA data to proceed.")
+            st.warning(translations["warning_ocha"])#Please upload the OCHA data to proceed."
     else:
         st.session_state.ready_to_proceed = False
         if selected_country == 'no selection':
-            st.warning("Please select a valid country to proceed.")
+            st.warning(translations["warning_missing_country"])#Please select a valid country to proceed.
         else:
-            st.warning("Please upload the MSNA data to proceed.")
+            st.warning(translations["warning_MSNA"])#Please upload the MSNA data to proceed
 
     # Display success message if ready to proceed
     if st.session_state.get('ready_to_proceed', False):
         st.success("You have completed all necessary steps!")
 
 if 'password_correct' not in st.session_state:
-    st.error('Please Login from the Home page and try again.')
+    st.error(translations["no_user"])
     st.stop()
 
 
@@ -38,7 +48,7 @@ countries = ['no selection',
     'Myanmar -- MMR', 'Niger -- NER', 'Syria -- SYR', 'Ukraine -- UKR', 'Somalia -- SOM'
 ]
 selected_country = st.selectbox(
-    'Which country do you want to calculate the PiN for?',
+    translations["page1_country"],
     countries,
     index=countries.index(st.session_state.get('country', 'no selection'))
 )
@@ -49,13 +59,13 @@ st.session_state['country'] = selected_country
 # Check if data already uploaded and preserved in session state
 if 'uploaded_data' in st.session_state:
     data = st.session_state['uploaded_data']
-    st.write("MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page")
+    st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
 else:
     # MSNA data uploader
-    uploaded_file = st.file_uploader("Upload your input MSNA file.", type=["csv", "xlsx"])
+    uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
 
     if uploaded_file is not None:
-        st.write('This process may take some time; please wait a bit longer. 🐌🐌🐌🐌')
+        st.write(translations["wait"])
         bar = st.progress(0)
 
         try:
@@ -72,7 +82,7 @@ else:
 
             # Finalize the loading process
             bar.progress(100)
-            st.success("MSNA Data uploaded successfully!")
+            st.success(translations["ok_upload"])
         except Exception as e:
             st.error(f"Failed to process the uploaded file: {e}")
             bar.progress(0)
@@ -81,19 +91,8 @@ else:
 st.markdown("---")  # Markdown horizontal rule
 
 # Provide a message and download button for the OCHA data template with a highlighted section
-st.markdown(
-    """
-    <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
-        <p style="color: #00529B;">
-            You can download the template and fill it with the population figures provided by OCHA.
-            Please ensure that you follow the template format.
-        </p>
-         <p style="color: red; margin-top: 0;">
-            YELLOW COLUMNS ARE MANDATORY
-        </p>
-    </div>
-    """, unsafe_allow_html=True
-)
+st.markdown(st.session_state.translations["download_template_message"], unsafe_allow_html=True)
+
 
 # Function to load the existing template from the file system
 def load_template():
@@ -102,7 +101,7 @@ def load_template():
     return template
 
 # Add a download button for the existing template
-st.download_button(label="Download OCHA Population Data Template",
+st.download_button(label=translations["template"],
                    data=load_template(),
                    file_name='Template_Population_figures.xlsx',
                    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -151,17 +150,17 @@ def perform_ocha_data_checks(ocha_data):
 if 'uploaded_data' in st.session_state:
     if 'uploaded_ocha_data' in st.session_state:
         ocha_data = st.session_state['uploaded_ocha_data']
-        st.write("OCHA Data already uploaded.")
+        st.write(translations["ok_upload"])
         st.dataframe(ocha_data.head())  # Show a preview of the data
     else:
         # OCHA data uploader
-        uploaded_ocha_file = st.file_uploader("Upload OCHA population data file", type=["csv", "xlsx"])
+        uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["csv", "xlsx"])
         if uploaded_ocha_file is not None:
             ocha_data = pd.read_excel(uploaded_ocha_file, engine='openpyxl')
             check_message = perform_ocha_data_checks(ocha_data)
             if check_message == "Data is valid":
                 st.session_state['uploaded_ocha_data'] = ocha_data
-                st.success("OCHA Data uploaded successfully!")
+                st.success(translations["ok_upload"])
             else:
                 st.error(check_message)  # Display the error message if checks fail
 
@@ -169,6 +168,7 @@ if 'uploaded_data' in st.session_state:
 check_conditions_and_proceed()
 
 col1, col2 = st.columns([0.60, 0.40])
+label_text = st.session_state.translations["proceed_to_calculation_label"]
 
 with col2: 
-    st.page_link("pages/2_📊_Calculation_--_PiN.py", label="Proceed to the PiN Calculation page 	:arrow_right:", icon='📊')
+    st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')

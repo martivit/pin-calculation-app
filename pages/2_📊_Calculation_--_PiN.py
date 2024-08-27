@@ -1,22 +1,30 @@
 import streamlit as st
 import pandas as pd
 import extra_streamlit_components as stx
+from shared_utils import language_selector
 
 st.logo('pics/logos.png')
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico', layout='wide')
-st.title('Indicator and Severity categorization')
+
+# Call the language selector function
+language_selector()
+
+# Access the translations
+translations = st.session_state.translations
+
+st.title(translations["title_page2"])
 
 
 if 'password_correct' not in st.session_state:
-    st.error('Please Login from the Home page and try again.')
+    st.error(translations["no_user"])
     st.stop()
 
 if 'current_step' not in st.session_state:
     st.session_state['current_step'] = 0
 
 # Define the steps for the stepper bar
-steps = ["Select correct data frame and language", "Select education indicators", "Define aggravating circumstances", "Define disaggregation variables"]
+steps = [translations["step1"],translations["step2"],translations["step3"],translations["step4"]]
 current_step = st.session_state['current_step']
 new_step = stx.stepper_bar(steps=steps)
 
@@ -85,25 +93,32 @@ def display_status(description, status):
 ##---------------------------------------------------------------------------------------------------------
 def handle_full_selection(suggestions, column_type, custom_message):
     # Construct the full message with custom formatting
-    full_message = f"Please select the variable required for measuring the <span style='color: #014bb4;'><strong>{custom_message}</strong></span>"
+    message_template = translations["full_message"]
+    full_message = message_template.format(custom_message=custom_message)
+    #full_message = f"Please select the variable required for measuring the <span style='color: #014bb4;'><strong>{custom_message}</strong></span>"
     st.markdown(full_message, unsafe_allow_html=True)
 
     # Use a key that ensures the selectbox is unique and not accidentally re-used
     select_key = f'{column_type}_selectbox'
     selected_column = st.selectbox(
-        "Choose one:",
+        "Choose one/Choisissez une option:",
         ['No selection'] + suggestions,
         key=select_key
     )
 
+    # Load the translated messages from session state
+    confirm_button_label = translations["confirm_button_label"].format(column_type=column_type.replace('_', ' ').capitalize())
+    column_confirmed_message = translations["column_confirmed_message"]
+    error_message = translations["error_message"]
+
     # Add a confirmation button
-    if st.button(f"Confirm {column_type.replace('_', ' ').capitalize()}", key=f'confirm_{column_type}'):
+    if st.button(confirm_button_label, key=f'confirm_{column_type}'):
         if selected_column != 'No selection':
             st.session_state[f'selected_{column_type}_column'] = selected_column
             st.session_state[f'{column_type}_column_confirmed'] = True
-            st.success(f"{column_type.capitalize()} column '{selected_column}' has been manually selected.")
+            st.success(column_confirmed_message.format(column_type=column_type.capitalize(), selected_column=selected_column))
         else:
-            st.error(f"Please select a valid option for {column_type.replace('_', ' ').capitalize()} before confirming.")
+            st.error(error_message.format(column_type=column_type.replace('_', ' ').capitalize()))
 
     # Update the status indicator after checking the session state
     display_status(f"{column_type.capitalize()} Column Confirmed", st.session_state.get(f'{column_type}_column_confirmed', False))
@@ -114,7 +129,9 @@ def handle_full_selection(suggestions, column_type, custom_message):
 ##---------------------------------------------------------------------------------------------------------
 def handle_column_selection(suggestions, column_type):
     suggested_column = suggestions[0] if suggestions else 'No selection'
-    st.write(f"Is this the individual {column_type} column? → **{suggested_column}**")
+    message_template = translations["is_this_individual_column_message"]
+
+    st.write(message_template.format(column_type=column_type.replace('_', ' ').capitalize(), suggested_column=suggested_column))
     col1, col2 = st.columns(2)
     confirm_key = f'confirm_yes_{column_type}'
     select_key = f'{column_type}_selectbox'
@@ -122,7 +139,7 @@ def handle_column_selection(suggestions, column_type):
     message_placeholder = st.empty()  # Place to show messages dynamically
 
     with col1:
-        if st.button("Yes", key=confirm_key):
+        if st.button("Yes/Oui", key=confirm_key):
             if suggested_column != 'No selection':
                 st.session_state[f'selected_{column_type}_column'] = suggested_column
                 st.session_state[f'{column_type}_column_confirmed'] = True
@@ -130,7 +147,7 @@ def handle_column_selection(suggestions, column_type):
                 message_placeholder.success(f"{column_type.capitalize()} column '{suggested_column}' has been confirmed.")
 
     with col2:
-        if st.button("No", key=f'confirm_no_{column_type}'):
+        if st.button("No/Non", key=f'confirm_no_{column_type}'):
             suggested_column = st.selectbox(
                 f"Select the individual {column_type} column:",
                 ['No selection'] + edu_data.columns.tolist(),
@@ -164,7 +181,7 @@ def update_combined_indicator():
     else:
         st.session_state.indicators_confirmed = False
 
-    display_status("Indicator Selection Confirmed", st.session_state.indicators_confirmed)
+    display_status(translations["indicator_selection_confirmed"], st.session_state.indicators_confirmed)
 ##---------------------------------------------------------------------------------------------------------
 def find_barrier_details(barrier_variable, survey_data, choices_data, label_column):
     """
@@ -176,29 +193,34 @@ def find_barrier_details(barrier_variable, survey_data, choices_data, label_colu
     return barrier_details[label_column].tolist()
 ##---------------------------------------------------------------------------------------------------------
 def show_barrier_selection(barrier_details, label_column):
-    st.write("Select aggravating circumstances falling under **severity 4**:")
+    st.write(translations["select_aggravating_circumstances_message"])
     selected_barriers = []
     for index, row in barrier_details.iterrows():
         if st.checkbox(f"{row[label_column]}", key=f"select_{row['name']}"):
             selected_barriers.append(row['name'])
     st.session_state.selected_barriers = selected_barriers  # Update session state
 ##---------------------------------------------------------------------------------------------------------
+
 def select_severity_barriers(barrier_options, severity):
-    """
-    Allow the user to select barriers that correspond to a specified severity.
-    """
-    confirm_button_label = f"Confirm Severity {severity} Barriers"
-    prompt_message = f"Select aggravating circumstances falling under **severity {severity}**, you can select multiple choices:"
+
+    # Load translated messages from session state
+    confirm_button_label = translations["confirm_button_label_severity"].format(severity=severity)
+    prompt_message = translations["prompt_message"].format(severity=severity)
+    none_of_listed_barriers = translations["none_of_listed_barriers"]
+    success_message = translations["success_message"].format(severity=severity)
+    confirmed_barriers_message = translations["confirmed_barriers_message"].format(severity=severity)
 
     # Add special option for severity 5
     if severity == 5:
-        barrier_options = barrier_options + ['---> None of the listed barriers <---']
+        barrier_options = barrier_options + [none_of_listed_barriers]
 
+    # Multiselect for barriers
     selected_barriers = st.multiselect(
             prompt_message,
             barrier_options,
             [])  # Start with no pre-selected barriers
 
+    # Confirmation button
     if st.button(confirm_button_label):
         if severity == 4:
             st.session_state.selected_severity_4_barriers = selected_barriers
@@ -208,14 +230,17 @@ def select_severity_barriers(barrier_options, severity):
             st.session_state.selected_severity_5_barriers = selected_barriers
             st.session_state['severity_5_confirmed'] = True
             # Handle the special case when 'None of the listed barriers' is selected
-            if '---> None of the listed barriers <---' in selected_barriers:
-                selected_barriers = ['---> None of the listed barriers <---']
+            if none_of_listed_barriers in selected_barriers:
+                selected_barriers = [none_of_listed_barriers]
                 st.session_state.selected_severity_5_barriers = selected_barriers
 
-        st.success(f"Selected severity {severity} barriers have been confirmed.")
-        st.write(f"Confirmed severity {severity} barriers:", selected_barriers)
+        # Display success message
+        st.success(success_message)
+        st.write(confirmed_barriers_message, selected_barriers)
 
     return selected_barriers
+
+
 ##---------------------------------------------------------------------------------------------------------
 def display_combined_severity_status():
     severity_4_status = st.session_state.get('severity_4_confirmed', False)
@@ -244,7 +269,7 @@ def check_for_duplicate_selections():
     
     # Check for duplicates
     if len(set(filtered_selections)) != len(filtered_selections):
-        st.error("**Duplicate selections detected. Each variable should be used for only one category. Please adjust your selections.**")
+        st.error(translations["duplicate_selections_error"])
 ##---------------------------------------------------------------------------------------------------------
 def update_other_parameters_status():
     if (st.session_state.get('admin_level_confirmed', False) and
@@ -256,24 +281,6 @@ def update_other_parameters_status():
 
     display_status("Other Parameters Confirmed", st.session_state['other_parameters_confirmed'])
 
-##---------------------------------------------------------------------------------------------------------
-def show_step_content(step):
-    if step == 0:
-        st.write("### Step 1: Select Correct Data Frame")
-        # Placeholder for data frame selection logic
-        st.write("Here you would include your UI for selecting and validating the data frame.")
-    elif step == 1:
-        st.write("### Step 2: Select Education Indicators")
-        # Placeholder for education indicators selection
-        st.write("This is where users would pick and validate education indicators.")
-    elif step == 2:
-        st.write("### Step 3: Define Aggravating Circumstances")
-        # Placeholder for defining aggravating circumstances
-        st.write("Users would define the severity of barriers here.")
-    elif step == 3:
-        st.write("### Step 4: Define Disaggregation Variable")
-        # Placeholder for disaggregation variables selection
-        st.write("Setup for disaggregation by variables like administrative area, school cycle, etc.")
 
 ##---------------------------------------------------------------------------------------------------------
 def find_matching_columns(dataframe, keywords):
@@ -284,7 +291,7 @@ def handle_displacement_column_selection():
     if 'household_data' in st.session_state:
         household_data = st.session_state['household_data']
         displacement_keywords = [
-            'hh_displaced', 'pop_group', 'i_type_pop', 'statut', 'hh_forcibly_displaced',
+            'hh_displaced', 'pop_group', 'i_type_pop', 'statut', 'hh_forcibly_displaced','statut',
             'demo_situation_menage', 'pop_group_name', 'residency_status', 'pop_group',
             'statut_menage', 'population_group', 'd_statut_deplacement', 'B_1_hh_primary_residence',
             'statutMenage', 'B_1_hh_primary_residence', 'status', 'displacement', 'origin'
@@ -296,7 +303,7 @@ def handle_displacement_column_selection():
 
         if displacement_suggestions and not st.session_state['show_manual_select']:
             selected_displacement = st.selectbox(
-                'Select the variable that corresponds to the status (host community, IDP, returnee) of the household:',
+                translations["select_status"],
                 ['No selection'] + displacement_suggestions,
                 key='displacement_selectbox'
             )
@@ -313,7 +320,7 @@ def handle_displacement_column_selection():
 
         if st.session_state['show_manual_select']:
             selected_displacement = st.selectbox(
-                f"Select the variable that corresponds to the status (host community, IDP, returnee) of the household:",
+                translations["select_status"],
                 ['No selection'] + household_data.columns.tolist(),
                 key='manual_displacement_selectbox'
             )
@@ -328,7 +335,7 @@ def handle_displacement_column_selection():
 # Function to handle uploading and selecting data
 def upload_and_select_data():
     if 'uploaded_data' in st.session_state:
-        st.subheader('Selection of the relevant sheets in the MSNA data file')
+        st.subheader(translations["sheet"])
 
         data = st.session_state['uploaded_data']
 
@@ -337,14 +344,20 @@ def upload_and_select_data():
 
             survey_sheet_guess = [col for col in list(data.keys()) if any(kw in col.lower() for kw in ['survey', 'questionnaire', 'enquête'])]
             choice_sheet_guess = [col for col in list(data.keys()) if any(kw in col.lower() for kw in ['choice', 'choix'])]
-            
+                        # Load the translated strings from session state
+            select_household_data_sheet = translations["select_household_data_sheet"]
+            select_survey_kobo_sheet = translations["select_survey_kobo_sheet"]
+            select_education_loop_data_sheet = translations["select_education_loop_data_sheet"]
+            select_kobo_choice_sheet = translations["select_kobo_choice_sheet"]
+
+            # Example usage in your app
             with col1:
-                selected_sheet = st.selectbox('Select the Household data sheet:', ['No selection'] + list(data.keys()), key='household_key')
-                selected_survey_sheet = survey_sheet_guess[0] if survey_sheet_guess else st.selectbox('Select the Survey/kobo sheet:', ['No selection'] + list(data.keys()), key='survey_key')
+                selected_sheet = st.selectbox(select_household_data_sheet, ['No selection'] + list(data.keys()), key='household_key')
+                selected_survey_sheet = survey_sheet_guess[0] if survey_sheet_guess else st.selectbox(select_survey_kobo_sheet, ['No selection'] + list(data.keys()), key='survey_key')
 
             with col2:
-                selected_edu_sheet = st.selectbox('Select the Education loop (or individual loop) data sheet:', ['No selection'] + list(data.keys()), key='edu_key')
-                selected_choice_sheet = choice_sheet_guess[0] if choice_sheet_guess else st.selectbox('Select the Kobo choice sheet:', ['No selection'] + list(data.keys()), key='choice_key')
+                selected_edu_sheet = st.selectbox(select_education_loop_data_sheet, ['No selection'] + list(data.keys()), key='edu_key')
+                selected_choice_sheet = choice_sheet_guess[0] if choice_sheet_guess else st.selectbox(select_kobo_choice_sheet, ['No selection'] + list(data.keys()), key='choice_key')
 
 
             if st.button('Confirm Data Selections') and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
@@ -359,38 +372,33 @@ def upload_and_select_data():
                 survey_data = st.session_state['survey_data']
                 label_columns = [col for col in survey_data.columns if col.startswith('label')]
                 if label_columns:
-                    selected_label = st.selectbox('Select the desired label column:', ['No selection'] + label_columns, key='selected_label')
+                    selected_label = st.selectbox(translations["label_json"], ['No selection'] + label_columns, key='selected_label')
                     if selected_label != 'No selection':
                         st.session_state['label'] = selected_label
                         if st.button("Confirm Label Language"):
                             st.session_state.label_selected = True
                             st.success(f"Label column '{selected_label}' has been selected.")
-                            st.markdown("""
-                                        <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'>
-                                            <span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span>
-                                            <span style='color: #014bb4; font-style: italic; font-size: 20px;'>Select education indicators</span>
-                                        </div>
-                                        """, unsafe_allow_html=True)
+                            st.markdown(translations["proceed_to_next_step"], unsafe_allow_html=True)
+
     else:
-        st.warning("No data uploaded. Please go to the previous page and upload data.")     
+        st.warning(translations["no_data"])     
 ##-----------------------------
 # Function to select indicators
 def select_indicators():
     if 'edu_data' in st.session_state and st.session_state.get('label_selected', False) :
         edu_data = st.session_state['edu_data']
-        st.subheader("Select the correct variables and indicators.")
-        st.markdown("""
-            <div style='background-color: #FDFD96; border-radius: 5px; padding: 10px; margin: 10px 0;'>
-            <h6 style='color: #162AFD; margin: 0; padding: 0;'>Please check carefully when selecting a variable. The choice of indicators directly impacts the PiN calculation.⚠️</h6>
-            </div>
-            """, unsafe_allow_html=True)
+        # Display the translated subheader
+        st.subheader(translations["select_variables_and_indicators_subheader"])
+
+        # Display the translated HTML content
+        st.markdown(translations["check_variable_warning_html"], unsafe_allow_html=True)
 
         age_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['age', 'âge', 'year'])]
         gender_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['sex', 'gender', 'sexe', 'genre'])]
         education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole'])]
 
         # Checkbox to show/hide the data header
-        if st.checkbox('Display Education Data Header (This can assist in inspecting the contents of the data frame)'):
+        if st.checkbox(translations["display_education_data_header_checkbox"]):
             st.dataframe(edu_data.head())
         
         if age_suggestions:
@@ -400,23 +408,20 @@ def select_indicators():
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
         if education_indicator_suggestions:
-            st.session_state['access_var'] = handle_full_selection(education_indicator_suggestions, 'education_access', "% of children accessing education:")    
-            st.session_state['teacher_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_teacher', "% of children whose access to education was disrupted due to teacher strikes or absenteeism:") 
-            st.session_state['idp_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_idp', "% of children whose access to education was disrupted due the school being used as a shelter by displaced persons:") 
-            st.session_state['armed_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_armed', "% of children whose access to education was disrupted due the school being occupied by armed groups:") 
-            st.session_state['barrier_var'] = handle_full_selection(education_indicator_suggestions, 'barriers', "main barriers to access education:") 
+            st.session_state['access_var'] = handle_full_selection(education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
+            st.session_state['teacher_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
+            st.session_state['idp_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
+            st.session_state['armed_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"])  
+            st.session_state['barrier_var'] = handle_full_selection(education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
             check_for_duplicate_selections()
         if st.button("Confirm Indicators"):
             st.session_state.indicators_confirmed = True
             st.success("Indicators confirmed!")
-            st.markdown("""
-            <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'>
-                <span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span>
-                <span style='color: #014bb4; font-style: italic; font-size: 20px;'>Define aggravating cicurmstances</span>
-            </div>
-            """, unsafe_allow_html=True)
+
+            # Display the HTML content
+            st.markdown(translations["proceed_to_next_step3"], unsafe_allow_html=True)
     else:
-        st.warning("Please go to the previous step and first select the right sheets in the MSNA data file.") 
+        st.warning(translations["no_data"]) 
 ##-----------------------------
 # Function to define severity of barriers
 def define_severity():
@@ -430,23 +435,7 @@ def define_severity():
         barrier_options = find_barrier_details(barrier_var, survey_data, choices_data, selected_label)
 
         # Encapsulate descriptions within a single box with a light gray background
-        st.markdown("""
-            <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ccc;'>
-                <h5 style='color: #c0474a;'>For the next part, please refer to the PiN methodology shared on the home page!</h5>
-                <h6 style='color: #014bb4;'>Severity 4 aggravating circumstances:</h6>
-                <ul>
-                    <li>Child marriage and child labour (work at home or on the household's own farm -- in income generating activities).</li>
-                    <li>Protection risks while traveling to/at the school (includes dangers and injuries, physical and emotional maltreatment, sexual and gender based violence, and verbal harassment, mental health and psychosocial distress).</li>
-                    <li>Lack of documentation for school enrollment: household is recently displaced and this is the reason why they do not have documentation.</li>
-                    <li>Discrimination or stigmatization affecting access to education.</li>
-                </ul>
-                <h6 style='color: #014bb4;'>Severity 5 aggravating circumstances:</h6>
-                <ul>
-                    <li>Children recruitment by armed groups.</li>
-                    <li>In some specific contexts, the presence of bans preventing children from attending education.</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown(translations["severity_circumstances_html"], unsafe_allow_html=True)
         
         selected_severity_4_barriers = select_severity_barriers(barrier_options, 4)
         barrier_options_5 = [option for option in barrier_options if option not in selected_severity_4_barriers]
@@ -454,22 +443,15 @@ def define_severity():
         if st.button("Confirm Severity Definitions"):
             st.session_state.severity_confirmed = True
             st.success("Severity definitions confirmed!")
-            st.markdown("""
-                    <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'>
-                        <span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span>
-                        <span style='color: #014bb4; font-style: italic; font-size: 20px;'>Define disaggregation variables</span>
-                    </div>
-                    """, unsafe_allow_html=True)  
+            # Display the HTML content
+            st.markdown(translations["disaggregation_variables_html"], unsafe_allow_html=True)
     else:
-        st.warning("Please return to the previous step and first select the correct variable referring to barriers to access education.")          
+        st.warning(translations["barriers_warning_message"])          
 ##-----------------------------
 # Function to handle administrative details and final confirmations
 def finalize_details():
     if st.session_state.get('severity_confirmed', False):
-        st.subheader("Choose the correct disaggregation variables and their values")
-
-
-
+        st.subheader(translations["choose_disaggregation_variables_subheader"])
         #admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
 
         # Check if the country has been selected on the first page
@@ -484,10 +466,9 @@ def finalize_details():
             admin_level_options = ['No selection']
 
         # Display the selectbox with an integrated markdown for instructions
-        st.markdown(
-            f"What is the smallest administrative level in **{selected_country}** at which we can calculate the PiN to ensure the results are representative? <span style='color: darkred; font-weight: bold;'>Please ensure that the selected administrative level corresponds to the same administrative level as that of the OCHA population data.</span>",
-            unsafe_allow_html=True
-        )
+        admin_message = translations["smallest_admin_level"]
+        markdown_message = admin_message.format(selected_country=selected_country)
+        st.markdown(markdown_message, unsafe_allow_html=True)
 
 
         admin_target = st.selectbox(
@@ -511,7 +492,7 @@ def finalize_details():
         months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 
                 'July', 'August', 'September', 'October', 'November', 'December']
         start_school_selection = st.selectbox(
-            "When does the school year officially start? Needed for the estimate of the correct age",
+            translations["start_message"],
             months,
             index=0,  # Default to 'No selection'
             key='start_school_selection'
@@ -533,7 +514,7 @@ def finalize_details():
         ## -------------------- school cycle -----------------------------------
         upper_primary_start = st.session_state['lower_primary_end'] +1
         lower_primary_end = st.slider(
-            "Which is the age range for the lower primary school cycle?",
+            translations["school1"],
             min_value=6, 
             max_value=17, 
             value=st.session_state['lower_primary_end'],
@@ -549,14 +530,14 @@ def finalize_details():
                 upper_primary_start = lower_primary_end +1                   
 
         with col2:
-            if st.button('There is only one cycle of primary, followed by secondary school'):
+            if st.button(translations["school2"]):
                 st.session_state.single_cycle = True
 
         # Depending on user selection, show different sliders or information
         if 'single_cycle' in st.session_state and not st.session_state['single_cycle']:
             # Slider for the upper primary school cycle age range
             upper_primary_end = st.slider(
-                "Which is the age range for the intermediate level (upper primary school / lower secondary)?",
+                translations["school3"],
                 min_value=upper_primary_start, 
                 max_value=17, 
                 value=st.session_state['upper_primary_end'],
@@ -573,14 +554,15 @@ def finalize_details():
                 vect1 =  st.session_state['lower_primary_end']  
                 vect2 =  st.session_state['upper_primary_end']
                 st.session_state['vector_cycle'] = [vect1,vect2]
-                st.markdown(f"""
-                <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
-                    <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
-                    <div><strong>Lower Primary School:</strong> 6 - {lower_primary_end}</div>
-                    <div><strong>Upper Primary School:</strong> {upper_primary_start} - {upper_primary_end}</div>
-                    <div><strong>Secondary School:</strong> {secondary_start} - 17</div>
-                </div>
-                """, unsafe_allow_html=True)
+                school4_message = translations["school4"]
+                school4_content = school4_message.format(
+                lower_primary_end=lower_primary_end,
+                upper_primary_start=upper_primary_start,
+                upper_primary_end=upper_primary_end,
+                secondary_start=secondary_start
+                )
+                st.markdown(school4_content, unsafe_allow_html=True)
+
 
 
         elif 'single_cycle' in st.session_state and st.session_state['single_cycle']:
@@ -590,14 +572,15 @@ def finalize_details():
             vect1 =  st.session_state['lower_primary_end']  
             vect2 =  0
             st.session_state['vector_cycle'] = [vect1,vect2]
-            st.markdown(f"""
-                <div style="border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;">
-                    <h6 style="color: #555555; margin-bottom: 5px;">Confirmed Age Ranges:</h6>
-                    <div><strong>Primary School:</strong> 6 - {primary_end}</div>
-                    <div><strong>Secondary School:</strong> {secondary_start} - 17</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
+            school5_message = translations["school5"]
+            # Insert the dynamic values into the HTML template
+            school5_content = school5_message.format(
+                primary_end=primary_end,
+                secondary_start=secondary_start
+            )
+
+            # Display the HTML content
+            st.markdown(school5_content, unsafe_allow_html=True)
         
 
         handle_displacement_column_selection()
@@ -650,7 +633,7 @@ if all([
     st.markdown("---")  # Markdown horizontal rule
     col1, col2 = st.columns([0.60, 0.40])
     with col2: 
-        st.page_link("pages/3_📋_Download_--_PiN_figures_and_other_outputs.py", label="Proceed to the PiN Calculation and downloading page 	:arrow_right:", icon='📋')
+        st.page_link("pages/3_📋_Download_--_PiN_figures_and_other_outputs.py", label=translations['to_page3'], icon='📋')
     
     #if st.button('Calculate PiN'):
 

@@ -1,0 +1,99 @@
+{
+    "Title": "# Calculer le nombre de personnes dans le besoin (PiN)",
+    "methodology": "Le calcul des personnes en détresse (PiN) pour le secteur de l'éducation dans le cadre d'un aperçu des besoins humanitaires (HNO) implique l'agrégation de données sur les besoins éducatifs de diverses régions géographiques et de divers groupes touchés par les crises.\n\nCe processus, guidé par l'OCHA des Nations Unies, aide à la planification et à l'allocation des ressources en détaillant l'ampleur et la sévérité des besoins éducatifs dans différentes régions et populations, y compris les personnes déplacées et les populations locales. Le calcul du PiN fournit des informations cruciales sur l'endroit et la manière dont les ressources doivent être distribuées, avec des données ventilées par emplacement géographique, groupe affecté, sévérité des conditions éducatives et sexe.\n\nLe guide complet est disponible ici : \n\n### Comment utiliser cet outil de calcul du PiN ?\n\n**👈 En suivant l'ordre indiqué dans l'encadré**\n\n- Sélectionnez votre pays, **téléchargez les données MSNA** et les données de population OCHA (si présentes);\n- Vérifiez et sélectionnez les indicateurs d'éducation et triez les obstacles à l'éducation selon la catégorie de sévérité;\n- Calculez le PiN!\n- Téléchargez les tableaux finaux. Si les chiffres de la population OCHA ont été fournis, les résultats montreront le nombre final de personnes dans le besoin.\n- Les résultats sont ventilés par : \n  - Le genre\n  - La zone géographique\n  - Les différents groupes affectés tels que définis dans le profil humanitaire du pays (IDP, résidents, rapatriés, réfugiés)\n  - La sévérité des conditions d'éducation, déterminée par le degré de besoins non satisfaits à travers les quatre dimensions\n  - Les dimensions du PiN\n\n#### Questions ? Problèmes ?\nVous pouvez contacter:",
+    "title_page1": "Télécharger les données du MSNA et de l'OCHA",
+    "warning_ocha":"Veuillez télécharger les données OCHA pour continuer.",
+    "warning_missing_country": "Veuillez sélectionner un pays valide pour continuer",
+    "warning_MSNA":"Veuillez télécharger les données MSNA pour continuer.",
+    "no_user": "Veuillez vous connecter à partir de la page d'accueil et réessayer.",
+    "page1_country": "Quel est le pays pour lequel vous voulez calculer le PiN ?",
+    "refresh":"Données MSNA déjà téléchargées. Si vous souhaitez modifier les données, il vous suffit de rafraîchir la page 🔄",
+    "upload_msna": "Téléchargez votre fichier MSNA d'entrée.",
+    "wait": "Ce processus peut prendre un certain temps ; veuillez patienter encore un peu. 🐌🐌🐌🐌",
+    "ok_upload":"Données téléchargées avec succès !",
+    "download_template_message": "\n<div style=\"background-color: #e6f7ff; padding: 10px; border-radius: 5px;\">\n    <p style=\"color: #00529B;\">\n        Vous pouvez télécharger le modèle et le remplir avec les chiffres de population fournis par l'OCHA.\n        Veuillez vous assurer de suivre le format du modèle.\n    </p>\n    <p style=\"color: red; margin-top: 0;\">\n        LES COLONNES JAUNES SONT OBLIGATOIRES\n    </p>\n</div>",
+    "template": "Télécharger le modèle de données sur la population d'OCHA",
+    "missing_columns_message": "Colonnes obligatoires manquantes : {missing_columns}",
+    "children_sum_mismatch_error": "Ligne {index} (Admin: {admin}) : La somme des catégories de groupes de population individuelles ne correspond pas au total des 'Enfants (5-17)'",
+    "girls_boys_sum_mismatch_error": "Ligne {index} (Admin: {admin}) : La somme des 'Filles' et des 'Garçons' ne correspond pas au total des 'Enfants (5-17)'",
+    "data_valid": "Les données sont valides",
+    "upload_ocha": "Téléchargez votre fichier OCHA d'entrée.",
+    "proceed_to_calculation_label": "Aller à la page de calcul du PiN :arrow_right:",
+    "title_page2": "Catégorisation des indicateurs et de la sévérité",
+    "step1":"Sélectionnez le cadre de données correct et la langue",
+    "step2":"Sélectionnez les indicateurs d'éducation",
+    "step3":"Définir les circonstances aggravantes",
+    "step4":"Définir les variables de désagrégation",
+    "full_message": "Veuillez sélectionner la variable requise pour mesurer <span style='color: #014bb4;'><strong>{custom_message}</strong></span>",
+    "confirm_button_label": "Confirmer {column_type}",
+    "column_confirmed_message": "La colonne {column_type} '{selected_column}' a été sélectionnée manuellement.",
+    "error_message": "Veuillez sélectionner une option valide pour {column_type} avant de confirmer.",
+    "is_this_individual_column_message": "Est-ce la colonne individuelle {column_type} ? → **{suggested_column}**",
+    "indicator_selection_confirmed": "Sélection de l'indicateur confirmée",
+    "select_aggravating_circumstances_message": "Sélectionnez les circonstances aggravantes relevant de **la sévérité 4** :",
+    "confirm_button_label_severity": "Confirmer les barrières de sévérité {severity}",
+    "prompt_message": "Sélectionnez les circonstances aggravantes relevant de **la sévérité {severity}**, vous pouvez sélectionner plusieurs choix:",
+    "none_of_listed_barriers": "---> Aucune des barrières listées <---",
+    "success_message": "Les barrières de sévérité {severity} sélectionnées ont été confirmées.",
+    "confirmed_barriers_message": "Barrières de sévérité {severity} confirmées :",
+    "duplicate_selections_error": "**Sélections en double détectées. Chaque variable doit être utilisée pour une seule catégorie. Veuillez ajuster vos sélections.**",
+    "select_status": "Sélectionnez la variable correspondant au statut du ménage (communauté d'accueil, déplacé interne, rapatrié) :",
+    "sheet": "Sélection des feuilles pertinentes dans le fichier de données MSNA",
+    "select_household_data_sheet": "Sélectionnez la feuille de données des ménages :",
+    "select_survey_kobo_sheet": "Sélectionnez la feuille d'enquête/Kobo :",
+    "select_education_loop_data_sheet": "Sélectionnez la feuille de données de la boucle éducative (ou boucle individuelle) :",
+    "select_kobo_choice_sheet": "Sélectionnez la feuille de choix Kobo :",
+    "label_json": "Sélectionnez la colonne d'étiquettes souhaitée :",
+    "proceed_to_next_step_markdown": "**Passez à l'étape suivante :**",
+    "select_education_indicators_markdown": "_Sélectionnez les indicateurs éducatifs_",
+    "proceed_to_next_step": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Passez à l'étape suivante :</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Sélectionnez les indicateurs éducatifs</span></div>",
+    "no_data": "Aucune donnée n'a été téléchargée. Veuillez aller à la page précédente et télécharger les données.",
+    "select_variables_and_indicators_subheader": "Sélectionnez les variables et indicateurs corrects.",
+    "check_variable_warning_html": "<div style='background-color: #FDFD96; border-radius: 5px; padding: 10px; margin: 10px 0;'><h6 style='color: #162AFD; margin: 0; padding: 0;'>Veuillez vérifier attentivement lors de la sélection d'une variable. Le choix des indicateurs a un impact direct sur le calcul du PiN.⚠️</h6></div>",
+    "display_education_data_header_checkbox": "Afficher l'en-tête des données d'éducation (Cela peut aider à inspecter le contenu du cadre de données)",
+    "access_var_prompt": "% d'enfants accédant à l'éducation :",
+    "teacher_disruption_var_prompt": "% d'enfants dont l'accès à l'éducation a été perturbé en raison de grèves d'enseignants ou d'absentéisme :",
+    "idp_disruption_var_prompt": "% d'enfants dont l'accès à l'éducation a été perturbé en raison de l'utilisation de l'école comme abri par des personnes déplacées :",
+    "armed_disruption_var_prompt": "% d'enfants dont l'accès à l'éducation a été perturbé en raison de l'occupation de l'école par des groupes armés :",
+    "barrier_var_prompt": "Principaux obstacles à l'accès à l'éducation :",
+    "proceed_to_next_step3": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Passez à l'étape suivante :</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Définir les circonstances aggravantes</span></div>",
+    "severity_circumstances_html": "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ccc;'><h5 style='color: #c0474a;'>Pour la prochaine partie, veuillez vous référer à la méthodologie PiN partagée sur la page d'accueil !</h5><h6 style='color: #014bb4;'>Circonstances aggravantes de sévérité 4 :</h6><ul><li>Mariage des enfants et travail des enfants (travail à domicile ou sur la ferme familiale -- dans des activités génératrices de revenus).</li><li>Risques de protection lors des déplacements vers/à l'école (y compris dangers et blessures, mauvais traitements physiques et émotionnels, violences sexuelles et sexistes, harcèlement verbal, détresse psychologique et psychosociale).</li><li>Manque de documentation pour l'inscription scolaire : le ménage a récemment été déplacé et c'est la raison pour laquelle ils n'ont pas de documentation.</li><li>Discrimination ou stigmatisation affectant l'accès à l'éducation.</li></ul><h6 style='color: #014bb4;'>Circonstances aggravantes de sévérité 5 :</h6><ul><li>Recrutement d'enfants par des groupes armés.</li><li>Dans certains contextes spécifiques, la présence d'interdictions empêchant les enfants de fréquenter l'école.</li></ul></div>",
+    "disaggregation_variables_html": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Passez à l'étape suivante :</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Définir les variables de désagrégation</span></div>",
+    "barriers_warning_message": "Veuillez revenir à l'étape précédente et sélectionner d'abord la variable correcte faisant référence aux obstacles à l'accès à l'éducation.",
+    "choose_disaggregation_variables_subheader": "Choisissez les bonnes variables de désagrégation et leurs valeurs",
+    "smallest_admin_level": "Quel est le plus petit niveau administratif en **{selected_country}** auquel nous pouvons calculer le PiN pour garantir que les résultats sont représentatifs ? <span style='color: darkred; font-weight: bold;'>Veuillez vous assurer que le niveau administratif sélectionné correspond au même niveau administratif que celui des données de population de l'OCHA.</span>",
+    "start_message": "Quand l'année scolaire commence-t-elle officiellement ? Nécessaire pour l'estimation de l'âge correct",
+    "school1": "Quelle est la tranche d'âge pour le premier cycle de l'école primaire ?",
+    "school2": "Il n'y a qu'un seul cycle d'enseignement primaire, suivi d'un cycle d'enseignement secondaire",
+    "school3": "Quelle est la tranche d'âge pour le niveau intermédiaire (école primaire supérieure / école secondaire inférieure) ?",
+    "school4": "<div style='border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;'><h6 style='color: #555555; margin-bottom: 5px;'>Tranches d'âge confirmées :</h6><div><strong>École primaire inférieure :</strong> 6 - {lower_primary_end}</div><div><strong>École primaire supérieure :</strong> {upper_primary_start} - {upper_primary_end}</div><div><strong>École secondaire :</strong> {secondary_start} - 17</div></div>",
+    "school5": "<div style='border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;'><h6 style='color: #555555; margin-bottom: 5px;'>Tranches d'âge confirmées :</h6><div><strong>École primaire :</strong> 6 - {primary_end}</div><div><strong>École secondaire :</strong> {secondary_start} - 17</div></div>",
+    "to_page3": "Proceed to the PiN Calculation and downloading page",
+    "pin_calculation_results_title": "Résultats du calcul du PiN",
+    "pin_calculation_message": "Le PiN est actuellement en cours de calcul (veuillez patienter, car cela peut prendre un certain temps) en utilisant les variables d'entrée sélectionnées. Les résultats incluent des tableaux de résultats PiN adaptés à la soumission à l'OCHA et un instantané spécifique qui peut être intégré à l'analyse contextuelle.",
+    "hno_guidelines_message": "Pour le HNO, il est attendu que les clusters d'éducation fournissent une ventilation détaillée du PiN couvrant :\n\n- **Zone géographique** : Répartition par régions géographiques spécifiques.\n- **Groupes affectés** : PiN détaillé pour différents profils humanitaires (par exemple, PDI, résidents, rapatriés, réfugiés).\n- **Sévérité des conditions éducatives** : Basé sur les besoins non satisfaits dans quatre dimensions clés. Les données doivent montrer le nombre d'enfants par niveau de sévérité dans chaque groupe affecté, dans les zones géographiques.\n- **Désagrégation par sexe** : Assurez-vous que les données sont réparties par sexe.\n- **Tranche d'âge** : Le PiN doit couvrir au moins les niveaux d'éducation obligatoires, conformément aux politiques éducatives nationales.\n\nUne fois que les niveaux préliminaires de PiN et de sévérité ont été estimés, il est important de les examiner et de les ajuster en fonction des données secondaires et de l'avis d'experts. Si des ajustements sont effectués, assurez-vous qu'ils sont fondés sur des preuves et clairement documentés. En cas de divergences, envisagez de revoir l'ensemble de la méthodologie plutôt que de simplement ajuster les chiffres.",
+    "hno_guidelines_subheader": "Directives pour l'aperçu des besoins humanitaires (HNO)",
+    "download_pin": "Télécharger les résultats et les tableaux du PiN",
+    "download_word": "Télécharger le Country Snapshot : Profil des enfants en détresse et aperçu des besoins"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  }
+  

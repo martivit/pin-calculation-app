@@ -9,25 +9,33 @@ from add_PiN_severity import add_severity
 from calculation_for_PiN_Dimension import calculatePIN
 from vizualize_PiN import create_output
 from snapshot_PiN import create_snapshot_PiN
+from shared_utils import language_selector
+
 
 st.logo('pics/logos.png')
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
 
+# Call the language selector function
+language_selector()
+
+# Access the translations
+translations = st.session_state.translations
+
 if 'password_correct' not in st.session_state:
-    st.error('Please Login from the Home page and try again.')
+    st.error(translations["no_user"])
     st.stop()
 
 if 'uploaded_data' not in st.session_state:
-    st.warning("No data uploaded. Please go to the 'Upload' page and upload data.")  
+    st.warning(translations["no_data"])  
     st.stop()
 
 ## ====================================================================================================
 ## ===================================== calculate and download the PiN
 ## ====================================================================================================
 # Streamlit app layout
-st.title("PiN Calculation Results")
-st.write('The PiN is currently being calculated (please be patient, as this may take some time) using the selected input variables. The outputs include PiN result tables suitable for submission to OCHA and a specific snapshot that can be integrated with contextual analysis.')
+st.title(translations["pin_calculation_results_title"])
+st.write(translations["pin_calculation_message"])
 
 
 
@@ -103,7 +111,7 @@ doc_snapshot = create_snapshot_PiN(country_label, final_overview_df, final_overv
 #)
 
 st.download_button(
-    label="Download PiN results, tables",
+    label=translations["download_pin"],
     data=ocha_excel.getvalue(),
     file_name=f"PiN_overview_OCHA_{country_label}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -124,23 +132,11 @@ st.download_button(
 #)
 
 st.download_button(
-    label="Download Country Snapshot: Children in Need Profile and Overview of Needs",
+    label=translations["download_word"],
     data=doc_snapshot.getvalue(),
     file_name="pin_snapshot.docx",
     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )
 
-st.subheader("Guidelines for Humanitarian Needs Overview (HNO)")
-st.write(
-    """
-    For the HNO, it is expected that Education Clusters will provide a detailed breakdown of PiN covering:
-    
-    - **Geographical Area**: Breakdown by specific geographic regions.
-    - **Affected Groups**: Detailed PiN for different humanitarian profiles (e.g., IDPs, residents, returnees, refugees).
-    - **Severity of Education Conditions**: Based on the unmet needs across four key dimensions. Data should show the number of children by severity level in each affected group, across geographic areas.
-    - **Sex Disaggregation**: Ensure the data is split by gender.
-    - **Age Range**: The PiN should cover at least compulsory education levels, in line with national education policies.
-    
-    Once preliminary PiN and severity levels have been estimated, it is important to review and adjust based on secondary data and expert opinion. If adjustments are made, ensure they are evidence-based and clearly documented. Where discrepancies arise, consider reviewing the entire methodology rather than simply adjusting the numbers.
-    """
-)
+st.subheader(translations["hno_guidelines_subheader"])
+st.markdown(translations["hno_guidelines_message"])
