@@ -99,7 +99,7 @@ ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OC
 #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
 #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
 
-doc_snapshot = create_snapshot_PiN(country_label, final_overview_df, final_overview_dimension_df)
+#doc_snapshot = create_snapshot_PiN(country_label, final_overview_df, final_overview_dimension_df)
 
 
 
@@ -132,12 +132,12 @@ st.download_button(
 #    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 #)
 
-st.download_button(
-    label=translations["download_word"],
-    data=doc_snapshot.getvalue(),
-    file_name="pin_snapshot.docx",
-    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-)
+#st.download_button(
+#    label=translations["download_word"],
+#    data=doc_snapshot.getvalue(),
+#    file_name="pin_snapshot.docx",
+#    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+#)
 
 st.subheader(translations["hno_guidelines_subheader"])
 st.markdown(translations["hno_guidelines_message"])
