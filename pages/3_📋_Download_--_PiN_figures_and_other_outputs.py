@@ -95,7 +95,7 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 # Create the Excel files
 #jiaf_excel = create_output(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL",   admin_var, dimension= False, ocha= False, tot_severity=Tot_PiN_by_admin)
-ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df,  "PiN TOTAL",   admin_var, dimension= False, ocha= True, tot_severity=Tot_PiN_by_admin)
+ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df,  "PiN TOTAL",   admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
 #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
 #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
 
