@@ -204,7 +204,7 @@ def apply_final_formatting(workbook, overview_df, small_overview_df, admin_var):
 
             for row in ws.iter_rows(min_row=5, max_row=ws.max_row, min_col=3, max_col=ws.max_column):  # Adjust columns as needed
                 for cell in row:
-                    if not cell.value:  # If the cell is empty, set white background
+                    if cell.value is None or (isinstance(cell.value, str) and cell.value.strip() == ""):  
                         cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")
                     else:  # If the cell has a value, apply black border
                         cell.border = thin_border
