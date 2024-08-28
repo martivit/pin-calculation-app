@@ -100,7 +100,8 @@ edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
 (severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,
  female_pin_per_admin_status, male_pin_per_admin_status, 
  pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary, 
- Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df, final_overview_dimension_df,
+ Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, final_overview_df_MSNA,
+   final_overview_dimension_df,
  Tot_PiN_by_admin,
    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,
                                                                                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
@@ -114,11 +115,11 @@ edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
 
 
 # Create the Excel files
-jiaf_excel = create_output(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL",   admin_var, dimension= False, ocha= False)
-ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df,  "PiN TOTAL",   admin_var, dimension= False, ocha= True, tot_severity=Tot_PiN_by_admin)
-dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
-dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
-doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_dimension_df)
+jiaf_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA,"PiN TOTAL",  admin_var,  ocha= False)
+ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
+#dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
+#dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
+#doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_dimension_df)
 
 
 
@@ -140,7 +141,10 @@ file_path_factor_uprimary3= 'output_validation/04_pin_factor_upperprimary.xlsx'
 file_path_factor_secondary3= 'output_validation/04_pin_factor_secondary.xlsx'
 
 file_path_overview= 'output_validation/05_pin_overview.xlsx'
+file_path_overview_OCHA= 'output_validation/05_pin_overview_OCHA.xlsx'
+
 file_path_dimension_overview= 'output_validation/05_dimension_overview.xlsx'
+
 file_path_pin_tot_by_admin = 'output_validation/06_pin_tot_by_admin_area_severity.xlsx'
 
 
@@ -230,6 +234,8 @@ with pd.ExcelWriter(file_path_factor_secondary3) as writer:
 
 
 final_overview_df.to_excel(file_path_overview, index=False, engine='openpyxl')
+final_overview_df_OCHA.to_excel(file_path_overview_OCHA, index=False, engine='openpyxl')
+
 final_overview_dimension_df.to_excel(file_path_dimension_overview, index=False, engine='openpyxl')
 Tot_PiN_by_admin.to_excel(file_path_pin_tot_by_admin, index=False, engine='openpyxl')
 
@@ -244,16 +250,16 @@ with open("output_validation/final__OCHA__platform_output.xlsx", "wb") as f:
     f.write(ocha_excel.getbuffer())
 
 # Save dimension_jiaf_excel
-with open("output_validation/final__dimension_JIAF__platform_output.xlsx", "wb") as f:
-    f.write(dimension_jiaf_excel.getbuffer())
+#with open("output_validation/final__dimension_JIAF__platform_output.xlsx", "wb") as f:
+    #f.write(dimension_jiaf_excel.getbuffer())
 
 # Save dimension_ocha_excel
-with open("output_validation/final__dimension_OCHA__platform_output.xlsx", "wb") as f:
-    f.write(dimension_ocha_excel.getbuffer())
+#with open("output_validation/final__dimension_OCHA__platform_output.xlsx", "wb") as f:
+    #f.write(dimension_ocha_excel.getbuffer())
 
 
 
 # Save the Word document to a file
 file_path = "output_validation/pin_snapshot_with_charts_and_text2.docx"
-with open(file_path, "wb") as f:
-    f.write(doc_output.getvalue())
+#with open(file_path, "wb") as f:
+    #f.write(doc_output.getvalue())

@@ -1138,34 +1138,42 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         dfs.append(single_row_df)
 
     # Determine the strata_summarized_data based on the value of single_cycle
+    strata_summarized_data_OCHA = [
+    overview_girl,
+    overview_boy,
+    overview_ece,
+    overview_disabilty
+    ]
     if single_cycle:
-        strata_summarized_data = [
-            #overview_girl,
-            #overview_boy,
+        strata_summarized_data_MSNA = [
             overview_girl_strata,
             overview_boy_strata,
-            overview_ece,
+            #overview_ece_strata,
             overview_primary,
-            overview_secondary,
-            overview_disabilty
+            overview_secondary
         ]
     else:
-        strata_summarized_data = [
-            #overview_girl,
-            #overview_boy,
+        strata_summarized_data_MSNA = [
             overview_girl_strata,
             overview_boy_strata,
-            overview_ece,
+            #overview_ece_strata,
             overview_primary,
             overview_upper_primary,
-            overview_secondary,
-            overview_disabilty
+            overview_secondary
         ]
 
+
+    final_overview_df = pd.concat(dfs, ignore_index=True) ## table with all severities and tot and pop_group
+    small_overview = dfs
+    MSNA_overview = dfs
     # Add the remaining summarized data to the list
-    dfs.extend(strata_summarized_data)
+    small_overview.extend(strata_summarized_data_OCHA)
     # Concatenate all DataFrames in the list into a single DataFrame
-    final_overview_df = pd.concat(dfs, ignore_index=True)
+    final_overview_df_OCHA = pd.concat(small_overview, ignore_index=True) ## table to reduce with all the population figures numbers
+
+    MSNA_overview.extend(strata_summarized_data_MSNA)
+    final_overview_df_MSNA = pd.concat(MSNA_overview, ignore_index=True) ## table to reduce with all the population figures numbers
+
 
     ## organization and manipulation 
     cols = list(final_overview_df.columns)
@@ -1174,6 +1182,13 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     del final_overview_df[admin_var]
     del final_overview_df['Admin Pcode']
     final_overview_df = final_overview_df.rename(columns={'Category': 'Strata'})
+
+    cols_ocha = list(final_overview_df_OCHA.columns)
+    cols_ocha.insert(cols_ocha.index(admin_var) + 1, cols_ocha.pop(cols_ocha.index('Category')))
+    final_overview_df_OCHA = final_overview_df_OCHA[cols_ocha]
+    del final_overview_df_OCHA[admin_var]
+    del final_overview_df_OCHA['Admin Pcode']
+    final_overview_df_OCHA = final_overview_df_OCHA.rename(columns={'Category': 'Strata'})
 
     final_overview_df[label_perc2] = final_overview_df[label_tot2]/final_overview_df[label_tot_population]
     final_overview_df[label_perc3] = final_overview_df[label_tot3]/final_overview_df[label_tot_population]
@@ -1276,6 +1291,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     process_dataframe(final_overview_df)
     final_overview_df[label_tot_population] = pd.to_numeric(final_overview_df[label_tot_population], errors='coerce').round(figures_round)
 
+    process_dataframe(final_overview_df_OCHA)
+    final_overview_df_OCHA[label_tot_population] = pd.to_numeric(final_overview_df_OCHA[label_tot_population], errors='coerce').round(figures_round)
+    final_overview_df_OCHA = final_overview_df_OCHA[['Strata', 'Population group',label_tot]]
 
     # Process final_overview_dimension_df
     process_dataframe(final_overview_dimension_df)
@@ -1474,4 +1492,4 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
 
-    return severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df, final_overview_dimension_df,Tot_PiN_by_admin, country_label
+    return severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, final_overview_df_MSNA,final_overview_dimension_df,Tot_PiN_by_admin, country_label

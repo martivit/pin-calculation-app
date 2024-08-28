@@ -4,6 +4,8 @@ from io import BytesIO
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
+from openpyxl.utils.dataframe import dataframe_to_rows
+
 
 int_2 = '2.0'
 int_3 = '3.0'
@@ -105,91 +107,145 @@ color_mapping_dimension = {
 }
 
 alignment_columns = list(color_mapping.keys())
-
-def apply_formatting(workbook, color_mapping, alignment_columns, colors, admin_var):
+def apply_final_formatting(workbook, overview_df, small_overview_df, admin_var):
     for ws in workbook.worksheets:
-        # Add empty rows at the top
-        ws.insert_rows(1, 4)
-        # Add empty columns to the left
-        ws.insert_cols(1, 4)
+        
 
-        # Add the sheet name as a title in the first row
-        title = ws.title
-        if ws.title != "PiN TOTAL":
-            title += " (5-17 y.o.)"
-        max_col = ws.max_column
-        ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
-        title_cell = ws.cell(row=1, column=5)
-        title_cell.value = title
-        title_cell.font = Font(bold=True, size=14)
-        title_cell.alignment = Alignment(horizontal='center', vertical='center')
 
-        # Set column widths based on content
-        for column in ws.columns:
-            max_length = 0
-            column_letter = None
-            for cell in column:
-                if cell.value and not isinstance(cell, MergedCell):
-                    try:
-                        max_length = max(max_length, len(str(cell.value)))
-                        column_letter = cell.column_letter  # Get the column letter
-                    except Exception as e:
-                        print(f"Error: {e}, Cell: {cell}")
-
-            if column_letter:
-                adjusted_width = max_length + 2
-                ws.column_dimensions[column_letter].width = adjusted_width
-
-        # Bold specific columns
-        for row in ws.iter_rows(min_row=6, max_col=ws.max_column, max_row=ws.max_row):  # Start from the data row
-            for cell in row:
-                col_name = ws.cell(row=5, column=cell.column).value  # Row 5 contains the headers
-                if col_name in [label_perc_tot, label_admin_severity, label_tot, admin_var]:
-                    cell.font = Font(bold=True)  # Apply bold font
-
-        # Check if the worksheet is "PiN TOTAL"
         if ws.title == "PiN TOTAL":
-            for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
-                for cell in row:
-                    col_name = ws.cell(row=5, column=cell.column).value
-                    if col_name in alignment_columns:
-                        cell.alignment = Alignment(horizontal='right', vertical='center')
+            # Clear existing content in the worksheet
+            ws.delete_rows(1, ws.max_row)
 
-            # Iterate through the rows starting from the first data row
-            for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
-                strata_value = row[4].value  # 'Strata' column should be the 5th column after inserting 4 empty columns
+            # Add empty rows at the top and adjust columns
+            ws.insert_rows(1, 4)
+            ws.insert_cols(1, 2)
 
-                # Determine the fill color based on 'Strata' value
+            # Write small_overview_df on the left (columns C-E)
+            for r_idx, row in enumerate(dataframe_to_rows(small_overview_df, index=False, header=True), start=5):
+                for c_idx, value in enumerate(row, start=3):  # Start writing in column C
+                    ws.cell(row=r_idx, column=c_idx, value=value)
+
+            # Write overview_df on the right (columns H onwards)
+            for r_idx, row in enumerate(dataframe_to_rows(overview_df, index=False, header=True), start=5):
+                for c_idx, value in enumerate(row, start=8):  # Start writing in column H
+                    ws.cell(row=r_idx, column=c_idx, value=value)
+
+            # Merge the title cell across all filled columns and ensure it is centered
+            max_col = ws.max_column
+            ws.merge_cells(start_row=1, start_column=3, end_row=1, end_column=max_col)
+            title_cell = ws.cell(row=1, column=3)
+            title_cell.value = "PiN TOTAL"
+            title_cell.font = Font(bold=True, size=14)
+            title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Set header formatting (bold, orange fill)
+            for cell in ws[5]:
+                cell.font = Font(bold=True)
+                cell.fill = PatternFill(start_color=colors["light_orange"], end_color=colors["light_orange"], fill_type="solid")
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Apply color formatting and borders based on the content of cells
+            for row in ws.iter_rows(min_row=6, max_row=ws.max_row):
+                strata_value = row[2].value  # Adjusting for zero-indexing; column C is the 'Strata' column
+                
                 if strata_value == "TOTAL (5-17 y.o.)":
                     fill_color = colors["bluepin"]
                     for cell in row:
+                        cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
                         cell.font = Font(color=colors["white"], bold=True)  # Set text color to white and bold
                 elif strata_value in ["Girls", "Boys"]:
                     fill_color = colors["gray"]
-                elif strata_value in ['Female', 'Male']:
+                    for cell in row:
+                        cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
+                elif strata_value in ['Female', 'Male', 'ECE (5 y.o.)', 'Children with disability']:
                     fill_color = colors["stratagray"]
-                elif strata_value == "ECE (5 y.o.)":
-                    fill_color = colors["light_pink"]
-                elif "school" in strata_value.lower():
-                    fill_color = colors["light_yellow"]
-                elif strata_value == "Strata":
-                    fill_color = colors["white"]
-                elif "disability" in strata_value.lower():
-                    fill_color = colors["white"]
+                    for cell in row:
+                        cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
                 else:
                     fill_color = colors["light_blue"]
-
-                # Apply fill color to the entire row if a color is determined
-                if fill_color:
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
 
-                # Set first four columns to white
-                for cell in row[:4]:
-                    cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")
-                    cell.border = None  # No border for the first four columns
+        # Set column widths based on content
+                for column in ws.columns:
+                    max_length = 0
+                    column_letter = None
+                    for cell in column:
+                        if cell.value and not isinstance(cell, MergedCell):
+                            try:
+                                max_length = max(max_length, len(str(cell.value)))
+                                column_letter = cell.column_letter  # Get the column letter
+                            except Exception as e:
+                                print(f"Error: {e}, Cell: {cell}")
 
-        else:
+                    if column_letter:
+                        adjusted_width = max_length + 2
+                        ws.column_dimensions[column_letter].width = adjusted_width
+
+            # Set the first two columns (A and B) to white background
+            for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=2):
+                for cell in row:
+                    cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")
+
+            # Apply specific formatting to columns F and G
+            for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=6, max_col=7):
+                for cell in row:
+                    # Example formatting, adjust as needed
+                    cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")
+                    cell.alignment = Alignment(horizontal='right', vertical='center')
+
+               # Set background for empty cells and apply black borders to cells with values
+            thin_border = Border(
+                left=Side(style='thin', color="000000"),
+                right=Side(style='thin', color="000000"),
+                top=Side(style='thin', color="000000"),
+                bottom=Side(style='thin', color="000000")
+            )
+
+            for row in ws.iter_rows(min_row=5, max_row=ws.max_row, min_col=3, max_col=ws.max_column):  # Adjust columns as needed
+                for cell in row:
+                    if not cell.value:  # If the cell is empty, set white background
+                        cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")
+                    else:  # If the cell has a value, apply black border
+                        cell.border = thin_border
+
+        if ws.title != "PiN TOTAL":
+            ws.insert_rows(1, 4)
+            # Add empty columns to the left
+            ws.insert_cols(1, 4)
+            # Add the sheet name as a title in the first row
+            title = ws.title
+            title += " (5-17 y.o.)"
+            max_col = ws.max_column
+            ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
+            title_cell = ws.cell(row=1, column=5)
+            title_cell.value = title
+            title_cell.font = Font(bold=True, size=14)
+            title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                # Set column widths based on content
+            for column in ws.columns:
+                max_length = 0
+                column_letter = None
+                for cell in column:
+                    if cell.value and not isinstance(cell, MergedCell):
+                        try:
+                            max_length = max(max_length, len(str(cell.value)))
+                            column_letter = cell.column_letter  # Get the column letter
+                        except Exception as e:
+                            print(f"Error: {e}, Cell: {cell}")
+
+                if column_letter:
+                    adjusted_width = max_length + 2
+                    ws.column_dimensions[column_letter].width = adjusted_width
+
+            # Bold specific columns
+            for row in ws.iter_rows(min_row=6, max_col=ws.max_column, max_row=ws.max_row):  # Start from the data row
+                for cell in row:
+                    col_name = ws.cell(row=5, column=cell.column).value  # Row 5 contains the headers
+                    if col_name in [label_perc_tot, label_admin_severity, label_tot, admin_var]:
+                        cell.font = Font(bold=True)  # Apply bold font
+        
             # Apply formatting to the headers
             for cell in ws[5]:  # Header row is now the 5th row
                 cell.font = Font(bold=True)
@@ -247,59 +303,13 @@ def apply_formatting(workbook, color_mapping, alignment_columns, colors, admin_v
                         cell.fill = PatternFill(start_color=colors["white"], end_color=colors["white"], fill_type="solid")  # White background for the first four columns
                         cell.border = None  # No border for the first four columns
 
-        # Apply borders around the table for "PiN TOTAL"
-        if ws.title == "PiN TOTAL":
-            for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
-                for cell in row:
-                    if cell.column > 4:
-                        if row[0].row == 5:  # Bold top border for header
-                            cell.border = Border(
-                                top=Side(style="medium"),
-                                left=Side(style="thin"),
-                                right=Side(style="thin"),
-                                bottom=Side(style="thin"),
-                            )
-                        elif cell == row[0]:  # Bold left border for each row
-                            cell.border = Border(
-                                top=Side(style="thin"),
-                                left=Side(style="medium"),
-                                right=Side(style="thin"),
-                                bottom=Side(style="thin"),
-                            )
-                        elif cell == row[-1]:  # Bold right border for each row
-                            cell.border = Border(
-                                top=Side(style="thin"),
-                                left=Side(style="thin"),
-                                right=Side(style="medium"),
-                                bottom=Side(style="thin"),
-                            )
-                        elif row[0].row == ws.max_row:  # Bold bottom border for last row
-                            cell.border = Border(
-                                top=Side(style="thin"),
-                                left=Side(style="thin"),
-                                right=Side(style="thin"),
-                                bottom=Side(style="medium"),
-                            )
-                        else:
-                            cell.border = Border(
-                                top=Side(style="thin"),
-                                left=Side(style="thin"),
-                                right=Side(style="thin"),
-                                bottom=Side(style="thin"),
-                            )
+
 
     return workbook
 
 
-
-
-
-
-#engine='openpyxl'
-# Function to create an Excel file and return it as a BytesIO object
-
-
-def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimension=True, ocha=True, tot_severity=None):
+# Function to create output with final formatting
+def create_output(dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None):
     output = BytesIO()
     with pd.ExcelWriter(output) as writer:
         # Only write the overview sheet if ocha is True
@@ -308,7 +318,7 @@ def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimen
 
         # Write the tot_severity sheet if it is provided
         if tot_severity is not None:
-            tot_severity.to_excel(writer, sheet_name='Area of severity', index=False)
+            tot_severity.to_excel(writer, sheet_name='Overall PiN and severity', index=False)
 
         # Write the category sheets
         for category, df in dataframes.items():
@@ -318,20 +328,14 @@ def create_output(dataframes, overview_df, overview_sheet_name, admin_var, dimen
     output.seek(0)
     workbook = load_workbook(output)
 
-    # Determine which color mapping and colors to use
-    if dimension:
-        workbook = apply_formatting(workbook, color_mapping_dimension, alignment_columns, colors_dimension, admin_var)
-    else:
-        workbook = apply_formatting(workbook, color_mapping, alignment_columns, colors, admin_var)
+    # Apply the final formatting to the workbook
+    workbook = apply_final_formatting(workbook, overview_df, small_overview_df, admin_var)
     
     formatted_output = BytesIO()
     workbook.save(formatted_output)
     formatted_output.seek(0)
 
     return formatted_output
-
-
-
 
 
 
