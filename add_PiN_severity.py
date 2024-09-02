@@ -12,16 +12,16 @@ int_2 = '2.0'
 int_3 = '3.0'
 int_4 = '4.0'
 int_5 = '5.0'
-label_perc2 = '% 1-2'
-label_perc3 = '% 3'
-label_perc4 = '% 4'
-label_perc5 = '% 5'
-label_tot2 = '# 1-2'
-label_tot3 = '# 3'
-label_tot4 = '# 4'
-label_tot5 = '# 5'
-label_perc_tot = '% Tot PiN (3+)'
-label_tot = '# Tot PiN (3+)'
+label_perc2 = '% severity levels 1-2'
+label_perc3 = '% severity level 3'
+label_perc4 = '% severity level 4'
+label_perc5 = '% severity level 5'
+label_tot2 = '# severity levels 1-2'
+label_tot3 = '# severity level 3'
+label_tot4 = '# severity level 4'
+label_tot5 = '# severity level 5'
+label_perc_tot = '% Tot PiN (severity levels 3-5)'
+label_tot = '# Tot PiN (severity levels 3-5)'
 label_admin_severity = 'Area severity'
 label_tot_population = 'TotN'
 
@@ -29,20 +29,21 @@ int_acc = 'access'
 int_agg= 'aggravating circumstances'
 int_lc = 'learning condition'
 int_penv = 'protected environment'
-int_out = 'not falling within the PiN dimensions'
+int_out = 'Not in need'
 label_perc_acc = '% Access'
 label_perc_agg= '% Aggravating circumstances'
 label_perc_lc = '% Learning conditions'
 label_perc_penv = '% Protected environment'
-label_perc_out = '% Not falling within the PiN dimensions'
+label_perc_out = '% Not in need'
 label_tot_acc = '# Access'
 label_tot_agg= '# Aggravating circumstances'
 label_tot_lc = '# Learning conditions'
 label_tot_penv = '# Protected environment'
-label_tot_out = '# Not falling within the PiN dimensions'
+label_tot_out = '# Not in need'
 label_dimension_perc_tot = '% Tot in PiN Dimensions'
 label_dimension_tot = '# Tot in PiN Dimensions'
 label_dimension_tot_population = 'TotN'
+
 
 
 
@@ -97,7 +98,7 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     
     # Normalize the input to handle different cases and languages
     normalized_access = normalize(access)
-    normalized_armed_disruption = normalize(armed_disruption)
+    normalized_armed_disruption = normalize(armed_disruption) if armed_disruption is not None else None
     normalized_idp_disruption = normalize(idp_disruption)
     normalized_teacher_disruption = normalize(teacher_disruption)
 
@@ -105,7 +106,7 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     yes_answers = ['yes', 'oui', '1', 1]
     no_answers = ['no', 'non', '0', 0]
     
-
+    # Main severity calculation logic
     if normalized_access in no_answers:
         if barrier in names_severity_5:
             return 5
@@ -114,7 +115,8 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
         else:
             return 3
     elif normalized_access in yes_answers:
-        if normalized_armed_disruption in yes_answers:
+        # Check if 'armed_disruption' is valid and not None
+        if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
             return 5
         elif normalized_idp_disruption in yes_answers:
             return 4
@@ -123,6 +125,7 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
         else:
             return 2
     return None  # Default fallback in case none of the conditions are met
+
 
 
 ##--------------------------------------------------------------------------------------------
@@ -147,7 +150,7 @@ def assign_dimension_pin(access, severity):
     elif normalized_access in yes_answers:
         if severity == 3: return 'learning condition'
         if severity in [4, 5]: return 'protected environment'    
-        if severity == 2: return 'not falling within the PiN dimensions'   
+        if severity == 2: return 'Not in need'   
     
     return None  # Default fallback in case none of the conditions are met         
 
@@ -192,6 +195,31 @@ def custom_to_datetime(date_str):
             return pd.to_datetime(date_str, format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
         except:
             return pd.NaT
+##--------------------------------------------------------------------------------------------
+def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_start_var=6, lower_primary_end_var=13, upper_primary_end_var=None):
+    if single_cycle:
+        # If single cycle is True, handle as a primary to secondary without upper primary
+        if lower_primary_start_var <= edu_age_corrected <= lower_primary_end_var:
+            return 'primary'
+        elif lower_primary_end_var + 1 <= edu_age_corrected <= 18:
+            return 'secondary'
+        elif edu_age_corrected == 5: 
+            return 'ECE'
+        else:
+            return 'out of school range'
+    else:
+        # If single cycle is False, handle lower primary, upper primary, and secondary phases
+        if lower_primary_start_var <= edu_age_corrected <= lower_primary_end_var:
+            return 'primary'
+        elif upper_primary_end_var and lower_primary_end_var + 1 <= edu_age_corrected <= upper_primary_end_var:
+            return 'intermediate level'
+        elif upper_primary_end_var and upper_primary_end_var + 1 <= edu_age_corrected <= 18:
+            return 'secondary'
+        elif edu_age_corrected == 5: 
+            return 'ECE'
+        else:
+            return 'out of school range'
+        
 
 ########################################################################################################################################
 ########################################################################################################################################
@@ -257,6 +285,18 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data, o
     #edu_data = edu_data[(edu_data[age_var] >= 5) & (edu_data[age_var] <= 18)]
 
     edu_data['edu_age_corrected'] = edu_data.apply(lambda row: row[age_var] - 1 if calculate_age_correction(start_school, row['month']) else row[age_var], axis=1)
+
+    single_cycle = (vector_cycle[1] == 0)
+    primary_start = 6
+    edu_data['school_cycle'] = edu_data['edu_age_corrected'].apply(
+        lambda x: assign_school_cycle(
+            x, 
+            single_cycle=single_cycle, 
+            lower_primary_start_var=primary_start, 
+            lower_primary_end_var=vector_cycle[0], 
+            upper_primary_end_var=vector_cycle[1] if not single_cycle else None
+        )
+    )
    
     edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
 
@@ -271,7 +311,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data, o
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
         access=row[access_var], 
         barrier=row[barrier_var], 
-        armed_disruption=row[armed_disruption_var], 
+        armed_disruption=row[armed_disruption_var] if armed_disruption_var != 'no_indicator' else None, 
         idp_disruption=row[idp_disruption_var], 
         teacher_disruption=row[teacher_disruption_var], 
         names_severity_4=names_severity_4, 

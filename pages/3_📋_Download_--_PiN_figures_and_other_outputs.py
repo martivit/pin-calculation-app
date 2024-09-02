@@ -75,11 +75,12 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 
 ## calculate PiN
+
 (severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,
  female_pin_per_admin_status, male_pin_per_admin_status, 
  pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary, 
- Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df, final_overview_df_OCHA, final_overview_df_MSNA,
- final_overview_dimension_df,
+ Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
+   final_overview_dimension_df,final_overview_dimension_df_in_need,
  Tot_PiN_by_admin,
    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,
                                                                                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
@@ -93,6 +94,7 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 
 
+
 # Create the Excel files
 #jiaf_excel = create_output(Tot_PiN_JIAF, final_overview_df, "PiN TOTAL",   admin_var, dimension= False, ocha= False, tot_severity=Tot_PiN_by_admin)
 ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
@@ -100,6 +102,7 @@ ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OC
 #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
 
 #doc_snapshot = create_snapshot_PiN(country_label, final_overview_df, final_overview_dimension_df)
+doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need)
 
 
 
@@ -114,7 +117,7 @@ ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OC
 st.download_button(
     label=translations["download_pin"],
     data=ocha_excel.getvalue(),
-    file_name=f"PiN_overview_OCHA_{country_label}.xlsx",
+    file_name=f"PiN_results_{country_label}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 
@@ -132,12 +135,12 @@ st.download_button(
 #    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 #)
 
-#st.download_button(
-#    label=translations["download_word"],
-#    data=doc_snapshot.getvalue(),
-#    file_name="pin_snapshot.docx",
-#    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-#)
+st.download_button(
+    label=translations["download_word"],
+    data=doc_output.getvalue(),
+    file_name=f"PiN_snapshot_{country_label}.docx",
+    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+)
 
 st.subheader(translations["hno_guidelines_subheader"])
 st.markdown(translations["hno_guidelines_message"])

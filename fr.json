@@ -74,7 +74,8 @@
     "hno_guidelines_message": "Pour le HNO, il est attendu que les clusters d'éducation fournissent une ventilation détaillée du PiN couvrant :\n\n- **Zone géographique** : Répartition par régions géographiques spécifiques.\n- **Groupes affectés** : PiN détaillé pour différents profils humanitaires (par exemple, PDI, résidents, rapatriés, réfugiés).\n- **Sévérité des conditions éducatives** : Basé sur les besoins non satisfaits dans quatre dimensions clés. Les données doivent montrer le nombre d'enfants par niveau de sévérité dans chaque groupe affecté, dans les zones géographiques.\n- **Désagrégation par sexe** : Assurez-vous que les données sont réparties par sexe.\n- **Tranche d'âge** : Le PiN doit couvrir au moins les niveaux d'éducation obligatoires, conformément aux politiques éducatives nationales.\n\nUne fois que les niveaux préliminaires de PiN et de sévérité ont été estimés, il est important de les examiner et de les ajuster en fonction des données secondaires et de l'avis d'experts. Si des ajustements sont effectués, assurez-vous qu'ils sont fondés sur des preuves et clairement documentés. En cas de divergences, envisagez de revoir l'ensemble de la méthodologie plutôt que de simplement ajuster les chiffres.",
     "hno_guidelines_subheader": "Directives pour l'aperçu des besoins humanitaires (HNO)",
     "download_pin": "Télécharger les résultats et les tableaux du PiN",
-    "download_word": "Télécharger le Country Snapshot : Profil des enfants en détresse et aperçu des besoins"
+    "download_word": "Télécharger le Country Snapshot : Profil des enfants en détresse et aperçu des besoins",
+    "no_armed_disruption_indicator":"L'indicateur % d'enfants dont l'accès à l'éducation a été perturbé en raison de l'occupation de l'école par des groupes armés n'a PAS été collecté dans ce contexte."
 
 
 

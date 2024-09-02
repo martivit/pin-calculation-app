@@ -126,6 +126,22 @@ def handle_full_selection(suggestions, column_type, custom_message):
     # Return the selected column for further processing
     return selected_column
 
+##-----------------------------
+def handle_armed_disruption_selection(suggestions):
+    # Display a checkbox to indicate if this indicator was not collected
+    no_indicator_collected = st.checkbox(translations["no_armed_disruption_indicator"], key="no_armed_disruption_checkbox")
+    column_type = 'disruption_armed'
+    # If checkbox is checked, mark armed disruption as 'no_indicator' and skip the selectbox
+    if no_indicator_collected:
+        armed_disruption_var = "no_indicator"
+        st.session_state[f'selected_{column_type}_column'] = "no_indicator"
+        st.session_state[f'{column_type}_column_confirmed'] = True
+    else:
+        # If checkbox is not checked, proceed with the regular selection
+        armed_disruption_var = handle_full_selection(suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"])
+
+    return armed_disruption_var
+
 ##---------------------------------------------------------------------------------------------------------
 def handle_column_selection(suggestions, column_type):
     suggested_column = suggestions[0] if suggestions else 'No selection'
@@ -382,6 +398,7 @@ def upload_and_select_data():
 
     else:
         st.warning(translations["no_data"])     
+
 ##-----------------------------
 # Function to select indicators
 def select_indicators():
@@ -408,10 +425,15 @@ def select_indicators():
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
         if education_indicator_suggestions:
+            st.markdown("---")  # Markdown horizontal rule
             st.session_state['access_var'] = handle_full_selection(education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
+            st.markdown("---")  # Markdown horizontal rule
             st.session_state['teacher_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
+            st.markdown("---")  # Markdown horizontal rule
             st.session_state['idp_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
-            st.session_state['armed_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"])  
+            st.markdown("---")  # Markdown horizontal rule
+            st.session_state['armed_disruption_var'] =  handle_armed_disruption_selection(education_indicator_suggestions)  
+            st.markdown("---")  # Markdown horizontal rule
             st.session_state['barrier_var'] = handle_full_selection(education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
             check_for_duplicate_selections()
         if st.button("Confirm Indicators"):
@@ -594,7 +616,7 @@ def finalize_details():
             st.session_state.final_confirmed = True
             st.success("All details confirmed and finalized!")
 
-        st.markdown("---")
+        #st.markdown("---")
   
 ###########################################################################################################
 ###########################################################################################################
@@ -630,7 +652,7 @@ if all([
             <span style='color: black; font-size: 20px;'><strong>Completed!</strong></span>
         </div>
         """, unsafe_allow_html=True)  
-    st.markdown("---")  # Markdown horizontal rule
+    #st.markdown("---")  # Markdown horizontal rule
     col1, col2 = st.columns([0.60, 0.40])
     with col2: 
         st.page_link("pages/3_📋_Download_--_PiN_figures_and_other_outputs.py", label=translations['to_page3'], icon='📋')

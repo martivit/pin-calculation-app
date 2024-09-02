@@ -11,16 +11,16 @@ int_2 = '2.0'
 int_3 = '3.0'
 int_4 = '4.0'
 int_5 = '5.0'
-label_perc2 = '% 1-2'
-label_perc3 = '% 3'
-label_perc4 = '% 4'
-label_perc5 = '% 5'
-label_tot2 = '# 1-2'
-label_tot3 = '# 3'
-label_tot4 = '# 4'
-label_tot5 = '# 5'
-label_perc_tot = '% Tot PiN (3+)'
-label_tot = '# Tot PiN (3+)'
+label_perc2 = '% severity levels 1-2'
+label_perc3 = '% severity level 3'
+label_perc4 = '% severity level 4'
+label_perc5 = '% severity level 5'
+label_tot2 = '# severity levels 1-2'
+label_tot3 = '# severity level 3'
+label_tot4 = '# severity level 4'
+label_tot5 = '# severity level 5'
+label_perc_tot = '% Tot PiN (severity levels 3-5)'
+label_tot = '# Tot PiN (severity levels 3-5)'
 label_admin_severity = 'Area severity'
 label_tot_population = 'TotN'
 
@@ -28,23 +28,20 @@ int_acc = 'access'
 int_agg= 'aggravating circumstances'
 int_lc = 'learning condition'
 int_penv = 'protected environment'
-int_out = 'not falling within the PiN dimensions'
+int_out = 'Not in need'
 label_perc_acc = '% Access'
 label_perc_agg= '% Aggravating circumstances'
 label_perc_lc = '% Learning conditions'
 label_perc_penv = '% Protected environment'
-label_perc_out = '% Not falling within the PiN dimensions'
+label_perc_out = '% Not in need'
 label_tot_acc = '# Access'
 label_tot_agg= '# Aggravating circumstances'
 label_tot_lc = '# Learning conditions'
 label_tot_penv = '# Protected environment'
-label_tot_out = '# Not falling within the PiN dimensions'
-
+label_tot_out = '# Not in need'
 label_dimension_perc_tot = '% Tot in PiN Dimensions'
 label_dimension_tot = '# Tot in PiN Dimensions'
-
 label_dimension_tot_population = 'TotN'
-
 
 
 # Define the colors
@@ -153,7 +150,7 @@ def apply_final_formatting(workbook, overview_df, small_overview_df, admin_var):
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
                         cell.font = Font(color=colors["white"], bold=True)  # Set text color to white and bold
-                elif strata_value in ["Girls", "Boys"]:
+                elif strata_value in ["Girls (5-17 y.o.)", "Boys (5-17 y.o.)"]:
                     fill_color = colors["gray"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
