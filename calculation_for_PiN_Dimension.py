@@ -1289,7 +1289,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     overview_dimension_boy = collapse_and_summarize_dimension(dimension_per_admin_status_boy, 'Boys (5-17 y.o.)', admin_var=admin_var)
     overview_dimension_ece = collapse_and_summarize_dimension(dimension_per_admin_status_ece, 'ECE (5 y.o.)', admin_var=admin_var)
     overview_dimension_primary = collapse_and_summarize_dimension(dimension_per_admin_status_primary, 'Primary school', admin_var=admin_var)
-    overview_dimension_intermediate = collapse_and_summarize_dimension(dimension_per_admin_status_intermediate, 'Intermediate school-level', admin_var=admin_var)
+    if not single_cycle:overview_dimension_intermediate = collapse_and_summarize_dimension(dimension_per_admin_status_intermediate, 'Intermediate school-level', admin_var=admin_var)
     overview_dimension_secondary = collapse_and_summarize_dimension(dimension_per_admin_status_secondary, 'Secondary school', admin_var=admin_var)
 
     collapsed_results_dimension_pop = {}
