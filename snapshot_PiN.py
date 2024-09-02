@@ -13,7 +13,6 @@ from docx.oxml.ns import nsdecls, qn
 from docx.oxml import parse_xml, OxmlElement
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from matplotlib.text import Text
-import plotly.graph_objects as go
 
 # Constants
 int_2 = '2.0'
