@@ -46,8 +46,10 @@ gender_var = 'ind_gender'
 start_school = 'September'
 country= 'Myanmar -- MMR'
 
+#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+ 
+# 'Admin_3: Townships'
 admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
-
 
 vector_cycle = [10,14]
 single_cycle = (vector_cycle[1] == 0)

@@ -1,11 +1,12 @@
 import pandas as pd
 #import fuzzywuzzy
-from fuzzywuzzy import process
+from fuzzywuzzy import process, fuzz
 import numpy as np
 import datetime
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
+import re
 
 
 int_2 = '2.0'
@@ -220,7 +221,51 @@ def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_sta
         else:
             return 'out of school range'
         
+##--------------------------------------------------------------------------------------------
+## finding admin        
+def extract_number(s):
+    match = re.search(r'\d+', s)
+    return int(match.group()) if match else None
+def find_similar_columns(admin_target, columns):
+    # Extract the base target without numbers for string comparison
+    base_target = re.sub(r'\d+', '', admin_target).lower()
 
+    # Find columns that have high string similarity with the base target
+    similar_columns = []
+    for col in columns:
+        base_col = re.sub(r'\d+', '', col).lower()
+        similarity_score = fuzz.partial_ratio(base_target, base_col)
+        if similarity_score > 70:  # Set a threshold for similarity
+            similar_columns.append(col)
+    
+    return similar_columns
+def find_best_match(admin_target, columns):
+    # Extract the target number
+    target_number = extract_number(admin_target)
+
+    # Step 1: Find columns similar in text content
+    similar_columns = find_similar_columns(admin_target, columns)
+
+    if not similar_columns:
+        # Fallback to fuzzy matching across all columns if no similar columns are found
+        return process.extractOne(admin_target, columns)[0]
+
+    # Step 2: Among similar columns, prioritize those with matching numbers
+    candidates_with_same_number = [col for col in similar_columns if extract_number(col) == target_number]
+
+    if candidates_with_same_number:
+        # Further prioritize candidates that include the word 'code'
+        candidates_with_code = [col for col in candidates_with_same_number if 'code' in col.lower()]
+
+        if candidates_with_code:
+            # If there are candidates with 'code', return the best match among them
+            return process.extractOne(admin_target, candidates_with_code)[0]
+        else:
+            # If no candidates with 'code', return the best match among all candidates with the same number
+            return process.extractOne(admin_target, candidates_with_same_number)[0]
+    else:
+        # Fallback to fuzzy matching among the similar columns
+        return process.extractOne(admin_target, similar_columns)[0]
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
@@ -270,8 +315,9 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data, o
     household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
     household_data['month'] = household_data[household_start_column].dt.month
 
-    # Find the most similar column to "Admin2" in household_data
-    admin_var = process.extractOne(admin_target, household_data.columns.tolist())[0]  # Take the string directly
+    admin_var = find_best_match(admin_target,  household_data.columns)
+
+    print(admin_var)
     # Columns to include in the merge
     columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight']
 
