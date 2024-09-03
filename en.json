@@ -74,7 +74,9 @@
     "download_pin": "Download PiN results, tables",
     "download_word": "Download Country Snapshot: Children in Need Profile and Overview of Needs",
     "no_armed_disruption_indicator": "The indicator % of children whose access to education was disrupted due to the school being occupied by armed groups was NOT collected in this context",
-    "no_ocha_data" : "OCHA data are not available"
+    "no_ocha_data" : "OCHA data are not available",
+    "mismatch_admin_message":  "There is a mismatch between OCHA scope and the MSNA administrative level representativeness."
+
   }
   
   

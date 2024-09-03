@@ -76,7 +76,9 @@
     "download_pin": "Télécharger les résultats et les tableaux du PiN",
     "download_word": "Télécharger le Country Snapshot : Profil des enfants en détresse et aperçu des besoins",
     "no_armed_disruption_indicator":"L'indicateur % d'enfants dont l'accès à l'éducation a été perturbé en raison de l'occupation de l'école par des groupes armés n'a PAS été collecté dans ce contexte.",
-    "no_ocha_data": "Les données d'OCHA ne sont pas disponibles"
+    "no_ocha_data": "Les données d'OCHA ne sont pas disponibles",
+    "mismatch_admin_message":  "Il existe un décalage entre la portée de l’OCHA et la représentativité au niveau administratif de la MSNA."
+
 
 
 

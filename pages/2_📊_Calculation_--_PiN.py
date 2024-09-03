@@ -500,10 +500,14 @@ def finalize_details():
             key='admin_target'
         )
 
+        mismatch_admin_checkbox = st.checkbox(f"**{translations['mismatch_admin_message']}**")
+        
         if st.button('Confirm Admin Level', key='confirm_admin_level'):
             if admin_target != 'No selection':
                 st.session_state['admin_var'] = admin_target
                 st.session_state.admin_level_confirmed = True
+                if mismatch_admin_checkbox:
+                    st.session_state['mismatch_admin'] = True
                 st.success(f"Administrative level '{admin_target}' confirmed!")
             else:
                 st.error("Please select a valid administrative level.")

@@ -64,6 +64,8 @@ ocha_data = st.session_state.get('uploaded_ocha_data')
 
 # Check if the user indicated that they do not have OCHA data
 no_ocha_data = st.session_state.get('no_upload_ocha_data', False)
+mismatch_admin = st.session_state.get('mismatch_admin', False)
+
 
 
 ## add indicator ---> severity
@@ -91,7 +93,8 @@ if ocha_data is not None:
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
-                                                                                    admin_var, vector_cycle, start_school, status_var)
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    mismatch_admin)
 
 
 
@@ -118,18 +121,7 @@ if ocha_data is not None:
 
 
 
-
-
-
-
-
-
-
-
-
-
-## no ocha data
-
+######################################################################### no ocha data
 if no_ocha_data:
     (severity_admin_status_list, dimension_admin_status_list,
     severity_female_list, severity_male_list ,
@@ -155,9 +147,9 @@ if no_ocha_data:
 
     # Create a download button for the Excel file in Streamlit
     st.download_button(
-        label="Download PiN distribution by admin and by population group",
+        label="Download PiN percentages by admin and by population group",
         data=excel_pin,
-        file_name=f"PiN_{country_label}.xlsx",
+        file_name=f"PiN_percentages_{country_label}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
