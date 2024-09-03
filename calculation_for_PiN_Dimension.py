@@ -133,7 +133,7 @@ def extract_status_data(ocha_data, mapped_statuses, pop_group_var):
             # Check if these columns exist in the DataFrame
             if all(col in ocha_data.columns for col in [children_col]):
                 # Create a new DataFrame for this category using the status as the category name
-                category_df = ocha_data[['Admin', 'Admin Pcode', children_col]].copy()
+                category_df = ocha_data[['Admin', children_col]].copy()
                 category_df.rename(columns={
                     children_col: 'TotN'
                 }, inplace=True)
@@ -180,7 +180,7 @@ def calculate_category_factors(df, total_col, category_col, category_name):
     result_df = df.copy()
     result_df[category_name] = result_df[category_col] / result_df[total_col].replace(0, pd.NA)
     result_df['Category'] = category_name
-    columns_to_keep = ['Admin', 'Admin Pcode', category_name, 'Category']
+    columns_to_keep = ['Admin',  category_name, 'Category']
     
     # Wrap the result in a dictionary using category_name as the key
     return {category_name: result_df[columns_to_keep]}
@@ -209,7 +209,7 @@ def calculate_cycle_factors(df, factor_cycle, primary_start, secondary_end, vect
         temp_df = df.copy()
         temp_df[category] = factor
         temp_df['Category'] = category
-        columns_to_keep = ['Admin', 'Admin Pcode', category, 'Category']
+        columns_to_keep = ['Admin',  category, 'Category']
         result[category] = temp_df[columns_to_keep]
     return result
 ##--------------------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ def add_disability_factor(df,factor=0.1, category = 'Disability'):
     result_df['Category'] = category_name
     
     # Define columns to keep
-    columns_to_keep = ['Admin', 'Admin Pcode', category_name, 'Category']
+    columns_to_keep = ['Admin', category_name, 'Category']
     
     # Return the filtered DataFrame
     return {category_name: result_df[columns_to_keep]}
@@ -252,8 +252,8 @@ def adjust_pin_by_strata_factor(pin_df, factor_df, category_label, tot_column, a
     # Merge the pin DataFrame with the factor DataFrame on the 'Admin_2' column
     factorized_df = pd.merge(
         pin_df, factor_df, 
-        left_on=[admin_var, 'Admin Pcode'], 
-        right_on=["Admin", 'Admin Pcode'], 
+        left_on=[admin_var], 
+        right_on=["Admin"], 
         how='left'
     )
    # Columns that need to be adjusted by the factor
@@ -281,7 +281,7 @@ def collapse_and_summarize(pin_per_admin_status_strata, category_str, admin_var)
         summed_df = df.iloc[0:1].copy()
 
         # Identify columns to skip from summation and columns to set to zero
-        columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Admin Pcode' or col == 'Population group' or col == 'Category' or col == 'Area severity']
+        columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var  or col == 'Population group' or col == 'Category' or col == 'Area severity']
         columns_to_zero = [col for col in df.columns if col.startswith('%')]
 
         # Sum all numerical columns except the skipped ones
@@ -291,7 +291,6 @@ def collapse_and_summarize(pin_per_admin_status_strata, category_str, admin_var)
 
         # Set non-sum columns with fixed values
         summed_df[admin_var] = 'whole country'
-        summed_df['Admin Pcode'] = '0'
         summed_df['Population group'] = category
         if 'Area severity' in summed_df.columns:
             del summed_df['Area severity']
@@ -316,7 +315,6 @@ def collapse_and_summarize(pin_per_admin_status_strata, category_str, admin_var)
 
     # Set final summary values
     overview_strata[admin_var] = 'Whole country'
-    overview_strata['Admin Pcode'] = 0
     overview_strata['Population group'] = 'All population groups'
     overview_strata['Category'] = category_str
 
@@ -343,7 +341,7 @@ def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str, 
         summed_df = df.iloc[0:1].copy()
 
         # Identify columns to skip from summation and columns to set to zero
-        columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Admin Pcode' or col == 'Population group' or col == 'Category' or col == 'Area severity' or col == 'Strata_category']
+        columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var  or col == 'Population group' or col == 'Category' or col == 'Area severity' or col == 'Strata_category']
         columns_to_zero = [col for col in df.columns if col.startswith('%')]
 
         # Sum all numerical columns except the skipped ones
@@ -353,7 +351,6 @@ def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str, 
 
         # Set non-sum columns with fixed values
         summed_df[admin_var] = 'whole country'
-        summed_df['Admin Pcode'] = '0'
         summed_df['Population group'] = category
         if 'Area severity' in summed_df.columns:
             del summed_df['Area severity']
@@ -380,7 +377,6 @@ def collapse_and_summarize_dimension(pin_per_admin_status_strata, category_str, 
 
     # Set final summary values
     overview_strata[admin_var] = 'Whole country'
-    overview_strata['Admin Pcode'] = 0
     overview_strata['Population group'] = 'All population groups'
     overview_strata['Category'] = category_str
 
@@ -402,8 +398,8 @@ def aggregate_pin_per_admin_status(pin_per_admin_status, admin_var):
     for col in columns_to_zero:
         combined_df[col] = 0
 
-    # Group by 'admin_var' and 'Admin Pcode', summing the numeric columns
-    grouped_df = combined_df.groupby([admin_var, 'Admin Pcode']).agg({
+    # Group by 'admin_var'  summing the numeric columns
+    grouped_df = combined_df.groupby([admin_var]).agg({
         label_tot_population: 'sum',
         label_perc2: 'sum',
         label_tot2: 'sum',
@@ -432,8 +428,8 @@ def merge_pin_ocha_with_strata (strata_pin_per_admin_status, category_data_frame
             grouped_df = severity_strata_list[category] 
             factorized_df = pd.merge(
                 df, factor_strata_df, 
-                left_on=[admin_var, 'Admin Pcode'], 
-                right_on=["Admin", 'Admin Pcode'], 
+                left_on=[admin_var], 
+                right_on=["Admin"], 
                 how='left'
             )
 
@@ -446,9 +442,6 @@ def merge_pin_ocha_with_strata (strata_pin_per_admin_status, category_data_frame
 
             ## Arranging columns 
             cols = list(pop_group_df.columns)
-            if 'Admin Pcode' in cols:
-                cols.remove('Admin Pcode')
-                cols.insert(cols.index(admin_var) + 1, 'Admin Pcode')
             pop_group_df = pop_group_df[cols]
 
             ## Calculation of the total PiN and admin severity
@@ -505,8 +498,8 @@ def merge_dimension_ocha_with_strata (strata_dimension_per_admin_status, categor
 
             factorized_df = pd.merge(
                 df, factor_strata_df, 
-                left_on=[admin_var, 'Admin Pcode'], 
-                right_on=["Admin", 'Admin Pcode'], 
+                left_on=[admin_var], 
+                right_on=["Admin"], 
                 how='left'
             )
 
@@ -519,8 +512,6 @@ def merge_dimension_ocha_with_strata (strata_dimension_per_admin_status, categor
 
             ## arranging columns 
             cols = list(pop_group_df.columns)
-            cols.remove('Admin Pcode')
-            cols.insert( cols.index(admin_var) + 1, 'Admin Pcode')
             pop_group_df = pop_group_df[cols]
 
 
@@ -674,6 +665,13 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     admin_target = admin_var
     pop_group_var = status_var
     ocha_pop_data = ocha_data
+
+    ocha_pop_data = ocha_pop_data.rename(columns={'Admin': 'Admin_label'})
+    ocha_pop_data = ocha_pop_data.rename(columns={'Admin Pcode': 'Admin'})
+
+    ocha_pop_data = ocha_pop_data.drop(columns=['Admin_label'])
+
+
 
     ## essential variables --------------------------------------------------------------------------------------------
     single_cycle = (vector_cycle[1] == 0)
@@ -874,8 +872,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
             ## arranging columns 
             cols = list(pop_group_df.columns)
-            cols.remove('Admin Pcode')
-            cols.insert( cols.index(admin_var) + 1, 'Admin Pcode')
             pop_group_df = pop_group_df[cols]
 
 
@@ -941,8 +937,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
             ## arranging columns 
             cols = list(pop_group_df.columns)
-            cols.remove('Admin Pcode')
-            cols.insert( cols.index(admin_var) + 1, 'Admin Pcode')
             pop_group_df = pop_group_df[cols]
 
 
@@ -1115,7 +1109,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         # Ensure both DataFrames are ready to merge
         if category in dimension_admin_status_in_need_list:
             # Fetch the corresponding DataFrame from the grouped data
-            df = df[[admin_var, label_tot, 'Admin Pcode']]
+            df = df[[admin_var, label_tot]]
             df = df.rename(columns={
                         label_tot: label_tot_population
                     })
@@ -1127,8 +1121,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
             ## arranging columns 
             cols = list(pop_group_df.columns)
-            cols.remove('Admin Pcode')
-            cols.insert( cols.index(admin_var) + 1, 'Admin Pcode')
             pop_group_df = pop_group_df[cols]
 
 
@@ -1304,7 +1296,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             summed_df = df.iloc[0:1].copy()
 
             # Identify columns to skip from summation and columns to set to zero
-            columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Admin Pcode' or col == 'Population group' or col == 'Category' or col== 'Area severity']
+            columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var  or col == 'Population group' or col == 'Category' or col== 'Area severity']
             columns_to_zero = [col for col in df.columns if col.startswith('%')]
 
             # Sum all numerical columns except the skipped ones
@@ -1314,7 +1306,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
             # Set non-sum columns with fixed values
             summed_df[admin_var] = 'whole country'
-            summed_df['Admin Pcode'] = '0'
             summed_df['Population group'] = category
             del summed_df['Area severity']
             # Set percentage columns to zero
@@ -1342,7 +1333,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             summed_dimension_df = df.iloc[0:1].copy()
 
             # Identify columns to skip from summation and columns to set to zero
-            columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Admin Pcode' or col == 'Population group' or col == 'Category' or col== 'Area severity']
+            columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var  or col == 'Population group' or col == 'Category' or col== 'Area severity']
             columns_to_zero = [col for col in df.columns if col.startswith('%')]
             # Sum all numerical columns except the skipped ones
             for col in df.columns:
@@ -1351,7 +1342,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
             # Set non-sum columns with fixed values
             summed_dimension_df[admin_var] = 'whole country'
-            summed_dimension_df['Admin Pcode'] = '0'
             summed_dimension_df['Population group'] = category
             if 'Area severity' in summed_dimension_df.columns:
                 del summed_dimension_df['Area severity']
@@ -1369,7 +1359,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             summed_dimension_df = df.iloc[0:1].copy()
 
             # Identify columns to skip from summation and columns to set to zero
-            columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Admin Pcode' or col == 'Population group' or col == 'Category' or col== 'Area severity']
+            columns_to_skip = [col for col in df.columns if col.startswith('%') or col == admin_var or col == 'Population group' or col == 'Category' or col== 'Area severity']
             columns_to_zero = [col for col in df.columns if col.startswith('%')]
             # Sum all numerical columns except the skipped ones
             for col in df.columns:
@@ -1378,7 +1368,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
             # Set non-sum columns with fixed values
             summed_dimension_df[admin_var] = 'whole country'
-            summed_dimension_df['Admin Pcode'] = '0'
             summed_dimension_df['Population group'] = category
             if 'Area severity' in summed_dimension_df.columns:
                 del summed_dimension_df['Area severity']
@@ -1425,14 +1414,12 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     cols.insert(cols.index(admin_var) + 1, cols.pop(cols.index('Category')))
     final_overview_df = final_overview_df[cols]
     del final_overview_df[admin_var]
-    del final_overview_df['Admin Pcode']
     final_overview_df = final_overview_df.rename(columns={'Category': 'Strata'})
 
     cols_ocha = list(final_overview_df_OCHA.columns)
     cols_ocha.insert(cols_ocha.index(admin_var) + 1, cols_ocha.pop(cols_ocha.index('Category')))
     final_overview_df_OCHA = final_overview_df_OCHA[cols_ocha]
     del final_overview_df_OCHA[admin_var]
-    del final_overview_df_OCHA['Admin Pcode']
     final_overview_df_OCHA = final_overview_df_OCHA.rename(columns={'Category': 'Strata'})
 
     final_overview_df[label_perc2] = final_overview_df[label_tot2]/final_overview_df[label_tot_population]
@@ -1484,7 +1471,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     cols.insert(cols.index(admin_var) + 1, cols.pop(cols.index('Category')))
     final_overview_dimension_df = final_overview_dimension_df[cols]
     del final_overview_dimension_df[admin_var]
-    del final_overview_dimension_df['Admin Pcode']
     final_overview_dimension_df = final_overview_dimension_df.rename(columns={'Category': 'Strata'})
 
     final_overview_dimension_df[label_perc_acc] = final_overview_dimension_df[label_tot_acc]/final_overview_dimension_df[label_dimension_tot_population]
@@ -1512,7 +1498,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     cols.insert(cols.index(admin_var) + 1, cols.pop(cols.index('Category')))
     final_overview_dimension_df_in_need = final_overview_dimension_df_in_need[cols]
     del final_overview_dimension_df_in_need[admin_var]
-    del final_overview_dimension_df_in_need['Admin Pcode']
     final_overview_dimension_df_in_need = final_overview_dimension_df_in_need.rename(columns={'Category': 'Strata'})
 
     final_overview_dimension_df_in_need[label_perc_acc] = final_overview_dimension_df_in_need[label_tot_acc]/final_overview_dimension_df_in_need[label_dimension_tot_population]

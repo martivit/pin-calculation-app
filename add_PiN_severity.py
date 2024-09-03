@@ -271,7 +271,7 @@ def find_best_match(admin_target, columns):
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
 ########################################################################################################################################
 ########################################################################################################################################
-def add_severity (country, edu_data, household_data, choice_data, survey_data, ocha_data,
+def add_severity (country, edu_data, household_data, choice_data, survey_data, 
                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
@@ -280,7 +280,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data, o
 
     admin_target = admin_var
     pop_group_var = status_var
-    ocha_pop_data = ocha_data
+
 
     ## essential variables --------------------------------------------------------------------------------------------
 

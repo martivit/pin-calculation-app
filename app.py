@@ -367,3 +367,24 @@ display_status("Gender Column Confirmed", st.session_state.gender_column_confirm
 
 update_combined_indicator()
 display_combined_severity_status()
+
+
+
+# Add or modify the section where OCHA data is uploaded
+if 'uploaded_data' in st.session_state:
+    if 'uploaded_ocha_data' in st.session_state:
+        ocha_data = st.session_state['uploaded_ocha_data']
+        st.write(translations["ok_upload"])
+        st.dataframe(ocha_data.head())  # Show a preview of the data
+    else:
+        # OCHA data uploader
+        uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["csv", "xlsx"])
+        if uploaded_ocha_file is not None:
+            ocha_data = pd.read_excel(uploaded_ocha_file, engine='openpyxl')
+            check_message = perform_ocha_data_checks(ocha_data)
+            if check_message == "Data is valid":
+                st.session_state['uploaded_ocha_data'] = ocha_data
+                st.success(translations["ok_upload"])
+            else:
+                st.error(check_message)  # Display the error message if checks fail
+

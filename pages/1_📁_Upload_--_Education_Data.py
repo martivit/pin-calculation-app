@@ -19,7 +19,7 @@ st.title(translations["title_page1"])
 
 def check_conditions_and_proceed():
     if selected_country != 'no selection' and 'uploaded_data' in st.session_state:
-        if 'uploaded_ocha_data' in st.session_state:
+        if 'no_upload_ocha_data' in st.session_state or 'uploaded_ocha_data' in st.session_state:
             st.session_state.ready_to_proceed = True
         else:
             st.session_state.ready_to_proceed = False
@@ -148,21 +148,31 @@ def perform_ocha_data_checks(ocha_data):
 
 # Add or modify the section where OCHA data is uploaded
 if 'uploaded_data' in st.session_state:
-    if 'uploaded_ocha_data' in st.session_state:
-        ocha_data = st.session_state['uploaded_ocha_data']
-        st.write(translations["ok_upload"])
-        st.dataframe(ocha_data.head())  # Show a preview of the data
+    # Checkbox for indicating no OCHA data
+    no_ocha_data_checkbox = st.checkbox(f"**{translations['no_ocha_data']}**")
+    
+    if no_ocha_data_checkbox:
+        st.session_state['no_upload_ocha_data'] = True
     else:
-        # OCHA data uploader
-        uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["csv", "xlsx"])
-        if uploaded_ocha_file is not None:
-            ocha_data = pd.read_excel(uploaded_ocha_file, engine='openpyxl')
-            check_message = perform_ocha_data_checks(ocha_data)
-            if check_message == "Data is valid":
-                st.session_state['uploaded_ocha_data'] = ocha_data
-                st.success(translations["ok_upload"])
-            else:
-                st.error(check_message)  # Display the error message if checks fail
+        if 'no_upload_ocha_data' in st.session_state:
+            del st.session_state['no_upload_ocha_data']
+        
+        if 'uploaded_ocha_data' in st.session_state:
+            ocha_data = st.session_state['uploaded_ocha_data']
+            st.write(translations["ok_upload"])
+            st.dataframe(ocha_data.head())  # Show a preview of the data
+        else:
+            # OCHA data uploader
+            uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["csv", "xlsx"])
+            if uploaded_ocha_file is not None:
+                ocha_data = pd.read_excel(uploaded_ocha_file, engine='openpyxl')
+                check_message = perform_ocha_data_checks(ocha_data)
+                if check_message == "Data is valid":
+                    st.session_state['uploaded_ocha_data'] = ocha_data
+                    st.success(translations["ok_upload"])
+                else:
+                    st.error(check_message)  # Display the error message if checks fail
+
 
 # Check conditions to allow proceeding
 check_conditions_and_proceed()

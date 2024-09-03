@@ -73,7 +73,8 @@
     "hno_guidelines_message": "For the HNO, it is expected that Education Clusters will provide a detailed breakdown of PiN covering:\n\n- **Geographical Area**: Breakdown by specific geographic regions.\n- **Affected Groups**: Detailed PiN for different humanitarian profiles (e.g., IDPs, residents, returnees, refugees).\n- **Severity of Education Conditions**: Based on the unmet needs across four key dimensions. Data should show the number of children by severity level in each affected group, across geographic areas.\n- **Sex Disaggregation**: Ensure the data is split by gender.\n- **Age Range**: The PiN should cover at least compulsory education levels, in line with national education policies.\n\nOnce preliminary PiN and severity levels have been estimated, it is important to review and adjust based on secondary data and expert opinion. If adjustments are made, ensure they are evidence-based and clearly documented. Where discrepancies arise, consider reviewing the entire methodology rather than simply adjusting the numbers.",
     "download_pin": "Download PiN results, tables",
     "download_word": "Download Country Snapshot: Children in Need Profile and Overview of Needs",
-    "no_armed_disruption_indicator": "The indicator % of children whose access to education was disrupted due to the school being occupied by armed groups was NOT collected in this context"
+    "no_armed_disruption_indicator": "The indicator % of children whose access to education was disrupted due to the school being occupied by armed groups was NOT collected in this context",
+    "no_ocha_data" : "OCHA data are not available"
   }
   
   
