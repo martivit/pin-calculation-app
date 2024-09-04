@@ -59,7 +59,7 @@
     "disaggregation_variables_html": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Define disaggregation variables</span></div>",
     "barriers_warning_message": "Please return to the previous step and first select the correct variable referring to barriers to access education.",
     "choose_disaggregation_variables_subheader": "Choose the correct disaggregation variables and their values",
-    "smallest_admin_level": "What is the smallest administrative level in **{selected_country}** at which we can calculate the PiN to ensure the results are representative? <span style='color: darkred; font-weight: bold;'>Please ensure that the selected administrative level corresponds to the same administrative level as that of the OCHA population data.</span>",
+    "smallest_admin_level": "What is the unit of analysis of the **{selected_country}** HNO? <span style='color: darkred; font-weight: bold;'>Please ensure that the selected administrative level corresponds to the same administrative level as that of the OCHA population data.</span>",
     "start_message": "When does the school year officially start? Needed for the estimate of the correct age",
     "school1": "Which is the age range for the lower primary school cycle?",
     "school2": "There is only one cycle of primary, followed by secondary school",
@@ -75,7 +75,7 @@
     "download_word": "Download Country Snapshot: Children in Need Profile and Overview of Needs",
     "no_armed_disruption_indicator": "The indicator % of children whose access to education was disrupted due to the school being occupied by armed groups was NOT collected in this context",
     "no_ocha_data" : "OCHA data are not available",
-    "mismatch_admin_message":  "There is a mismatch between OCHA scope and the MSNA administrative level representativeness."
+    "mismatch_admin_message":  "There is a mismatch between OCHA unit of analyis and the administrative level at which MSNA is representative."
 
   }
   

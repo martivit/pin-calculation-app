@@ -46,10 +46,10 @@ gender_var = 'ind_gender'
 start_school = 'September'
 country= 'Myanmar -- MMR'
 
-#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
+#admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
 
 vector_cycle = [10,14]
 single_cycle = (vector_cycle[1] == 0)
@@ -59,7 +59,8 @@ label = 'label::English'
 
 # Path to your Excel file
 excel_path = 'input/REACH_MMR_MMR2402_MSNA_Dataset_SMALL.xlsx'
-excel_path_ocha = 'input/ocha_pop_MMR2.xlsx'
+excel_path_ocha = 'input/ocha_pop_MMR4.xlsx'
+#excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
 xls = pd.ExcelFile(excel_path, engine='openpyxl')
@@ -77,7 +78,12 @@ household_data = dfs['01_clean_data_main']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
-ocha_data = pd.read_excel(pd.ExcelFile(excel_path_ocha, engine='openpyxl') )
+ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
+
+# Read specific sheets into separate dataframes
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
+mismatch_admin = True
 
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################
@@ -107,12 +113,13 @@ if ocha_data is not None:
     Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
     final_overview_dimension_df,final_overview_dimension_df_in_need,
     Tot_PiN_by_admin,
-    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,
+    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
-                                                                                    admin_var, vector_cycle, start_school, status_var)
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    mismatch_admin)
 
 
 

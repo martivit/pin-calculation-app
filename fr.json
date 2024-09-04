@@ -61,7 +61,7 @@
     "disaggregation_variables_html": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Passez à l'étape suivante :</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Définir les variables de désagrégation</span></div>",
     "barriers_warning_message": "Veuillez revenir à l'étape précédente et sélectionner d'abord la variable correcte faisant référence aux obstacles à l'accès à l'éducation.",
     "choose_disaggregation_variables_subheader": "Choisissez les bonnes variables de désagrégation et leurs valeurs",
-    "smallest_admin_level": "Quel est le plus petit niveau administratif en **{selected_country}** auquel nous pouvons calculer le PiN pour garantir que les résultats sont représentatifs ? <span style='color: darkred; font-weight: bold;'>Veuillez vous assurer que le niveau administratif sélectionné correspond au même niveau administratif que celui des données de population de l'OCHA.</span>",
+    "smallest_admin_level": "Quelle est l'unité d'analyse du **{selected_country}** HNO? <span style='color: darkred; font-weight: bold;'>Veuillez vous assurer que le niveau administratif sélectionné correspond au même niveau administratif que celui des données de population de l'OCHA.</span>",
     "start_message": "Quand l'année scolaire commence-t-elle officiellement ? Nécessaire pour l'estimation de l'âge correct",
     "school1": "Quelle est la tranche d'âge pour le premier cycle de l'école primaire ?",
     "school2": "Il n'y a qu'un seul cycle d'enseignement primaire, suivi d'un cycle d'enseignement secondaire",
@@ -77,7 +77,7 @@
     "download_word": "Télécharger le Country Snapshot : Profil des enfants en détresse et aperçu des besoins",
     "no_armed_disruption_indicator":"L'indicateur % d'enfants dont l'accès à l'éducation a été perturbé en raison de l'occupation de l'école par des groupes armés n'a PAS été collecté dans ce contexte.",
     "no_ocha_data": "Les données d'OCHA ne sont pas disponibles",
-    "mismatch_admin_message":  "Il existe un décalage entre la portée de l’OCHA et la représentativité au niveau administratif de la MSNA."
+    "mismatch_admin_message":  "Il existe un décalage entre l’unité d’analyse d’OCHA et le niveau administratif auquel MSNA est représentatif."
 
 
 

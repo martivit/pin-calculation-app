@@ -61,6 +61,8 @@ selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barrie
 admin_var =  st.session_state.get('admin_var')
 # Access the OCHA data if it was uploaded
 ocha_data = st.session_state.get('uploaded_ocha_data')
+mismatch_ocha_data = st.session_state.get('ocha_mismatch_data')
+
 
 # Check if the user indicated that they do not have OCHA data
 no_ocha_data = st.session_state.get('no_upload_ocha_data', False)
@@ -88,7 +90,7 @@ if ocha_data is not None:
     Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
     final_overview_dimension_df,final_overview_dimension_df_in_need,
     Tot_PiN_by_admin,
-    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,
+    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,

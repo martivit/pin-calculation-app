@@ -299,6 +299,26 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         'Other': ndsp_suggestion
     }
     # --------------------------------------------------------------------------------------------
+    admin_levels_per_country = {
+        'Afghanistan -- AFG': ['Admin_1: Province', 'Admin_2: District', 'Admin_3: Subdistrict'],
+        'Burkina Faso -- BFA': ['Admin_1: Regions (Région)', 'Admin_2: Province', 'Admin_3: Department (Département)'],
+        'Central African Republic -- CAR': ['Admin_1: Prefectures (préfectures)', 'Admin_2: Sub-prefectures (sous-préfectures)', 'Admin_3: Communes'],
+        'Democratic Republic of the Congo -- DRC': ['Admin_1: Provinces', 'Admin_2: Territories', 'Admin_3: Sectors/chiefdoms/communes'],
+        'Haiti -- HTI': ['Admin_1: Departments (départements)', 'Admin_2: Arrondissements', 'Admin_3: Communes'],
+        'Iraq -- IRQ': ['Admin_1: Governorates', 'Admin_2: Districts (aqḍyat)', 'Admin_3: Sub-districts (naḥiyat)'],
+        'Kenya -- KEN': ['Admin_1: Counties', 'Admin_2: Sub-counties (kaunti ndogo)', 'Admin_3: Wards (mtaa)'],
+        'Bangladesh -- BGD': ['Admin_1: Divisions (bibhag)', 'Admin_2: Districts (zila)', 'Admin_3: Upazilas'],
+        'Lebanon -- LBN': ['Admin_1: Governorates', 'Admin_2: Districts (qaḍya)', 'Admin_3: Municipalities'],
+        'Moldova -- MDA': ['Admin_1: Districts', 'Admin_2: Cities', 'Admin_3: Communes'],
+        'Mali -- MLI': ['Admin_1: Régions', 'Admin_2: Cercles', 'Admin_3: Arrondissements'],
+        'Mozambique -- MOZ': ['Admin_1: Provinces (provincias)', 'Admin_2: Districts (distritos)', 'Admin_3: Postos'],
+        'Myanmar -- MMR': ['Admin_1: States/Regions', 'Admin_2: Districts', 'Admin_3: Townships'],
+        'Niger -- NER': ['Admin_1: Régions ', 'Admin_2: Départements', 'Admin_3: Communes'],
+        'Syria -- SYR': ['Admin_1: Governorates', 'Admin_2: Districts (mintaqah)', 'Admin_3: Subdistricts (nawaḥi)'],
+        'Ukraine -- UKR': ['Admin_1: Oblasts', 'Admin_2: Raions', 'Admin_3: Hromadas'],
+        'Somalia -- SOM': ['Admin_1: States', 'Admin_2: Regions', 'Admin_3: Districts']
+    }
+
 
 
     ####### ** 1 **       ------------------------------ manipulation and join between H and edu data   ------------------------------------------     #######
@@ -318,9 +338,20 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     admin_var = find_best_match(admin_target,  household_data.columns)
 
     print(admin_var)
-    # Columns to include in the merge
-    columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight']
 
+    # Get the admin levels for the specified country
+    admin_levels = admin_levels_per_country.get(country, [])
+    # Flatten the admin levels to extract just the terms (like 'Region', 'District', etc.)
+    admin_keywords = [term.split(": ")[-1].lower() for term in admin_levels]
+    # Create a list of all household data columns that contain 'admin' or any of the admin keywords
+    admin_columns_from_household = [col for col in household_data.columns if 'admin' in col.lower() or any(keyword in col.lower() for keyword in admin_keywords)]
+    # Make sure admin_var is not duplicated
+    if admin_var in admin_columns_from_household:
+        admin_columns_from_household.remove(admin_var)
+    # Now add the admin columns to the columns to include, without duplicating
+    columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight'] + admin_columns_from_household
+    # Ensure there are no duplicate column names in columns_to_include
+    columns_to_include = list(set(columns_to_include))
 
     columns_to_drop = [col for col in columns_to_include if col in edu_data.columns and col != edu_uuid_column and col != household_uuid_column]
     edu_data = edu_data.drop(columns=columns_to_drop, errors='ignore')

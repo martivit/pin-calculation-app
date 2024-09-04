@@ -144,8 +144,6 @@ def perform_ocha_data_checks(ocha_data):
     return "Data is valid"
 
 
-
-
 # Add or modify the section where OCHA data is uploaded
 if 'uploaded_data' in st.session_state:
     # Checkbox for indicating no OCHA data
@@ -157,21 +155,40 @@ if 'uploaded_data' in st.session_state:
         if 'no_upload_ocha_data' in st.session_state:
             del st.session_state['no_upload_ocha_data']
         
-        if 'uploaded_ocha_data' in st.session_state:
+        if 'uploaded_ocha_data' in st.session_state and 'ocha_mismatch_data' in st.session_state:
             ocha_data = st.session_state['uploaded_ocha_data']
+            ocha_mismatch_data = st.session_state['ocha_mismatch_data']
+            
             st.write(translations["ok_upload"])
-            st.dataframe(ocha_data.head())  # Show a preview of the data
+            st.write("OCHA Data Preview:")
+            st.dataframe(ocha_data.head())  # Show a preview of the 'ocha' sheet data
+            
+            st.write("Scope-Fix Data Preview:")
+            st.dataframe(ocha_mismatch_data.head())  # Show a preview of the 'scope-fix' sheet data
         else:
             # OCHA data uploader
-            uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["csv", "xlsx"])
+            uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["xlsx"])
             if uploaded_ocha_file is not None:
-                ocha_data = pd.read_excel(uploaded_ocha_file, engine='openpyxl')
-                check_message = perform_ocha_data_checks(ocha_data)
-                if check_message == "Data is valid":
-                    st.session_state['uploaded_ocha_data'] = ocha_data
-                    st.success(translations["ok_upload"])
-                else:
-                    st.error(check_message)  # Display the error message if checks fail
+                # Load both the 'ocha' and 'scope-fix' sheets
+                try:
+                    ocha_data = pd.read_excel(uploaded_ocha_file, sheet_name='ocha', engine='openpyxl')
+                    ocha_mismatch_data = pd.read_excel(uploaded_ocha_file, sheet_name='scope-fix', engine='openpyxl')
+                    
+                    # Perform checks on the 'ocha' data
+                    check_message_ocha = perform_ocha_data_checks(ocha_data)
+                    
+                    if check_message_ocha == "Data is valid":
+                        # Store the sheets in session state
+                        st.session_state['uploaded_ocha_data'] = ocha_data
+                        st.session_state['ocha_mismatch_data'] = ocha_mismatch_data
+                        
+                        st.success(translations["ok_upload"])
+                    else:
+                        st.error(check_message_ocha)  # Display the error message for 'ocha' sheet if checks fail
+                        
+                except Exception as e:
+                    st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets
+
 
 
 # Check conditions to allow proceeding
