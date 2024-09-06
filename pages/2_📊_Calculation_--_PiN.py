@@ -129,7 +129,7 @@ def handle_full_selection(suggestions, column_type, custom_message):
 ##-----------------------------
 def handle_armed_disruption_selection(suggestions):
     # Display a checkbox to indicate if this indicator was not collected
-    no_indicator_collected = st.checkbox(translations["no_armed_disruption_indicator"], key="no_armed_disruption_checkbox")
+    no_indicator_collected = st.checkbox(f"**{translations["no_armed_disruption_indicator"]}**")
     column_type = 'disruption_armed'
     # If checkbox is checked, mark armed disruption as 'no_indicator' and skip the selectbox
     if no_indicator_collected:
@@ -290,7 +290,8 @@ def check_for_duplicate_selections():
 def update_other_parameters_status():
     if (st.session_state.get('admin_level_confirmed', False) and
         st.session_state.get('school_start_month_confirmed', False) and
-        (st.session_state.get('single_cycle', False) or st.session_state.get('upper_primary_end_confirmed', False))):
+        (st.session_state.get('single_cycle', False) or st.session_state.get('upper_primary_end_confirmed', False)) and
+        st.session_state.get('displacement_column_confirmed', False)) :
         st.session_state['other_parameters_confirmed'] = True
     else:
         st.session_state['other_parameters_confirmed'] = False
@@ -609,7 +610,6 @@ def finalize_details():
             st.markdown(school5_content, unsafe_allow_html=True)
         
 
-        handle_displacement_column_selection()
 
         if st.session_state.get('displacement_column_confirmed', False):
             st.success(f"Displacement column confirmed: {st.session_state['status_var']}")
@@ -619,6 +619,9 @@ def finalize_details():
         if st.button("Finalize and Confirm"):
             st.session_state.final_confirmed = True
             st.success("All details confirmed and finalized!")
+
+
+        handle_displacement_column_selection()
 
         #st.markdown("---")
   
