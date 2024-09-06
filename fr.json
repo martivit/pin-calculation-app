@@ -77,7 +77,7 @@
     "download_word": "Télécharger le Country Snapshot : Profil des enfants en détresse et aperçu des besoins",
     "no_armed_disruption_indicator":"L'indicateur ** % d'enfants dont l'accès à l'éducation a été perturbé en raison de l'occupation de l'école par des groupes armés** n'a PAS été collecté dans ce contexte.",
     "no_ocha_data": "Les données d'OCHA ne sont pas disponibles",
-    "mismatch_admin_message":  "Il y a un décalage entre l'unité d'analyse OCHA et le niveau administratif auquel le MSNA est représentatif. Si cette case est cochée, assurez-vous que le fichier OCHA contient la liste des unités administratives non concordantes dans la feuille « scope-fix ». Veuillez vous référer au modèle pour obtenir des conseils."
+    "mismatch_admin_message":  "**Il y a un décalage entre l'unité d'analyse OCHA et le niveau administratif auquel le MSNA est représentatif.** Si cette case est cochée, assurez-vous que le fichier OCHA contient la liste des unités administratives non concordantes dans la feuille « scope-fix ». **Veuillez vous référer au modèle pour obtenir des conseils.**"
 
 
 

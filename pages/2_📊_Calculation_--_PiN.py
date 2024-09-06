@@ -502,7 +502,7 @@ def finalize_details():
             key='admin_target'
         )
 
-        mismatch_admin_checkbox = st.checkbox(f"**{translations['mismatch_admin_message']}**")
+        mismatch_admin_checkbox = st.checkbox(f"{translations['mismatch_admin_message']}")
         
         if st.button('Confirm Admin Level', key='confirm_admin_level'):
             if admin_target != 'No selection':
