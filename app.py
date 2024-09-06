@@ -388,3 +388,19 @@ if 'uploaded_data' in st.session_state:
             else:
                 st.error(check_message)  # Display the error message if checks fail
 
+    # Iterate over the DataFrame rows to create the bullet points for each population group
+    for _, row_pop in final_overview_df_OCHA.iterrows():
+        total_population_in_need = row_pop[label_tot]
+        strata = row_pop['Strata']
+        
+        if strata not in not_pop_group_columns:
+            # Remove the substring '(5-17 y.o.)' and convert to uppercase
+            strata_cleaned = strata.replace('(5-17 y.o.)', '').strip().upper()
+            
+            # Create a bullet point for each population group with indentation
+            bullet_point = doc.add_paragraph(style='List Bullet')
+            bullet_point_format = bullet_point.paragraph_format
+            bullet_point_format.left_indent = Inches(1)  # Adjust this value for the desired indentation
+            bullet_text = bullet_point.add_run(f"{format_number(total_population_in_need)} are {strata_cleaned} population group;")
+            bullet_text.font.size = Pt(12)
+            bullet_text.font.name = 'Calibri'
