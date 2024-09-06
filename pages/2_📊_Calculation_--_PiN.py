@@ -130,7 +130,7 @@ def handle_full_selection(suggestions, column_type, custom_message):
 def handle_armed_disruption_selection(suggestions):
     # Display a checkbox to indicate if this indicator was not collected
     translated_text = translations["no_armed_disruption_indicator"]
-    no_indicator_collected = st.checkbox(f"**{translated_text}**")
+    no_indicator_collected = st.checkbox(f"{translated_text}")
     column_type = 'disruption_armed'
     # If checkbox is checked, mark armed disruption as 'no_indicator' and skip the selectbox
     if no_indicator_collected:
@@ -611,18 +611,14 @@ def finalize_details():
             st.markdown(school5_content, unsafe_allow_html=True)
         
 
-
-        if st.session_state.get('displacement_column_confirmed', False):
-            st.success(f"Displacement column confirmed: {st.session_state['status_var']}")
-            pippo = st.session_state['status_var']
-            st.write(f"Selected Displacement Column: {pippo}")
+            
+        handle_displacement_column_selection()
 
         if st.button("Finalize and Confirm"):
             st.session_state.final_confirmed = True
             st.success("All details confirmed and finalized!")
 
 
-        handle_displacement_column_selection()
 
         #st.markdown("---")
   
