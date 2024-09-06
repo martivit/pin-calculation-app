@@ -129,7 +129,8 @@ def handle_full_selection(suggestions, column_type, custom_message):
 ##-----------------------------
 def handle_armed_disruption_selection(suggestions):
     # Display a checkbox to indicate if this indicator was not collected
-    no_indicator_collected = st.checkbox(f"**{translations["no_armed_disruption_indicator"]}**")
+    translated_text = translations["no_armed_disruption_indicator"]
+    no_indicator_collected = st.checkbox(f"**{translated_text}**")
     column_type = 'disruption_armed'
     # If checkbox is checked, mark armed disruption as 'no_indicator' and skip the selectbox
     if no_indicator_collected:
