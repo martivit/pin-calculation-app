@@ -504,14 +504,14 @@ def finalize_details():
 
         st.markdown(
             f"""
-            <div style="font-size:20px; font-weight:bold;">
+            <div style="font-size:18px; font-weight:bold;">
                 {translations['mismatch_admin_message']}
             </div>
             """, unsafe_allow_html=True
         )
 
         # Display a simple checkbox below the message
-        mismatch_admin_checkbox = st.checkbox("Check if there is a mismatch")
+        mismatch_admin_checkbox = st.checkbox(translations['check_box'])
         
         if st.button('Confirm Admin Level', key='confirm_admin_level'):
             if admin_target != 'No selection':
