@@ -115,8 +115,7 @@ def handle_full_selection(current_country, suggestions, column_type, custom_mess
         st.text_area("Message important", 
             """Conformément à la méthodologie convenue, les indicateurs supplémentaires :
             1) Incidents de protection sur le trajet de l'école (violences, harcèlement verbal/physique, VBG, EEI, etc.)
-            2) Incidents de protection au sein de l'école (violences, harcèlement verbal/physique, VBG, etc.)
-            concourent à attribuer l'enfant dans la dimension de l'environnement protégé.""",
+            2) Incidents de protection au sein de l'école (violences, harcèlement verbal/physique, VBG, etc.) concourent à attribuer l'enfant dans la dimension de l'environnement protégé.""",
             height=150
         )
     # Add a confirmation button

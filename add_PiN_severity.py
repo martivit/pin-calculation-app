@@ -88,7 +88,8 @@ def find_matching_choices(choices_df, barriers_list, label_var):
 
         
 ##--------------------------------------------------------------------------------------------
-def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption, names_severity_4, names_severity_5):
+def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption, protection_at_school, protection_to_school, names_severity_4, names_severity_5):
+
     # Helper function to safely normalize string inputs
     def normalize(input_value):
         if isinstance(input_value, str):
@@ -102,6 +103,8 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     normalized_armed_disruption = normalize(armed_disruption) if armed_disruption is not None else None
     normalized_idp_disruption = normalize(idp_disruption)
     normalized_teacher_disruption = normalize(teacher_disruption)
+    normalized_protection_at_school = normalize(protection_at_school) if protection_at_school is not None else None
+    normalized_protection_to_school = normalize(protection_to_school) if protection_to_school is not None else None
 
     # Normalize to handle English and French variations of "yes" and "no"
     yes_answers = ['yes', 'oui', '1', 1]
@@ -119,7 +122,9 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
         # Check if 'armed_disruption' is valid and not None
         if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
             return 5
-        elif normalized_idp_disruption in yes_answers:
+        elif (normalized_idp_disruption in yes_answers or 
+              normalized_protection_at_school in yes_answers or 
+              normalized_protection_to_school in yes_answers):
             return 4
         elif normalized_teacher_disruption in yes_answers:
             return 3
@@ -390,13 +395,15 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
-    # Apply the conditions and choices to create the new 'severity_category' column
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
         access=row[access_var], 
         barrier=row[barrier_var], 
         armed_disruption=row[armed_disruption_var] if armed_disruption_var != 'no_indicator' else None, 
         idp_disruption=row[idp_disruption_var], 
         teacher_disruption=row[teacher_disruption_var], 
+        protection_at_school=row['e_incident_ecol'] if country == 'Burkina Faso -- BFA'  else None,
+        protection_to_school=row['e_incident_trajet'] if country == 'Burkina Faso -- BFA'  else None,
+        country_label=row['country_label'],  # Assuming 'country_label' is in the dataset
         names_severity_4=names_severity_4, 
         names_severity_5=names_severity_5
     ), axis=1)
