@@ -402,6 +402,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     print('===============  COUNTRY ===================')
     print(country)
     print(edu_data['e_incident_ecol'])
+    print(edu_data.columns)
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
         access=row[access_var], 
         barrier=row[barrier_var], 
