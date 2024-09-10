@@ -89,7 +89,7 @@ def find_matching_choices(choices_df, barriers_list, label_var):
         
 ##--------------------------------------------------------------------------------------------
 
-def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption, protection_at_school, protection_to_school, names_severity_4, names_severity_5):
+def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption,names_severity_4, names_severity_5):
 
     # Helper function to safely normalize string inputs
     def normalize(input_value):
