@@ -107,14 +107,6 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     normalized_protection_at_school = normalize(protection_at_school) if protection_at_school is not None else None
     normalized_protection_to_school = normalize(protection_to_school) if protection_to_school is not None else None
 
-    #normalized_protection_at_school = None
-    #normalized_protection_to_school = None
-    print('========================   normalized_protection_at_school')
-
-    print(normalized_protection_at_school)
-    print('========================    normalized_protection_to_school')
-
-    print(normalized_protection_to_school)
 
     
     # Normalize to handle English and French variations of "yes" and "no"
