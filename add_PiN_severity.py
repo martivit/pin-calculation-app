@@ -88,6 +88,7 @@ def find_matching_choices(choices_df, barriers_list, label_var):
 
         
 ##--------------------------------------------------------------------------------------------
+
 def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption, protection_at_school, protection_to_school, names_severity_4, names_severity_5):
 
     # Helper function to safely normalize string inputs
@@ -97,7 +98,7 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
         elif isinstance(input_value, (int, float)):  # Handle numeric values directly
             return input_value
         return ""  # Default to empty string if input is not a string or number
-    
+
     # Normalize the input to handle different cases and languages
     normalized_access = normalize(access)
     normalized_armed_disruption = normalize(armed_disruption) if armed_disruption is not None else None
@@ -106,10 +107,20 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     normalized_protection_at_school = normalize(protection_at_school) if protection_at_school is not None else None
     normalized_protection_to_school = normalize(protection_to_school) if protection_to_school is not None else None
 
+    #normalized_protection_at_school = None
+    #normalized_protection_to_school = None
+    print('========================   normalized_protection_at_school')
+
+    print(normalized_protection_at_school)
+    print('========================    normalized_protection_to_school')
+
+    print(normalized_protection_to_school)
+
+    
     # Normalize to handle English and French variations of "yes" and "no"
     yes_answers = ['yes', 'oui', '1', 1]
     no_answers = ['no', 'non', '0', 0]
-    
+
     # Main severity calculation logic
     if normalized_access in no_answers:
         if barrier in names_severity_5:
@@ -130,7 +141,9 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
             return 3
         else:
             return 2
+    
     return None  # Default fallback in case none of the conditions are met
+
 
 
 
@@ -394,7 +407,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     severity_5_matches = find_matching_choices(choice_data, selected_severity_5_barriers, label_var=label)
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
-
+    print('===============  COUNTRY ===================')
+    print(country)
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
         access=row[access_var], 
         barrier=row[barrier_var], 
@@ -403,7 +417,6 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         teacher_disruption=row[teacher_disruption_var], 
         protection_at_school=row['e_incident_ecol'] if country == 'Burkina Faso -- BFA'  else None,
         protection_to_school=row['e_incident_trajet'] if country == 'Burkina Faso -- BFA'  else None,
-        country_label=row['country_label'],  # Assuming 'country_label' is in the dataset
         names_severity_4=names_severity_4, 
         names_severity_5=names_severity_5
     ), axis=1)
@@ -413,6 +426,9 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         access=row[access_var],
         severity= row['severity_category']
         ), axis=1)
+
+
+
 
     return edu_data
 

@@ -948,8 +948,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         grouped_dict = dict(grouped_dict)
 
         # Print the resulting dictionary
-        for key, value in grouped_dict.items():
-            print(f"{key}: {value}")
+        #for key, value in grouped_dict.items():
+        #    print(f"{key}: {value}")
 
         
         length_dict = categorize_levels_dynamic(prefix_list)
