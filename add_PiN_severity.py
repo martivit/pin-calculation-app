@@ -104,11 +104,9 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     normalized_armed_disruption = normalize(armed_disruption) if armed_disruption is not None else None
     normalized_idp_disruption = normalize(idp_disruption)
     normalized_teacher_disruption = normalize(teacher_disruption)
-    normalized_protection_at_school = normalize(protection_at_school) if protection_at_school is not None else None
-    normalized_protection_to_school = normalize(protection_to_school) if protection_to_school is not None else None
+    #normalized_protection_at_school = normalize(protection_at_school) if protection_at_school is not None else None
+    #normalized_protection_to_school = normalize(protection_to_school) if protection_to_school is not None else None
 
-
-    
     # Normalize to handle English and French variations of "yes" and "no"
     yes_answers = ['yes', 'oui', '1', 1]
     no_answers = ['no', 'non', '0', 0]
@@ -125,9 +123,7 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
         # Check if 'armed_disruption' is valid and not None
         if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
             return 5
-        elif (normalized_idp_disruption in yes_answers or 
-              normalized_protection_at_school in yes_answers or 
-              normalized_protection_to_school in yes_answers):
+        elif normalized_idp_disruption in yes_answers:
             return 4
         elif normalized_teacher_disruption in yes_answers:
             return 3
@@ -136,7 +132,9 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     
     return None  # Default fallback in case none of the conditions are met
 
-
+        #elif normalized_idp_disruption in yes_answers or 
+              #normalized_protection_at_school in yes_answers or 
+              #normalized_protection_to_school in yes_answers):
 
 
 ##--------------------------------------------------------------------------------------------
@@ -409,8 +407,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         armed_disruption=row[armed_disruption_var] if armed_disruption_var != 'no_indicator' else None, 
         idp_disruption=row[idp_disruption_var], 
         teacher_disruption=row[teacher_disruption_var], 
-        protection_at_school=row['e_incident_ecol'] if country == 'Burkina Faso -- BFA'  else None,
-        protection_to_school=row['e_incident_trajet'] if country == 'Burkina Faso -- BFA'  else None,
+        #protection_at_school=row['e_incident_ecol'] if country == 'Burkina Faso -- BFA'  else None,
+        #protection_to_school=row['e_incident_trajet'] if country == 'Burkina Faso -- BFA'  else None,
         names_severity_4=names_severity_4, 
         names_severity_5=names_severity_5
     ), axis=1)
