@@ -91,7 +91,7 @@ def display_status(description, status):
     color = 'green' if status else 'gray'
     st.markdown(f"<span style='color: {color}; font-size: 20px; margin-right: 5px;'>●</span> {description}", unsafe_allow_html=True)
 ##---------------------------------------------------------------------------------------------------------
-def handle_full_selection(suggestions, column_type, custom_message):
+def handle_full_selection(current_country, suggestions, column_type, custom_message):
     # Construct the full message with custom formatting
     message_template = translations["full_message"]
     full_message = message_template.format(custom_message=custom_message)
@@ -111,6 +111,14 @@ def handle_full_selection(suggestions, column_type, custom_message):
     column_confirmed_message = translations["column_confirmed_message"]
     error_message = translations["error_message"]
 
+    if column_type == 'disruption_idp' and current_country == 'Burkina Faso -- BFA':
+        st.text_area("Message important", 
+            """Conformément à la méthodologie convenue, les indicateurs supplémentaires :
+            1) Incidents de protection sur le trajet de l'école (violences, harcèlement verbal/physique, VBG, EEI, etc.)
+            2) Incidents de protection au sein de l'école (violences, harcèlement verbal/physique, VBG, etc.)
+            concourent à attribuer l'enfant dans la dimension de l'environnement protégé.""",
+            height=150
+        )
     # Add a confirmation button
     if st.button(confirm_button_label, key=f'confirm_{column_type}'):
         if selected_column != 'No selection':
@@ -127,7 +135,7 @@ def handle_full_selection(suggestions, column_type, custom_message):
     return selected_column
 
 ##-----------------------------
-def handle_armed_disruption_selection(suggestions):
+def handle_armed_disruption_selection(current_country, suggestions):
     # Display a checkbox to indicate if this indicator was not collected
     translated_text = translations["no_armed_disruption_indicator"]
     no_indicator_collected = st.checkbox(f"{translated_text}")
@@ -139,7 +147,7 @@ def handle_armed_disruption_selection(suggestions):
         st.session_state[f'{column_type}_column_confirmed'] = True
     else:
         # If checkbox is not checked, proceed with the regular selection
-        armed_disruption_var = handle_full_selection(suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"])
+        armed_disruption_var = handle_full_selection(current_country, suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"])
 
     return armed_disruption_var
 
@@ -414,7 +422,7 @@ def select_indicators():
 
         age_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['age', 'âge', 'year'])]
         gender_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['sex', 'gender', 'sexe', 'genre'])]
-        education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole'])]
+        education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole', 'scolarise', 'enseignant', 'formel'])]
 
         # Checkbox to show/hide the data header
         if st.checkbox(translations["display_education_data_header_checkbox"]):
@@ -426,17 +434,19 @@ def select_indicators():
         if gender_suggestions:
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
+        if 'country' in st.session_state and st.session_state['country'] != 'no selection':
+            current_country = st.session_state['country']
         if education_indicator_suggestions:
             st.markdown("---")  # Markdown horizontal rule
-            st.session_state['access_var'] = handle_full_selection(education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
+            st.session_state['access_var'] = handle_full_selection(current_country,education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
             st.markdown("---")  # Markdown horizontal rule
-            st.session_state['teacher_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
+            st.session_state['teacher_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
             st.markdown("---")  # Markdown horizontal rule
-            st.session_state['idp_disruption_var'] =  handle_full_selection(education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
+            st.session_state['idp_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
             st.markdown("---")  # Markdown horizontal rule
-            st.session_state['armed_disruption_var'] =  handle_armed_disruption_selection(education_indicator_suggestions)  
+            st.session_state['armed_disruption_var'] =  handle_armed_disruption_selection(current_country, education_indicator_suggestions)  
             st.markdown("---")  # Markdown horizontal rule
-            st.session_state['barrier_var'] = handle_full_selection(education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
+            st.session_state['barrier_var'] = handle_full_selection(current_country, education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
             check_for_duplicate_selections()
         if st.button("Confirm Indicators"):
             st.session_state.indicators_confirmed = True
