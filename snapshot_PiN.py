@@ -14,6 +14,11 @@ from docx.oxml import parse_xml, OxmlElement
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from matplotlib.text import Text
 from docx.enum.table import WD_TABLE_ALIGNMENT
+import matplotlib as mpl
+
+# Set the global font to Calibri
+mpl.rcParams['font.family'] = 'Calibri'
+mpl.rcParams['font.size'] = 12  # Set default font size if needed
 
 
 # Constants
@@ -179,7 +184,7 @@ def set_top_bottom_border(cell):
 
     tcPr.append(tcBorders)
 
-
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 def create_dimension_table(doc, label, perc_acc, num_acc, perc_lc, num_lc, perc_env, num_env, perc_agg, num_agg, total_in_need, font = 12):
     # Create the table with 5 rows and 3 columns
     table_dimension = doc.add_table(rows=5, cols=3)
@@ -207,7 +212,7 @@ def create_dimension_table(doc, label, perc_acc, num_acc, perc_lc, num_lc, perc_
 
     # Merge the first row across all columns
     cell_title = table_dimension.cell(0, 0)
-    cell_title.text = f'Among the {label} children in need ({format_number(total_in_need)}):'
+    cell_title.text = f'Among {label} children in need ({format_number(total_in_need)}):'
 
     # Left align text in the merged cell
     cell_title.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -267,12 +272,12 @@ def create_dimension_table(doc, label, perc_acc, num_acc, perc_lc, num_lc, perc_
 
     return table_dimension
 
-
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 # Filter the data for each section
 def filter_data(df, strata_list):
     filtered_data = df[df['Strata'].isin(strata_list)]
     return filtered_data
-
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 # Function to plot each section
 def plot_snapshot(ax, df, title, color_dim, fixed_height):
     groups_dimension = []
@@ -441,7 +446,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
             severity_4_groups.append(percentage_4_pop)
             severity_5_groups.append(percentage_5_pop)
             percentage_tot_values.append(percentage_tot)
-            text_line = f'{population_group}: {percentage_3_pop:.1f}% (3), {percentage_4_pop:.1f}% (4), {percentage_5_pop:.1f}% (5)'
+            text_line = f'{population_group}: {percentage_3_pop:.1f}% (severity 3), {percentage_4_pop:.1f}% (severity 4), {percentage_5_pop:.1f}% (severity 5)'
             text_data.append(text_line)  # Append the formatted string to the list
     text_str = '\n'.join(text_data)  # Join the strings with newlines
 
@@ -470,23 +475,16 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
     for i, percentage_tot in enumerate(percentage_tot_values):
         ax.text(ind[i], severity_3_groups[i] + severity_4_groups[i] + severity_5_groups[i] + 1,  # 1 is for padding above the bar
-                f'{percentage_tot:.1f}%', ha='center', va='bottom', fontsize=15)
+                f'{percentage_tot:.1f}%', ha='center', va='bottom', fontsize=16)
 
     # Adding grid lines
     ax.yaxis.grid(True, linestyle='--', which='major', color='gray', alpha=0.7)
 
-    # Customize the legend with larger text
-    legend_labels = [
-        'Severity 3:\nOoS children NOT enduring aggravating \ncircumstances or accessing education \nin poor learning conditions',
-        'Severity 4:\nOoS and enduring aggravating \ncircumstances or accessing with \nserious protection concerns',
-        'Severity 5:\nOoS and enduring exceptional aggravating \ncircumstances or accessing with \nlife-threatening concerns'
-    ]
-
     # Customizing the text in the legend to make "Severity" bold by splitting and recombining the text
     formatted_legend_labels = [
-        f'$\mathbf{{Severity\ 3}}$:\nOoS children who do NOT endure aggravating \ncircumstances OR in-school children \nstudying in unacceptable basic learning conditions',
-        f'$\mathbf{{Severity\ 4}}$:\nOoS children who endure aggravating \ncircumstances OR in-school children evolving in a \nnon-protective education environment',
-        f'$\mathbf{{Severity\ 5}}$:\nOoS children who endure exceptionally aggravating \ncircumstances OR in-school children evolving \nin a life-threating education environment'
+        f'$\mathbf{{Severity level\ 3}}$:\nOoS children who do NOT endure aggravating \ncircumstances OR in-school children \nstudying in unacceptable basic learning conditions',
+        f'$\mathbf{{Severity level\ 4}}$:\nOoS children who endure aggravating \ncircumstances OR in-school children evolving in a \nnon-protective education environment',
+        f'$\mathbf{{Severity level\ 5}}$:\nOoS children who endure exceptionally aggravating \ncircumstances OR in-school children evolving \nin a life-threating education environment'
     ]
 
 
@@ -776,20 +774,22 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
     # Add the first part with the percentage in need, making it bold
     run_perc_in_need = paragraph_tot.add_run(f"{tot_perc_in_need}% (i.e. {format_number(tot_in_need)})")
-    run_perc_in_need.font.size = Pt(15)
+    run_perc_in_need.font.size = Pt(16)
+    run_perc_in_need.font.name = 'Calibri'
     run_perc_in_need.font.color.rgb = RGBColor(86,150,151)
     run_perc_in_need.bold = True
 
     # Add the remaining text of the first sentence (not bold)
     run_text = paragraph_tot.add_run(" of school-aged children are in need. Among them:")
-    run_text.font.size = Pt(15)
+    run_text.font.size = Pt(16)
+    run_text.font.name = 'Calibri'
 
     # Create a bullet point for each disaggregation with indentation
     bullet_point_girls_boys = doc.add_paragraph(style='List Bullet')
     bullet_point_format = bullet_point_girls_boys.paragraph_format
     bullet_point_format.left_indent = Inches(1)  # Adjust this value for the desired indentation
     bullet_text = bullet_point_girls_boys.add_run(f"{format_number(tot_in_need_girl)} are girls and {format_number(tot_in_need_boy)} are boys;")
-    bullet_text.font.size = Pt(13)
+    bullet_text.font.size = Pt(16)
     bullet_text.font.name = 'Calibri'
 
     # Add separate bullet points for other groups with indentation
@@ -797,19 +797,24 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     bullet_point_format = bullet_point_ece.paragraph_format
     bullet_point_format.left_indent = Inches(1)
     bullet_text = bullet_point_ece.add_run(f"{format_number(tot_in_need_ece)} are 5 years old (ECE);")
-    bullet_text.font.size = Pt(13)
+    bullet_text.font.size = Pt(16)
     bullet_text.font.name = 'Calibri'
 
     bullet_point_disability = doc.add_paragraph(style='List Bullet')
     bullet_point_format = bullet_point_disability.paragraph_format
     bullet_point_format.left_indent = Inches(1)
     bullet_text = bullet_point_disability.add_run(f"{format_number(tot_in_need_disability)} are children with disability.")
-    bullet_text.font.size = Pt(13)
+    bullet_text.font.size = Pt(16)
     bullet_text.font.name = 'Calibri'
 
     doc.add_paragraph()
 
     pop_group_intro = doc.add_paragraph("School-aged children in need, according to population groups:")
+    # Apply font and size formatting to the text
+    run_pop_group_intro = pop_group_intro.runs[0]
+    run_pop_group_intro.font.name = 'Calibri'
+    run_pop_group_intro.font.size = Pt(16)
+
     table_pop_group = doc.add_table(rows=1, cols=2)
 
     # Set the table headers
@@ -822,7 +827,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = cell.paragraphs[0].runs[0]
         #run.font.bold = True
-        run.font.size = Pt(10)
+        run.font.size = Pt(12)
         run.font.name = 'Calibri'
 
     for _, row_pop in final_overview_df_OCHA.iterrows():
@@ -841,7 +846,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
             for cell in row_cells:
                 cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                 run = cell.paragraphs[0].runs[0]
-                run.font.size = Pt(10)
+                run.font.size = Pt(12)
                 run.font.name = 'Calibri'
 
     # Optionally add a total row at the end
@@ -869,6 +874,9 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     doc.add_paragraph()
 
     pteacher = doc.add_paragraph("Additionally, X of adults (teachers/educational staff) are in need of education assistance.")
+    pteacher_format = pteacher.runs[0]
+    pteacher_format.font.name = 'Calibri'
+    pteacher_format.font.size = Pt(16)
 
     # Add a subsection before the table
     section_severity_distribution = doc.add_heading('School-aged children severity distribution', level=3)
@@ -918,7 +926,8 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         tcPr = tc.get_or_add_tcPr()
         tcPr.append(parse_xml(r'<w:vAlign {} w:val="center"/>'.format(nsdecls('w'))))
         run = cell.paragraphs[0].runs[0]
-        run.font.size = Pt(11)
+        run.font.size = Pt(12)
+        run.font.name = 'Calibri'
         run.font.bold = False  # Remove bold formatting
 
     # Add text to the second row
@@ -1002,7 +1011,10 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     section_needs_in_need.font.name = 'Calibri'
     section_needs_in_need.alignment = 0  # Left align
 
-    doc.add_paragraph("Considering only the children in need, it is possible to explore the needs driving the severity.")
+    intro_need = doc.add_paragraph("What is driving the severity of children in needs?")
+    intro_need_format = intro_need.runs[0]
+    intro_need_format.font.name = 'Calibri'
+    intro_need_format.font.size = Pt(16)
 
     ## table need
     create_dimension_table(
@@ -1045,14 +1057,17 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     ##############################################################
     doc.add_page_break()
 
-    section_needs_msna = doc.add_heading("Children's profile (from MSNA, HH survey)", level=3)
+    section_needs_msna = doc.add_heading("Children's profiles (from MSNA, HH survey)", level=3)
     section_needs_msna = section_needs_msna.runs[0]
     section_needs_msna.font.size = Pt(18)  # Customize the section header size
     section_needs_msna.font.name = 'Calibri'
     section_needs_msna.alignment = 0  # Left align
 
-    doc.add_paragraph("The graphics below shows school-aged children profile, relying on the 4 dimensions of the education PiN (ALPA, Access to education, Learning conditions, Protection level in or on the way to school and Aggravating circumstances).")
-
+    intro_dimension = doc.add_paragraph("The graphics below show school-aged children profiles, relying on the 4 dimensions of the education PiN (ALPA, Access to education, Learning conditions, Protection level in or on the way to school and Aggravating circumstances).")
+    intro_dimension_format = intro_dimension.runs[0]
+    intro_dimension_format.font.name = 'Calibri'
+    intro_dimension_format.font.size = Pt(16)
+    
 
 
 

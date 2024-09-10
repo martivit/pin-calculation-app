@@ -11,6 +11,7 @@ from calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from vizualize_PiN import create_output
 from snapshot_PiN import create_snapshot_PiN
 from shared_utils import language_selector
+from translate_PiN import translate_excel_sheets_with_formatting
 
 
 st.logo('pics/logos.png')
@@ -22,6 +23,7 @@ language_selector()
 
 # Access the translations
 translations = st.session_state.translations
+selected_language = st.session_state.get('selected_language', 'English')
 
 if 'password_correct' not in st.session_state:
     st.error(translations["no_user"])
@@ -70,6 +72,11 @@ mismatch_admin = st.session_state.get('mismatch_admin', False)
 
 
 
+
+
+
+
+
 ## add indicator ---> severity
 edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 
                                                                                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
@@ -101,6 +108,15 @@ if ocha_data is not None:
 
 
     ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
+
+
+    # Check if the selected language is French and apply translation if necessary
+    if st.session_state.get('selected_language') == 'French':
+        
+        # Pass the in-memory Excel data to the translation function
+        ocha_excel = translate_excel_sheets_with_formatting(ocha_excel)
+        st.write("French translation applied.")
+
     doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need)
 
     st.download_button(
