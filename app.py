@@ -404,3 +404,94 @@ if 'uploaded_data' in st.session_state:
             bullet_text = bullet_point.add_run(f"{format_number(total_population_in_need)} are {strata_cleaned} population group;")
             bullet_text.font.size = Pt(12)
             bullet_text.font.name = 'Calibri'
+
+
+
+
+status_var = 'pop_group'
+access_var = 'edu_access'
+teacher_disruption_var = 'edu_disrupted_teacher'
+idp_disruption_var = 'edu_disrupted_displaced'
+armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
+barrier_var = 'edu_barrier'
+selected_severity_4_barriers = [
+    "Protection/safety risks while commuting to school",
+    "Protection/safety risks while at school",
+    "Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income)",
+    "Child participating in income generating activities outside of the home",
+    "Child marriage, engagement or pregnancies",
+    "Discrimination or stigmatization of the child for any reason",
+    "Unable to enroll in school due to lack of documentation"]
+selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+#"---> None of the listed barriers <---"
+#"Child is associated with armed forces or armed groups "
+age_var = 'ind_age'
+gender_var = 'ind_gender'
+start_school = 'September'
+country= 'Myanmar -- MMR'
+
+#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+ 
+# 'Admin_3: Townships'
+admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
+
+vector_cycle = [10,14]
+single_cycle = (vector_cycle[1] == 0)
+primary_start = 6
+secondary_end = 17
+label = 'label::English'
+
+# Path to your Excel file
+excel_path = 'input/REACH_MMR_MMR2402_MSNA_Dataset_VALIDATED.xlsx'
+excel_path_ocha = 'input/ocha_pop_MMR.xlsx'
+#excel_path_ocha = 'input/test_ocha.xlsx'
+
+
+
+
+        # Iterate through each column in the edu_data dataframe
+        for col in edu_data.columns:
+            # Convert the column to strings to ensure type consistency
+            column_data = edu_data[col].astype(str)            
+            # Check if any value from prefix_list is present in the current column
+            matching_values = column_data.isin(prefix_list)
+
+            # If there are any matches, add the column to the list
+            if matching_values.any():
+                admin_column_rapresentative.append(col)
+
+
+
+
+
+                 dimension_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
+        dimension_admin_status_in_need_list = run_mismatch_admin_analysis(in_need_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)      
+        severity_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='severity_category',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
+        severity_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='severity_category',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
+        dimension_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)        
+        dimension_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
+        dimension_ece_list = run_mismatch_admin_analysis(ece_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
+        dimension_primary_list = run_mismatch_admin_analysis(primary_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
+        dimension_secondary_list = run_mismatch_admin_analysis(secondary_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
+        if not single_cycle:      
+            dimension_intermediate_list = run_mismatch_admin_analysis(intermediate_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)   

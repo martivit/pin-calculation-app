@@ -46,10 +46,10 @@ gender_var = 'ind_gender'
 start_school = 'September'
 country= 'Myanmar -- MMR'
 
-#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
+#admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
 
 vector_cycle = [10,14]
 single_cycle = (vector_cycle[1] == 0)
@@ -58,8 +58,8 @@ secondary_end = 17
 label = 'label::English'
 
 # Path to your Excel file
-excel_path = 'input/REACH_MMR_MMR2402_MSNA_Dataset_VALIDATED.xlsx'
-excel_path_ocha = 'input/ocha_pop_MMR.xlsx'
+excel_path = 'input/REACH_MMR_MMR2402_MSNA_Dataset_SMALL.xlsx'
+excel_path_ocha = 'input/ocha_pop_MMR4.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -255,6 +255,7 @@ if ocha_data is not None:
 
     # Save the BytesIO objects to Excel files
 
+    print('before saving')
     # Save jiaf_excel
     with open("output_validation/final__JIAF__platform_output.xlsx", "wb") as f:
         f.write(jiaf_excel.getbuffer())

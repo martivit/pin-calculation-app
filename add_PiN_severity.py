@@ -323,21 +323,27 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     ####### ** 1 **       ------------------------------ manipulation and join between H and edu data   ------------------------------------------     #######
         
-    household_data['weight'] = 1
     # Find the UUID columns, assuming they exist and taking only the first match for simplicity
     edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
     household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
 
-    household_start_column = [col for col in household_data.columns if 'start' in col.lower()][0]  # Take the first item directly
-
-
+    household_start_column = [col for col in household_data.columns if 'start' in col.lower()][0]  # Take the first item directl
     # Extract the month from the 'start_time' column
     household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
     household_data['month'] = household_data[household_start_column].dt.month
 
     admin_var = find_best_match(admin_target,  household_data.columns)
-
     print(admin_var)
+
+
+    weight_column = None
+
+    # Check if 'weights' column exists, if not, find and rename the correct weight column
+    if 'weights' not in household_data.columns:
+        weight_column = [col for col in household_data.columns if 'weight' in col.lower()][0]  # Take the first matching weight column
+        household_data = household_data.rename(columns={weight_column: 'weights'})
+    else:
+        print("Weights column already exists.")
 
     # Get the admin levels for the specified country
     admin_levels = admin_levels_per_country.get(country, [])
@@ -349,7 +355,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     if admin_var in admin_columns_from_household:
         admin_columns_from_household.remove(admin_var)
     # Now add the admin columns to the columns to include, without duplicating
-    columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights', 'weight'] + admin_columns_from_household
+    columns_to_include = [household_uuid_column, admin_var, pop_group_var, 'month', 'weights'] + admin_columns_from_household
     # Ensure there are no duplicate column names in columns_to_include
     columns_to_include = list(set(columns_to_include))
 

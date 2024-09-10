@@ -654,87 +654,255 @@ def find_best_match(admin_target, columns):
         return process.extractOne(admin_target, similar_columns)[0]
     
 ##--------------------------------------------------------------------------------------------
-def run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative, pop_group_var, analysis_variable,  
-                 admin_low_ok_list, prefix_list, grouped_dict):
-    # 1. Run the analysis grouped by 'admin_var' (Analysis A)
-    results_analysis_admin_low = df.groupby([admin_var, pop_group_var, analysis_variable]).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    results_analysis_admin_low = reduce_index(results_analysis_admin_low, 0, pop_group_var)
-    
-    # 2. Run the analysis grouped by 'admin_column_rapresentative' (Analysis B)
-    results_analysis_admin_up = df.groupby([admin_column_rapresentative, pop_group_var, analysis_variable]).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    results_analysis_admin_up = reduce_index(results_analysis_admin_up, 0, pop_group_var)
+def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_group_var, analysis_variable, 
+                                admin_low_ok_list, prefix_list, grouped_dict):
+    all_expanded_results_admin_up = {}  # Collect results from both levels by category
+    admin_var_dummy = 'admin_var_dummy'
 
-    #print(f"admin_low_ok_list: {admin_low_ok_list}")
-    #print(f"prefix_list: {prefix_list}")
+    # Check if the `admin_var` column is empty
+    if df[admin_var].notna().any():
+        # 1. Run the analysis grouped by 'admin_var' (Analysis A)
+        results_analysis_admin_low = df.groupby([admin_var, pop_group_var, analysis_variable]).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        results_analysis_admin_low = reduce_index(results_analysis_admin_low, 0, pop_group_var)
 
-    # 3. Filter results_analysis_admin_low to only include rows where 'admin_var' is in 'admin_low_ok_list'
-    if admin_low_ok_list:
-        for category, pop_group_df in results_analysis_admin_low.items():
-            # Apply filtering to the 'admin_var' column
-            pop_group_df = pop_group_df[pop_group_df[admin_var].isin(admin_low_ok_list)]
-            results_analysis_admin_low[category] = pop_group_df
+        # 3. Filter results_analysis_admin_low to only include rows where 'admin_var' is in 'admin_low_ok_list'
+        if admin_low_ok_list:
+            for category, pop_group_df in results_analysis_admin_low.items():
+                # Apply filtering to the 'admin_var' column
+                pop_group_df = pop_group_df[pop_group_df[admin_var].isin(admin_low_ok_list)]
+                results_analysis_admin_low[category] = pop_group_df
+        else:
+            print("admin_low_ok_list is empty, skipping filtering for Analysis A.")
     else:
-        print("admin_low_ok_list is empty, skipping filtering for Analysis A.")
+        print(f"admin_var column ({admin_var}) is empty, skipping Analysis A.")
+        results_analysis_admin_low = {}  # Or set to None if you prefer
 
-    # 4. Filter results_analysis_admin_up to only include rows where 'admin_column_rapresentative' is in 'prefix_list'
-    if prefix_list:
-        for category, pop_group_df in results_analysis_admin_up.items():
-            # Apply filtering to the 'admin_column_rapresentative' column
-            pop_group_df = pop_group_df[pop_group_df[admin_column_rapresentative].isin(prefix_list)]
-            results_analysis_admin_up[category] = pop_group_df
+    # Case where 'admin_column_rapresentative' is a dictionary, even with one level
+    if isinstance(admin_column_rapresentative, dict):
+        # Check if it's a single-level case (only one key in the dictionary)
+        if len(admin_column_rapresentative) == 1:
+            # Extract the single value from the dictionary
+            length, admin_col = list(admin_column_rapresentative.items())[0]
+            
+            # Run the analysis grouped by this single admin column
+            results_analysis_admin_up = df.groupby([admin_col, pop_group_var, analysis_variable]).agg(
+                total_weight=('weights', 'sum')
+            ).groupby(level=[0, 1]).apply(
+                lambda x: x / x.sum()
+            ).unstack(fill_value=0)
+            results_analysis_admin_up = reduce_index(results_analysis_admin_up, 0, pop_group_var)
+
+            admin_var_dummy = 'admin_var_dummy'
+            for category, pop_group_df in results_analysis_admin_up.items():
+                    pop_group_df.rename(columns={admin_col: admin_var_dummy}, inplace=True)
+                    results_analysis_admin_up[category] = pop_group_df
+
+            # 4. Filter results_analysis_admin_up to only include rows where 'admin_col_level1' is in 'prefix_list'
+            if prefix_list:
+                for category, pop_group_df in results_analysis_admin_up.items():
+                    pop_group_df = pop_group_df[pop_group_df[admin_var_dummy].isin(prefix_list)]
+                    results_analysis_admin_up[category] = pop_group_df
+
+
+            # Expand results based on 'grouped_dict'
+            for category, pop_group_df in results_analysis_admin_up.items():
+                for admin_column_value in grouped_dict.keys():
+                    if admin_column_value in pop_group_df[admin_var_dummy].values:
+                        matching_rows = pop_group_df[pop_group_df[admin_var_dummy] == admin_column_value]
+
+                        # Duplicate rows for each detailed admin
+                        for detailed_admin in grouped_dict[admin_column_value]:
+                            expanded_row = matching_rows.copy()
+                            expanded_row[admin_var_dummy] = detailed_admin
+                            all_expanded_results_admin_up.setdefault(category, []).append(expanded_row)
+        else:
+            # Case where there are multiple levels (e.g., {4: 'i_admin1', 6: 'i_admin2'})
+            results_analysis_admin_up = {}
+            all_expanded_results_admin_up_single = {}
+
+            for idx, (length, admin_col) in enumerate(admin_column_rapresentative.items()):
+                #print(f"Running analysis for length {length} with column {admin_col} (index {idx})")
+
+                # Perform analysis grouped by each admin column
+                results_analysis_admin_up[idx] = df.groupby([admin_col, pop_group_var, analysis_variable]).agg(
+                    total_weight=('weights', 'sum')
+                ).groupby(level=[0, 1]).apply(
+                    lambda x: x / x.sum()
+                ).unstack(fill_value=0)
+                results_analysis_admin_up[idx] = reduce_index(results_analysis_admin_up[idx], 0, pop_group_var)
+                
+                admin_var_dummy = 'admin_var_dummy'
+                for category, pop_group_df in results_analysis_admin_up[idx].items():
+                        pop_group_df.rename(columns={admin_col: admin_var_dummy}, inplace=True)
+                        results_analysis_admin_up[idx][category] = pop_group_df
+
+
+                #print('results_analysis_admin_up')
+                #print(results_analysis_admin_up[idx])
+
+                # 4. Filter the results based on the prefix list
+                if prefix_list:
+                    for category, pop_group_df in results_analysis_admin_up[idx].items():
+                        pop_group_df = pop_group_df[pop_group_df[admin_var_dummy].isin(prefix_list)]
+                        results_analysis_admin_up[idx][category] = pop_group_df
+
+                #print('results_analysis_admin_up FILTERED')
+                #print(results_analysis_admin_up[idx])
+
+                # Initialize the expanded results for this index
+                all_expanded_results_admin_up_single[idx] = {}
+
+                # Expand results based on 'grouped_dict'
+                for category, pop_group_df in results_analysis_admin_up[idx].items():
+                    for admin_column_value in grouped_dict.keys():
+                        if admin_column_value in pop_group_df[admin_var_dummy].values:
+                            matching_rows = pop_group_df[pop_group_df[admin_var_dummy] == admin_column_value]
+
+                            # Duplicate rows for each detailed admin
+                            for detailed_admin in grouped_dict[admin_column_value]:
+                                expanded_row = matching_rows.copy()
+                                expanded_row[admin_var_dummy] = detailed_admin
+                                all_expanded_results_admin_up_single[idx].setdefault(category, []).append(expanded_row)
+                #print(f'results_analysis_admin_up EXPANDED for index {idx}')
+                #print(all_expanded_results_admin_up_single[idx])
+
+            # Concatenate the two levels of results into a single DataFrame
+            for category in all_expanded_results_admin_up_single[0].keys():
+                if category in all_expanded_results_admin_up_single[1]:
+                    #print(category)
+                    pop_group_df_0 = pd.concat(all_expanded_results_admin_up_single[0][category], ignore_index=True)
+                    pop_group_df_1 = pd.concat(all_expanded_results_admin_up_single[1][category], ignore_index=True)
+
+                    final_concat = pd.concat([pop_group_df_0, pop_group_df_1], ignore_index=True)
+                    all_expanded_results_admin_up[category] = final_concat
+                else:
+                    # Handle cases where category only exists in one of the levels
+                    all_expanded_results_admin_up[category] = pd.concat(all_expanded_results_admin_up_single[0][category], ignore_index=True)
+
     else:
-        print("prefix_list is empty, skipping filtering for Analysis B.")
+        raise ValueError("admin_column_rapresentative should always be a dictionary in this case.")
 
+    if all_expanded_results_admin_up:
+        # Convert lists of DataFrames to DataFrames by concatenating them first
+        for category in all_expanded_results_admin_up.keys():
+            if isinstance(all_expanded_results_admin_up[category], list):
+                all_expanded_results_admin_up[category] = pd.concat(all_expanded_results_admin_up[category], ignore_index=True)
 
-    # 5. Expand the results from admin_up (grouped_dict logic)
-    expanded_results_admin_up = []
-
-    for category, pop_group_df in results_analysis_admin_up.items():
-        for admin_column_value in grouped_dict.keys():
-            if admin_column_value in pop_group_df[admin_column_rapresentative].values:
-                # Get matching rows
-                matching_rows = pop_group_df[pop_group_df[admin_column_rapresentative] == admin_column_value]
-
-                # Duplicate rows for each detailed admin
-                for detailed_admin in grouped_dict[admin_column_value]:
-                    expanded_row = matching_rows.copy()
-                    expanded_row[admin_column_rapresentative] = detailed_admin
-                    expanded_results_admin_up.append(expanded_row)
-
-                    #print(f"Duplicated results for {detailed_admin} based on {admin_column_value}")
-                    #print(expanded_row)
-
-    # Convert the list of expanded results into a DataFrame
-    if expanded_results_admin_up:
-        expanded_results_admin_up_df = pd.concat(expanded_results_admin_up, ignore_index=True)
+        # Now concatenate all the DataFrames into a single DataFrame
+        expanded_results_admin_up_df = pd.concat(all_expanded_results_admin_up.values(), ignore_index=True)
     else:
-        expanded_results_admin_up_df = pd.DataFrame()  # Empty DataFrame if nothing to expand
+        expanded_results_admin_up_df = pd.DataFrame()
 
     results_analysis_admin_up_duplicated = expanded_results_admin_up_df
-    #print("Expanded Results for B:")
-    #print(results_analysis_admin_up_duplicated)
 
-    # 6. Merge the expanded results into the complete set
+    # 5. Merge with results from Analysis A (if Analysis A was run)
     results_analysis_complete = {}
-    for category, admin_low in results_analysis_admin_low.items():
-        # Match the category
-        admin_up = results_analysis_admin_up_duplicated[results_analysis_admin_up_duplicated[pop_group_var] == category]
-        admin_up.rename(columns={admin_column_rapresentative: admin_var}, inplace=True)
-        
-        # Handle case where either DataFrame is empty
-        all_admin = pd.concat([admin_low, admin_up], ignore_index=True)
-        results_analysis_complete[category] = all_admin
 
-    # Return the final complete results
+    if results_analysis_admin_low:
+        # If Analysis A results exist, merge Analysis A (admin_low) with Analysis B (admin_up)
+        for category, admin_low in results_analysis_admin_low.items():
+            if category in results_analysis_admin_up_duplicated[pop_group_var].unique():
+                admin_up = results_analysis_admin_up_duplicated[results_analysis_admin_up_duplicated[pop_group_var] == category].copy() 
+                admin_up.rename(columns={admin_var_dummy: admin_var}, inplace=True)
+
+                # Combine admin_low and admin_up
+                all_admin = pd.concat([admin_low, admin_up], ignore_index=True)
+                results_analysis_complete[category] = all_admin
+            else:
+                results_analysis_complete[category] = admin_low
+    else:
+        # Process only Analysis B (admin_up) results
+        for category in results_analysis_admin_up_duplicated[pop_group_var].unique():
+            admin_up = results_analysis_admin_up_duplicated[results_analysis_admin_up_duplicated[pop_group_var] == category].copy() 
+            admin_up.rename(columns={admin_var_dummy: admin_var}, inplace=True)
+
+            # Use only admin_up for this case
+            results_analysis_complete[category] = admin_up
+
+    # Return final results
     return results_analysis_complete
+
+##--------------------------------------------------------------------------------------------
+# Step 1: Categorize codes by length
+def categorize_levels_dynamic(prefix_list):
+    # Dictionary to hold codes grouped by their length
+    length_dict = defaultdict(list)
+
+    # Loop through each code and categorize by length
+    for code in prefix_list:
+        code_length = len(code)
+        length_dict[code_length].append(code)
+    
+    return length_dict
+##--------------------------------------------------------------------------------------------
+# Step 2: Modify the logic to find the appropriate columns in `edu_data`
+# Helper function to find matching columns for each length level
+def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list, admin_var):
+    # Categorize codes based on length
+    length_dict = categorize_levels_dynamic(prefix_list)
+    admin_columns_representative = {}
+
+    # Get the available columns from the `edu_data` and `household_data` dataframes
+    edu_columns = edu_data.columns
+    household_columns = household_data.columns
+
+    # Find the best match for `admin_var` in `household_data`
+    best_match_for_admin_var = find_similar_columns(admin_var, household_columns)
+    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var[0]}")
+
+    # Iterate through each column in the edu_data dataframe
+    for col in edu_columns:
+        # Convert the column to strings to ensure type consistency
+        column_data = edu_data[col].astype(str)
+        
+        # For each length group in the `length_dict`, check for matches
+        for length, codes in length_dict.items():
+            matching_values = column_data.isin(codes)
+
+            # If there are any matches, add the column to the admin_columns_representative dictionary for that length
+            if matching_values.any():
+                if length not in admin_columns_representative:
+                    admin_columns_representative[length] = []
+                admin_columns_representative[length].append(col)
+                print(f"Matching column found: {col} for length {length}")
+
+    # Prioritize columns based on the number of non-empty values
+    def prioritize_non_empty_columns(columns):
+        non_empty_counts = {col: edu_data[col].notna().sum() for col in columns}
+        sorted_columns = sorted(non_empty_counts, key=non_empty_counts.get, reverse=True)
+        return sorted_columns[0] if sorted_columns else None
+
+    # Handle the case where multiple levels (lengths) are detected
+    if len(length_dict) > 1:
+        print("Multiple levels detected:")
+        for length, codes in length_dict.items():
+            print(f"Level {length}: {codes}")
+
+        # Match columns based on length and prioritize based on the number of non-empty values
+        best_columns = {}
+        for length, columns in admin_columns_representative.items():
+            # Prioritize based on the number of non-empty values
+            best_columns_for_level = prioritize_non_empty_columns(columns)
+            best_columns[length] = best_columns_for_level
+
+        admin_columns_representative = best_columns
+    else:
+        # For single level case, directly prioritize the column with non-empty values
+        if length_dict:
+            single_level = next(iter(length_dict.keys()))
+            columns_for_single_level = admin_columns_representative.get(single_level, [])
+            if columns_for_single_level:
+                admin_columns_representative[single_level] = prioritize_non_empty_columns(columns_for_single_level)
+            else:
+                admin_columns_representative = {}
+
+    return admin_columns_representative
+
+
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
@@ -755,6 +923,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ocha_pop_data = ocha_pop_data.rename(columns={'Admin': 'Admin_label'})
     ocha_pop_data = ocha_pop_data.rename(columns={'Admin Pcode': 'Admin'})
     ocha_pop_data = ocha_pop_data.drop(columns=['Admin_label'])
+
+    admin_var = find_best_match(admin_target,  household_data.columns)
 
     admin_column_rapresentative = []
     grouped_dict = {}
@@ -781,18 +951,17 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         for key, value in grouped_dict.items():
             print(f"{key}: {value}")
 
-        # Iterate through each column in the edu_data dataframe
-        for col in edu_data.columns:
-            # Convert the column to strings to ensure type consistency
-            column_data = edu_data[col].astype(str)            
-            # Check if any value from prefix_list is present in the current column
-            matching_values = column_data.isin(prefix_list)
+        
+        length_dict = categorize_levels_dynamic(prefix_list)
+        #print("Codes grouped by length:")
+        #for length, codes in length_dict.items():
+            #print(f"Length {length}: {codes}")
 
-            # If there are any matches, add the column to the list
-            if matching_values.any():
-                admin_column_rapresentative.append(col)
 
-        admin_column_rapresentative = admin_column_rapresentative[0]
+
+        admin_column_rapresentative = find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list, admin_var)
+        print('admin_column_rapresentative')
+        print(admin_column_rapresentative)
     ## essential variables --------------------------------------------------------------------------------------------
     single_cycle = (vector_cycle[1] == 0)
     primary_start = 6
@@ -820,7 +989,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # in the function add_severity
 
     ####### ** 3 **       ------------------------------ Analysis per ADMIN AND POPULATION GROUP ------------------------------------------     #######
-    admin_var = find_best_match(admin_target,  household_data.columns)
+
     edu_data = edu_data[edu_data[access_var].notna()]
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
@@ -843,6 +1012,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         admin_up_msna = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
         admin_low_ok_list = ocha_mismatch_list.iloc[:, 0].dropna().astype(str).tolist()  # Drop NaN and convert to string
 
+        print(admin_up_msna)
 
         severity_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
                                 analysis_variable='severity_category',
@@ -877,9 +1047,15 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         if not single_cycle:      
             dimension_intermediate_list = run_mismatch_admin_analysis(intermediate_df, admin_var,admin_column_rapresentative,pop_group_var,
                                 analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)                    
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)   
+                        
 
     else:
+        print(df.columns)
+        if 'weights' in df.columns:
+            print("Weights column exists")
+        else:
+            print("Weights column does not exist")
         #------    CORRECT PIN    -------            
         severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
             total_weight=('weights', 'sum')

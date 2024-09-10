@@ -652,6 +652,166 @@ def find_best_match(admin_target, columns):
     else:
         # Fallback to fuzzy matching among the similar columns
         return process.extractOne(admin_target, similar_columns)[0]
+    
+##--------------------------------------------------------------------------------------------
+def run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative, pop_group_var, analysis_variable,  
+                 admin_low_ok_list, prefix_list, grouped_dict):
+    # 1. Run the analysis grouped by 'admin_var' (Analysis A)
+    results_analysis_admin_low = df.groupby([admin_var, pop_group_var, analysis_variable]).agg(
+        total_weight=('weights', 'sum')
+    ).groupby(level=[0, 1]).apply(
+        lambda x: x / x.sum()
+    ).unstack(fill_value=0)
+    results_analysis_admin_low = reduce_index(results_analysis_admin_low, 0, pop_group_var)
+    
+    # 2. Run the analysis grouped by 'admin_column_rapresentative' (Analysis B)
+    results_analysis_admin_up = df.groupby([admin_column_rapresentative, pop_group_var, analysis_variable]).agg(
+        total_weight=('weights', 'sum')
+    ).groupby(level=[0, 1]).apply(
+        lambda x: x / x.sum()
+    ).unstack(fill_value=0)
+    results_analysis_admin_up = reduce_index(results_analysis_admin_up, 0, pop_group_var)
+
+    print(f"admin_low_ok_list: {admin_low_ok_list}")
+    print(f"prefix_list: {prefix_list}")
+
+    # 3. Filter results_analysis_admin_low to only include rows where 'admin_var' is in 'admin_low_ok_list'
+    if admin_low_ok_list:
+        for category, pop_group_df in results_analysis_admin_low.items():
+            # Apply filtering to the 'admin_var' column
+            pop_group_df = pop_group_df[pop_group_df[admin_var].isin(admin_low_ok_list)]
+            results_analysis_admin_low[category] = pop_group_df
+    else:
+        print("admin_low_ok_list is empty, skipping filtering for Analysis A.")
+
+    # 4. Filter results_analysis_admin_up to only include rows where 'admin_column_rapresentative' is in 'prefix_list'
+    if prefix_list:
+        for category, pop_group_df in results_analysis_admin_up.items():
+            # Apply filtering to the 'admin_column_rapresentative' column
+            pop_group_df = pop_group_df[pop_group_df[admin_column_rapresentative].isin(prefix_list)]
+            results_analysis_admin_up[category] = pop_group_df
+    else:
+        print("prefix_list is empty, skipping filtering for Analysis B.")
+
+
+    # 5. Expand the results from admin_up (grouped_dict logic)
+    expanded_results_admin_up = []
+
+    for category, pop_group_df in results_analysis_admin_up.items():
+        for admin_column_value in grouped_dict.keys():
+            if admin_column_value in pop_group_df[admin_column_rapresentative].values:
+                # Get matching rows
+                matching_rows = pop_group_df[pop_group_df[admin_column_rapresentative] == admin_column_value]
+
+                # Duplicate rows for each detailed admin
+                for detailed_admin in grouped_dict[admin_column_value]:
+                    expanded_row = matching_rows.copy()
+                    expanded_row[admin_column_rapresentative] = detailed_admin
+                    expanded_results_admin_up.append(expanded_row)
+
+                    print(f"Duplicated results for {detailed_admin} based on {admin_column_value}")
+                    #print(expanded_row)
+
+    # Convert the list of expanded results into a DataFrame
+    if expanded_results_admin_up:
+        expanded_results_admin_up_df = pd.concat(expanded_results_admin_up, ignore_index=True)
+    else:
+        expanded_results_admin_up_df = pd.DataFrame()  # Empty DataFrame if nothing to expand
+
+    results_analysis_admin_up_duplicated = expanded_results_admin_up_df
+    #print("Expanded Results for B:")
+    #print(results_analysis_admin_up_duplicated)
+
+    # 6. Merge the expanded results into the complete set
+    results_analysis_complete = {}
+    for category, admin_low in results_analysis_admin_low.items():
+        # Match the category
+        admin_up = results_analysis_admin_up_duplicated[results_analysis_admin_up_duplicated[pop_group_var] == category]
+        admin_up.rename(columns={admin_column_rapresentative: admin_var}, inplace=True)
+        
+        # Handle case where either DataFrame is empty
+        all_admin = pd.concat([admin_low, admin_up], ignore_index=True)
+        results_analysis_complete[category] = all_admin
+
+    # Return the final complete results
+    return results_analysis_complete
+
+# Step 1: Categorize codes by length
+def categorize_levels_dynamic(prefix_list):
+    # Dictionary to hold codes grouped by their length
+    length_dict = defaultdict(list)
+
+    # Loop through each code and categorize by length
+    for code in prefix_list:
+        code_length = len(code)
+        length_dict[code_length].append(code)
+    
+    return length_dict
+
+# Step 2: Modify the logic to find the appropriate columns in `edu_data`
+# Helper function to find matching columns for each length level
+def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list, admin_var):
+    # Categorize codes based on length
+    length_dict = categorize_levels_dynamic(prefix_list)
+    admin_columns_representative = {}
+
+    # Get the available columns from the `edu_data` and `household_data` dataframes
+    edu_columns = edu_data.columns
+    household_columns = household_data.columns
+
+    # Find the best match for `admin_var` in `household_data`
+    best_match_for_admin_var = find_similar_columns(admin_var, household_columns)
+    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var[0]}")
+
+    # Iterate through each column in the edu_data dataframe
+    for col in edu_columns:
+        # Convert the column to strings to ensure type consistency
+        column_data = edu_data[col].astype(str)
+        
+        # For each length group in the `length_dict`, check for matches
+        for length, codes in length_dict.items():
+            matching_values = column_data.isin(codes)
+
+            # If there are any matches, add the column to the admin_columns_representative dictionary for that length
+            if matching_values.any():
+                if length not in admin_columns_representative:
+                    admin_columns_representative[length] = []
+                admin_columns_representative[length].append(col)
+                print(f"Matching column found: {col} for length {length}")
+
+    # Prioritize columns based on the number of non-empty values
+    def prioritize_non_empty_columns(columns):
+        non_empty_counts = {col: edu_data[col].notna().sum() for col in columns}
+        sorted_columns = sorted(non_empty_counts, key=non_empty_counts.get, reverse=True)
+        return sorted_columns[0] if sorted_columns else None
+
+    # Handle the case where multiple levels (lengths) are detected
+    if len(length_dict) > 1:
+        print("Multiple levels detected:")
+        for length, codes in length_dict.items():
+            print(f"Level {length}: {codes}")
+
+        # Match columns based on length and prioritize based on the number of non-empty values
+        best_columns = {}
+        for length, columns in admin_columns_representative.items():
+            # Prioritize based on the number of non-empty values
+            best_columns_for_level = prioritize_non_empty_columns(columns)
+            best_columns[length] = best_columns_for_level
+
+        admin_columns_representative = best_columns
+    else:
+        # For single level case, directly prioritize the column with non-empty values
+        if length_dict:
+            single_level = next(iter(length_dict.keys()))
+            columns_for_single_level = admin_columns_representative.get(single_level, [])
+            if columns_for_single_level:
+                admin_columns_representative[single_level] = prioritize_non_empty_columns(columns_for_single_level)
+            else:
+                admin_columns_representative = {}
+
+    return admin_columns_representative
+
+
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
@@ -673,6 +833,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ocha_pop_data = ocha_pop_data.rename(columns={'Admin Pcode': 'Admin'})
     ocha_pop_data = ocha_pop_data.drop(columns=['Admin_label'])
 
+    admin_var = find_best_match(admin_target,  household_data.columns)
+
     admin_column_rapresentative = []
     grouped_dict = {}
     if mismatch_admin:
@@ -682,6 +844,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         # Create a defaultdict to store grouped data
         detailed_list = ocha_mismatch_list.iloc[:, 1].astype(str).tolist()  # Converting to string
         prefix_list = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
+        admin_low_ok_list = ocha_mismatch_list.iloc[:, 0].dropna().astype(str).tolist()  # Drop NaN and convert to string
+
         grouped_dict = defaultdict(list)
         # Iterate over each prefix in the prefix_list
         for prefix in prefix_list:
@@ -696,18 +860,17 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         for key, value in grouped_dict.items():
             print(f"{key}: {value}")
 
-        # Iterate through each column in the edu_data dataframe
-        for col in edu_data.columns:
-            # Convert the column to strings to ensure type consistency
-            column_data = edu_data[col].astype(str)            
-            # Check if any value from prefix_list is present in the current column
-            matching_values = column_data.isin(prefix_list)
-
-            # If there are any matches, add the column to the list
-            if matching_values.any():
-                admin_column_rapresentative.append(col)
+        
+        length_dict = categorize_levels_dynamic(prefix_list)
+        #print("Codes grouped by length:")
+        #for length, codes in length_dict.items():
+            #print(f"Length {length}: {codes}")
 
 
+
+        admin_column_rapresentative = find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list, admin_var)
+        print('admin_column_rapresentative')
+        print(admin_column_rapresentative)
     ## essential variables --------------------------------------------------------------------------------------------
     single_cycle = (vector_cycle[1] == 0)
     primary_start = 6
@@ -735,7 +898,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # in the function add_severity
 
     ####### ** 3 **       ------------------------------ Analysis per ADMIN AND POPULATION GROUP ------------------------------------------     #######
-    admin_var = find_best_match(admin_target,  household_data.columns)
+
     edu_data = edu_data[edu_data[access_var].notna()]
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
@@ -752,91 +915,130 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         intermediate_df = edu_data[edu_data['school_cycle'].isin(['intermediate level'])]
     # filtering only kids in need == 3+
     in_need_df = edu_data[edu_data['severity_category'].isin([3, 4, 5])]
-    #------    CORRECT PIN    -------            
-    severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    #-------    CORRECT TARGETTING    -------          
-    dimension_admin_status = df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    ## subset in need
-    dimension_admin_status_in_need = in_need_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    # -------- GENDER DISAGGREGATION  ---------    
-    severity_female = female_df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    severity_male = male_df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    dimension_female = female_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    dimension_male = male_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    # -------- SCHOOL-CYCLE DISAGGREGATION  ---------    
-    dimension_ece = ece_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    dimension_primary = primary_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    dimension_secondary = secondary_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
-    ).groupby(level=[0, 1]).apply(
-        lambda x: x / x.sum()
-    ).unstack(fill_value=0)
-    if not single_cycle:
-        dimension_intermediate = intermediate_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-        total_weight=('weights', 'sum')
+
+    if mismatch_admin:
+        detailed_list = ocha_mismatch_list.iloc[:, 1].astype(str).tolist()  # Converting to string
+        admin_up_msna = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
+        admin_low_ok_list = ocha_mismatch_list.iloc[:, 0].dropna().astype(str).tolist()  # Drop NaN and convert to string
+
+
+        severity_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='severity_category',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
+        dimension_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
+        dimension_admin_status_in_need_list = run_mismatch_admin_analysis(in_need_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)      
+        severity_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='severity_category',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
+        severity_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='severity_category',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
+        dimension_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)        
+        dimension_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
+        dimension_ece_list = run_mismatch_admin_analysis(ece_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
+        dimension_primary_list = run_mismatch_admin_analysis(primary_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
+        dimension_secondary_list = run_mismatch_admin_analysis(secondary_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
+        if not single_cycle:      
+            dimension_intermediate_list = run_mismatch_admin_analysis(intermediate_df, admin_var,admin_column_rapresentative,pop_group_var,
+                                analysis_variable='dimension_pin',
+                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)                    
+
+    else:
+        #------    CORRECT PIN    -------            
+        severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
+            total_weight=('weights', 'sum')
         ).groupby(level=[0, 1]).apply(
             lambda x: x / x.sum()
         ).unstack(fill_value=0)
+        #-------    CORRECT TARGETTING    -------          
+        dimension_admin_status = df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        ## subset in need
+        dimension_admin_status_in_need = in_need_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        # -------- GENDER DISAGGREGATION  ---------    
+        severity_female = female_df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        severity_male = male_df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        dimension_female = female_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        dimension_male = male_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        # -------- SCHOOL-CYCLE DISAGGREGATION  ---------    
+        dimension_ece = ece_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        dimension_primary = primary_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        dimension_secondary = secondary_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
+        if not single_cycle:
+            dimension_intermediate = intermediate_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
+            total_weight=('weights', 'sum')
+            ).groupby(level=[0, 1]).apply(
+                lambda x: x / x.sum()
+            ).unstack(fill_value=0)
+        ## reducing the multiindex of the panda dataframe
+        severity_admin_status_list = reduce_index(severity_admin_status, 0, pop_group_var)
+        dimension_admin_status_list = reduce_index(dimension_admin_status, 0, pop_group_var)
+        dimension_admin_status_in_need_list = reduce_index(dimension_admin_status_in_need,  0, pop_group_var) ## only who is in need we check the distriburion of need
+        severity_female_list = reduce_index(severity_female, 0, pop_group_var)
+        severity_male_list = reduce_index(severity_male, 0, pop_group_var)
+        dimension_female_list = reduce_index(dimension_female, 0, pop_group_var)
+        dimension_male_list = reduce_index(dimension_male, 0, pop_group_var)
+        dimension_ece_list = reduce_index(dimension_ece, 0, pop_group_var)
+        dimension_primary_list = reduce_index(dimension_primary, 0, pop_group_var)
+        dimension_secondary_list = reduce_index(dimension_secondary, 0, pop_group_var)
+        if not single_cycle: dimension_intermediate_list = reduce_index(dimension_intermediate, 0, pop_group_var)
 
 
-
-    ## reducing the multiindex of the panda dataframe
-    severity_admin_status_list = reduce_index(severity_admin_status, 0, pop_group_var)
-    dimension_admin_status_list = reduce_index(dimension_admin_status, 0, pop_group_var)
-    dimension_admin_status_in_need_list = reduce_index(dimension_admin_status_in_need,  0, pop_group_var) ## only who is in need we check the distriburion of need
-
-    severity_female_list = reduce_index(severity_female, 0, pop_group_var)
-    severity_male_list = reduce_index(severity_male, 0, pop_group_var)
-    dimension_female_list = reduce_index(dimension_female, 0, pop_group_var)
-    dimension_male_list = reduce_index(dimension_male, 0, pop_group_var)
-    dimension_ece_list = reduce_index(dimension_ece, 0, pop_group_var)
-    dimension_primary_list = reduce_index(dimension_primary, 0, pop_group_var)
-    dimension_secondary_list = reduce_index(dimension_secondary, 0, pop_group_var)
-    if not single_cycle: dimension_intermediate_list = reduce_index(dimension_intermediate, 0, pop_group_var)
-
-
+    ## checking number of columns
     severity_needed_columns = [2.0, 3.0, 4.0, 5.0]
     dimension_needed_columns = ['access','aggravating circumstances', 'learning condition', 'protected environment']
     severity_admin_status_list = ensure_columns(severity_admin_status_list, severity_needed_columns)
     severity_female_list = ensure_columns(severity_female_list, severity_needed_columns)
     severity_male_list = ensure_columns(severity_male_list, severity_needed_columns)
-
     dimension_admin_status_list = ensure_columns(dimension_admin_status_list, dimension_needed_columns)
     dimension_admin_status_in_need_list = ensure_columns(dimension_admin_status_in_need_list, dimension_needed_columns)
     dimension_female_list = ensure_columns(dimension_female_list, dimension_needed_columns)
@@ -1422,11 +1624,15 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     # Add the single-row entries from collapsed_results_pop
     for category, df in collapsed_results_pop.items():
-        single_row = df.iloc[0].copy()
-        single_row['Category'] = f"{category} (5-17 y.o.)"
-        # Convert the Series to a DataFrame with a single row and append it to the list
-        single_row_df = single_row.to_frame().T
-        dfs_overview_ToT.append(single_row_df)
+        if not df.empty:  # Ensure the DataFrame is not empty
+            single_row = df.iloc[0].copy()
+            single_row['Category'] = f"{category} (5-17 y.o.)"
+            # Convert the Series to a DataFrame with a single row and append it to the list
+            single_row_df = single_row.to_frame().T
+            dfs_overview_ToT.append(single_row_df)
+        else:
+            print(f"Warning: DataFrame for category {category} is empty, creating a dummy row.")
+
     # important overview for the total and population figures. It has all the percentages and total numbers
     final_overview_df = pd.concat(dfs_overview_ToT, ignore_index=True) ## table with all severities and tot and pop_group
 
