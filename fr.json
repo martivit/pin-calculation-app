@@ -41,7 +41,7 @@
     "sheet": "Sélection des feuilles pertinentes dans le fichier de données MSNA",
     "select_household_data_sheet": "Sélectionnez la feuille de données des ménages :",
     "select_survey_kobo_sheet": "Sélectionnez la feuille d'enquête/Kobo :",
-    "select_education_loop_data_sheet": "Sélectionnez la feuille de données de la boucle éducative (ou boucle individuelle) :",
+    "select_education_loop_data_sheet": "Sélectionnez la feuille de la boucle éducative (ou individuelle) :",
     "select_kobo_choice_sheet": "Sélectionnez la feuille de choix Kobo :",
     "label_json": "Sélectionnez la colonne d'étiquettes souhaitée :",
     "proceed_to_next_step_markdown": "**Passez à l'étape suivante :**",
