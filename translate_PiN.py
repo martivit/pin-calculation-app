@@ -10,11 +10,10 @@ from io import BytesIO
 
 
 translation_dict = {
-    'Girls (5-17 y.o.)': 'Filles (5-17)',
-    'Boys (5-17 y.o.)': 'Garçons (5-17)',
-    # Add more translations as needed
+    'Girls (5-17 y.o.)': 'Filles (5-17 ans)',
+    'Boys (5-17 y.o.)': 'Garçons (5-17 ans)',
+    'TOTAL (5-17 y.o.)': 'TOTAL (5-17 ans)'
 }
-
 
 
 

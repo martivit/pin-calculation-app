@@ -111,13 +111,14 @@ def handle_full_selection(current_country, suggestions, column_type, custom_mess
     column_confirmed_message = translations["column_confirmed_message"]
     error_message = translations["error_message"]
 
-    #if column_type == 'disruption_idp' and current_country == 'Burkina Faso -- BFA':
-    #    st.text_area("Message important", 
-    #        """Conformément à la méthodologie convenue, les indicateurs supplémentaires :
-    #        1) Incidents de protection sur le trajet de l'école (violences, harcèlement verbal/physique, VBG, EEI, etc.)
-    #        2) Incidents de protection au sein de l'école (violences, harcèlement verbal/physique, VBG, etc.) concourent à attribuer l'enfant dans la dimension de l'environnement protégé.""",
-    #        height=150
-    #    )
+    if column_type == 'disruption_idp' and current_country == 'Burkina Faso -- BFA':
+        st.text_area("Message important", 
+            """Conformément à la méthodologie convenue, la dimension de l'environnement protégé est déterminée par trois indicateurs de protection dans l'évaluation MSNA :
+            1) École utilisée comme abri par des personnes déplacées
+            2) Incidents de protection sur le trajet de l'école (violences, harcèlement verbal/physique, VBG, EEI, etc.)
+            3) Incidents de protection au sein de l'école (violences, harcèlement verbal/physique, VBG, etc.) concourent à attribuer l'enfant dans la dimension de l'environnement protégé.""",
+            height=150
+        )
     # Add a confirmation button
     if st.button(confirm_button_label, key=f'confirm_{column_type}'):
         if selected_column != 'No selection':

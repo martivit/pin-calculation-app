@@ -111,11 +111,11 @@ if ocha_data is not None:
 
 
     # Check if the selected language is French and apply translation if necessary
-    if st.session_state.get('selected_language') == 'French':
+    #if st.session_state.get('selected_language') == 'French':
         
         # Pass the in-memory Excel data to the translation function
-        ocha_excel = translate_excel_sheets_with_formatting(ocha_excel)
-        st.write("French translation applied.")
+        #ocha_excel = translate_excel_sheets_with_formatting(ocha_excel)
+        #st.write("French translation applied.")
 
     doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need)
 
