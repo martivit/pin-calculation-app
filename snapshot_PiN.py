@@ -16,6 +16,8 @@ from matplotlib.text import Text
 from docx.enum.table import WD_TABLE_ALIGNMENT
 import matplotlib as mpl
 
+
+
 # Set the global font to Calibri
 mpl.rcParams['font.family'] = 'Calibri'
 mpl.rcParams['font.size'] = 12  # Set default font size if needed
@@ -183,6 +185,33 @@ def set_top_bottom_border(cell):
     tcBorders.append(bottom_border)
 
     tcPr.append(tcBorders)
+
+
+
+
+# Call this function after creating the document title
+image_path = 'pics/pin_table.jpg'  # Path to your uploaded image
+textbox_text = (
+    "Education PiN definition\n"
+    "The definition agreed globally and as part of the JIAF of a child in need is the following:\n"
+    "Number of school-aged children and youths in the areas affected by crisis who do not have access to protective education and acceptable learning conditions, which can negatively impact:\n"
+)
+bullet_points = [
+    "(i) their physical and psychosocial wellbeing",
+    "(ii) cognitive development",
+    "(iii) ability to meet their future needs."
+]
+additional_text = (
+    "\nThe severity of the situation for Education is computed based on 4 dimensions (ALPA):\n"
+    "• Access to education\n"
+    "• Learning conditions\n"
+    "• Protection level in or on the way to school\n"
+    "• Aggravating circumstances (at individual level)\n\n"
+    "The table below recaps some examples of indicators falling under each of these dimensions and the main data sources "
+    "usually available in countries where clusters are activated. The list is not exhaustive, and other indicators deemed "
+    "appropriate at country level can be used."
+)
+
 
 ## -------------------------------------------------------------------------------------------------------------------------------------------------
 def create_dimension_table(doc, label, perc_acc, num_acc, perc_lc, num_lc, perc_env, num_env, perc_agg, num_agg, total_in_need, font = 12):
@@ -482,9 +511,9 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
     # Customizing the text in the legend to make "Severity" bold by splitting and recombining the text
     formatted_legend_labels = [
-        f'$\mathbf{{Severity level\ 3}}$:\nOoS children who do NOT endure aggravating \ncircumstances OR in-school children \nstudying in unacceptable basic learning conditions',
-        f'$\mathbf{{Severity level\ 4}}$:\nOoS children who endure aggravating \ncircumstances OR in-school children evolving in a \nnon-protective education environment',
-        f'$\mathbf{{Severity level\ 5}}$:\nOoS children who endure exceptionally aggravating \ncircumstances OR in-school children evolving \nin a life-threating education environment'
+        f'$\mathbf{{Severity\ level\ 3}}$:\nOoS children who do NOT endure aggravating \ncircumstances OR in-school children \nstudying in unacceptable basic learning conditions',
+        f'$\mathbf{{Severity\ level\ 4}}$:\nOoS children who endure aggravating \ncircumstances OR in-school children evolving in a \nnon-protective education environment',
+        f'$\mathbf{{Severity\ level\ 5}}$:\nOoS children who endure exceptionally aggravating \ncircumstances OR in-school children evolving \nin a life-threating education environment'
     ]
 
 
@@ -758,11 +787,103 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     title_run.font.name = 'Calibri'
     title.alignment = 1  # Center the title
 
+    # Define the gray background color (hex code)
+    gray_background = "e0e0e0"
+
+    # Add a 1x1 table to the document
+    table_pin = doc.add_table(rows=1, cols=1)
+
+    # Get the first (and only) cell of the table
+    cell_pin = table_pin.cell(0, 0)
+
+    # Insert the main text into the table cell
+   # Start a new paragraph for the cell
+    paragraph = cell_pin.add_paragraph()
+
+    # Add the bold part for "Education PiN definition"
+    run = paragraph.add_run("Education PiN definition")
+    run.bold = True
+    run.font.size = Pt(10)  # Smaller font size
+    run.font.name = 'Calibri'
+
+    # Set paragraph spacing to reduce the extra space
+    paragraph.paragraph_format.space_before = Pt(0)  # No space before the paragraph
+    paragraph.paragraph_format.space_after = Pt(0)   # No space after the paragraph
+    paragraph.paragraph_format.line_spacing = Pt(12)  # Adjust line spacing
+
+    # Add the rest of the text (regular font)
+    run = paragraph.add_run("\nThe definition agreed globally and as part of the JIAF of a child in need is the following:\n"
+                            "Number of school-aged children and youths in the areas affected by crisis who do not have access to "
+                            "protective education and acceptable learning conditions, which can negatively impact:\n")
+    run.font.size = Pt(10)
+    run.font.name = 'Calibri'
+
+    # Add bullet points with reduced spacing
+    bullet_points = [
+        "(i) their physical and psychosocial wellbeing",
+        "(ii) cognitive development",
+        "(iii) ability to meet their future needs."
+    ]
+
+    for point in bullet_points:
+        p = cell_pin.add_paragraph(point, style='List Bullet')
+        p.paragraph_format.space_before = Pt(0)  # Reduce space before bullet point
+        p.paragraph_format.space_after = Pt(0)   # Reduce space after bullet point
+        p.paragraph_format.line_spacing = Pt(12) # Adjust line spacing
+        run = p.runs[0]
+        run.font.size = Pt(10)
+        run.font.name = 'Calibri'
+
+    # Add additional text after the bullet points with reduced spacing
+    additional_text = (
+        "\nThe severity of the situation for Education is computed based on 4 dimensions (ALPA):\n"
+        "1) Access to education\n"
+        "2) Learning conditions\n"
+        "3) Protection level in or on the way to school\n"
+        "4) Aggravating circumstances (at individual level)\n\n"
+        "The table below recaps some examples of indicators falling under each of these dimensions and the main data sources "
+        "usually available in countries where clusters are activated. The list is not exhaustive, and other indicators deemed "
+        "appropriate at country level can be used."
+    )
+
+    additional_paragraph = cell_pin.add_paragraph(additional_text)
+    additional_paragraph.paragraph_format.space_before = Pt(0)  # Reduce space before the paragraph
+    additional_paragraph.paragraph_format.space_after = Pt(0)   # Reduce space after the paragraph
+    additional_paragraph.paragraph_format.line_spacing = Pt(12) # Adjust line spacing
+
+    for run in additional_paragraph.runs:
+        run.font.size = Pt(10)
+        run.font.name = 'Calibri'
+
+    # Insert the image into the table cell
+    paragraph = cell_pin.add_paragraph()
+    run = paragraph.add_run()
+    run.add_picture(image_path, width=Inches(6))  # Adjust the width as needed
+
+    # Set the table width to the width of the page
+    table_pin.autofit = False
+    table_pin.allow_autofit = False
+    table_pin.columns[0].width = Inches(6.5)  # Adjust the width based on your page settings
+
+    # Center the table in the document
+    table_pin.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    # Apply a gray background to the cell
+    cell_pin._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="{}"/>'.format(nsdecls('w'), gray_background)))
+
+    # Apply font size 10 to the entire table content
+    for paragraph in cell_pin.paragraphs:
+        for run in paragraph.runs:
+            run.font.size = Pt(10)
+            run.font.name = 'Calibri'
+
+
     # Add some spacing after the title
-    doc.add_paragraph()
+    doc.add_page_break()
+
 
     # Session 1: Children in Need (5-17 y.o.)
-    section1 = doc.add_heading('Children in Need (5-17 y.o.)', level=2)
+    section1 = doc.add_heading(f'Children in Need (5-17 y.o.) in {country_name}', level=2)
     section1_run = section1.runs[0]
     section1_run.font.size = Pt(20)  # Customize the section header size
     section1_run.bold = True
@@ -797,6 +918,14 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     bullet_point_format = bullet_point_ece.paragraph_format
     bullet_point_format.left_indent = Inches(1)
     bullet_text = bullet_point_ece.add_run(f"{format_number(tot_in_need_ece)} are 5 years old (ECE);")
+    bullet_text.font.size = Pt(16)
+    bullet_text.font.name = 'Calibri'
+
+        # Add separate bullet points for other groups with indentation
+    bullet_point_rest = doc.add_paragraph(style='List Bullet')
+    bullet_point_format = bullet_point_rest.paragraph_format
+    bullet_point_format.left_indent = Inches(1)
+    bullet_text = bullet_point_rest.add_run(f"{format_number(tot_in_need-tot_in_need_ece)} are between 6 and 17 years old;")
     bullet_text.font.size = Pt(16)
     bullet_text.font.name = 'Calibri'
 
@@ -1015,6 +1144,32 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     intro_need_format = intro_need.runs[0]
     intro_need_format.font.name = 'Calibri'
     intro_need_format.font.size = Pt(16)
+    # Add the new text with bullet points
+    bullet_point_text = (
+        "Children in need are categorized based on four key dimensions of the Education People in Need (PiN) framework: "
+        "Access to education, Learning conditions, Protection level in or on the way to school, and Aggravating circumstances. "
+        "These dimensions determine their severity level:"
+    )
+    # Add the paragraph for the introductory sentence
+    intro_paragraph = doc.add_paragraph(bullet_point_text)
+    intro_paragraph_format = intro_paragraph.runs[0]
+    intro_paragraph_format.font.name = 'Calibri'
+    intro_paragraph_format.font.size = Pt(12)
+
+    # Create bullet points
+    bullet_points = [
+        "Lack of access to school: This applies to children who fall into severity 3 and are not accessing school at all.",
+        "Studying in unacceptable basic learning conditions: These children are assigned to severity 3, but they do have access to school. However, the quality of their learning environment is extremely poor and inadequate.",
+        "Evolve in a non-protective education environment: Children assigned to severity 4 who are attending school but in an environment that does not ensure their safety or protection.",
+        "Face aggravating circumstances preventing their access to education: Children assigned to either severity 4 or 5, where external factors significantly affect their ability to attend school, leading to a lack of access to education."
+    ]
+
+    # Add each bullet point with formatting
+    for point in bullet_points:
+        bullet_paragraph = doc.add_paragraph(style='List Bullet')
+        bullet_run = bullet_paragraph.add_run(point)
+        bullet_run.font.name = 'Calibri'
+        bullet_run.font.size = Pt(12)
 
     ## table need
     create_dimension_table(
@@ -1025,7 +1180,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         perc_env= perc_env_in_need, num_env=num_env_in_need,
         perc_agg=perc_agg_in_need, num_agg=num_agg_in_need,
         total_in_need=tot_dimension_in_need,
-        font = 12
+        font = 11
     )
     doc.add_paragraph("")
     ## table need by pop_group
@@ -1055,7 +1210,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
             doc.add_paragraph("")
 
     ##############################################################
-    doc.add_page_break()
+
 
     section_needs_msna = doc.add_heading("Children's profiles (from MSNA, HH survey)", level=3)
     section_needs_msna = section_needs_msna.runs[0]
@@ -1066,17 +1221,16 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     intro_dimension = doc.add_paragraph("The graphics below show school-aged children profiles, relying on the 4 dimensions of the education PiN (ALPA, Access to education, Learning conditions, Protection level in or on the way to school and Aggravating circumstances).")
     intro_dimension_format = intro_dimension.runs[0]
     intro_dimension_format.font.name = 'Calibri'
-    intro_dimension_format.font.size = Pt(16)
+    intro_dimension_format.font.size = Pt(12)
     
 
 
 
     # Insert the bar chart after the corresponding section
     #doc.add_picture(bar_chart_path_dim, width=Inches(6))  # Adjust the width as needed
-    doc.add_picture(bar_chart_path_subsection, width=Inches(6))
-    doc.add_picture(bar_chart_path_dim_gender, width=Inches(6))  # Adjust the width as needed
-
-    doc.add_picture(bar_chart_path_dim_school, width=Inches(6))  # Adjust the width as needed
+    doc.add_picture(bar_chart_path_subsection, width=Inches(5))
+    doc.add_picture(bar_chart_path_dim_gender, width=Inches(5))  # Adjust the width as needed
+    doc.add_picture(bar_chart_path_dim_school, width=Inches(5))  # Adjust the width as needed
 
 
 
