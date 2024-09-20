@@ -442,9 +442,9 @@ def select_indicators():
         # Display the translated HTML content
         st.markdown(translations["check_variable_warning_html"], unsafe_allow_html=True)
 
-        age_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['age', 'âge', 'year'])]
+        age_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['age', 'âge'])]
         gender_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['sex', 'gender', 'sexe', 'genre'])]
-        education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole', 'scolarise', 'enseignant', 'formel'])]
+        education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole', 'scolarise', 'enseignant', 'formel', 'access'])]
 
         # Checkbox to show/hide the data header
         if st.checkbox(translations["display_education_data_header_checkbox"]):
@@ -584,14 +584,24 @@ def finalize_details():
 
         ## -------------------- school cycle -----------------------------------
         upper_primary_start = st.session_state['lower_primary_end'] +1
-        lower_primary_end = st.slider(
-            translations["school1"],
-            min_value=6, 
-            max_value=17, 
-            value=st.session_state['lower_primary_end'],
-            step=1,
-            key='lower_primary_end'
-        )
+        if st.session_state['country'] != 'Afghanistan -- AFG':
+            lower_primary_end = st.slider(
+                translations["school1"],
+                min_value=6, 
+                max_value=17, 
+                value=st.session_state['lower_primary_end'],
+                step=1,
+                key='lower_primary_end'
+            )
+        else:
+            lower_primary_end = st.slider(
+                translations["school1"],
+                min_value=7, 
+                max_value=17, 
+                value=st.session_state['lower_primary_end'],
+                step=1,
+                key='lower_primary_end'
+            )
 
         col1, col2 = st.columns(2)
         with col1:
@@ -625,7 +635,8 @@ def finalize_details():
                 vect1 =  st.session_state['lower_primary_end']  
                 vect2 =  st.session_state['upper_primary_end']
                 st.session_state['vector_cycle'] = [vect1,vect2]
-                school4_message = translations["school4"]
+                if st.session_state['country'] != 'Afghanistan -- AFG': school4_message = translations["school4"]
+                else: school4_message = translations["school4_afg"]
                 school4_content = school4_message.format(
                 lower_primary_end=lower_primary_end,
                 upper_primary_start=upper_primary_start,
@@ -643,7 +654,8 @@ def finalize_details():
             vect1 =  st.session_state['lower_primary_end']  
             vect2 =  0
             st.session_state['vector_cycle'] = [vect1,vect2]
-            school5_message = translations["school5"]
+            if st.session_state['country'] != 'Afghanistan -- AFG': school5_message = translations["school5"]
+            else: school5_message = translations["school5_afg"]
             # Insert the dynamic values into the HTML template
             school5_content = school5_message.format(
                 primary_end=primary_end,
