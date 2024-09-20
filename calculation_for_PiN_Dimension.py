@@ -909,7 +909,7 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
 ########################################################################################################################################
 ########################################################################################################################################
 def calculatePIN (country, edu_data, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
-                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
                 label, 
@@ -967,8 +967,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     primary_start = 6
     secondary_end = 17
 
-    host_suggestion = ["always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ["displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
+    host_suggestion = ["Urban","always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
+    IDP_suggestion = ["Rural","displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
     returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
     ndsp_suggestion = ['ndsp','Protracted IDPs']

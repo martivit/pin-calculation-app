@@ -64,7 +64,7 @@ if 'vector_cycle' not in st.session_state:
 
 ## INFO ADMIN PER COUNTRY ##
 admin_levels_per_country = {
-    'Afghanistan -- AFG': ['Admin_1: Province', 'Admin_2: District', 'Admin_3: Subdistrict'],
+    'Afghanistan -- AFG': ['Admin_1: Region', 'Admin_2: Province', 'Admin_3: Districts'],
     'Burkina Faso -- BFA': ['Admin_1: Regions (Région)', 'Admin_2: Province', 'Admin_3: Department (Département)'],
     'Central African Republic -- CAR': ['Admin_1: Prefectures (préfectures)', 'Admin_2: Sub-prefectures (sous-préfectures)', 'Admin_3: Communes'],
     'Democratic Republic of the Congo -- DRC': ['Admin_1: Provinces', 'Admin_2: Territories', 'Admin_3: Sectors/chiefdoms/communes'],
@@ -151,7 +151,28 @@ def handle_armed_disruption_selection(current_country, suggestions):
         armed_disruption_var = handle_full_selection(current_country, suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"])
 
     return armed_disruption_var
+##-----------------------------
+def handle_natural_hazard_disruption_selection(current_country, suggestions):
+    # Display a checkbox for the natural hazard disruption indicator
+    translated_text = translations["yes_natural_hazard_disruption_indicator"]
+    indicator_collected = st.checkbox(f"{translated_text}")
+    column_type = 'disruption_natural_hazard'
+    
+    # If checkbox is checked, proceed with the regular selection
+    if indicator_collected:
+        natural_hazard_disruption_var = handle_full_selection(
+            current_country, 
+            suggestions, 
+            'disruption_natural_hazard', 
+            translations["natural_hazard_disruption_var_prompt"]
+        )
+    else:
+        # If checkbox is not checked, mark natural hazard disruption as 'no_indicator'
+        natural_hazard_disruption_var = "no_indicator"
+        st.session_state[f'selected_{column_type}_column'] = "no_indicator"
+        st.session_state[f'{column_type}_column_confirmed'] = True
 
+    return natural_hazard_disruption_var
 ##---------------------------------------------------------------------------------------------------------
 def handle_column_selection(suggestions, column_type):
     suggested_column = suggestions[0] if suggestions else 'No selection'
@@ -443,6 +464,8 @@ def select_indicators():
             st.markdown("---")  # Markdown horizontal rule
             st.session_state['teacher_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
             st.markdown("---")  # Markdown horizontal rule
+            st.session_state['natural_hazard_disruption_var'] =  handle_natural_hazard_disruption_selection(current_country, education_indicator_suggestions) 
+            st.markdown("---")  # Markdown horizontal rule
             st.session_state['idp_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
             st.markdown("---")  # Markdown horizontal rule
             st.session_state['armed_disruption_var'] =  handle_armed_disruption_selection(current_country, education_indicator_suggestions)  
@@ -703,6 +726,7 @@ if all([
     st.write("Teacher Disruption Variable:", st.session_state.get('teacher_disruption_var'))
     st.write("IDP Disruption Variable:", st.session_state.get('idp_disruption_var'))
     st.write("Armed Disruption Variable:", st.session_state.get('armed_disruption_var'))
+    st.write("Natural hazard Variable:", st.session_state.get('natural_hazard_disruption_var'))
     st.write("Barrier Variable:", st.session_state.get('barrier_var'))
     st.write("Selected Severity 4 Barriers:", st.session_state.get('selected_severity_4_barriers', []))
     st.write("Selected Severity 5 Barriers:", st.session_state.get('selected_severity_5_barriers', []))
@@ -724,6 +748,7 @@ if all([
     teacher_disruption_var =  st.session_state.get('teacher_disruption_var')
     idp_disruption_var =  st.session_state.get('idp_disruption_var')
     armed_disruption_var =  st.session_state.get('armed_disruption_var')
+    natural_hazard_var =  st.session_state.get('natural_hazard_disruption_var')
     barrier_var =  st.session_state.get('barrier_var')
     selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
     selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])

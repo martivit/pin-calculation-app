@@ -57,6 +57,7 @@ access_var =  st.session_state.get('access_var')
 teacher_disruption_var =  st.session_state.get('teacher_disruption_var')
 idp_disruption_var =  st.session_state.get('idp_disruption_var')
 armed_disruption_var =  st.session_state.get('armed_disruption_var')
+natural_hazard_var =  st.session_state.get('natural_hazard_disruption_var')
 barrier_var =  st.session_state.get('barrier_var')
 selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
 selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])
@@ -79,7 +80,7 @@ mismatch_admin = st.session_state.get('mismatch_admin', False)
 
 ## add indicator ---> severity
 edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 
-                                                                                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                                                                                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                 age_var, gender_var,
                                                                                 label, 
@@ -98,7 +99,7 @@ if ocha_data is not None:
     final_overview_dimension_df,final_overview_dimension_df_in_need,
     Tot_PiN_by_admin,
     country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
-                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 

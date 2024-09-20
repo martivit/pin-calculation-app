@@ -89,7 +89,7 @@ def find_matching_choices(choices_df, barriers_list, label_var):
         
 ##--------------------------------------------------------------------------------------------
 
-def calculate_severity(access, barrier, armed_disruption, idp_disruption, teacher_disruption,names_severity_4, names_severity_5):
+def calculate_severity(country, gender, age, access, barrier, armed_disruption, natural_hazard,idp_disruption, teacher_disruption,names_severity_4, names_severity_5):
 
     # Helper function to safely normalize string inputs
     def normalize(input_value):
@@ -100,8 +100,11 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
         return ""  # Default to empty string if input is not a string or number
 
     # Normalize the input to handle different cases and languages
+    normalized_age = normalize(age)
+    normalized_gender = normalize(gender)
     normalized_access = normalize(access)
     normalized_armed_disruption = normalize(armed_disruption) if armed_disruption is not None else None
+    normalized_natural_hazard = normalize(natural_hazard) if natural_hazard is not None else None
     normalized_idp_disruption = normalize(idp_disruption)
     normalized_teacher_disruption = normalize(teacher_disruption)
     #normalized_protection_at_school = normalize(protection_at_school) if protection_at_school is not None else None
@@ -111,31 +114,55 @@ def calculate_severity(access, barrier, armed_disruption, idp_disruption, teache
     yes_answers = ['yes', 'oui', '1', 1]
     no_answers = ['no', 'non', '0', 0]
 
+    if country != 'Afghanistan -- AFG':
     # Main severity calculation logic
-    if normalized_access in no_answers:
-        if barrier in names_severity_5:
-            return 5
-        elif barrier in names_severity_4:
-            return 4
-        else:
-            return 3
-    elif normalized_access in yes_answers:
-        # Check if 'armed_disruption' is valid and not None
-        if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
-            return 5
-        elif normalized_idp_disruption in yes_answers:
-            return 4
-        elif normalized_teacher_disruption in yes_answers:
-            return 3
-        else:
-            return 2
-    
-    return None  # Default fallback in case none of the conditions are met
+        if normalized_access in no_answers:
+            if barrier in names_severity_5:
+                return 5
+            elif barrier in names_severity_4:
+                return 4
+            else:
+                return 3
+        elif normalized_access in yes_answers:
+            # Check if 'armed_disruption' is valid and not None
+            if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
+                return 5
+            elif normalized_idp_disruption in yes_answers:
+                return 4
+            elif normalized_teacher_disruption in yes_answers:
+                return 3
+            elif normalized_natural_hazard is not None and normalized_natural_hazard in yes_answers:
+                return 3
+            else:
+                return 2
+        
+        return None  # Default fallback in case none of the conditions are met
 
-        #elif normalized_idp_disruption in yes_answers or 
-              #normalized_protection_at_school in yes_answers or 
-              #normalized_protection_to_school in yes_answers):
-
+    else: 
+         # Main severity calculation logic
+        if normalized_access in no_answers:
+            if barrier in names_severity_5:
+                return 5
+            elif gender == 'female' and age > 12:
+                return 5
+            elif barrier in names_severity_4:
+                return 4
+            else:
+                return 3
+        elif normalized_access in yes_answers:
+            # Check if 'armed_disruption' is valid and not None
+            if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
+                return 5
+            elif normalized_idp_disruption in yes_answers:
+                return 4
+            elif normalized_teacher_disruption in yes_answers:
+                return 3
+            elif normalized_natural_hazard is not None and normalized_natural_hazard in yes_answers:
+                return 3
+            else:
+                return 2
+        
+        return None  # Default fallback in case none of the conditions are met
 
 ##--------------------------------------------------------------------------------------------
 def assign_dimension_pin(access, severity):
@@ -198,21 +225,31 @@ def save_subtables_to_excel(severity_admin_status, pop_group_var, file_path):
 ##--------------------------------------------------------------------------------------------
 def custom_to_datetime(date_str):
     try:
+        # Try the default date parsing first
         return pd.to_datetime(date_str, errors='coerce')
     except:
         try:
+            # Handle the 'Y-m-d H:M:S.f' format
             return pd.to_datetime(date_str, format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
         except:
-            return pd.NaT
+            try:
+                # Handle the 'dd/mm/yyyy' format
+                return pd.to_datetime(date_str, format='%d/%m/%Y', errors='coerce')
+            except:
+                # Return NaT if all parsing attempts fail
+                return pd.NaT
 ##--------------------------------------------------------------------------------------------
 def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_start_var=6, lower_primary_end_var=13, upper_primary_end_var=None):
+
+    if lower_primary_start_var == 6: primary_minus_one = 5
+    else: primary_minus_one = 6
     if single_cycle:
         # If single cycle is True, handle as a primary to secondary without upper primary
         if lower_primary_start_var <= edu_age_corrected <= lower_primary_end_var:
             return 'primary'
         elif lower_primary_end_var + 1 <= edu_age_corrected <= 18:
             return 'secondary'
-        elif edu_age_corrected == 5: 
+        elif edu_age_corrected == primary_minus_one: 
             return 'ECE'
         else:
             return 'out of school range'
@@ -224,7 +261,7 @@ def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_sta
             return 'intermediate level'
         elif upper_primary_end_var and upper_primary_end_var + 1 <= edu_age_corrected <= 18:
             return 'secondary'
-        elif edu_age_corrected == 5: 
+        elif edu_age_corrected == primary_minus_one: 
             return 'ECE'
         else:
             return 'out of school range'
@@ -280,7 +317,7 @@ def find_best_match(admin_target, columns):
 ########################################################################################################################################
 ########################################################################################################################################
 def add_severity (country, edu_data, household_data, choice_data, survey_data, 
-                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
                 label, 
@@ -292,8 +329,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     ## essential variables --------------------------------------------------------------------------------------------
 
-    host_suggestion = ["always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ["displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
+    host_suggestion = ["Urban","always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
+    IDP_suggestion = ["Rural","displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
     returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
     ndsp_suggestion = ['ndsp','Protracted IDPs']
@@ -308,7 +345,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     }
     # --------------------------------------------------------------------------------------------
     admin_levels_per_country = {
-        'Afghanistan -- AFG': ['Admin_1: Province', 'Admin_2: District', 'Admin_3: Subdistrict'],
+        'Afghanistan -- AFG': ['Admin_1: Region', 'Admin_2: Province', 'Admin_3: Districts'],
         'Burkina Faso -- BFA': ['Admin_1: Regions (Région)', 'Admin_2: Province', 'Admin_3: Department (Département)'],
         'Central African Republic -- CAR': ['Admin_1: Prefectures (préfectures)', 'Admin_2: Sub-prefectures (sous-préfectures)', 'Admin_3: Communes'],
         'Democratic Republic of the Congo -- DRC': ['Admin_1: Provinces', 'Admin_2: Territories', 'Admin_3: Sectors/chiefdoms/communes'],
@@ -334,11 +371,28 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     # Find the UUID columns, assuming they exist and taking only the first match for simplicity
     edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
     household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
+    print(household_uuid_column)
+    print(edu_uuid_column)
 
-    household_start_column = [col for col in household_data.columns if 'start' in col.lower()][0]  # Take the first item directl
-    # Extract the month from the 'start_time' column
+
+
+    if country != 'Afghanistan -- AFG':
+        # Safely get the first column that contains 'start' in its name
+        household_start_column = [col for col in household_data.columns if 'start' in col.lower()]
+        if household_start_column:
+            household_start_column = household_start_column[0]  # Take the first item directly
+        else:
+            raise KeyError("No column containing 'start' found in household_data.")
+    else:
+        # Assign the 'today' column if the country is Afghanistan
+        household_start_column = 'today'
+        if household_start_column not in household_data.columns:
+            raise KeyError(f"'today' column is missing in household_data for Afghanistan.")
+
+    # Convert the date column to datetime and extract the month
     household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
     household_data['month'] = household_data[household_start_column].dt.month
+
 
     admin_var = find_best_match(admin_target,  household_data.columns)
     print(admin_var)
@@ -351,7 +405,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         weight_column = [col for col in household_data.columns if 'weight' in col.lower()][0]  # Take the first matching weight column
         household_data = household_data.rename(columns={weight_column: 'weights'})
     else:
-        print("Weights column already exists.")
+        print("--------------------------- Weights column already exists.")
 
     # Get the admin levels for the specified country
     admin_levels = admin_levels_per_country.get(country, [])
@@ -367,6 +421,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     # Ensure there are no duplicate column names in columns_to_include
     columns_to_include = list(set(columns_to_include))
 
+    print(columns_to_include)
+
     columns_to_drop = [col for col in columns_to_include if col in edu_data.columns and col != edu_uuid_column and col != household_uuid_column]
     edu_data = edu_data.drop(columns=columns_to_drop, errors='ignore')
 
@@ -378,7 +434,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     edu_data['edu_age_corrected'] = edu_data.apply(lambda row: row[age_var] - 1 if calculate_age_correction(start_school, row['month']) else row[age_var], axis=1)
 
     single_cycle = (vector_cycle[1] == 0)
-    primary_start = 6
+    if country != 'Afghanistan -- AFG': primary_start = 6
+    else: primary_start = 7
     edu_data['school_cycle'] = edu_data['edu_age_corrected'].apply(
         lambda x: assign_school_cycle(
             x, 
@@ -389,7 +446,10 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         )
     )
    
-    edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
+    if country != 'Afghanistan -- AFG':
+        edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
+    else:
+        edu_data = edu_data[(edu_data['edu_age_corrected'] >= 6) & (edu_data['edu_age_corrected'] <= 17)]
 
 
     ####### ** 2 **       ------------------------------ severity definition and calculation ------------------------------------------     #######
@@ -399,9 +459,13 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
+        country = country,
+        gender = row[gender_var],
+        age = row ['edu_age_corrected'],
         access=row[access_var], 
         barrier=row[barrier_var], 
         armed_disruption=row[armed_disruption_var] if armed_disruption_var != 'no_indicator' else None, 
+        natural_hazard=row[natural_hazard_var] if natural_hazard_var != 'no_indicator' else None, 
         idp_disruption=row[idp_disruption_var], 
         teacher_disruption=row[teacher_disruption_var], 
         #protection_at_school=row['e_incident_ecol'] if country == 'Burkina Faso -- BFA'  else None,
