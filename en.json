@@ -37,7 +37,7 @@
     "success_message": "Selected severity {severity} barriers have been confirmed.",
     "confirmed_barriers_message": "Confirmed severity {severity} barriers:",
     "duplicate_selections_error": "**Duplicate selections detected. Each variable should be used for only one category. Please adjust your selections.**",
-    "select_status": "Select the variable that corresponds to the status (host community, IDP, returnee) of the household:",
+    "select_status": "Select the variable that corresponds to the status (host community, IDP, returnee, urban/rural) of the household:",
     "sheet": "Selection of the relevant sheets in the MSNA data file",
     "select_household_data_sheet": "Select the Household data sheet:",
     "select_survey_kobo_sheet": "Select the Survey/kobo sheet:",
