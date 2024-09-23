@@ -1610,6 +1610,16 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # Apply the conditions to determine admin severity
     Tot_PiN_by_admin[label_admin_severity] = np.select(conditions, choices, default='0')
 
+    tot_5_17_label = 'TOTAL (5-17 y.o.)'
+    girl_5_17_label = 'Girls (5-17 y.o.)'
+    boy_5_17_label = 'Boys (5-17 y.o.)'
+    ece_5yo_label = 'ECE (5 y.o.)'
+
+    if country == 'Afghanistan -- AFG':
+        tot_5_17_label = 'TOTAL (6-17 y.o.)'
+        girl_5_17_label = 'Girls (6-17 y.o.)'
+        boy_5_17_label = 'Boys (6-17 y.o.)'
+        ece_5yo_label = 'ECE (6 y.o.)'
 
 
     ####### ** 9 **       ------------------------------  preparation for overview--> SUM all the admin per population group and per strata ------------------------------------------     #######
@@ -1651,16 +1661,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             summed_df = summed_df.iloc[:1]
             collapsed_results_pop[category] = summed_df
 
-    if country != 'Afghanistan -- AFG':
-        tot_5_17_label = 'TOTAL (5-17 y.o.)'
-        girl_5_17_label = 'Girls (5-17 y.o.)'
-        boy_5_17_label = 'Boys (5-17 y.o.)'
-        ece_5yo_label = 'ECE (5 y.o.)'
-    else:
-        tot_5_17_label = 'TOTAL (6-17 y.o.)'
-        girl_5_17_label = 'Girls (6-17 y.o.)'
-        boy_5_17_label = 'Boys (6-17 y.o.)'
-        ece_5yo_label = 'ECE (6 y.o.)'
 
     overview_dimension_ToT_in_need = collapse_and_summarize_dimension(dimension_per_admin_status_in_need, tot_5_17_label, admin_var=admin_var)
 

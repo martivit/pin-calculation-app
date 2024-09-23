@@ -403,13 +403,13 @@ def plot_snapshot(ax, df, title, color_dim, fixed_height):
 def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
 
+    print(country_name)
 
-    if country_label != 'Afghanistan -- AFG':
-        tot_5_17_label = 'TOTAL (5-17 y.o.)'
-        girl_5_17_label = 'Girls (5-17 y.o.)'
-        boy_5_17_label = 'Boys (5-17 y.o.)'
-        ece_5yo_label = 'ECE (5 y.o.)'
-    else:
+    tot_5_17_label = 'TOTAL (5-17 y.o.)'
+    girl_5_17_label = 'Girls (5-17 y.o.)'
+    boy_5_17_label = 'Boys (5-17 y.o.)'
+    ece_5yo_label = 'ECE (5 y.o.)'
+    if country_name == 'Afghanistan':
         tot_5_17_label = 'TOTAL (6-17 y.o.)'
         girl_5_17_label = 'Girls (6-17 y.o.)'
         boy_5_17_label = 'Boys (6-17 y.o.)'
@@ -433,7 +433,10 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
     ## reading values for different sessions
     # Retrieve data for the total row
+    print(final_overview_df)
     row_tot = final_overview_df.loc[final_overview_df['Strata'] == tot_5_17_label]
+    print(tot_5_17_label)
+    print(row_tot)
     total_population = row_tot[label_tot_population].values[0]
     tot_perc_in_need = row_tot[label_perc_tot].values[0]
     tot_in_need = row_tot[label_tot].values[0]
@@ -660,21 +663,20 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     fig_dim_gender, ax_dim_gender = plt.subplots(figsize=(14, 10))  # Adjust size as needed
 
     # Plot each group's data for all needs
-    
-    if country_label != 'Afghanistan -- AFG':
+    if country_name != 'Afghanistan':
         for i, group in enumerate(groups_dimension_gender):
-                ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender[group], markersize=markertaile, label=group)
-                ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender[group], markersize=markertaile)
-                ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender[group], markersize=markertaile)
-                ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender[group], markersize=markertaile)
-                ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender[group], markersize=markertaile)
+            ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender[group], markersize=markertaile, label=group)
+            ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender[group], markersize=markertaile)
+            ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender[group], markersize=markertaile)
+            ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender[group], markersize=markertaile)
+            ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender[group], markersize=markertaile)
     else:
         for i, group in enumerate(groups_dimension_gender):
-                ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender_afg[group], markersize=markertaile, label=group)
-                ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender_afg[group], markersize=markertaile)
-                ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender_afg[group], markersize=markertaile)
-                ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender_afg[group], markersize=markertaile)
-                ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender_afg[group], markersize=markertaile)
+            ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender_afg[group], markersize=markertaile, label=group)
+            ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender_afg[group], markersize=markertaile)
+            ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender_afg[group], markersize=markertaile)
+            ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender_afg[group], markersize=markertaile)
+            ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender_afg[group], markersize=markertaile)
 
 
 
@@ -910,7 +912,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
 
     # Session 1: Children in Need (5-17 y.o.)
-    if country_label != 'Afghanistan -- AFG':
+    if country_name != 'Afghanistan':
         section1 = doc.add_heading(f'Children in Need (5-17 y.o.) in {country_name}', level=2)
     else:
         section1 = doc.add_heading(f'Children in Need (6-17 y.o.) in {country_name}', level=2)
@@ -995,9 +997,8 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         
         if strata not in not_pop_group_columns:
             # Remove the substring '(5-17 y.o.)' and convert to uppercase
-            if country_label != 'Afghanistan -- AFG':
-                  strata_cleaned = strata.replace('(5-17 y.o.)', '').strip().upper()
-            else:
+            strata_cleaned = strata.replace('(5-17 y.o.)', '').strip().upper()
+            if country_name == 'Afghanistan':
                   strata_cleaned = strata.replace('(6-17 y.o.)', '').strip().upper()
 
 
