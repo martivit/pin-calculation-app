@@ -128,11 +128,11 @@ if ocha_data is not None:
 
 
     # Create the Excel files
-    jiaf_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA,"PiN TOTAL",  admin_var,  ocha= False)
-    ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
+    jiaf_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA,"PiN TOTAL",  admin_var,  ocha= False)
+    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
     #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
     #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
-    doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need)
+    #doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need)
 
 
 
@@ -277,6 +277,6 @@ if ocha_data is not None:
 
 
     # Save the Word document to a file
-    file_path = "output_validation/pin_snapshot_with_charts_and_text2.docx"
-    with open(file_path, "wb") as f:
-        f.write(doc_output.getvalue())
+    #file_path = "output_validation/pin_snapshot_with_charts_and_text2.docx"
+    #with open(file_path, "wb") as f:
+        #f.write(doc_output.getvalue())

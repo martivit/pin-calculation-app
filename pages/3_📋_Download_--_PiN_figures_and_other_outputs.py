@@ -108,7 +108,7 @@ if ocha_data is not None:
 
 
 
-    ocha_excel = create_output(Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
+    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
 
 
     # Check if the selected language is French and apply translation if necessary

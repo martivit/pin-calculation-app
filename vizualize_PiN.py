@@ -104,7 +104,21 @@ color_mapping_dimension = {
 }
 
 alignment_columns = list(color_mapping.keys())
-def apply_final_formatting(workbook, overview_df, small_overview_df, admin_var):
+def apply_final_formatting(country_name, workbook, overview_df, small_overview_df, admin_var):
+
+    tot_5_17_label = 'TOTAL (5-17 y.o.)'
+    girl_5_17_label = 'Girls (5-17 y.o.)'
+    boy_5_17_label = 'Boys (5-17 y.o.)'
+    ece_5yo_label = 'ECE (5 y.o.)'
+    age_label = ' (5-17 y.o.)'
+    if country_name == 'Afghanistan':
+        tot_5_17_label = 'TOTAL (6-17 y.o.)'
+        girl_5_17_label = 'Girls (6-17 y.o.)'
+        boy_5_17_label = 'Boys (6-17 y.o.)'
+        ece_5yo_label = 'ECE (6 y.o.)'
+        age_label = ' (6-17 y.o.)'
+
+
     for ws in workbook.worksheets:
         
 
@@ -145,16 +159,16 @@ def apply_final_formatting(workbook, overview_df, small_overview_df, admin_var):
             for row in ws.iter_rows(min_row=6, max_row=ws.max_row):
                 strata_value = row[2].value  # Adjusting for zero-indexing; column C is the 'Strata' column
                 
-                if strata_value == "TOTAL (5-17 y.o.)":
+                if strata_value == tot_5_17_label:
                     fill_color = colors["bluepin"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
                         cell.font = Font(color=colors["white"], bold=True)  # Set text color to white and bold
-                elif strata_value in ["Girls (5-17 y.o.)", "Boys (5-17 y.o.)"]:
+                elif strata_value in [girl_5_17_label, boy_5_17_label]:
                     fill_color = colors["gray"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
-                elif strata_value in ['Female', 'Male', 'ECE (5 y.o.)', 'Children with disability']:
+                elif strata_value in ['Female', 'Male', ece_5yo_label, 'Children with disability']:
                     fill_color = colors["stratagray"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
@@ -212,7 +226,7 @@ def apply_final_formatting(workbook, overview_df, small_overview_df, admin_var):
             ws.insert_cols(1, 4)
             # Add the sheet name as a title in the first row
             title = ws.title
-            title += " (5-17 y.o.)"
+            title += age_label
             max_col = ws.max_column
             ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
             title_cell = ws.cell(row=1, column=5)
@@ -306,7 +320,9 @@ def apply_final_formatting(workbook, overview_df, small_overview_df, admin_var):
 
 
 # Function to create output with final formatting
-def create_output(dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None):
+def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None):
+    country_name = country_label.split('__')[0]  # Extract the part before the "__"
+
     output = BytesIO()
     with pd.ExcelWriter(output) as writer:
         # Only write the overview sheet if ocha is True
@@ -326,7 +342,7 @@ def create_output(dataframes, overview_df, small_overview_df, overview_sheet_nam
     workbook = load_workbook(output)
 
     # Apply the final formatting to the workbook
-    workbook = apply_final_formatting(workbook, overview_df, small_overview_df, admin_var)
+    workbook = apply_final_formatting(country_name,workbook, overview_df, small_overview_df, admin_var)
     
     formatted_output = BytesIO()
     workbook.save(formatted_output)

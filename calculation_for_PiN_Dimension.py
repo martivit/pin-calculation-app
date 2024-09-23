@@ -659,6 +659,7 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
     all_expanded_results_admin_up = {}  # Collect results from both levels by category
     admin_var_dummy = 'admin_var_dummy'
 
+
     # Check if the `admin_var` column is empty
     if df[admin_var].notna().any():
         # 1. Run the analysis grouped by 'admin_var' (Analysis A)
@@ -677,9 +678,12 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
                 results_analysis_admin_low[category] = pop_group_df
         else:
             print("admin_low_ok_list is empty, skipping filtering for Analysis A.")
+            results_analysis_admin_low = {}  # Or set to None if you prefer
     else:
         print(f"admin_var column ({admin_var}) is empty, skipping Analysis A.")
         results_analysis_admin_low = {}  # Or set to None if you prefer
+
+
 
     # Case where 'admin_column_rapresentative' is a dictionary, even with one level
     if isinstance(admin_column_rapresentative, dict):
@@ -719,6 +723,7 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
                             expanded_row = matching_rows.copy()
                             expanded_row[admin_var_dummy] = detailed_admin
                             all_expanded_results_admin_up.setdefault(category, []).append(expanded_row)
+
         else:
             # Case where there are multiple levels (e.g., {4: 'i_admin1', 6: 'i_admin2'})
             results_analysis_admin_up = {}
@@ -803,6 +808,7 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
     results_analysis_complete = {}
 
     if results_analysis_admin_low:
+        print('If Analysis A results exist, merge Analysis A (admin_low) with Analysis B (admin_up)')
         # If Analysis A results exist, merge Analysis A (admin_low) with Analysis B (admin_up)
         for category, admin_low in results_analysis_admin_low.items():
             if category in results_analysis_admin_up_duplicated[pop_group_var].unique():
@@ -815,6 +821,7 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
             else:
                 results_analysis_complete[category] = admin_low
     else:
+        print('# Process only Analysis B (admin_up) results')
         # Process only Analysis B (admin_up) results
         for category in results_analysis_admin_up_duplicated[pop_group_var].unique():
             admin_up = results_analysis_admin_up_duplicated[results_analysis_admin_up_duplicated[pop_group_var] == category].copy() 
@@ -824,6 +831,7 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
             results_analysis_complete[category] = admin_up
 
     # Return final results
+
     return results_analysis_complete
 
 ##--------------------------------------------------------------------------------------------
@@ -930,12 +938,13 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     grouped_dict = {}
     if mismatch_admin:
         ocha_mismatch_list = mismatch_ocha_data
-
-        # Create a defaultdict to store grouped data
         # Create a defaultdict to store grouped data
         detailed_list = ocha_mismatch_list.iloc[:, 1].astype(str).tolist()  # Converting to string
         prefix_list = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
         admin_low_ok_list = ocha_mismatch_list.iloc[:, 0].dropna().astype(str).tolist()  # Drop NaN and convert to string
+
+        #print(detailed_list)
+        #print(prefix_list)
 
         grouped_dict = defaultdict(list)
         # Iterate over each prefix in the prefix_list
@@ -948,8 +957,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         grouped_dict = dict(grouped_dict)
 
         # Print the resulting dictionary
-        #for key, value in grouped_dict.items():
-        #    print(f"{key}: {value}")
+        for key, value in grouped_dict.items():
+            print(f"{key}: {value}")
 
         
         length_dict = categorize_levels_dynamic(prefix_list)
@@ -965,6 +974,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ## essential variables --------------------------------------------------------------------------------------------
     single_cycle = (vector_cycle[1] == 0)
     primary_start = 6
+    if country == 'Afghanistan -- AFG': 
+        primary_start = 7
+
     secondary_end = 17
 
     host_suggestion = ["Urban","always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
