@@ -1613,10 +1613,10 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     ####### ** 9 **       ------------------------------  preparation for overview--> SUM all the admin per population group and per strata ------------------------------------------     #######
-    overview_ToT = collapse_and_summarize(pin_per_admin_status, 'TOTAL (5-17 y.o.)', admin_var=admin_var)
-    overview_girl = collapse_and_summarize(pin_per_admin_status_girl, 'Girls (5-17 y.o.)', admin_var=admin_var)
-    overview_boy = collapse_and_summarize(pin_per_admin_status_boy, 'Boys (5-17 y.o.)', admin_var=admin_var)
-    overview_ece = collapse_and_summarize(pin_per_admin_status_ece, 'ECE (5 y.o.)', admin_var=admin_var)
+    overview_ToT = collapse_and_summarize(pin_per_admin_status, tot_5_17_label, admin_var=admin_var)
+    overview_girl = collapse_and_summarize(pin_per_admin_status_girl, girl_5_17_label, admin_var=admin_var)
+    overview_boy = collapse_and_summarize(pin_per_admin_status_boy, boy_5_17_label, admin_var=admin_var)
+    overview_ece = collapse_and_summarize(pin_per_admin_status_ece, ece_5yo_label, admin_var=admin_var)
     overview_primary = collapse_and_summarize(pin_per_admin_status_primary, 'Primary school', admin_var=admin_var)
     overview_upper_primary = collapse_and_summarize(pin_per_admin_status_upper_primary, 'Intermediate school-level', admin_var=admin_var)
     overview_secondary = collapse_and_summarize(pin_per_admin_status_secondary, 'Secondary school', admin_var=admin_var)
@@ -1651,13 +1651,23 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             summed_df = summed_df.iloc[:1]
             collapsed_results_pop[category] = summed_df
 
+    if country != 'Afghanistan -- AFG':
+        tot_5_17_label = 'TOTAL (5-17 y.o.)'
+        girl_5_17_label = 'Girls (5-17 y.o.)'
+        boy_5_17_label = 'Boys (5-17 y.o.)'
+        ece_5yo_label = 'ECE (5 y.o.)'
+    else:
+        tot_5_17_label = 'TOTAL (6-17 y.o.)'
+        girl_5_17_label = 'Girls (6-17 y.o.)'
+        boy_5_17_label = 'Boys (6-17 y.o.)'
+        ece_5yo_label = 'ECE (6 y.o.)'
 
-    overview_dimension_ToT_in_need = collapse_and_summarize_dimension(dimension_per_admin_status_in_need, 'TOTAL (5-17 y.o.)', admin_var=admin_var)
+    overview_dimension_ToT_in_need = collapse_and_summarize_dimension(dimension_per_admin_status_in_need, tot_5_17_label, admin_var=admin_var)
 
-    overview_dimension_ToT = collapse_and_summarize_dimension(dimension_per_admin_status, 'TOTAL (5-17 y.o.)', admin_var=admin_var)
-    overview_dimension_girl = collapse_and_summarize_dimension(dimension_per_admin_status_girl, 'Girls (5-17 y.o.)', admin_var=admin_var)
-    overview_dimension_boy = collapse_and_summarize_dimension(dimension_per_admin_status_boy, 'Boys (5-17 y.o.)', admin_var=admin_var)
-    overview_dimension_ece = collapse_and_summarize_dimension(dimension_per_admin_status_ece, 'ECE (5 y.o.)', admin_var=admin_var)
+    overview_dimension_ToT = collapse_and_summarize_dimension(dimension_per_admin_status, tot_5_17_label, admin_var=admin_var)
+    overview_dimension_girl = collapse_and_summarize_dimension(dimension_per_admin_status_girl, girl_5_17_label, admin_var=admin_var)
+    overview_dimension_boy = collapse_and_summarize_dimension(dimension_per_admin_status_boy, boy_5_17_label, admin_var=admin_var)
+    overview_dimension_ece = collapse_and_summarize_dimension(dimension_per_admin_status_ece, ece_5yo_label, admin_var=admin_var)
     overview_dimension_primary = collapse_and_summarize_dimension(dimension_per_admin_status_primary, 'Primary school', admin_var=admin_var)
     if not single_cycle:overview_dimension_intermediate = collapse_and_summarize_dimension(dimension_per_admin_status_intermediate, 'Intermediate school-level', admin_var=admin_var)
     overview_dimension_secondary = collapse_and_summarize_dimension(dimension_per_admin_status_secondary, 'Secondary school', admin_var=admin_var)
@@ -1724,7 +1734,11 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     for category, df in collapsed_results_pop.items():
         if not df.empty:  # Ensure the DataFrame is not empty
             single_row = df.iloc[0].copy()
-            single_row['Category'] = f"{category} (5-17 y.o.)"
+            if country != 'Afghanistan -- AFG':
+                single_row['Category'] = f"{category} (5-17 y.o.)"
+            else:
+                single_row['Category'] = f"{category} (6-17 y.o.)"
+
             # Convert the Series to a DataFrame with a single row and append it to the list
             single_row_df = single_row.to_frame().T
             dfs_overview_ToT.append(single_row_df)
@@ -1776,7 +1790,10 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # Add the single-row entries from collapsed_results_pop
     for category, df in collapsed_results_dimension_pop.items():
         single_dimension_row = df.iloc[0].copy()
-        single_dimension_row['Category'] = f"{category} (5-17 y.o.)"
+        if country != 'Afghanistan -- AFG':
+            single_dimension_row['Category'] = f"{category} (5-17 y.o.)"
+        else:
+            single_dimension_row['Category'] = f"{category} (6-17 y.o.)"
         # Convert the Series to a DataFrame with a single row and append it to the list
         single_row_dimension_df = single_dimension_row.to_frame().T
         dfs_overview_dimension_ToT.append(single_row_dimension_df)
@@ -1812,6 +1829,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     del final_overview_dimension_df[admin_var]
     final_overview_dimension_df = final_overview_dimension_df.rename(columns={'Category': 'Strata'})
 
+    print(final_overview_dimension_df)
+
     final_overview_dimension_df[label_perc_acc] = final_overview_dimension_df[label_tot_acc]/final_overview_dimension_df[label_dimension_tot_population]
     final_overview_dimension_df[label_perc_agg] = final_overview_dimension_df[label_tot_agg]/final_overview_dimension_df[label_dimension_tot_population]
     final_overview_dimension_df[label_perc_lc] = final_overview_dimension_df[label_tot_lc]/final_overview_dimension_df[label_dimension_tot_population]
@@ -1826,7 +1845,10 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # Add the single-row entries from collapsed_results_pop
     for category, df in collapsed_results_dimension_pop_in_need.items():
         single_dimension_row = df.iloc[0].copy()
-        single_dimension_row['Category'] = f"{category} (5-17 y.o.)"
+        if country != 'Afghanistan -- AFG':
+            single_dimension_row['Category'] = f"{category} (5-17 y.o.)"
+        else:
+            single_dimension_row['Category'] = f"{category} (6-17 y.o.)"
         # Convert the Series to a DataFrame with a single row and append it to the list
         single_row_dimension_df = single_dimension_row.to_frame().T
         dfs_overview_dimension_ToT_in_need.append(single_row_dimension_df)
