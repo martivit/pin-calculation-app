@@ -583,10 +583,13 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     )
 
     fixed_bar_height = 0.8  # You can adjust this value as needed
+    label_snapshot_5yo = "Snapshot of ECE (5 y.o.)"
+    if country_name == 'Afghanistan':
+        label_snapshot_5yo = "Snapshot of ECE (6 y.o.)"
 
     # Plot each section
     p_no_need, p_acc, p_lc, p_env, p_agg = plot_snapshot(axs_subsection[0], df_gender, "Snapshot of gender", color_dim, fixed_bar_height)
-    plot_snapshot(axs_subsection[1], df_ece, "Snapshot of ECE (5 y.o.)", color_dim, fixed_bar_height)
+    plot_snapshot(axs_subsection[1], df_ece, label_snapshot_5yo, color_dim, fixed_bar_height)
     plot_snapshot(axs_subsection[2], df_school_cycles, "Snapshot of school cycles", color_dim, fixed_bar_height)
 
 
@@ -949,7 +952,10 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     bullet_point_ece = doc.add_paragraph(style='List Bullet')
     bullet_point_format = bullet_point_ece.paragraph_format
     bullet_point_format.left_indent = Inches(1)
-    bullet_text = bullet_point_ece.add_run(f"{format_number(tot_in_need_ece)} are 5 years old (ECE);")
+    if country_name != 'Afghanistan':
+        bullet_text = bullet_point_ece.add_run(f"{format_number(tot_in_need_ece)} are 5 years old (ECE);")
+    else:
+        bullet_text = bullet_point_ece.add_run(f"{format_number(tot_in_need_ece)} are 6 years old (ECE);")
     bullet_text.font.size = Pt(16)
     bullet_text.font.name = 'Calibri'
 
@@ -957,7 +963,11 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     bullet_point_rest = doc.add_paragraph(style='List Bullet')
     bullet_point_format = bullet_point_rest.paragraph_format
     bullet_point_format.left_indent = Inches(1)
-    bullet_text = bullet_point_rest.add_run(f"{format_number(tot_in_need-tot_in_need_ece)} are between 6 and 17 years old;")
+    if country_name != 'Afghanistan':
+        bullet_text = bullet_point_rest.add_run(f"{format_number(tot_in_need-tot_in_need_ece)} are between 6 and 17 years old;")
+    else:
+        bullet_text = bullet_point_rest.add_run(f"{format_number(tot_in_need-tot_in_need_ece)} are between 7 and 17 years old;")
+
     bullet_text.font.size = Pt(16)
     bullet_text.font.name = 'Calibri'
 
