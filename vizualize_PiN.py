@@ -120,6 +120,20 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
     label_admin_severity = 'Area severity'
     label_tot_population = 'TotN'
 
+    color_mapping = {
+        label_perc2: colors["light_beige"],
+        label_tot2: colors["light_beige"],
+        label_perc3: colors["light_orange"],
+        label_tot3: colors["light_orange"],
+        label_perc4: colors["dark_orange"],
+        label_tot4: colors["dark_orange"],
+        label_perc5: colors["darker_orange"],
+        label_tot5: colors["darker_orange"],
+        label_perc_tot: colors["light_blue"],
+        label_admin_severity: colors["light_blue"],
+        label_tot: colors["light_blue"]
+    }
+
     tot_5_17_label = 'TOTAL (5-17 y.o.)'
     girl_5_17_label = 'Girls (5-17 y.o.)'
     boy_5_17_label = 'Boys (5-17 y.o.)'
