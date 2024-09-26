@@ -1110,7 +1110,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
         tcPr = tc.get_or_add_tcPr()
         tcPr.append(parse_xml(r'<w:vAlign {} w:val="center"/>'.format(nsdecls('w'))))
         run = cell.paragraphs[0].runs[0]
-        run.font.size = Pt(9)
+        run.font.size = Pt(10)
         run.font.name = 'Calibri'
         run.font.bold = False  # Remove bold formatting
 
@@ -1171,7 +1171,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
 
     # Set different heights for the rows
     set_row_height(table.rows[0], 300)  
-    set_row_height(table.rows[1], 300)  
+    set_row_height(table.rows[1], 600)  
     set_row_height(table.rows[2], 300) 
     set_row_height(table.rows[3], 300)  
 
