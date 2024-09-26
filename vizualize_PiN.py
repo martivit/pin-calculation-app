@@ -106,6 +106,20 @@ color_mapping_dimension = {
 alignment_columns = list(color_mapping.keys())
 def apply_final_formatting(country_name, workbook, overview_df, small_overview_df, admin_var, selected_language= 'English'):
 
+
+    label_perc2 = '% severity levels 1-2'
+    label_perc3 = '% severity level 3'
+    label_perc4 = '% severity level 4'
+    label_perc5 = '% severity level 5'
+    label_tot2 = '# severity levels 1-2'
+    label_tot3 = '# severity level 3'
+    label_tot4 = '# severity level 4'
+    label_tot5 = '# severity level 5'
+    label_perc_tot = '% Tot PiN (severity levels 3-5)'
+    label_tot = '# Tot PiN (severity levels 3-5)'
+    label_admin_severity = 'Area severity'
+    label_tot_population = 'TotN'
+
     tot_5_17_label = 'TOTAL (5-17 y.o.)'
     girl_5_17_label = 'Girls (5-17 y.o.)'
     boy_5_17_label = 'Boys (5-17 y.o.)'
@@ -132,8 +146,8 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
         label_tot3= '# niveau de sévérité 3'
         label_tot4= '# niveau de sévérité 4'
         label_tot5= '# niveau de sévérité 5'
-        label_perc_tot= '% Tot PiN (niveaux de sévérité 3-5)'
-        label_tot= '# Tot PiN (niveaux de sévérité 3-5)'
+        label_perc_tot= "% Tot PiN (niveaux de sévérité 3-5)"
+        label_tot= "# Tot PiN (niveaux de sévérité 3-5)"
         label_admin_severity= 'Sévérité de la zone'
         label_tot_population= 'Population totale'
         color_mapping = {
