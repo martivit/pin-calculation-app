@@ -104,7 +104,7 @@ color_mapping_dimension = {
 }
 
 alignment_columns = list(color_mapping.keys())
-def apply_final_formatting(country_name, workbook, overview_df, small_overview_df, admin_var):
+def apply_final_formatting(country_name, workbook, overview_df, small_overview_df, admin_var, selected_language= 'English'):
 
     tot_5_17_label = 'TOTAL (5-17 y.o.)'
     girl_5_17_label = 'Girls (5-17 y.o.)'
@@ -118,11 +118,39 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
         ece_5yo_label = 'ECE (6 y.o.)'
         age_label = ' (6-17 y.o.)'
 
+    if selected_language == "French":
+        tot_5_17_label= 'TOTAL (5-17 ans)'
+        girl_5_17_label= 'Filles (5-17 ans)'
+        boy_5_17_label='Garcons (5-17 ans)'
+        ece_5yo_label= 'Éducation préscolaire (5 ans)'
+        age_label = ' (5-17 ans)'
+        label_perc2= '% niveaux de sévérité 1-2'
+        label_perc3= '% niveau de sévérité 3'
+        label_perc4= '% niveau de sévérité 4'
+        label_perc5= '% niveau de sévérité 5'
+        label_tot2= '# niveaux de sévérité 1-2'
+        label_tot3= '# niveau de sévérité 3'
+        label_tot4= '# niveau de sévérité 4'
+        label_tot5= '# niveau de sévérité 5'
+        label_perc_tot= '% Tot PiN (niveaux de sévérité 3-5)'
+        label_tot= '# Tot PiN (niveaux de sévérité 3-5)'
+        label_admin_severity= 'Sévérité de la zone'
+        label_tot_population= 'TotN'
+        color_mapping = {
+            label_perc2: colors["light_beige"],
+            label_tot2: colors["light_beige"],
+            label_perc3: colors["light_orange"],
+            label_tot3: colors["light_orange"],
+            label_perc4: colors["dark_orange"],
+            label_tot4: colors["dark_orange"],
+            label_perc5: colors["darker_orange"],
+            label_tot5: colors["darker_orange"],
+            label_perc_tot: colors["light_blue"],
+            label_admin_severity: colors["light_blue"],
+            label_tot: colors["light_blue"]
+        }
 
     for ws in workbook.worksheets:
-        
-
-
         if ws.title == "PiN TOTAL":
             # Clear existing content in the worksheet
             ws.delete_rows(1, ws.max_row)
@@ -168,7 +196,7 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
                     fill_color = colors["gray"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
-                elif strata_value in ['Female', 'Male', ece_5yo_label, 'Children with disability']:
+                elif strata_value in ['Female', 'Male', ece_5yo_label, 'Children with disability', 'Enfants handicapés', 'Filles', 'Garcons']:
                     fill_color = colors["stratagray"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
@@ -320,9 +348,12 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
 
 
 # Function to create output with final formatting
-def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None):
+def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None, selected_language='English'):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
 
+    label_overall_severity = 'Overall PiN and severity'
+    if selected_language == "French":
+        label_overall_severity = 'PiN globale et sévérité'
     output = BytesIO()
     with pd.ExcelWriter(output) as writer:
         # Only write the overview sheet if ocha is True
@@ -331,7 +362,7 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
 
         # Write the tot_severity sheet if it is provided
         if tot_severity is not None:
-            tot_severity.to_excel(writer, sheet_name='Overall PiN and severity', index=False)
+            tot_severity.to_excel(writer, sheet_name=label_overall_severity, index=False)
 
         # Write the category sheets
         for category, df in dataframes.items():
@@ -342,7 +373,7 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
     workbook = load_workbook(output)
 
     # Apply the final formatting to the workbook
-    workbook = apply_final_formatting(country_name,workbook, overview_df, small_overview_df, admin_var)
+    workbook = apply_final_formatting(country_name,workbook, overview_df, small_overview_df, admin_var, selected_language=selected_language)
     
     formatted_output = BytesIO()
     workbook.save(formatted_output)

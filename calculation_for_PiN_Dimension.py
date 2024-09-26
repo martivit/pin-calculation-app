@@ -911,6 +911,27 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
     return admin_columns_representative
 
 
+# Function to translate labels
+def translate_labels(data, translation_dict):
+    # Check if 'data' is a DataFrame or a dictionary of DataFrames
+    if isinstance(data, pd.DataFrame):
+        # Translate column names
+        data.columns = [translation_dict.get(col, col) for col in data.columns]
+        # Translate values inside the DataFrame
+        for col in data.columns:
+            if data[col].dtype == 'object':  # Apply replacement only for string columns
+                data[col] = data[col].replace(translation_dict)
+        return data
+    elif isinstance(data, dict):
+        # If 'data' is a dictionary, apply translation to each DataFrame
+        for key in data:
+            data[key] = translate_labels(data[key], translation_dict)
+        return data
+    else:
+        raise TypeError("Input must be a pandas DataFrame or a dictionary of DataFrames.")
+
+
+
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
@@ -922,7 +943,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 age_var, gender_var,
                 label, 
                 admin_var, vector_cycle, start_school, status_var,
-                mismatch_admin):
+                mismatch_admin,
+                selected_language):
 
     admin_target = admin_var
     pop_group_var = status_var
@@ -1916,12 +1938,44 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     final_overview_dimension_df_in_need[label_dimension_tot_population] = pd.to_numeric(final_overview_dimension_df_in_need[label_dimension_tot_population], errors='coerce').round(figures_round)
 
 
+
     country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
 
+    translation_dict = {
+        label_perc2: '% niveaux de sévérité 1-2',
+        label_perc3: '% niveau de sévérité 3',
+        label_perc4: '% niveau de sévérité 4',
+        label_perc5: '% niveau de sévérité 5',
+        label_tot2: '# niveaux de sévérité 1-2',
+        label_tot3: '# niveau de sévérité 3',
+        label_tot4: '# niveau de sévérité 4',
+        label_tot5: '# niveau de sévérité 5',
+        label_perc_tot: '% Tot PiN (niveaux de sévérité 3-5)',
+        label_tot: '# Tot PiN (niveaux de sévérité 3-5)',
+        label_admin_severity: 'Sévérité de la zone',
+        label_tot_population: 'TotN',
+        tot_5_17_label: 'TOTAL (5-17 ans)',
+        girl_5_17_label: 'Filles (5-17 ans)',
+        boy_5_17_label: 'Garcons (5-17 ans)',
+        ece_5yo_label: 'Éducation préscolaire (5 ans)',
+        'All population groups': 'Tous les groupes de population',
+        'Population group': 'Groupe de population',
+        'Children with disability': 'Enfants handicapés',
+        "Primary school": "École primaire",
+        "Intermediate school-level": "Niveau scolaire intermédiaire",
+        "Secondary school":"École secondaire"
+    }
 
 
+    if selected_language == 'French':
+        final_overview_df = translate_labels(final_overview_df, translation_dict)
+        final_overview_df_OCHA = translate_labels(final_overview_df_OCHA, translation_dict)
+        final_overview_dimension_df = translate_labels(final_overview_dimension_df, translation_dict)
+        final_overview_dimension_df_in_need = translate_labels(final_overview_dimension_df_in_need, translation_dict)
+        Tot_PiN_by_admin = translate_labels(Tot_PiN_by_admin, translation_dict)
+        Tot_PiN_JIAF = translate_labels(Tot_PiN_JIAF,translation_dict)
 
-
-
+    print(final_overview_df_OCHA)
+    
 
     return severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,Tot_PiN_by_admin, country_label

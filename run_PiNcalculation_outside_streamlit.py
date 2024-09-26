@@ -15,6 +15,8 @@ from docx.shared import Pt, RGBColor
 import matplotlib.pyplot as plt
 from docx.shared import Inches
 from snapshot_PiN import create_snapshot_PiN
+from snapshot_PiN_FR import create_snapshot_PiN_FR
+
 
 
 
@@ -25,42 +27,41 @@ from snapshot_PiN import create_snapshot_PiN
 ################################################
 
 
-status_var = 'urbanity'
-access_var = 'edu_access'
-teacher_disruption_var = 'edu_disrupted_teacher'
-idp_disruption_var = 'edu_disrupted_displaced'
-armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'edu_disrupted_hazards'
-barrier_var = 'resn_no_access'
-selected_severity_4_barriers = [
- "Protection risks whilst at the school " ,
-"Protection risks whilst travelling to the school ",
-"Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income) ",
-"Child participating in income generating activities outside of the home"
 
+status_var = 'i_type_pop'
+access_var = 'e_enfant_scolarise_formel'
+teacher_disruption_var = 'e_absence_enseignant'
+idp_disruption_var = 'e_ecole_abris'
+armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'no_indicator'#'natural_hazard_var'no_indicator
+
+barrier_var = 'e_raison_pas_educ_formel'
+selected_severity_4_barriers = [
+    "Risques de protection à l’école (tels que le harcèlement physique et verbal, risque de viol, les attaques contre les écoles ou d’autres incidents de protection)",
+"Risques de protection pendant le trajet vers l’école (tels que les incidents de harcèlement physique et verbal, risque de viol ou d’autres incidents de protection)"
 ]
-selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'ind_age'
-gender_var = 'edu_ind_gender'
-start_school = 'November'
-country= 'Afghanistan -- AFG'
+age_var = 'sne_enfant_ind_age'
+gender_var = 'sne_enfant_ind_genre'
+start_school = 'September'
+country= 'Burkina Faso -- BFA'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_3: Districts'#'Admin_2: Regions' 
+admin_var = 'Admin_3: Department (Département)'#'Admin_2: Regions' 
 
-vector_cycle = [14,16]
+vector_cycle = [10,14]
 single_cycle = (vector_cycle[1] == 0)
-primary_start = 7
+primary_start = 6
 secondary_end = 17
-label = 'label::English'
+label = 'label'
 
 # Path to your Excel file
-excel_path = 'input/AFG_WoAA_2024_data.xlsx'
-excel_path_ocha = 'input/AFG_ocha.xlsx'
+excel_path = 'input/BFA2402_MSNA_2024_DATA_CLEANED_MV.xlsx'
+excel_path_ocha = 'input/ocha_pop_BFA.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -74,8 +75,8 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['AFG_WoAA_2024_data_main_recoded']
-edu_data = dfs['AFG_WoAA_2024_edu_loop']
+edu_data = dfs['loop_sne_cleaned']
+household_data = dfs['main_cleaned']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
@@ -87,6 +88,8 @@ mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-f
 mismatch_admin = True
 
 
+
+selected_language = "French"
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################
 #############################################################################        CALCULATION PIN              ################################################################################################
@@ -99,7 +102,8 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
                                                                                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                 age_var, gender_var,
                                                                                 label, 
-                                                                                admin_var, vector_cycle, start_school, status_var)
+                                                                                admin_var, vector_cycle, start_school, status_var,
+                                                                                selected_language= selected_language)
 
 
 
@@ -121,20 +125,26 @@ if ocha_data is not None:
                                                                                     age_var, gender_var,
                                                                                     label, 
                                                                                     admin_var, vector_cycle, start_school, status_var,
-                                                                                    mismatch_admin)
+                                                                                    mismatch_admin,
+                                                                                    selected_language= selected_language)
 
 
 
 
 
     # Create the Excel files
-    jiaf_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA,"PiN TOTAL",  admin_var,  ocha= False)
-    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
+    label_total_pin_sheet = "PiN TOTAL"
+
+
+    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language)
+
     #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
     #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
-    #doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need)
+    if selected_language == 'English':
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
-
+    if selected_language == 'French':
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
     ##   ***********************************    save for intermediate check:
     file_path_pin_1 = 'output_validation/01_pin_percentage.xlsx'
@@ -258,9 +268,6 @@ if ocha_data is not None:
     # Save the BytesIO objects to Excel files
 
     print('before saving')
-    # Save jiaf_excel
-    with open("output_validation/final__JIAF__platform_output.xlsx", "wb") as f:
-        f.write(jiaf_excel.getbuffer())
 
     # Save ocha_excel
     with open("output_validation/final__OCHA__platform_output.xlsx", "wb") as f:
@@ -277,6 +284,6 @@ if ocha_data is not None:
 
 
     # Save the Word document to a file
-    #file_path = "output_validation/pin_snapshot_with_charts_and_text2.docx"
-    #with open(file_path, "wb") as f:
-        #f.write(doc_output.getvalue())
+    file_path = "output_validation/pin_snapshot_with_charts_and_text2.docx"
+    with open(file_path, "wb") as f:
+        f.write(doc_output.getvalue())

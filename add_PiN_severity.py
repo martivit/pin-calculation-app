@@ -321,7 +321,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
                 label, 
-                admin_var, vector_cycle, start_school, status_var):
+                admin_var, vector_cycle, start_school, status_var,
+                selected_language):
 
     admin_target = admin_var
     pop_group_var = status_var
