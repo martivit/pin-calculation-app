@@ -199,25 +199,6 @@ def set_top_bottom_border(cell):
 
 # Call this function after creating the document title
 image_path = 'pics/pin_table_FR.png'  # Path to your uploaded image
-textbox_text = ("\nLa définition convenue au niveau mondial et dans le cadre du JIAF d'un enfant dans le besoin est la suivante :\n"
-                        "Nombre d'enfants en âge scolaire et de jeunes dans les zones touchées par la crise qui n'ont pas accès à "
-                        "une éducation protectrice et à des conditions d'apprentissage acceptables, ce qui peut avoir un impact négatif sur :\n")
-bullet_points = [
-        "(i) leur bien-être physique et psychosocial",
-        "(ii) leur développement cognitif",
-        "(iii) leur capacité à répondre à leurs besoins futurs."
-    ]
-additional_text = (
-        "\nLa sévérité de la situation pour l’éducation est calculée en fonction de quatre dimensions \n"
-        "1) Accès à l’éducation\n"
-        "2) Conditions d’apprentissage\n"
-        "3) Niveau de protection au sein ou sur le chemin de l’école\n"
-        "4) Circonstances individuelles (aggravantes)\n\n"
-    "Le tableau ci-dessous inclut des exemples d’indicateurs pour chacune de ces dimensions et les principales sources "
-     "de données habituellement disponibles dans les pays où les clusters sont activés. Cette liste n’est pas exhaustive "
-     "et d’autres indicateurs jugés appropriés au niveau des pays peuvent être utilisés."
-    )
-
 
 
 
@@ -267,10 +248,10 @@ def create_dimension_table(doc, label, perc_acc, num_acc, perc_lc, num_lc, perc_
 
     # Prepare content to be added to the table
     content = [
-        ["Absence d'accès à l'école", f"{perc_acc}%", f"{format_number(num_acc)}"],
-        ["Étudier dans des conditions inacceptables", f"{perc_lc}%", f"{format_number(num_lc)}"],
-        ["Évoluer dans un environnement éducatif non protecteur", f"{perc_env}%", f"{format_number(num_env)}"],
-        ["Faire face à des circonstances aggravantes empêchant l'accès à l'éducation", f"{perc_agg}%", f"{format_number(num_agg)}"],
+        ["N’ont pas accès à l’école", f"{perc_acc}%", f"{format_number(num_acc)}"],
+        ["Étudient dans des conditions inacceptables ", f"{perc_lc}%", f"{format_number(num_lc)}"],
+        ["Évoluent dans un environnement éducatif non protecteur", f"{perc_env}%", f"{format_number(num_env)}"],
+        ["Font face à des circonstances aggravantes empêchant l'accès à l'éducation", f"{perc_agg}%", f"{format_number(num_agg)}"],
     ]
     severity_colors = ['#f4a582', '#fddbc7', '#fee8c8', '#fff7ec']
     percentages = [perc_acc, perc_lc, perc_env, perc_agg]
@@ -422,7 +403,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     label_perc_tot= '% Tot PiN (niveaux de sévérité 3-5)'
     label_tot= '# Tot PiN (niveaux de sévérité 3-5)'
     label_admin_severity= 'Sévérité de la zone'
-    label_tot_population= 'TotN'
+    label_tot_population= 'Population totale'
     color_mapping = {
         label_perc2: colors["light_beige"],
         label_tot2: colors["light_beige"],
@@ -440,7 +421,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     not_pop_group_columns_overview = [tot_5_17_label]
     not_pop_group_columns = [tot_5_17_label,
         girl_5_17_label,boy_5_17_label, "Filles", "Garcons", ece_5yo_label, 
-         "École primaire", "Niveau scolaire intermédiaire", "École secondaire", "Enfants handicapés"
+         "École primaire", "Niveau scolaire intermédiaire", "École secondaire", "Enfants en situation de handicap"
     ]
     dimension_strata = [ girl_5_17_label, boy_5_17_label, "Filles", "Garcons", ece_5yo_label, 
          "École primaire", "Niveau scolaire intermédiaire", "École secondaire"
@@ -477,7 +458,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     row_girl = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == girl_5_17_label]
     row_boy= final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == boy_5_17_label]
     row_ece = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == ece_5yo_label]
-    row_disability = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == "Enfants handicapés"]
+    row_disability = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == "Enfants en situation de handicap"]
 
     print(row_boy)
     tot_in_need_girl = row_girl[label_tot].values[0]
@@ -608,23 +589,23 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     )
 
     fixed_bar_height = 0.8  # You can adjust this value as needed
-    label_snapshot_5yo = "Aperçu de éducation de la petite enfance (5 ans)"
+    label_snapshot_5yo = "Analyse des enfants en âge préscolaire (5 ans)"
     if country_name == 'Afghanistan':
         label_snapshot_5yo = "Snapshot of ECE (6 y.o.)"
 
     # Plot each section
-    p_no_need, p_acc, p_lc, p_env, p_agg = plot_snapshot(axs_subsection[0], df_gender, "Aperçu du genre", color_dim, fixed_bar_height)
+    p_no_need, p_acc, p_lc, p_env, p_agg = plot_snapshot(axs_subsection[0], df_gender, "Analyse basée sur le genre", color_dim, fixed_bar_height)
     plot_snapshot(axs_subsection[1], df_ece, label_snapshot_5yo, color_dim, fixed_bar_height)
-    plot_snapshot(axs_subsection[2], df_school_cycles, "Aperçu des cycles scolaires", color_dim, fixed_bar_height)
+    plot_snapshot(axs_subsection[2], df_school_cycles, "Analyse basée sur les tranches d’âges des cycles scolaires", color_dim, fixed_bar_height)
 
 
     # Add the shared legend at the bottom
     legend_labels = [
         'Pas dans le besoin d’éducation (sévérité 1-2)',
-        'Enfants déscolarisés, n’ayant pas accès à l’éducation',
+        'Enfants déscolarisés, mais ne souffrant pas de circonstance individuelle aggravante',
         'Enfants scolarisés, étudiant dans de mauvaises conditions d’apprentissage',
         'Enfants scolarisés, évoluant dans un environnement non protégé',
-        'Enfants déscolarisés, confrontés à des circonstances aggravantes individuelles'
+        'Enfants déscolarisés, confrontés à des circonstances individuelles aggravantes'
     ]
 
     fig_subsection.legend([p_no_need, p_acc, p_lc, p_env, p_agg], labels=legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.05),
@@ -682,10 +663,10 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     # Define need labels and group colors
     need_labels = [
         'Pas dans le besoin \nd’éducation (sévérité 1-2)',
-        'Enfants déscolarisés, n’ayant \npas accès à l’éducation',
+        'Enfants déscolarisés, mais ne souffrant \npas de circonstance individuelle aggravante',
         'Enfants scolarisés, étudiant dans \nde mauvaises conditions d’apprentissage',
-        'Enfants scolarisés, évoluant dans \nun environnement non protégé',
-        'Enfants déscolarisés, confrontés à \ndes circonstances aggravantes individuelles'
+        'Enfants scolarisés, évoluant \ndans un environnement non protégé',
+        'Enfants déscolarisés, confrontés \nà des circonstances individuelles aggravantes'
     ]
 
     # Create the plot
@@ -870,7 +851,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     paragraph.paragraph_format.line_spacing = Pt(12)  # Adjust line spacing
 
     # Add the rest of the text (regular font)
-    run = paragraph.add_run("\nLa définition convenue au niveau mondial et dans le cadre du JIAF d'un enfant dans le besoin est la suivante :\n"
+    run = paragraph.add_run("\nLa définition convenue du PiN Education au niveau global et dans le cadre du JIAF est la suivante:\n"
                         "Nombre d'enfants en âge scolaire et de jeunes dans les zones touchées par la crise qui n'ont pas accès à "
                         "une éducation protectrice et à des conditions d'apprentissage acceptables, ce qui peut avoir un impact négatif sur :\n")
 
@@ -943,7 +924,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
 
     # Session 1: Children in Need (5-17 y.o.)
     if country_name != 'Afghanistan':
-        section1 = doc.add_heading(f'Enfants dans le besoin (âgés de 5 à 17 ans) en {country_name}', level=2)
+        section1 = doc.add_heading(f'Enfants dans le besoin (âgés de 5 à 17 ans) au {country_name}', level=2)
     else:
         section1 = doc.add_heading(f'Children in Need (6-17 y.o.) in {country_name}', level=2)
     section1_run = section1.runs[0]
@@ -1075,10 +1056,10 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
 
     doc.add_paragraph()
 
-    pteacher = doc.add_paragraph("En outre, X adultes (enseignants/personnel éducatif) ont besoin d'une aide éducative.")
-    pteacher_format = pteacher.runs[0]
-    pteacher_format.font.name = 'Calibri'
-    pteacher_format.font.size = Pt(16)
+    #pteacher = doc.add_paragraph("En outre, X adultes (enseignants/personnel éducatif) ont besoin d'une aide éducative.")
+    #pteacher_format = pteacher.runs[0]
+    #pteacher_format.font.name = 'Calibri'
+    #pteacher_format.font.size = Pt(16)
 
     # Add a subsection before the table
     section_severity_distribution = doc.add_heading('Répartition de la sévérité parmi les enfants en âge scolaire', level=3)
@@ -1115,7 +1096,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
 
 
     # Add text to the first row
-    cell_pin.text = 'Enfants en âge scolaire PiN'
+    cell_pin.text = 'Enfants en âge scolaire dans le besoin, par niveau de sévérité'
     cell_all_population.text = 'ToT #'
     cell_severity_1_2.text = 'Niveaux de sévérité 1-2'
     cell_severity_3.text = 'Niveau de sévérité 3'
@@ -1214,13 +1195,13 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     section_needs_in_need.font.name = 'Calibri'
     section_needs_in_need.alignment = 0  # Left align
 
-    intro_need = doc.add_paragraph("Quels sont les facteurs de sévérité des besoins des enfants?")
+    intro_need = doc.add_paragraph("Besoins et niveaux de sévérité")
     intro_need_format = intro_need.runs[0]
     intro_need_format.font.name = 'Calibri'
     intro_need_format.font.size = Pt(16)
     # Add the new text with bullet points
     bullet_point_text = (
-        "Les enfants dans le besoin sont catégorisés selon quatre dimensions clés du cadre PiN Éducation : accès à l'éducation, conditions d'apprentissage, niveau de protection au sein ou sur le chemin de l'école, et circonstances aggravantes. Ces dimensions déterminent leur niveau de sévérité"
+        "Les enfants dans le besoin sont catégorisés selon les quatre dimensions du PiN Éducation : accès à l'éducation, conditions d'apprentissage, niveau de protection au sein ou sur le chemin de l'école et circonstances aggravantes. Ces dimensions déterminent leur niveau de sévérité."
     )
     # Add the paragraph for the introductory sentence
     intro_paragraph = doc.add_paragraph(bullet_point_text)
@@ -1230,10 +1211,10 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
 
     # Create bullet points
     bullet_points = [
-        "Absence d'accès à l'école : Cela concerne les enfants en sévérité 3 qui n'ont pas du tout accès à l'école.",
-        "Étudier dans des conditions d'apprentissage de base inacceptables : Ces enfants sont classés en sévérité 3, bien qu'ils aient accès à l'école. Cependant, la qualité de leur environnement d'apprentissage est extrêmement médiocre et inadéquate.",
-        "Évoluer dans un environnement éducatif non protecteur : Les enfants de sévérité 4 qui fréquentent l'école mais dans un environnement qui ne garantit pas leur sécurité ou leur protection.",
-        "Faire face à des circonstances aggravantes empêchant l'accès à l'éducation : Les enfants classés en sévérité 4 ou 5, où des facteurs externes affectent considérablement leur capacité à fréquenter l'école, entraînant une absence d'accès à l'éducation."
+        "Absence d'accès à l'école : Ces enfants n’ont pas accès à l’école, mais ne souffrent pas de circonstance individuelle aggravante.",
+        "Étudier dans des conditions d'apprentissage de base inacceptables : Ces enfants sont classés en sévérité 3, bien qu'ils aient accès à l'école. Cependant, la qualité de leur environnement d'apprentissage est considérée inacceptable.",
+        "Évoluer dans un environnement éducatif non protecteur : Les enfants alloués en sévérité 4 fréquentent l'école mais dans un environnement qui ne garantit pas leur sécurité ou leur protection.",
+        "Faire face à des circonstances aggravantes empêchant l'accès à l'éducation : Les enfants classés en sévérité 4 ou 5, ne fréquentent pas l’école en raison de barrières d’accès/ circonstances individuelles aggravantes."
     ]
 
     # Add each bullet point with formatting
@@ -1284,7 +1265,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     ##############################################################
 
 
-    section_needs_msna = doc.add_heading("Profils des enfants (à partir de l'enquête MSNA)", level=3)
+    section_needs_msna = doc.add_heading("Profils des enfants (asés sur les résultats de l'enquête MSNA)", level=3)
     section_needs_msna = section_needs_msna.runs[0]
     section_needs_msna.font.size = Pt(18)  # Customize the section header size
     section_needs_msna.font.name = 'Calibri'

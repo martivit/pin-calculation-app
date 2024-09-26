@@ -135,7 +135,7 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
         label_perc_tot= '% Tot PiN (niveaux de sévérité 3-5)'
         label_tot= '# Tot PiN (niveaux de sévérité 3-5)'
         label_admin_severity= 'Sévérité de la zone'
-        label_tot_population= 'TotN'
+        label_tot_population= 'Population totale'
         color_mapping = {
             label_perc2: colors["light_beige"],
             label_tot2: colors["light_beige"],
@@ -196,7 +196,7 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
                     fill_color = colors["gray"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
-                elif strata_value in ['Female', 'Male', ece_5yo_label, 'Children with disability', 'Enfants handicapés', 'Filles', 'Garcons']:
+                elif strata_value in ['Female', 'Male', ece_5yo_label, 'Children with disability', 'Enfants en situation de handicap', 'Filles', 'Garcons']:
                     fill_color = colors["stratagray"]
                     for cell in row:
                         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
@@ -353,7 +353,7 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
 
     label_overall_severity = 'Overall PiN and severity'
     if selected_language == "French":
-        label_overall_severity = 'PiN globale et sévérité'
+        label_overall_severity = 'PiN total par admin'
     output = BytesIO()
     with pd.ExcelWriter(output) as writer:
         # Only write the overview sheet if ocha is True
