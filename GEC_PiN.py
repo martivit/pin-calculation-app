@@ -81,13 +81,7 @@ if not check_password():
 
 spacer1, spacer2 = st.sidebar.empty(), st.sidebar.empty()
 
-for _ in range(150):  # You might need to adjust this number
-    spacer1.write("")
-    spacer2.write("")
-logo_path_1 = 'pics/GEC_logo.png'
-logo_path_2 = 'pics/IMPACT_Logo_TransparentBackground_WH.png'
-st.sidebar.image(logo_path_1, width=200)  # Adjust width as necessary
-st.sidebar.image(logo_path_2, width=200)  # Adjust width as necessary
+
 
 
 st.image('pics/pinheader.jpg')
