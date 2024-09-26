@@ -1096,7 +1096,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
 
 
     # Add text to the first row
-    cell_pin.text = 'Enfants en âge scolaire dans le besoin, par niveau de sévérité'
+    cell_pin.text = 'Enfants en besoin scolaire, par niveau de sévérité'
     cell_all_population.text = 'ToT #'
     cell_severity_1_2.text = 'Niveaux de sévérité 1-2'
     cell_severity_3.text = 'Niveau de sévérité 3'
