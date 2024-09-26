@@ -10,6 +10,7 @@ from calculation_for_PiN_Dimension import calculatePIN
 from calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from vizualize_PiN import create_output
 from snapshot_PiN import create_snapshot_PiN
+from snapshot_PiN_FR import create_snapshot_PiN_FR
 from shared_utils import language_selector
 from translate_PiN import translate_excel_sheets_with_formatting
 
@@ -84,7 +85,8 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
                                                                                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                 age_var, gender_var,
                                                                                 label, 
-                                                                                admin_var, vector_cycle, start_school, status_var)
+                                                                                admin_var, vector_cycle, start_school, status_var,
+                                                                                selected_language)
 
 
 
@@ -104,11 +106,14 @@ if ocha_data is not None:
                                                                                     age_var, gender_var,
                                                                                     label, 
                                                                                     admin_var, vector_cycle, start_school, status_var,
-                                                                                    mismatch_admin)
+                                                                                    mismatch_admin,
+                                                                                    selected_language)
 
 
+    label_total_pin_sheet = "PiN TOTAL"
 
-    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, "PiN TOTAL",  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin)
+
+    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language)
 
 
     # Check if the selected language is French and apply translation if necessary
@@ -118,7 +123,10 @@ if ocha_data is not None:
         #ocha_excel = translate_excel_sheets_with_formatting(ocha_excel)
         #st.write("French translation applied.")
 
-    doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need)
+    if selected_language == "English":
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
+    if selected_language == "French":
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
 
     st.download_button(
         label=translations["download_pin"],
