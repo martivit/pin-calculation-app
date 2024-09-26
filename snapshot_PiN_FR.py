@@ -1110,7 +1110,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
         tcPr = tc.get_or_add_tcPr()
         tcPr.append(parse_xml(r'<w:vAlign {} w:val="center"/>'.format(nsdecls('w'))))
         run = cell.paragraphs[0].runs[0]
-        run.font.size = Pt(12)
+        run.font.size = Pt(11)
         run.font.name = 'Calibri'
         run.font.bold = False  # Remove bold formatting
 
