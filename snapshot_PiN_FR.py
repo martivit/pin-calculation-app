@@ -549,7 +549,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
                     fontsize=14, title="Définitions de la sévérité", title_fontsize='14', frameon=True, ncol=1,
                     prop={'size': 14}, handlelength=3, handleheight=4)
     
-    ax.text(1.05, 0.15, text_str, transform=ax.transAxes, fontsize=10, verticalalignment='top', 
+    ax.text(1.05, 0.15, text_str, transform=ax.transAxes, fontsize=8, verticalalignment='top', 
         bbox=dict(facecolor='white', alpha=0.5), wrap=True)
 
     # Adjust the plot and legend layout to give the plot more space
