@@ -89,7 +89,7 @@
     "success_indicator": "Indicators confirmed!",
     "confirm_severity_all": "Confirm Severity Definitions",
     "success_severity_all": "Severity definitions selection recorded!",
-    "cofirm_admin": "Confirm Admin Level",
+    "confirm_admin": "Confirm Admin Level",
     "success_admin": "Administrative level '{admin_target}' is recorded!"
   }
   
