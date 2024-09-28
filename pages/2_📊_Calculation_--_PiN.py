@@ -502,9 +502,9 @@ def define_severity():
         selected_severity_4_barriers = select_severity_barriers(barrier_options, 4)
         barrier_options_5 = [option for option in barrier_options if option not in selected_severity_4_barriers]
         selected_severity_5_barriers = select_severity_barriers(barrier_options_5, 5)
-        if st.button("Confirm Severity Definitions"):
+        if st.button(translations["confirm_severity_all"]):
             st.session_state.severity_confirmed = True
-            st.success("Severity definitions confirmed!")
+            st.success(translations["success_severity_all"])
             # Display the HTML content
             st.markdown(translations["disaggregation_variables_html"], unsafe_allow_html=True)
     else:

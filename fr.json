@@ -88,7 +88,9 @@
     "success_1": "Sélection mise à jour avec succès !",
     "success_label_kobo":"La colonne des 'label' a été sélectionnée: {selected_label}",
     "confirm_indicators": "Confirmation des indicateurs" ,
-    "success_indicator": "Indicateurs confirmés !"
+    "success_indicator": "Indicateurs confirmés !",
+    "confirm_severity_all": "Confirmer les définitions de sévérité",
+    "success_severity_all": "Sélection des définitions de la sévérité enregistrée !"
 
 
 

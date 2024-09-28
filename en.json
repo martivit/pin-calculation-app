@@ -86,7 +86,9 @@
     "success_1": "Selection updated successfully!",
     "success_label_kobo":"Label column has been selected: {selected_label}",
     "confirm_indicators": "Confirm Indicators",
-    "success_indicator": "Indicators confirmed!"
+    "success_indicator": "Indicators confirmed!",
+    "confirm_severity_all": "Confirm Severity Definitions",
+    "success_severity_all": "Severity definitions selection recorded!"
   }
   
   
