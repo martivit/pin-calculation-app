@@ -407,14 +407,16 @@ def upload_and_select_data():
                 selected_edu_sheet = st.selectbox(select_education_loop_data_sheet, ['No selection'] + list(data.keys()), key='edu_key')
                 selected_choice_sheet = choice_sheet_guess[0] if choice_sheet_guess else st.selectbox(select_kobo_choice_sheet, ['No selection'] + list(data.keys()), key='choice_key')
 
-
-            if st.button('Confirm Data Selections') and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
+            label_confirm_1 = translations["confirm_1"]
+            label_success_1 = translations["success_1"]
+  
+            if st.button(label_confirm_1) and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
                 st.session_state['household_data'] = data[selected_sheet]
                 st.session_state['survey_data'] = data[selected_survey_sheet]
                 st.session_state['edu_data'] = data[selected_edu_sheet]
                 st.session_state['choice_data'] = data[selected_choice_sheet]
                 st.session_state.data_selections_confirmed = True
-                st.success("Data selections updated successfully!")
+                st.success(label_success_1)
 
             if 'survey_data' in st.session_state:
                 survey_data = st.session_state['survey_data']
@@ -423,9 +425,10 @@ def upload_and_select_data():
                     selected_label = st.selectbox(translations["label_json"], ['No selection'] + label_columns, key='selected_label')
                     if selected_label != 'No selection':
                         st.session_state['label'] = selected_label
-                        if st.button("Confirm Label Language"):
+                        if st.button(label_confirm_1):
                             st.session_state.label_selected = True
-                            st.success(f"Label column '{selected_label}' has been selected.")
+                            message_label_sucess =  translations["success_label"].format(selected_label=selected_label)
+                            st.success(message_label_sucess)
                             st.markdown(translations["proceed_to_next_step"], unsafe_allow_html=True)
 
     else:

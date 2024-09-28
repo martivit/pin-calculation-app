@@ -150,9 +150,9 @@ def format_number(num):
     if num >= 1_000_000:
         return f"{num / 1_000_000:.1f}M"
     elif num >= 1_000:
-        return f"{num / 1_000:.0f}K"
+        return f"{num / 1_000:.1f}K"
     else:
-        return f"{num:.0f}"
+        return f"{num:.1f}"
 
 def set_row_height(row, height):
     tr = row._tr
@@ -1048,10 +1048,10 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
     doc.add_paragraph()
 
-    pteacher = doc.add_paragraph("Additionally, X of adults (teachers/educational staff) are in need of education assistance.")
-    pteacher_format = pteacher.runs[0]
-    pteacher_format.font.name = 'Calibri'
-    pteacher_format.font.size = Pt(16)
+    #pteacher = doc.add_paragraph("Additionally, X of adults (teachers/educational staff) are in need of education assistance.")
+    #pteacher_format = pteacher.runs[0]
+    #pteacher_format.font.name = 'Calibri'
+    #pteacher_format.font.size = Pt(16)
 
     # Add a subsection before the table
     section_severity_distribution = doc.add_heading('School-aged children severity distribution', level=3)

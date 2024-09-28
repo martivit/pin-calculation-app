@@ -1668,6 +1668,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     overview_girl_strata = collapse_and_summarize(female_pin_per_admin_status, 'Female', admin_var=admin_var) ## with the proper gender anlysis 
     overview_boy_strata = collapse_and_summarize(male_pin_per_admin_status, 'Male', admin_var=admin_var)## with the proper gender anlysis 
 
+    print('----------------------------           overview_girl')
+
+    print(overview_girl)
 
     collapsed_results_pop = {}
     for category, df in pin_per_admin_status.items():

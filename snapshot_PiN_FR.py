@@ -151,9 +151,9 @@ def format_number(num):
     if num >= 1_000_000:
         return f"{num / 1_000_000:.1f}M"
     elif num >= 1_000:
-        return f"{num / 1_000:.0f}K"
+        return f"{num / 1_000:.1f}K"
     else:
-        return f"{num:.0f}"
+        return f"{num:.1f}"
 
 def set_row_height(row, height):
     tr = row._tr
