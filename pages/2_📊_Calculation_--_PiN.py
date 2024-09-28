@@ -409,7 +409,7 @@ def upload_and_select_data():
 
             label_confirm_1 = translations["confirm_1"]
             label_success_1 = translations["success_1"]
-            label_confirm_2 = translations["confirm_1"]
+            label_confirm_2 = translations["confirm_2"]
 
             if st.button(label_confirm_1) and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
                 st.session_state['household_data'] = data[selected_sheet]

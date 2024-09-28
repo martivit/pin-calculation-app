@@ -84,6 +84,7 @@
     "yes_natural_hazard_disruption_indicator": "L'indicateur **% d'enfants dont l'accès à l'éducation a été perturbé en raison d'un risque naturel** est considéré comme un indicateur supplémentaire contribuant à la dimension PiN de l'environnement d'apprentissage.",
     "natural_hazard_disruption_var_prompt" : "% d'enfants dont l'accès à l'éducation a été perturbé par l'un des événements suivants : Risques naturels tels que les inondations, les cyclones, les sécheresses, les incendies de forêt ou les tremblements de terre :",
     "confirm_1": "Confirmer la sélection",
+    "confirm_2": "Confirmer la sélection 'label'",
     "success_1": "Sélection mise à jour avec succès !",
     "success_label_kobo":"La colonne des 'label' a été sélectionnée: {selected_label}"
 
