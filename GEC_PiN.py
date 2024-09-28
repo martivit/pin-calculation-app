@@ -28,7 +28,8 @@ try:
         "vit": st.secrets["users"]["vit"]["pwd"],
         "grand": st.secrets["users"]["grand"]["pwd"],
         "impact": st.secrets["users"]["impact"]["pwd"],
-        "cluster": st.secrets["users"]["cluster"]["pwd"]
+        "cluster": st.secrets["users"]["cluster"]["pwd"],
+        "retreat2024": st.secrets["users"]["retreat2024"]["pwd"]
     }
 except KeyError as e:
     st.error(f"Error loading user credentials: {e}")
