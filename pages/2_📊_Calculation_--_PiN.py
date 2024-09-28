@@ -675,9 +675,9 @@ def finalize_details():
             
         handle_displacement_column_selection()
 
-        if st.button("Finalize and Confirm"):
+        if st.button(translations["last_confirm"]):
             st.session_state.final_confirmed = True
-            st.success("All details confirmed and finalized!")
+            #st.success("All details confirmed and finalized!")
 
 
 
@@ -714,7 +714,7 @@ if all([
 ]):
     st.markdown("""
         <div style='background-color: #90EE90; padding: 10px; border-radius: 5px; display: inline-block;'>
-            <span style='color: black; font-size: 20px;'><strong>Completed!</strong></span>
+            <span style='color: black; font-size: 20px;'><strong>Completed / Terminé !!!!</strong></span>
         </div>
         """, unsafe_allow_html=True)  
     #st.markdown("---")  # Markdown horizontal rule

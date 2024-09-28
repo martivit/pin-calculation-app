@@ -70,7 +70,7 @@
     "school5": "<div style='border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;'><h6 style='color: #555555; margin-bottom: 5px;'>Tranches d'âge confirmées :</h6><div><strong>École primaire :</strong> 6 - {primary_end}</div><div><strong>École secondaire :</strong> {secondary_start} - 17</div></div>",
     "school4_afg": "<div style='border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;'><h6 style='color: #555555; margin-bottom: 5px;'>Tranches d'âge confirmées :</h6><div><strong>École primaire inférieure :</strong> 7 - {lower_primary_end}</div><div><strong>École primaire supérieure :</strong> {upper_primary_start} - {upper_primary_end}</div><div><strong>École secondaire :</strong> {secondary_start} - 17</div></div>",
     "school5_afg": "<div style='border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;'><h6 style='color: #555555; margin-bottom: 5px;'>Tranches d'âge confirmées :</h6><div><strong>École primaire :</strong> 7 - {primary_end}</div><div><strong>École secondaire :</strong> {secondary_start} - 17</div></div>",
-    "to_page3": "Proceed to the PiN Calculation and downloading page",
+    "to_page3": "Aller à la page de calcul et de téléchargement du PiN",
     "pin_calculation_results_title": "Résultats du calcul du PiN",
     "pin_calculation_message": "Le PiN est actuellement en cours de calcul (veuillez patienter, car cela peut prendre un certain temps) en utilisant les variables d'entrée sélectionnées. Les résultats incluent des tableaux de résultats PiN adaptés à la soumission à l'OCHA et un instantané spécifique qui peut être intégré à l'analyse contextuelle.",
     "hno_guidelines_message": "Pour le HNO, il est attendu que les clusters d'éducation fournissent une ventilation détaillée du PiN couvrant :\n\n- **Zone géographique** : Répartition par régions géographiques spécifiques.\n- **Groupes affectés** : PiN détaillé pour différents profils humanitaires (par exemple, PDI, résidents, rapatriés, réfugiés).\n- **Sévérité des conditions éducatives** : Basé sur les besoins non satisfaits dans quatre dimensions clés. Les données doivent montrer le nombre d'enfants par niveau de sévérité dans chaque groupe affecté, dans les zones géographiques.\n- **Désagrégation par sexe** : Assurez-vous que les données sont réparties par sexe.\n- **Tranche d'âge** : Le PiN doit couvrir au moins les niveaux d'éducation obligatoires, conformément aux politiques éducatives nationales.\n\nUne fois que les niveaux préliminaires de PiN et de sévérité ont été estimés, il est important de les examiner et de les ajuster en fonction des données secondaires et de l'avis d'experts. Si des ajustements sont effectués, assurez-vous qu'ils sont fondés sur des preuves et clairement documentés. En cas de divergences, envisagez de revoir l'ensemble de la méthodologie plutôt que de simplement ajuster les chiffres.",
@@ -96,7 +96,8 @@
     "confirm_school": "Confirmer le mois de rentrée scolaire",
     "success_start_school": "Le mois de la rentrée scolaire a été enregistré",
     "confirm_status": "Confirmer la colonne état/groupe de population",
-    "success_status":"La colonne de déplacement a été enregistrée"
+    "success_status":"La colonne de déplacement a été enregistrée",
+    "last_confirm": "Finaliser et confirmer"
 
 
 
