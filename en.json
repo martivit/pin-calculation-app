@@ -84,8 +84,9 @@
     "confirm_1": "Confirm selection",
     "confirm_2": "Confirm selection 'label'",
     "success_1": "Selection updated successfully!",
-    "success_label_kobo":"Label column has been selected: {selected_label}"
-  
+    "success_label_kobo":"Label column has been selected: {selected_label}",
+    "confirm_indicators": "Confirm Indicators",
+    "success_indicator": "Indicators confirmed!"
   }
   
   

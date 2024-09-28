@@ -476,9 +476,9 @@ def select_indicators():
             st.markdown("---")  # Markdown horizontal rule
             st.session_state['barrier_var'] = handle_full_selection(current_country, education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
             check_for_duplicate_selections()
-        if st.button("Confirm Indicators"):
+        if st.button(translations["confirm_indicators"]):
             st.session_state.indicators_confirmed = True
-            st.success("Indicators confirmed!")
+            st.success(translations["success_indicator"])
 
             # Display the HTML content
             st.markdown(translations["proceed_to_next_step3"], unsafe_allow_html=True)

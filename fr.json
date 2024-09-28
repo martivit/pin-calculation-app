@@ -45,8 +45,8 @@
     "select_kobo_choice_sheet": "Sélectionnez la feuille de choix Kobo :",
     "label_json": "Sélectionnez la colonne d'étiquettes souhaitée :",
     "proceed_to_next_step_markdown": "**Passez à l'étape suivante :**",
-    "select_education_indicators_markdown": "_Sélectionnez les indicateurs éducatifs_",
-    "proceed_to_next_step": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Passez à l'étape suivante :</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Sélectionnez les indicateurs éducatifs</span></div>",
+    "select_education_indicators_markdown": "_Sélectionnez les indicateurs d'éducation_",
+    "proceed_to_next_step": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Passez à l'étape suivante :</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Sélectionnez les indicateurs d'éducation</span></div>",
     "no_data": "Aucune donnée n'a été téléchargée. Veuillez aller à la page précédente et télécharger les données.",
     "select_variables_and_indicators_subheader": "Sélectionnez les variables et indicateurs corrects.",
     "check_variable_warning_html": "<div style='background-color: #FDFD96; border-radius: 5px; padding: 10px; margin: 10px 0;'><h6 style='color: #162AFD; margin: 0; padding: 0;'>Veuillez vérifier attentivement lors de la sélection d'une variable. Le choix des indicateurs a un impact direct sur le calcul du PiN.⚠️</h6></div>",
@@ -86,9 +86,9 @@
     "confirm_1": "Confirmer la sélection",
     "confirm_2": "Confirmer la sélection 'label'",
     "success_1": "Sélection mise à jour avec succès !",
-    "success_label_kobo":"La colonne des 'label' a été sélectionnée: {selected_label}"
-
-
+    "success_label_kobo":"La colonne des 'label' a été sélectionnée: {selected_label}",
+    "confirm_indicators": "Confirmation des indicateurs" ,
+    "success_indicator": "Indicateurs confirmés !"
 
 
 
