@@ -91,7 +91,7 @@
     "success_indicator": "Indicateurs confirmés !",
     "confirm_severity_all": "Confirmer les définitions de sévérité",
     "success_severity_all": "Sélection des définitions de la sévérité enregistrée !",
-    "cofirm_admin":"Confirmer le niveau d'administration",
+    "confirm_admin":"Confirmer le niveau d'administration",
     "success_admin":"Le niveau administratif '{admin_target}' est enregistré !"
 
 
