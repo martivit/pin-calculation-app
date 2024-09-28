@@ -29,12 +29,12 @@
     "column_confirmed_message": "La colonne {column_type} '{selected_column}' a été sélectionnée manuellement.",
     "error_message": "Veuillez sélectionner une option valide pour {column_type} avant de confirmer.",
     "is_this_individual_column_message": "Est-ce la colonne individuelle {column_type} ? → **{suggested_column}**",
-    "indicator_selection_confirmed": "Sélection de l'indicateur confirmée",
+    "indicator_selection_confirmed": "Sélection de l'indicateur enregistrée",
     "select_aggravating_circumstances_message": "Sélectionnez les circonstances aggravantes relevant de **la sévérité 4** :",
     "confirm_button_label_severity": "Confirmer les barrières de sévérité {severity}",
     "prompt_message": "Sélectionnez les circonstances aggravantes relevant de **la sévérité {severity}**, vous pouvez sélectionner plusieurs choix:",
     "none_of_listed_barriers": "---> Aucune des barrières listées <---",
-    "success_message": "Les barrières de sévérité {severity} sélectionnées ont été confirmées.",
+    "success_message": "Les barrières de sévérité {severity} sélectionnées ont été enregistrées.",
     "confirmed_barriers_message": "Barrières de sévérité {severity} confirmées :",
     "duplicate_selections_error": "**Sélections en double détectées. Chaque variable doit être utilisée pour une seule catégorie. Veuillez ajuster vos sélections.**",
     "select_status": "Sélectionnez la variable correspondant au statut du ménage (communauté d'accueil, déplacé interne, rapatrié) :",
@@ -88,11 +88,18 @@
     "success_1": "Sélection mise à jour avec succès !",
     "success_label_kobo":"La colonne des 'label' a été sélectionnée: {selected_label}",
     "confirm_indicators": "Confirmation des indicateurs" ,
-    "success_indicator": "Indicateurs confirmés !",
+    "success_indicator": "Indicateurs enregistrés !",
     "confirm_severity_all": "Confirmer les définitions de sévérité",
     "success_severity_all": "Sélection des définitions de la sévérité enregistrée !",
     "confirm_admin":"Confirmer le niveau d'administration",
-    "success_admin":"Le niveau administratif '{admin_target}' est enregistré !"
+    "success_admin":"Le niveau administratif '{admin_target}' est enregistré !",
+    "confirm_school": "Confirmer le mois de rentrée scolaire",
+    "success_start_school": "Le mois de la rentrée scolaire a été enregistré",
+    "confirm_status": "Confirmer la colonne état/groupe de population",
+    "success_status":"La colonne de déplacement a été enregistrée"
+
+
+
 
 
 

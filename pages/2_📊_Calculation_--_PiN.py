@@ -357,10 +357,10 @@ def handle_displacement_column_selection():
             )
             col1, col2 = st.columns(2)
             with col1:
-                if selected_displacement != 'No selection' and st.button("Confirm Displacement Column"):
+                if selected_displacement != 'No selection' and st.button(translations["confirm_status"]):
                     st.session_state['status_var'] = selected_displacement
                     st.session_state['displacement_column_confirmed'] = True
-                    st.success(f"Displacement column '{selected_displacement}' has been confirmed.")
+                    st.success(translations["success_status"])
 
             with col2:
                 if st.button("It is not listed, select manually"):
@@ -574,12 +574,12 @@ def finalize_details():
             index=0,  # Default to 'No selection'
             key='start_school_selection'
         )
-        if st.button('Confirm School Start Month', key='confirm_start_school'):
+        if st.button(translations["confirm_school"], key='confirm_start_school'):
             if start_school_selection != 'No selection':
                 st.session_state.school_start_month_confirmed = True
                 st.session_state['start_school'] = start_school_selection 
 
-                st.success("School start month confirmed!")
+                st.success(translations["success_start_school"])
                 pluto =  st.session_state['start_school']
                 st.write(pluto)
             else:
