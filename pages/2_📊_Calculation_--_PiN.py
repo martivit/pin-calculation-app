@@ -427,7 +427,7 @@ def upload_and_select_data():
                         st.session_state['label'] = selected_label
                         if st.button(label_confirm_1):
                             st.session_state.label_selected = True
-                            message_label_sucess =  translations["success_label"].format(selected_label=selected_label)
+                            message_label_sucess =  translations["success_label_kobo"].format(selected_label=selected_label)
                             st.success(message_label_sucess)
                             st.markdown(translations["proceed_to_next_step"], unsafe_allow_html=True)
 

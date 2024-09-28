@@ -83,7 +83,7 @@
     "yes_natural_hazard_disruption_indicator": "The indicator **% of children whose access to education was disrupted due to natural hazard** is considered an additional indicator contributing to the Learning Environment PiN dimension",
     "confirm_1": "Confirm selection",
     "success_1": "Selection updated successfully!",
-    "success_label":"Label column has been selected: {selected_label}"
+    "success_label_kobo":"Label column has been selected: {selected_label}"
   
   }
   
