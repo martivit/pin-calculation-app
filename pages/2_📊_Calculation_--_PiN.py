@@ -409,7 +409,8 @@ def upload_and_select_data():
 
             label_confirm_1 = translations["confirm_1"]
             label_success_1 = translations["success_1"]
-  
+            label_confirm_2 = translations["confirm_1"]
+
             if st.button(label_confirm_1) and not any(x == 'No selection' for x in [selected_sheet, selected_survey_sheet, selected_edu_sheet, selected_choice_sheet]):
                 st.session_state['household_data'] = data[selected_sheet]
                 st.session_state['survey_data'] = data[selected_survey_sheet]
@@ -425,7 +426,7 @@ def upload_and_select_data():
                     selected_label = st.selectbox(translations["label_json"], ['No selection'] + label_columns, key='selected_label')
                     if selected_label != 'No selection':
                         st.session_state['label'] = selected_label
-                        if st.button(label_confirm_1):
+                        if st.button(label_confirm_2):
                             st.session_state.label_selected = True
                             message_label_sucess =  translations["success_label_kobo"].format(selected_label=selected_label)
                             st.success(message_label_sucess)
