@@ -3,7 +3,7 @@ import pandas as pd
 import extra_streamlit_components as stx
 from shared_utils import language_selector
 
-st.logo('pics/logos.png')
+st.logo('pics/GEC Global English logo_Colour_JPEG.jpg')
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico', layout='wide')
 
