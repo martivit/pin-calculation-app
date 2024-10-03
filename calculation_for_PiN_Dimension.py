@@ -1001,8 +1001,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     secondary_end = 17
 
-    host_suggestion = ["Urban","always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ["Rural","displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
+    host_suggestion = ["Urban","always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
+    IDP_suggestion = ["Rural","displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant',"menage_deplace_interne", 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
     returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
     ndsp_suggestion = ['ndsp','Protracted IDPs']
@@ -1818,7 +1818,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     final_overview_df[label_perc5] = final_overview_df[label_tot5]/final_overview_df[label_tot_population]
     final_overview_df[label_perc_tot] = final_overview_df[label_tot]/final_overview_df[label_tot_population]
 
-    
+
 
 
     ####### ** 10.B **       ------------------------------  Creating OVERVIEW file ------------------------------------------     #######
