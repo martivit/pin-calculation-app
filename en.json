@@ -79,7 +79,7 @@
     "no_armed_disruption_indicator": "The indicator **% of children whose access to education was disrupted due to the school being occupied by armed groups** was NOT collected in this context",
     "no_ocha_data" : "OCHA data are not available",
     "mismatch_admin_message":  "There is a mismatch between the OCHA unit of analysis and the administrative level at which the MSNA is representative. If this box is checked, ensure that the OCHA file contains the list of mismatched administrative units in the 'scope-fix' sheet. Please refer to the template for guidance.",
-    "check_box":"Check if there is a mismatch",
+    "check_box":"Click if there is a mismatch",
     "yes_natural_hazard_disruption_indicator": "The indicator **% of children whose access to education was disrupted due to natural hazard** is considered an additional indicator contributing to the Learning Environment PiN dimension",
     "confirm_1": "Confirm selection",
     "confirm_2": "Confirm selection 'label'",

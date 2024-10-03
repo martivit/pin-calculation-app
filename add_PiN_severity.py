@@ -391,8 +391,10 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
             raise KeyError(f"'today' column is missing in household_data for Afghanistan.")
 
     # Convert the date column to datetime and extract the month
-    household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
-    household_data['month'] = household_data[household_start_column].dt.month
+    #household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
+    #household_data['month'] = household_data[household_start_column].dt.month
+    household_data['month'] = 6
+
 
 
     admin_var = find_best_match(admin_target,  household_data.columns)
