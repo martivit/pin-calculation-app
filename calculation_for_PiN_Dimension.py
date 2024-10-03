@@ -1818,6 +1818,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     final_overview_df[label_perc5] = final_overview_df[label_tot5]/final_overview_df[label_tot_population]
     final_overview_df[label_perc_tot] = final_overview_df[label_tot]/final_overview_df[label_tot_population]
 
+    
 
 
     ####### ** 10.B **       ------------------------------  Creating OVERVIEW file ------------------------------------------     #######

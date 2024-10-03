@@ -229,15 +229,20 @@ def custom_to_datetime(date_str):
         return pd.to_datetime(date_str, errors='coerce')
     except:
         try:
-            # Handle the 'Y-m-d H:M:S.f' format
-            return pd.to_datetime(date_str, format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
+            # Handle the 'Y-m-d H:M:S.f+TZ' format
+            return pd.to_datetime(date_str, format='%Y-%m-%dT%H:%M:%S.%f%z', errors='coerce')
         except:
             try:
-                # Handle the 'dd/mm/yyyy' format
-                return pd.to_datetime(date_str, format='%d/%m/%Y', errors='coerce')
+                # Handle the 'Y-m-d H:M:S.f' format without time zone
+                return pd.to_datetime(date_str, format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
             except:
-                # Return NaT if all parsing attempts fail
-                return pd.NaT
+                try:
+                    # Handle the 'dd/mm/yyyy' format
+                    return pd.to_datetime(date_str, format='%d/%m/%Y', errors='coerce')
+                except:
+                    # Return NaT if all parsing attempts fail
+                    return pd.NaT
+
 ##--------------------------------------------------------------------------------------------
 def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_start_var=6, lower_primary_end_var=13, upper_primary_end_var=None):
 
@@ -391,9 +396,12 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
             raise KeyError(f"'today' column is missing in household_data for Afghanistan.")
 
     # Convert the date column to datetime and extract the month
-    #household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
-    #household_data['month'] = household_data[household_start_column].dt.month
-    household_data['month'] = 6
+    
+    household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
+    household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors='coerce')
+
+    household_data['month'] = household_data[household_start_column].dt.month
+    #household_data['month'] = 6
 
 
 

@@ -81,7 +81,7 @@ admin_levels_per_country = {
     'Niger -- NER': ['Admin_1: Régions ', 'Admin_2: Départements', 'Admin_3: Communes'],
     'Syria -- SYR': ['Admin_1: Governorates', 'Admin_2: Districts (mintaqah)', 'Admin_3: Subdistricts (nawaḥi)'],
     'Ukraine -- UKR': ['Admin_1: Oblasts', 'Admin_2: Raions', 'Admin_3: Hromadas'],
-    'Somalia -- SOM': ['Admin_1: States', 'Admin_2: Regions', 'Admin_3: Districts']
+    'Somalia -- SOM': ['Admin_1: States', 'Admin_2: Districts', 'Admin_3: sub-Districts']
 }
 
 
