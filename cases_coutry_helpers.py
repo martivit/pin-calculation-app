@@ -189,3 +189,67 @@ mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-f
 mismatch_admin = True
 
 selected_language = "French"
+
+
+
+## SOM
+status_var = 'population_group'
+access_var = 'edu_access'
+teacher_disruption_var = 'edu_disrupted_teacher'
+idp_disruption_var = 'edu_disrupted_displaced'
+armed_disruption_var = 'edu_disrupted_hazards'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'edu_disrupted_hazards'
+barrier_var = 'edu_barrier'
+selected_severity_4_barriers = [
+"Protection risks whilst at the school " ,
+"Protection risks whilst travelling to the school "
+
+]
+selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+#"---> None of the listed barriers <---"
+#"Child is associated with armed forces or armed groups "
+age_var = 'edu_ind_age'
+gender_var = 'edu_ind_gender'
+start_school = 'September'
+country= 'Somalia -- SOM'
+
+#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+ 
+# 'Admin_3: Townships'
+admin_var = 'Admin_2: Districts'#'Admin_2: Regions' 
+
+vector_cycle = [12,16]
+single_cycle = (vector_cycle[1] == 0)
+primary_start = 6
+secondary_end = 17
+label = 'label::english'
+
+# Path to your Excel file
+excel_path = 'input/REACH_MSNA_2024_FINAL_Cleaned_Weights.xlsx'
+excel_path_ocha = 'input/ocha.xlsx'
+#excel_path_ocha = 'input/test_ocha.xlsx'
+
+# Load the Excel file
+xls = pd.ExcelFile(excel_path, engine='openpyxl')
+# Print all sheet names (optional)
+print(xls.sheet_names)
+# Dictionary to hold your dataframes
+dfs = {}
+# Read each sheet into a dataframe
+for sheet_name in xls.sheet_names:
+    dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
+
+# Access specific dataframes
+household_data = dfs['main']
+edu_data = dfs['edu_ind']
+survey_data = dfs['survey']
+choice_data = dfs['choices']
+
+ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
+
+# Read specific sheets into separate dataframes
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
+mismatch_admin = False
+
+selected_language = "English"

@@ -27,8 +27,8 @@ from snapshot_PiN_FR import create_snapshot_PiN_FR
 ################################################
 
 
-## AFG
-status_var = 'population_group'
+## SOM
+status_var = 'type_population'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
@@ -36,32 +36,31 @@ armed_disruption_var = 'edu_disrupted_hazards'#'edu_disrupted_occupation'no_indi
 natural_hazard_var = 'edu_disrupted_hazards'
 barrier_var = 'edu_barrier'
 selected_severity_4_barriers = [
-"Protection risks whilst at the school " ,
-"Protection risks whilst travelling to the school "
+"Absence d'école appropriée et accessible"
 
 ]
-selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+selected_severity_5_barriers = ["Le handicap ou les problèmes de santé de l'enfant l'empêchent d'aller à l'école"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'edu_ind_age'
 gender_var = 'edu_ind_gender'
 start_school = 'September'
-country= 'Somalia -- SOM'
+country= 'Central African Republic -- CAR'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_2: Districts'#'Admin_2: Regions' 
+admin_var = 'Admin_2: Sub-prefectures (sous-préfectures)'#'Admin_2: Regions' 
 
 vector_cycle = [12,16]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
-label = 'label::english'
+label = 'label::french'
 
 # Path to your Excel file
-excel_path = 'input/REACH_MSNA_2024_FINAL_Cleaned_Weights.xlsx'
-excel_path_ocha = 'input/ocha.xlsx'
+excel_path = 'input/CAR2402_REACH_MSNA_Base-de-donnees-nettoyees_septembre-2024-1.xlsx'
+excel_path_ocha = 'input/Ocha_pop_CAR.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -75,8 +74,8 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['main']
-edu_data = dfs['edu_ind']
+household_data = dfs['menage']
+edu_data = dfs['Education']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
@@ -87,7 +86,7 @@ ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
 
-selected_language = "English"
+selected_language = "French"
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################
 #############################################################################        CALCULATION PIN              ################################################################################################
