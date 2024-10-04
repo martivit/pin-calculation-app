@@ -340,7 +340,7 @@ def handle_displacement_column_selection():
         household_data = st.session_state['household_data']
         displacement_keywords = [
             'hh_displaced', 'pop_group', 'i_type_pop', 'statut', 'hh_forcibly_displaced','statut',
-            'demo_situation_menage', 'pop_group_name', 'residency_status', 'pop_group',
+            'demo_situation_menage', 'pop_group_name', 'residency_status', 'pop_group','population',
             'statut_menage', 'population_group', 'd_statut_deplacement', 'B_1_hh_primary_residence',
             'statutMenage', 'B_1_hh_primary_residence', 'status', 'displacement', 'origin', 'urbanity', 'urban'
         ]
