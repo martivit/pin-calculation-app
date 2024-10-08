@@ -42,7 +42,7 @@ if 'password_correct' not in st.session_state:
 
 # Country selection setup
 countries = ['no selection',
-    'Afghanistan -- AFG', 'Burkina Faso -- BFA', 'Central African Republic -- CAR', 
+    'Afghanistan -- AFG', 'Burkina Faso -- BFA', 'Cameroon -- CMR', 'Central African Republic -- CAR', 
     'Democratic Republic of the Congo -- DRC', 'Haiti -- HTI', 'Iraq -- IRQ', 'Lemuria -- LMR','Kenya -- KEN', 
     'Bangladesh -- BGD', 'Lebanon -- LBN', 'Moldova -- MDA', 'Mali -- MLI', 'Mozambique -- MOZ', 
     'Myanmar -- MMR', 'Niger -- NER', 'Syria -- SYR', 'Ukraine -- UKR', 'Somalia -- SOM'
