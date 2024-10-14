@@ -1007,12 +1007,12 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     refugee_suggestion = ['refugees', 'refugee','refugie', 'refugie','prl', 'refugiee', '3']
     ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp', 'idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
-    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiee', 'Other']
+    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']
     suggestions_mapping = {
         'Host/Hôte': host_suggestion,
         'IDP/PDI': IDP_suggestion,
         'Returnees/Retournés': returnee_suggestion,
-        'Refugees/Refugiee': refugee_suggestion,
+        'Refugees/Refugiees': refugee_suggestion,
         'Other': ndsp_suggestion
     }
     # --------------------------------------------------------------------------------------------
@@ -1188,6 +1188,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         suggestions_mapping[key] = suggestions  # keeping original case
 
     mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
+    print (mapped_statuses)
     category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)# Extract population figures based on mapped statuses without modifying the case
 
     for category, df in category_data_frames.items():
