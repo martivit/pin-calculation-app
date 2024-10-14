@@ -68,7 +68,7 @@ admin_levels_per_country = {
     'Burkina Faso -- BFA': ['Admin_1: Regions (Région)', 'Admin_2: Province', 'Admin_3: Department (Département)'],
     'Cameroon -- CMR': ['Admin_1', 'Admin_2', 'Admin_3'],
     'Central African Republic -- CAR': ['Admin_1: Prefectures (préfectures)', 'Admin_2: Sub-prefectures (sous-préfectures)', 'Admin_3: Communes'],
-    'Democratic Republic of the Congo -- DRC': ['Admin_1: Provinces', 'Admin_2: Territories', 'Admin_3: Sectors/chiefdoms/communes'],
+    'Democratic Republic of the Congo -- DRC': ['Admin_1', 'Admin_2', 'Admin_3'],
     'Haiti -- HTI': ['Admin_1: Departments (départements)', 'Admin_2: Arrondissements', 'Admin_3: Communes'],
     'Iraq -- IRQ': ['Admin_1: Governorates', 'Admin_2: Districts (aqḍyat)', 'Admin_3: Sub-districts (naḥiyat)'],
     'Lemuria -- LMR':['Admin_1: Province', 'Admin_2: District', 'Admin_3: Subdistrict'] ,
@@ -341,7 +341,7 @@ def handle_displacement_column_selection():
     if 'household_data' in st.session_state:
         household_data = st.session_state['household_data']
         displacement_keywords = [
-            'hh_displaced', 'pop_group', 'i_type_pop', 'statut', 'hh_forcibly_displaced','statut','hoh_dis',
+            'hh_displaced', 'pop_group', 'i_type_pop', 'statut', 'hh_forcibly_displaced','statut','hoh_dis','l_stratification',
             'demo_situation_menage', 'pop_group_name', 'residency_status', 'pop_group','population',
             'statut_menage', 'population_group', 'd_statut_deplacement', 'B_1_hh_primary_residence',
             'statutMenage', 'B_1_hh_primary_residence', 'status', 'displacement', 'origin', 'urbanity', 'urban', "depl_situation_menage_final"

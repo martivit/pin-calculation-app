@@ -324,7 +324,7 @@ selected_language = "French"
 
 ## DRC
 
-status_var = 'd_statut_deplacement'
+status_var = 'hoh_dis'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
@@ -338,15 +338,15 @@ selected_severity_4_barriers = [
 selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'edu_age'
-gender_var = 'edu_gender'
+age_var = 'edu_ind_age'
+gender_var = 'edu_ind_gender'
 start_school = 'September'
-country= 'Niger -- NER'
+country= 'Democratic Republic of the Congo -- DRC'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_2: Départements'#'Admin_2: Regions' 
+admin_var = 'Admin_3: Sectors/chiefdoms/communes'#'Admin_2: Regions' 
 
 vector_cycle = [12,16]
 single_cycle = (vector_cycle[1] == 0)

@@ -26,8 +26,8 @@ from snapshot_PiN_FR import create_snapshot_PiN_FR
 ##           input from thee user             ##
 ################################################
 
-## NER
-status_var = 'd_statut_deplacement'
+## DRC
+status_var = 'hoh_dis'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
@@ -41,15 +41,15 @@ selected_severity_4_barriers = [
 selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'ind_age'
-gender_var = 'ind_gender'
+age_var = 'edu_ind_age'
+gender_var = 'edu_ind_gender'
 start_school = 'September'
-country= 'Niger -- NER'
+country= 'Democratic Republic of the Congo -- DRC'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_2: Départements'#'Admin_2: Regions' 
+admin_var = 'Admin_3'#'Admin_2: Regions' 
 
 vector_cycle = [12,16]
 single_cycle = (vector_cycle[1] == 0)
@@ -58,8 +58,8 @@ secondary_end = 17
 label = 'label::french'
 
 # Path to your Excel file
-excel_path = 'input/ner_msna_clean_data_FINAL.xlsx'
-excel_path_ocha = 'input/ocha_NER_update.xlsx'
+excel_path = 'input/REACH_DRC2404_MSNA2024_Clean-Data.xlsx'
+excel_path_ocha = 'input/DRC_ocha.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -73,10 +73,10 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['raw_data_clean']
-edu_data = dfs['loop_data_clean']
-survey_data = dfs['kobo_survey']
-choice_data = dfs['kobo_choices']
+household_data = dfs['hh data']
+edu_data = dfs['edu data']
+survey_data = dfs['survey']
+choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 

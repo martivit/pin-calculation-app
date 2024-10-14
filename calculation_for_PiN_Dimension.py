@@ -1227,6 +1227,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     factor_category.update(disability_factors)
 
 
+    #print(factor_category)
+
+    print(severity_admin_status_list)
 
     ####### ** 6.A **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
     pin_per_admin_status = {}
@@ -1290,7 +1293,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             # Save modified DataFrame back into the dictionary under the category key
             pin_per_admin_status[category] = pop_group_df
 
-
+    print(pin_per_admin_status)
+    print(category_data_frames)
     ####### ** 6.B **       ------------------------------ %dimension AND #dimension PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
     dimension_per_admin_status = {}
 
@@ -1385,6 +1389,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     male_pin_per_admin_status = {}
     male_pin_per_admin_status = merge_pin_ocha_with_strata(male_pin_per_admin_status, category_data_frames,factor_boy_df,severity_male_list, admin_var, pop_group_var, 'Boy')
     
+
+
     ####### ** strata 6.B **       ------------------------------ %dimension AND #dimension PER ADMIN AND POPULATION GROUP and strata using ocha figures ------------------------------------------     #######
     female_strata_dimension_per_admin_status = {}
     female_strata_dimension_per_admin_status= merge_dimension_ocha_with_strata (female_strata_dimension_per_admin_status, category_data_frames,factor_girl_df,dimension_female_list, admin_var, pop_group_var,'Girl')
@@ -1656,6 +1662,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         boy_5_17_label = 'Boys (6-17 y.o.)'
         ece_5yo_label = 'ECE (6 y.o.)'
 
+    print(pin_per_admin_status_girl)
 
     ####### ** 9 **       ------------------------------  preparation for overview--> SUM all the admin per population group and per strata ------------------------------------------     #######
     overview_ToT = collapse_and_summarize(pin_per_admin_status, tot_5_17_label, admin_var=admin_var)
