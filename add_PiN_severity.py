@@ -385,7 +385,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     if country != 'Afghanistan -- AFG':
         # Safely get the first column that contains 'start' in its name
-        ousehold_start_column = [col for col in household_data.columns if 'start' in col.lower()]
+        household_start_column = [col for col in household_data.columns if 'start' in col.lower()]
         if household_start_column:
             household_start_column = household_start_column[0]  # Take the first item directly
         else:
