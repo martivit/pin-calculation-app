@@ -1002,10 +1002,10 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     secondary_end = 17
 
     host_suggestion = ["Urban","always_lived","general_pop",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ["Rural","displaced","IDP", 'New IDPs','pdi', 'idp', 'site','idp_host' ,'camp', 'migrant',"menage_deplace_interne", 'Out-of-camp', 'In-camp','no',  'pdi_fam', '2', '1' ]
+    IDP_suggestion = ['host_family',"Rural","displaced","IDP", 'New IDPs','pdi', 'idp', 'site','idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
     returnee_suggestion = ['displaced_previously' ,'cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
-    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP", 'idp_site','pdi_site']
+    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp', 'idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
     template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiee', 'Other']
     suggestions_mapping = {
