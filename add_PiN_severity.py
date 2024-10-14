@@ -383,26 +383,26 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
 
 
-    #if country != 'Afghanistan -- AFG':
+    if country != 'Afghanistan -- AFG':
         # Safely get the first column that contains 'start' in its name
-        #ousehold_start_column = [col for col in household_data.columns if 'start' in col.lower()]
-        #if household_start_column:
-            #household_start_column = household_start_column[0]  # Take the first item directly
-        #else:
-            #raise KeyError("No column containing 'start' found in household_data.")
-    #else:
+        ousehold_start_column = [col for col in household_data.columns if 'start' in col.lower()]
+        if household_start_column:
+            household_start_column = household_start_column[0]  # Take the first item directly
+        else:
+            raise KeyError("No column containing 'start' found in household_data.")
+    else:
         # Assign the 'today' column if the country is Afghanistan
-        #household_start_column = 'today'
-        #if household_start_column not in household_data.columns:
-            #raise KeyError(f"'today' column is missing in household_data for Afghanistan.")
+        household_start_column = 'today'
+        if household_start_column not in household_data.columns:
+            raise KeyError(f"'today' column is missing in household_data for Afghanistan.")
 
     # Convert the date column to datetime and extract the month
     
-    #household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
-    #household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors='coerce')
+    household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
+    household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors='coerce')
 
-    #household_data['month'] = household_data[household_start_column].dt.month
-    household_data['month'] = 7
+    household_data['month'] = household_data[household_start_column].dt.month
+    #household_data['month'] = 7
 
 
 
