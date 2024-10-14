@@ -1030,8 +1030,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     df = pd.DataFrame(edu_data)
     # Filtering data based on gender
-    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl'])]
-    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy'])]
+    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin'])]
+    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin'])]
     # Filtering data based on school cycle
     ece_df = edu_data[edu_data['school_cycle'].isin(['ECE'])]
     primary_df = edu_data[edu_data['school_cycle'].isin(['primary'])]
