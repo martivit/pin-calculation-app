@@ -402,7 +402,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     #household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors='coerce')
 
     #household_data['month'] = household_data[household_start_column].dt.month
-    household_data['month'] = 6
+    household_data['month'] = 7
 
 
 
