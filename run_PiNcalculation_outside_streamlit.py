@@ -26,30 +26,35 @@ from snapshot_PiN_FR import create_snapshot_PiN_FR
 ##           input from thee user             ##
 ################################################
 
-## DRC
-status_var = 'hoh_dis'
+
+
+
+## CAR
+status_var = 'type_population'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
-armed_disruption_var = 'edu_disrupted_hazards'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'edu_disrupted_hazards'
+armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'no_indicator'
 barrier_var = 'edu_barrier'
 selected_severity_4_barriers = [
-    "Risques de protection à l’école (tels que le harcèlement physique et verbal, risque de viol, les attaques contre les écoles ou d’autres incidents de protection)",
-"Risques de protection pendant le trajet vers l’école (tels que les incidents de harcèlement physique et verbal, risque de viol ou d’autres incidents de protection)"
-]
-selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés"]
+ "Risques de protection à l'école ", "Risques de protection pendant le trajet vers l'école ",
+"L'enfant doit travailler à la maison ou dans la ferme du ménage (c'est-à-dire qu'il ne gagne pas de revenu pour ces activités, mais peut permettre à d'autres membres de la famille de gagner un revenu)", "L'enfant participe à des activités génératrices de revenus en dehors du foyer",
+"Mariage, fiançailles et/ou grossesse",
+"Impossibilité de s'inscrire à l'école en raison d'un manque de documents", "Impossibilité de s'inscrire à l'école en raison d'un déplacement/retour récent (déplacement après le début de l'année scolaire)"
+]#"L'école a été fermée en raison de dommages, d'une catastrophe naturelle ou d'un conflit.",, "Discrimination ou stigmatisation de l'enfant pour quelque raison que ce soit"
+selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés "]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'edu_ind_age'
 gender_var = 'edu_ind_gender'
 start_school = 'September'
-country= 'Democratic Republic of the Congo -- DRC'
+country= 'Central African Republic -- CAR'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_3'#'Admin_2: Regions' 
+admin_var = 'Admin_2: Sub-prefectures (sous-préfectures)'#'Admin_2: Regions' 
 
 vector_cycle = [12,16]
 single_cycle = (vector_cycle[1] == 0)
@@ -58,8 +63,8 @@ secondary_end = 17
 label = 'label::french'
 
 # Path to your Excel file
-excel_path = 'input/REACH_DRC2404_MSNA2024_Clean-Data.xlsx'
-excel_path_ocha = 'input/DRC_ocha.xlsx'
+excel_path = 'input/CAR2402_REACH_MSNA_Base-de-donnees-nettoyees_septembre-2024-1.xlsx'
+excel_path_ocha = 'input/Ocha_pop_CAR.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -73,8 +78,8 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['hh data']
-edu_data = dfs['edu data']
+household_data = dfs['menage']
+edu_data = dfs['Education']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
@@ -85,7 +90,9 @@ ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
 
+
 selected_language = "French"
+
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################
 #############################################################################        CALCULATION PIN              ################################################################################################

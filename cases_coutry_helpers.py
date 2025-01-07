@@ -64,8 +64,6 @@ mismatch_admin = False
 
 
 ## BFA
-
-
 status_var = 'i_type_pop'
 access_var = 'e_enfant_scolarise_formel'
 teacher_disruption_var = 'e_absence_enseignant'
@@ -126,6 +124,7 @@ mismatch_admin = True
 
 
 
+
 ## AFG
 status_var = 'urbanity'
 access_var = 'edu_access'
@@ -152,7 +151,7 @@ country= 'Afghanistan -- AFG'
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_3: Districts'#'Admin_2: Regions' 
+admin_var = 'Admin_2'#'Admin_2: Regions' 
 
 vector_cycle = [14,16]
 single_cycle = (vector_cycle[1] == 0)
@@ -162,7 +161,7 @@ label = 'label::English'
 
 # Path to your Excel file
 excel_path = 'input/AFG_WoAA_2024_data.xlsx'
-excel_path_ocha = 'input/AFG_ocha.xlsx'
+excel_path_ocha = 'input/AFG_ocha_admin2.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -186,10 +185,10 @@ ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 # Read specific sheets into separate dataframes
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
-mismatch_admin = True
 
-selected_language = "French"
+mismatch_admin = False
 
+selected_language = "English"
 
 
 ## SOM
@@ -444,3 +443,66 @@ ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
+
+
+
+
+
+## MLI
+
+status_var = 'pop_group'
+access_var = 'edu_access'
+teacher_disruption_var = 'edu_disrupted_teacher'
+idp_disruption_var = 'edu_disrupted_displaced'
+armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'edu_disrupted_hazards'
+barrier_var = 'edu_barrier'
+selected_severity_4_barriers = ["Mariage, fiançailles et/ou grossesse"]
+selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés "]
+#"---> None of the listed barriers <---"
+#"Child is associated with armed forces or armed groups "
+age_var = 'edu_ind_age'
+gender_var = 'edu_ind_gender'
+start_school = 'October'
+country= 'Mali -- MLI'
+
+#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+ 
+# 'Admin_3: Townships'
+admin_var = 'Admin_2: Cercles' 
+
+vector_cycle = [11,0]
+single_cycle = (vector_cycle[1] == 0)
+primary_start = 7
+secondary_end = 17
+label = 'label::french'
+
+# Path to your Excel file
+excel_path = 'input/REACH_MLI2402__Clean-Dataset_final.xlsx'
+excel_path_ocha = 'input/Template_Population_figures_final_1510.xlsx'
+#excel_path_ocha = 'input/test_ocha.xlsx'
+
+# Load the Excel file
+xls = pd.ExcelFile(excel_path, engine='openpyxl')
+# Print all sheet names (optional)
+print(xls.sheet_names)
+# Dictionary to hold your dataframes
+dfs = {}
+# Read each sheet into a dataframe
+for sheet_name in xls.sheet_names:
+    dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
+
+# Access specific dataframes
+household_data = dfs['Ménages']
+edu_data = dfs['Ménages']
+survey_data = dfs['Survey']
+choice_data = dfs['Choices']
+
+ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
+
+# Read specific sheets into separate dataframes
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
+mismatch_admin = False
+
+selected_language = "English"

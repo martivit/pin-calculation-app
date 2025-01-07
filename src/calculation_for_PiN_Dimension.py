@@ -265,6 +265,12 @@ def adjust_pin_by_strata_factor(pin_df, factor_df, category_label, tot_column, a
     # Apply the multiplication for each column that needs adjustment
     for col in columns_to_adjust:
         factorized_df[col] *= factorized_df[category_label]
+ 
+    if (category_label == "Girl"): 
+        print('-----------------------------------------------------    factorized_df')
+        print(factorized_df)
+        print(factor_df)
+        print(pin_df)
 
     # Drop the now unneeded factor column
     factorized_df.drop(columns=[category_label], inplace=True)
@@ -1046,7 +1052,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         admin_up_msna = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
         admin_low_ok_list = ocha_mismatch_list.iloc[:, 0].dropna().astype(str).tolist()  # Drop NaN and convert to string
 
-        print(admin_up_msna)
+        #print(admin_up_msna)
 
         severity_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
                                 analysis_variable='severity_category',
@@ -1230,7 +1236,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     #print(factor_category)
 
     print(severity_admin_status_list)
-
+    print(category_data_frames)
     ####### ** 6.A **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
     pin_per_admin_status = {}
     # Assume category_data_frames is a dictionary of DataFrames, indexed by category
@@ -1293,8 +1299,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             # Save modified DataFrame back into the dictionary under the category key
             pin_per_admin_status[category] = pop_group_df
 
-    print(pin_per_admin_status)
-    print(category_data_frames)
+    #print(pin_per_admin_status)
+   #print(category_data_frames)
     ####### ** 6.B **       ------------------------------ %dimension AND #dimension PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
     dimension_per_admin_status = {}
 
@@ -1662,7 +1668,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         boy_5_17_label = 'Boys (6-17 y.o.)'
         ece_5yo_label = 'ECE (6 y.o.)'
 
-    print(pin_per_admin_status_girl)
+    #print(pin_per_admin_status_girl)
 
     ####### ** 9 **       ------------------------------  preparation for overview--> SUM all the admin per population group and per strata ------------------------------------------     #######
     overview_ToT = collapse_and_summarize(pin_per_admin_status, tot_5_17_label, admin_var=admin_var)
@@ -1677,7 +1683,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     overview_boy_strata = collapse_and_summarize(male_pin_per_admin_status, 'Male', admin_var=admin_var)## with the proper gender anlysis 
 
     print('----------------------------           overview_girl')
-
     print(overview_girl)
 
     collapsed_results_pop = {}

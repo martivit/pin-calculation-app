@@ -5,14 +5,14 @@ from io import BytesIO
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
-from add_PiN_severity import add_severity
-from calculation_for_PiN_Dimension import calculatePIN
-from calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
-from vizualize_PiN import create_output
-from snapshot_PiN import create_snapshot_PiN
-from snapshot_PiN_FR import create_snapshot_PiN_FR
+from src.add_PiN_severity import add_severity
+from src.calculation_for_PiN_Dimension import calculatePIN
+from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
+from src.vizualize_PiN import create_output
+from src.snapshot_PiN import create_snapshot_PiN
+from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from shared_utils import language_selector
-from translate_PiN import translate_excel_sheets_with_formatting
+#from translate_PiN import translate_excel_sheets_with_formatting
 
 
 st.logo('pics/GEC Global English logo_Colour_JPEG.jpg')
