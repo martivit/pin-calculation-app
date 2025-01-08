@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import time
 from shared_utils import language_selector
+from fuzzywuzzy import process, fuzz
 
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
@@ -56,6 +57,71 @@ st.session_state['country'] = selected_country
 
 
 
+REQUIRED_COLUMNS = {
+    'uuid': {'uuid', '_uuid', 'uuid_X'},
+    'ind_gender': {'ind_gender', 'edu_gender', 'ind_sex', 'sne_enfant_ind_genre', 'sex','edu_sex', 'edu_ind_sex', 'gender_member', 'genre'},
+    'ind_age': {'ind_age', 'age', 'edu_age', 'edu_ind_age', 'age'},
+    'admin': {'admin1', 'admin2', 'admin3', 'camp', 'state', 'county', 'district'},
+    'access': {'edu_access', 'enrolled_school'},
+    'teacher':{'edu_disrupted_teacher'},
+    'hazard':{'edu_disrupted_hazards'},
+    'displaced':{'edu_disrupted_displaced'},
+    'barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel'},
+    'start': {'start', 'date'}
+}
+FUZZY_THRESHOLD = 90  # Match similarity percentage (higher = stricter)
+
+def validate_columns_across_sheets(all_sheets):
+    """Validate mandatory columns across all sheets while excluding 'end'."""
+    column_matches = {key: None for key in REQUIRED_COLUMNS}  # Track matches per key
+    unmatched_columns = set(REQUIRED_COLUMNS.keys())  # Track remaining unmatched keys
+    
+    # Iterate through sheets
+    for sheet_name, sheet_df in all_sheets.items():
+        if sheet_name.lower() in ['survey', 'choices']:
+            continue  # Skip unwanted sheets
+
+        # Exclude 'end' column from matching
+        valid_columns = [col for col in sheet_df.columns if col.lower() != 'end']
+
+
+        for key, alternatives in REQUIRED_COLUMNS.items():
+            if column_matches[key]:  # Skip if already matched
+                continue
+            
+            # Step 1: Case-insensitive Exact Match
+            found_column = next(
+                (col for col in valid_columns if col.lower() in {alt.lower() for alt in alternatives}),
+                None
+            )
+            
+            
+            # Step 2: Partial Substring Matching (Manually Check Substrings)
+            if not found_column:
+                found_column = next(
+                    (col for col in valid_columns if any(alt in col.lower() for alt in {alt.lower() for alt in alternatives})),
+                    None
+                )
+            
+            # Step 3: Fuzzy Match as Backup
+            if not found_column:
+                best_match, score = process.extractOne(
+                    key, valid_columns, scorer=fuzz.partial_ratio
+                )
+                if best_match and score >= FUZZY_THRESHOLD:
+                    found_column = best_match
+            
+            # Record the match
+            if found_column:
+                column_matches[key] = (sheet_name, found_column)
+                unmatched_columns.discard(key)
+    
+    return column_matches, unmatched_columns
+
+
+
+
+#######################################################################################################################
 # Check if data already uploaded and preserved in session state
 if 'uploaded_data' in st.session_state:
     data = st.session_state['uploaded_data']
@@ -69,20 +135,30 @@ else:
         bar = st.progress(0)
 
         try:
-            # Increment progress for file load initialization
-            bar.progress(10)
-            time.sleep(0.1)  # simulate delay for starting the load
+            # Load all sheets
+            all_sheets = pd.read_excel(uploaded_file, sheet_name=None, engine='openpyxl')
+            st.session_state['uploaded_data'] = all_sheets
+            bar.progress(30)
 
-            # Actual data loading
-            data = pd.read_excel(uploaded_file, engine='openpyxl', sheet_name=None)
-            st.session_state['uploaded_data'] = data
-            # Update progress post data load
-            bar.progress(50)
-            time.sleep(0.1)  # simulate delay for post-load processing
+            # Validate columns across sheets
+            column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
+            bar.progress(60)
 
-            # Finalize the loading process
+            # Display results
+            #st.write("### ✅ **Column Mapping Across Sheets:**")
+            #for key, match in column_matches.items():
+                #if match:
+                    #st.write(f"- **{key}** → Found in sheet: **{match[0]}** as column: `{match[1]}`")
+            
+            if unmatched_columns:
+                st.warning("### ⚠️ **Missing Mandatory Columns:**")
+                for col in unmatched_columns:
+                    st.write(f"- **{col}** (not found in any sheet)")
+            else:
+                st.success("✅ All mandatory columns have been found across the sheets!")
+
             bar.progress(100)
-            st.success(translations["ok_upload"])
+        
         except Exception as e:
             st.error(f"Failed to process the uploaded file: {e}")
             bar.progress(0)

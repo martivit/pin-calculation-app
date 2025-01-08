@@ -97,7 +97,10 @@
     "success_start_school": "Le mois de la rentrée scolaire a été enregistré",
     "confirm_status": "Confirmer la colonne état/groupe de population",
     "success_status":"La colonne de déplacement a été enregistrée",
-    "last_confirm": "Finaliser et confirmer"
+    "last_confirm": "Finaliser et confirmer",
+    "missing_columns_error": "Colonnes obligatoires manquantes dans la feuille '{sheet_name}' : {columns}",
+    "no_valid_sheet": "Aucune feuille valide n'a été trouvée contenant toutes les colonnes obligatoires."
+
 
 
 

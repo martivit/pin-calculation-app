@@ -95,7 +95,9 @@
     "success_start_school": "School start month has been recorded",
     "confirm_status": "Confirm status/population-group column",
     "success_status":"Displacement column has been recorded.",
-    "last_confirm": "Finalize and Confirm"
+    "last_confirm": "Finalize and Confirm",
+    "missing_columns_error": "Missing mandatory columns in sheet '{sheet_name}': {columns}",
+    "no_valid_sheet": "No valid sheet was found containing all mandatory columns."
   }
   
   
