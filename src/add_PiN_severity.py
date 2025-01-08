@@ -414,10 +414,15 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     # Check if 'weights' column exists, if not, find and rename the correct weight column
     if 'weights' not in household_data.columns:
-        weight_column = [col for col in household_data.columns if 'weight' in col.lower()][0]  # Take the first matching weight column
-        household_data = household_data.rename(columns={weight_column: 'weights'})
+        weight_column = [col for col in household_data.columns if col.lower() in ['weight']][0]  
+             
+        if weight_column:
+            household_data = household_data.rename(columns={weight_column: 'weights'})
+        else:
+            print("--------------------------- No valid 'weight' column found. Creating a default 'weights' column with value 1.")
+            household_data['weights'] = 1
     else:
-        print("--------------------------- Weights column already exists.")
+        print("--------------------------- 'Weights' column already exists.")
 
     # Get the admin levels for the specified country
     admin_levels = admin_levels_per_country.get(country, [])
