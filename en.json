@@ -9,7 +9,7 @@
     "page1_country": "Which country do you want to calculate the PiN for?",
     "refresh":"MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page",
     "upload_msna": "Upload your input MSNA file.",
-    "wait": "This process may take some time; please wait a bit longer. 🐌🐌🐌🐌",
+    "wait": "This process may take some time;   please wait a bit longer. 🐌🐌🐌🐌",
     "ok_upload":"Data uploaded successfully!",
     "download_template_message": "\n<div style=\"background-color: #e6f7ff; padding: 10px; border-radius: 5px;\">\n    <p style=\"color: #00529B;\">\n        You can download the template and fill it with the population figures provided by OCHA.\n        Please ensure that you follow the template format.\n    </p>\n    <p style=\"color: red; margin-top: 0;\">\n        YELLOW COLUMNS ARE MANDATORY\n    </p>\n</div>",
     "template": "Download OCHA Population Data Template",
