@@ -16,9 +16,9 @@ translations = st.session_state.translations
 st.title(translations["title_page2"])
 
 
-if 'password_correct' not in st.session_state:
-    st.error(translations["no_user"])
-    st.stop()
+#if 'password_correct' not in st.session_state:
+    #st.error(translations["no_user"])
+    #st.stop()
 
 if 'current_step' not in st.session_state:
     st.session_state['current_step'] = 0

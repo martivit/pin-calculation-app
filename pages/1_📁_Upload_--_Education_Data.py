@@ -3,6 +3,7 @@ import pandas as pd
 import time
 from shared_utils import language_selector
 from fuzzywuzzy import process, fuzz
+import numpy as np
 
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
@@ -36,9 +37,9 @@ def check_conditions_and_proceed():
     if st.session_state.get('ready_to_proceed', False):
         st.success("You have completed all necessary steps!")
 
-if 'password_correct' not in st.session_state:
-    st.error(translations["no_user"])
-    st.stop()
+#if 'password_correct' not in st.session_state:
+    #st.error(translations["no_user"])
+    #st.stop()
 
 
 # Country selection setup
@@ -59,15 +60,15 @@ st.session_state['country'] = selected_country
 
 REQUIRED_COLUMNS = {
     'uuid': {'uuid', '_uuid', 'uuid_X'},
-    'ind_gender': {'ind_gender', 'edu_gender', 'ind_sex', 'sne_enfant_ind_genre', 'sex','edu_sex', 'edu_ind_sex', 'gender_member', 'genre'},
-    'ind_age': {'ind_age', 'age', 'edu_age', 'edu_ind_age', 'age'},
+    'individual gender': {'ind_gender', 'edu_gender', 'ind_sex', 'sne_enfant_ind_genre', 'sex','edu_sex', 'edu_ind_sex', 'gender_member', 'genre'},
+    'individual age': {'ind_age', 'age', 'edu_age', 'edu_ind_age', 'age'},
     'admin': {'admin1', 'admin2', 'admin3', 'camp', 'state', 'county', 'district'},
-    'access': {'edu_access', 'enrolled_school'},
-    'teacher':{'edu_disrupted_teacher'},
-    'hazard':{'edu_disrupted_hazards'},
-    'displaced':{'edu_disrupted_displaced'},
-    'barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel'},
-    'start': {'start', 'date'}
+    'edu access': {'edu_access', 'enrolled_school'},
+    'distruption teacher':{'edu_disrupted_teacher', 'teacher'},
+    'distruption hazard':{'edu_disrupted_hazards', 'hazard'},
+    'distruption displaced':{'edu_disrupted_displaced', 'distrupted_idp'},
+    'edu barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel'},
+    'survey start': {'start', 'date'}
 }
 FUZZY_THRESHOLD = 90  # Match similarity percentage (higher = stricter)
 
@@ -193,11 +194,20 @@ def perform_ocha_data_checks(ocha_data):
     if missing_columns:
         return f"Missing mandatory columns: {', '.join(missing_columns)}"
 
-    # Prepare the data by replacing NaN with 0 and rounding to the nearest whole number
-    filled_ocha_data = ocha_data.fillna(0)
+
 
     # Prepare to collect error messages
     errors = []
+
+     # Check if columns contain non-empty values
+    for col in mandatory_columns:
+        if ocha_data[col].isnull().all():  # If all values are NaN
+            errors.append(f"Column '{col}' is empty.")
+        elif ocha_data[col].isnull().sum() > 0:  # If some values are NaN
+            errors.append(f"Column '{col}' contains missing values.")
+
+    # Prepare the data by replacing NaN with 0 and rounding to the nearest whole number
+    filled_ocha_data = ocha_data.fillna(0)
 
     # Check if the sum of values matches for specified columns
     for index, row in filled_ocha_data.iterrows():
@@ -234,11 +244,16 @@ if 'uploaded_data' in st.session_state:
         if 'uploaded_ocha_data' in st.session_state and 'ocha_mismatch_data' in st.session_state:
             ocha_data = st.session_state['uploaded_ocha_data']
             ocha_mismatch_data = st.session_state['ocha_mismatch_data']
-            
+
+            second_row = ocha_mismatch_data.iloc[1]
+            non_empty_count = second_row.iloc[:3].astype(str).str.strip().replace("", pd.NA).notna().sum()
+
+            scope_fix = non_empty_count >= 2           
             st.write(translations["ok_upload"])
             st.write("OCHA Data Preview:")
             st.dataframe(ocha_data.head())  # Show a preview of the 'ocha' sheet data
             
+
             st.write("Scope-Fix Data Preview:")
             st.dataframe(ocha_mismatch_data.head())  # Show a preview of the 'scope-fix' sheet data
         else:
@@ -257,6 +272,22 @@ if 'uploaded_data' in st.session_state:
                         # Store the sheets in session state
                         st.session_state['uploaded_ocha_data'] = ocha_data
                         st.session_state['ocha_mismatch_data'] = ocha_mismatch_data
+
+                        df = pd.DataFrame(ocha_mismatch_data)
+                        # Replace all non-NaN/non-None values in the second row with 1
+                        for col in df.columns:
+                            if pd.notna(df.at[0, col]) and df.at[0, col] != '':
+                                df.at[0, col] = 1
+                            else:
+                                df.at[0, col] = np.nan
+
+                        st.dataframe(df) 
+                        second_row = df.iloc[0]
+
+                        non_empty_count = second_row.notna().sum()
+                        scope_fix = non_empty_count >= 2
+                        st.session_state['scope_fix'] = scope_fix
+
                         
                         st.success(translations["ok_upload"])
                     else:
@@ -272,6 +303,13 @@ check_conditions_and_proceed()
 
 col1, col2 = st.columns([0.60, 0.40])
 label_text = st.session_state.translations["proceed_to_calculation_label"]
+
+scope_test = st.session_state.get('scope_fix')
+
+if scope_test:
+    st.write("Scope-Fix sheet contains data!")
+else:
+    st.write("Scope-Fix sheet is empty!")
 
 with col2: 
     st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')

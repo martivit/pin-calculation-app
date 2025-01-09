@@ -26,9 +26,9 @@ language_selector()
 translations = st.session_state.translations
 selected_language = st.session_state.get('selected_language', 'English')
 
-if 'password_correct' not in st.session_state:
-    st.error(translations["no_user"])
-    st.stop()
+#if 'password_correct' not in st.session_state:
+    #st.error(translations["no_user"])
+    #st.stop()
 
 if 'uploaded_data' not in st.session_state:
     st.warning(translations["no_data"])  
