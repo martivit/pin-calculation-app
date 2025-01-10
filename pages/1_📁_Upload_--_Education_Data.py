@@ -127,6 +127,7 @@ def validate_columns_across_sheets(all_sheets):
 if 'uploaded_data' in st.session_state:
     data = st.session_state['uploaded_data']
     st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
+    
 else:
     # MSNA data uploader
     uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
@@ -150,13 +151,14 @@ else:
             #for key, match in column_matches.items():
                 #if match:
                     #st.write(f"- **{key}** → Found in sheet: **{match[0]}** as column: `{match[1]}`")
-            
+
             if unmatched_columns:
-                st.warning("### ⚠️ **Missing Mandatory Columns:**")
+                st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
                 for col in unmatched_columns:
-                    st.write(f"- **{col}** (not found in any sheet)")
+                    st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
             else:
-                st.success("✅ All mandatory columns have been found across the sheets!")
+                st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+
 
             bar.progress(100)
         
@@ -286,7 +288,8 @@ if 'uploaded_data' in st.session_state:
 
                         non_empty_count = second_row.notna().sum()
                         scope_fix = non_empty_count >= 2
-                        st.session_state['scope_fix'] = scope_fix
+                        if scope_fix:
+                            st.session_state['scope_fix'] = True
 
                         
                         st.success(translations["ok_upload"])

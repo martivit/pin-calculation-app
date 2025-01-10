@@ -545,20 +545,34 @@ def finalize_details():
         st.markdown(
             f"""
             <div style="font-size:18px; font-weight:bold;">
-                {translations['mismatch_admin_message']}
+                {translations['mismatch_admin_message']}<br>
+                <span style="color:darkred;">{translations['mismatch_admin_example']}</span>
             </div>
             """, unsafe_allow_html=True
         )
+        scope_fix = st.session_state.get('scope_fix', False)
 
         # Display a simple checkbox below the message
         mismatch_admin_checkbox = st.checkbox(translations['check_box'])
+        if mismatch_admin_checkbox:
+                        if not scope_fix:
+                            st.error(
+                                f"### {translations['scope_fix_empty_error_title']}"
+                                f"\n\n{translations['scope_fix_empty_error_message']}"
+                                f"\n\n⚠️ **{translations['scope_fix_warning']}**"
+                                )
+
         
         if st.button(translations["confirm_admin"], key='confirm_admin_level'):
             if admin_target != 'No selection':
                 st.session_state['admin_var'] = admin_target
                 st.session_state.admin_level_confirmed = True
                 if mismatch_admin_checkbox:
-                    st.session_state['mismatch_admin'] = True
+                    if scope_fix:
+                        st.session_state['mismatch_admin'] = True
+                    else:
+                        st.session_state['mismatch_admin'] = False
+
                 success_message_admin=  translations["success_admin"].format(admin_target=admin_target)
     
                 st.success(success_message_admin)
@@ -566,6 +580,7 @@ def finalize_details():
                 st.error("Please select a valid administrative level.")
 
 
+        st.markdown("---")  # Markdown horizontal rule
 
 
         months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 

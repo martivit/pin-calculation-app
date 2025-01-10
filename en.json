@@ -60,7 +60,7 @@
     "disaggregation_variables_html": "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px;'><span style='color: #014bb4;'><strong>Proceed to the next step:</strong></span><span style='color: #014bb4; font-style: italic; font-size: 20px;'>Define disaggregation variables</span></div>",
     "barriers_warning_message": "Please return to the previous step and first select the correct variable referring to barriers to access education.",
     "choose_disaggregation_variables_subheader": "Choose the correct disaggregation variables and their values",
-    "smallest_admin_level": "What is the unit of analysis of the **{selected_country}** HNO? <span style='color: darkred; font-weight: bold;'>Please ensure that the selected administrative level corresponds to the same administrative level as that of the OCHA population data.</span>",
+    "smallest_admin_level": "What is the unit of analysis of the **{selected_country}** HNO? <span style='color: darkred; font-weight: bold;'>Please choose the administrative level (e.g., Admin 1, Admin 2) that defines the scope of analysis for the HNO. Ensure that the selected level matches the administrative level used in the OCHA population data file to maintain consistency in the calculations.</span>",
     "start_message": "When does the school year officially start? Needed for the estimate of the correct age",
     "school1": "Which is the age range for the lower primary school cycle?",
     "school2": "There is only one cycle of primary, followed by secondary school",
@@ -78,7 +78,6 @@
     "download_word": "Download Country Snapshot: Children in Need Profile and Overview of Needs",
     "no_armed_disruption_indicator": "The indicator **% of children whose access to education was disrupted due to the school being occupied by armed groups** was NOT collected in this context",
     "no_ocha_data" : "OCHA data are not available",
-    "mismatch_admin_message":  "There is a mismatch between the OCHA unit of analysis and the administrative level at which the MSNA is representative. If this box is checked, ensure that the OCHA file contains the list of mismatched administrative units in the 'scope-fix' sheet. Please refer to the template for guidance.",
     "check_box":"Click if there is a mismatch",
     "yes_natural_hazard_disruption_indicator": "The indicator **% of children whose access to education was disrupted due to natural hazard** is considered an additional indicator contributing to the Learning Environment PiN dimension",
     "confirm_1": "Confirm selection",
@@ -97,8 +96,26 @@
     "success_status":"Displacement column has been recorded.",
     "last_confirm": "Finalize and Confirm",
     "missing_columns_error": "Missing mandatory columns in sheet '{sheet_name}': {columns}",
-    "no_valid_sheet": "No valid sheet was found containing all mandatory columns."
+    "no_valid_sheet": "No valid sheet was found containing all mandatory columns.",
+    "missing_mandatory_columns": "⚠️ Mandatory columns are missing.",
+    "not_found_in_sheet": "(not found in any sheet)",
+    "all_mandatory_columns_found": "All mandatory columns have been found across the sheets!",
+    "scope_fix_empty_error_title": "The 'scope-fix' sheet in the OCHA population figures file is empty.",
+    "scope_fix_empty_error_message": "This may have occurred due to an error or because this box was incorrectly ticked. If there is no mismatch between the representativeness of the assessment and the HNO's unit of analysis, you can safely untick this box. However, if a mismatch exists, please ensure the 'scope-fix' sheet is correctly filled to reflect the required adjustments for the HNO unit of analysis.",
+    "scope_fix_warning": "Ticking this box indicates there is a mismatch between the level of representativeness of the assessment and the unit of analysis for the HNO. Please verify your data and selections carefully to avoid errors in the calculation.",
+    "mismatch_admin_message": "There may be a mismatch between the HNO unit of analysis and the administrative level at which the MSNA is representative.",
+    "mismatch_admin_example": "For example, the MSNA data might be representative at Admin 2, while the HNO unit of analysis is Admin 3.<br>If you click this box, you are confirming that such a mismatch exists. In this case, ensure that the 'scope-fix' sheet in the OCHA file lists the mismatched administrative units and their corresponding levels. Refer to the provided template for guidance on how to correctly fill the 'scope-fix' sheet."
+
+
+
+
+
+
+
+
+
   }
+  
   
   
 
