@@ -13,6 +13,10 @@ from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from shared_utils import language_selector
 #from github import Github
+import requests
+import base64
+
+
 
 
 #from translate_PiN import translate_excel_sheets_with_formatting
@@ -42,7 +46,7 @@ github_token = st.secrets["github"]["token"]
 
 def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
     """
-    Uploads a file to a GitHub repository.
+    Uploads a file to a GitHub repository using the GitHub REST API.
 
     :param file_content: The binary content of the file to be uploaded.
     :param file_name: The path in the repository where the file should be uploaded.
@@ -51,28 +55,48 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
     :param commit_message: The commit message for the file upload.
     :param token: GitHub Personal Access Token.
     """
-    token = "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"
-    g = Github(token)
-    repo = g.get_repo(repo_name)
+    # GitHub API base URL
+    api_url = f"https://api.github.com/repos/{repo_name}/contents/{file_name}"
 
-    try:
-        # Get the file from the repository if it exists
-        contents = repo.get_contents(file_name, ref=branch_name)
-        repo.update_file(contents.path, commit_message, file_content, contents.sha, branch=branch_name)
-    except Exception as e:
-        # If the file does not exist, create it
-        repo.create_file(file_name, commit_message, file_content, branch=branch_name)
+    # Encode the file content to Base64
+    encoded_content = base64.b64encode(file_content).decode('utf-8')
 
-    # Create a pull request
-    base_branch = repo.default_branch  # Typically 'main' or 'master'
-    pr = repo.create_pull(
-        title=f"Add {file_name}",
-        body="Automatically uploaded by Streamlit app.",
-        head=branch_name,
-        base=base_branch
-    )
-    return pr.html_url
+    # Headers with the GitHub token
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
 
+    # Check if the file already exists
+    response = requests.get(api_url, headers=headers)
+    if response.status_code == 200:
+        # File exists, update it
+        sha = response.json()["sha"]
+        data = {
+            "message": commit_message,
+            "content": encoded_content,
+            "sha": sha,
+            "branch": branch_name
+        }
+        response = requests.put(api_url, headers=headers, json=data)
+    elif response.status_code == 404:
+        # File does not exist, create it
+        data = {
+            "message": commit_message,
+            "content": encoded_content,
+            "branch": branch_name
+        }
+        response = requests.put(api_url, headers=headers, json=data)
+    else:
+        # Some other error
+        raise Exception(f"Failed to check file existence: {response.status_code} {response.text}")
+
+    # Handle response
+    if response.status_code in [200, 201]:
+        # Successful creation or update
+        return response.json()["html_url"]
+    else:
+        raise Exception(f"Failed to upload file: {response.status_code} {response.text}")
 
 
 
@@ -187,15 +211,14 @@ if ocha_data is not None:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     ):
         
-        # Prepare the GitHub upload
-        repo_name = "martivit/pin-calculation-app"
-        branch_name = "develop_2025"  # Create or use an existing branch
-        commit_message = f"Add PiN results for {country_label}"
-        file_path_in_repo = f"platform_PiN_output/PiN_results_{country_label}.xlsx"
-        github_token = st.secrets["github"]["token"]
-
         # Upload to GitHub
         try:
+            repo_name = "martivit/pin-calculation-app"
+            branch_name = "develop_2025"
+            commit_message = f"Add PiN results for {country_label}"
+            file_path_in_repo = f"platform_PiN_output/PiN_results_{country_label}.xlsx"
+            github_token = st.secrets["github"]["token"]
+
             pr_url = upload_to_github(
                 file_content=ocha_excel.getvalue(),
                 file_name=file_path_in_repo,
@@ -204,7 +227,7 @@ if ocha_data is not None:
                 commit_message=commit_message,
                 token=github_token
             )
-            st.success(f"File uploaded to GitHub successfully! [View Pull Request]({pr_url})")
+            st.success(f"File uploaded to GitHub successfully! [View File]({pr_url})")
         except Exception as e:
             st.error(f"Failed to upload to GitHub: {e}")
 
