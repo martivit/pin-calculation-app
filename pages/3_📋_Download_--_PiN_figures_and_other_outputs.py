@@ -37,7 +37,7 @@ if 'uploaded_data' not in st.session_state:
     st.stop()
 
 
-github_token = st.secrets["github"]["token"]
+#github_token = st.secrets["github"]["token"]
 
 def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
     """
