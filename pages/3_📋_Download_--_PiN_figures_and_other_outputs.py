@@ -210,7 +210,30 @@ if ocha_data is not None:
         file_name=f"PiN_results_{country_label}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     ):
-        
+        st.write("Checking GitHub token...")
+        if "github" in st.secrets and "token" in st.secrets["github"]:
+            github_token = st.secrets["github"]["token"]
+            st.write("GitHub token retrieved successfully.")
+            st.write(f"Token starts with: {github_token}...")  # Display only part of the token for security
+        else:
+            st.error("GitHub token not found in secrets.")
+
+        headers = {
+            "Authorization": f"Bearer {github_token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+
+        response = requests.get("https://api.github.com/user", headers=headers)
+
+        if response.status_code == 200:
+            st.write("Token is valid!")
+            st.json(response.json())  # Display user details
+        else:
+            st.error(f"Token is invalid. Status code: {response.status_code}. Response: {response.text}")
+
+
+
+
         # Upload to GitHub
         try:
             repo_name = "martivit/pin-calculation-app"
