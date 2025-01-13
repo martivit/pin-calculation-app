@@ -12,7 +12,7 @@ from src.vizualize_PiN import create_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from shared_utils import language_selector
-from github import Github
+#from github import Github
 
 
 #from translate_PiN import translate_excel_sheets_with_formatting
@@ -51,6 +51,7 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
     :param commit_message: The commit message for the file upload.
     :param token: GitHub Personal Access Token.
     """
+    token = "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"
     g = Github(token)
     repo = g.get_repo(repo_name)
 
