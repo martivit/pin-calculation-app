@@ -1,2 +1,3 @@
 output_validation/
 to_be_ingnored_checked/
+.streamlit/secret.toml

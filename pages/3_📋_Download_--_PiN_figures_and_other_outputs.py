@@ -37,7 +37,7 @@ if 'uploaded_data' not in st.session_state:
     st.stop()
 
 
-#github_token = st.secrets["github"]["token"]
+github_token = st.secrets["github"]["token"]
 
 def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
     """
@@ -190,7 +190,7 @@ if ocha_data is not None:
         branch_name = "develop_2025"  # Create or use an existing branch
         commit_message = f"Add PiN results for {country_label}"
         file_path_in_repo = f"platform_PiN_output/PiN_results_{country_label}.xlsx"
-        github_token = st.secrets["github_token"]
+        github_token = st.secrets["github"]["token"]
 
         # Upload to GitHub
         try:
