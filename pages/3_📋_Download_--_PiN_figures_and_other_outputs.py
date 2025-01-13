@@ -12,6 +12,8 @@ from src.vizualize_PiN import create_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from shared_utils import language_selector
+from github import Github
+
 #from translate_PiN import translate_excel_sheets_with_formatting
 
 
@@ -33,6 +35,54 @@ selected_language = st.session_state.get('selected_language', 'English')
 if 'uploaded_data' not in st.session_state:
     st.warning(translations["no_data"])  
     st.stop()
+
+
+github_token = st.secrets["github"]["token"]
+
+def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
+    """
+    Uploads a file to a GitHub repository.
+
+    :param file_content: The binary content of the file to be uploaded.
+    :param file_name: The path in the repository where the file should be uploaded.
+    :param repo_name: The full name of the repository (e.g., "username/repo").
+    :param branch_name: The branch to push changes to.
+    :param commit_message: The commit message for the file upload.
+    :param token: GitHub Personal Access Token.
+    """
+    g = Github(token)
+    repo = g.get_repo(repo_name)
+
+    try:
+        # Get the file from the repository if it exists
+        contents = repo.get_contents(file_name, ref=branch_name)
+        repo.update_file(contents.path, commit_message, file_content, contents.sha, branch=branch_name)
+    except Exception as e:
+        # If the file does not exist, create it
+        repo.create_file(file_name, commit_message, file_content, branch=branch_name)
+
+    # Create a pull request
+    base_branch = repo.default_branch  # Typically 'main' or 'master'
+    pr = repo.create_pull(
+        title=f"Add {file_name}",
+        body="Automatically uploaded by Streamlit app.",
+        head=branch_name,
+        base=base_branch
+    )
+    return pr.html_url
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## ====================================================================================================
 ## ===================================== calculate and download the PiN
@@ -128,12 +178,41 @@ if ocha_data is not None:
     if selected_language == "French":
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
 
-    st.download_button(
+    if st.download_button(
         label=translations["download_pin"],
         data=ocha_excel.getvalue(),
         file_name=f"PiN_results_{country_label}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    ):
+        
+        # Prepare the GitHub upload
+        repo_name = "martivit/pin-calculation-app"
+        branch_name = "develop_2025"  # Create or use an existing branch
+        commit_message = f"Add PiN results for {country_label}"
+        file_path_in_repo = f"platform_PiN_output/PiN_results_{country_label}.xlsx"
+        github_token = st.secrets["github_token"]
+
+        # Upload to GitHub
+        try:
+            pr_url = upload_to_github(
+                file_content=ocha_excel.getvalue(),
+                file_name=file_path_in_repo,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=commit_message,
+                token=github_token
+            )
+            st.success(f"File uploaded to GitHub successfully! [View Pull Request]({pr_url})")
+        except Exception as e:
+            st.error(f"Failed to upload to GitHub: {e}")
+
+
+
+
+
+
+
+
     st.download_button(
         label=translations["download_word"],
         data=doc_output.getvalue(),
