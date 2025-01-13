@@ -226,10 +226,10 @@ if ocha_data is not None:
         response = requests.get("https://api.github.com/user", headers=headers)
 
         if response.status_code == 200:
-            st.write("Token is valid!")
+            st.write("---> Token is valid!")
             st.json(response.json())  # Display user details
         else:
-            st.error(f"Token is invalid. Status code: {response.status_code}. Response: {response.text}")
+            st.error(f"---> Token is invalid. Status code: {response.status_code}. Response: {response.text}")
 
 
 
