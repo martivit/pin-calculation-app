@@ -15,6 +15,8 @@ from shared_utils import language_selector
 #from github import Github
 import requests
 import base64
+from datetime import datetime
+
 
 
 
@@ -210,28 +212,29 @@ if ocha_data is not None:
         file_name=f"PiN_results_{country_label}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     ):
-        st.write("Checking GitHub token...")
-        if "github" in st.secrets and "token" in st.secrets["github"]:
-            github_token = st.secrets["github"]["token"]
-            st.write("GitHub token retrieved successfully.")
-            st.write(f"Token starts with: {github_token}...")  # Display only part of the token for security
-        else:
-            st.error("GitHub token not found in secrets.")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        headers = {
-            "Authorization": f"Bearer {github_token}",
-            "Accept": "application/vnd.github.v3+json"
-        }
+        
+        #st.write("Checking GitHub token...")
+        #if "github" in st.secrets and "token" in st.secrets["github"]:
+            #github_token = st.secrets["github"]["token"]
+            #st.write("GitHub token retrieved successfully.")
+            #st.write(f"Token starts with: {github_token}...")  # Display only part of the token for security
+        #else:
+            #st.error("GitHub token not found in secrets.")
 
-        response = requests.get("https://api.github.com/user", headers=headers)
+        #headers = {
+            #"Authorization": f"Bearer {github_token}",
+            #"Accept": "application/vnd.github.v3+json"
+        #}
 
-        if response.status_code == 200:
-            st.write("---> Token is valid!")
-            st.json(response.json())  # Display user details
-        else:
-            st.error(f"---> Token is invalid. Status code: {response.status_code}. Response: {response.text}")
+        #response = requests.get("https://api.github.com/user", headers=headers)
 
-
+        #if response.status_code == 200:
+            #st.write("---> Token is valid!")
+            #st.json(response.json())  # Display user details
+        #else:
+            #st.error(f"---> Token is invalid. Status code: {response.status_code}. Response: {response.text}")
 
 
         # Upload to GitHub
@@ -239,7 +242,7 @@ if ocha_data is not None:
             repo_name = "martivit/pin-calculation-app"
             branch_name = "develop_2025"
             commit_message = f"Add PiN results for {country_label}"
-            file_path_in_repo = f"platform_PiN_output/testPiN_results_testtes{country_label}.xlsx"
+            file_path_in_repo = f"platform_PiN_output/{country}/PiN_results_testtes{country}_{timestamp}.xlsx"
             github_token = st.secrets["github"]["token"]
             #github_token = "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"
 
