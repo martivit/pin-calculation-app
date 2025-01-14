@@ -46,22 +46,14 @@ github_token = st.secrets["github"]["token"]
 
 def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
     """
-    Uploads a file to a GitHub repository using the GitHub REST API.
-
-    :param file_content: The binary content of the file to be uploaded.
-    :param file_name: The path in the repository where the file should be uploaded.
-    :param repo_name: The full name of the repository (e.g., "username/repo").
-    :param branch_name: The branch to push changes to.
-    :param commit_message: The commit message for the file upload.
-    :param token: GitHub Personal Access Token.
+    Uploads a file to GitHub using the REST API.
     """
-    # GitHub API base URL
     api_url = f"https://api.github.com/repos/{repo_name}/contents/{file_name}"
 
-    # Encode the file content to Base64
-    encoded_content = base64.b64encode(file_content).decode('utf-8')
+    # Encode the file content
+    encoded_content = base64.b64encode(file_content).decode("utf-8")
 
-    # Headers with the GitHub token
+    # Headers
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
@@ -70,34 +62,28 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
     # Check if the file already exists
     response = requests.get(api_url, headers=headers)
     if response.status_code == 200:
-        # File exists, update it
-        sha = response.json()["sha"]
+        sha = response.json()["sha"]  # Get the file's SHA to update it
         data = {
             "message": commit_message,
             "content": encoded_content,
             "sha": sha,
             "branch": branch_name
         }
-        response = requests.put(api_url, headers=headers, json=data)
-    elif response.status_code == 404:
-        # File does not exist, create it
+    else:
         data = {
             "message": commit_message,
             "content": encoded_content,
             "branch": branch_name
         }
-        response = requests.put(api_url, headers=headers, json=data)
-    else:
-        # Some other error
-        raise Exception(f"Failed to check file existence: {response.status_code} {response.text}")
 
-    # Handle response
+    # Upload the file
+    response = requests.put(api_url, headers=headers, json=data)
+
+    # Confirm success based on the status code
     if response.status_code in [200, 201]:
-        # Successful creation or update
-        return response.json()["html_url"]
+        return f"File uploaded successfully with status {response.status_code}."
     else:
         raise Exception(f"Failed to upload file: {response.status_code} {response.text}")
-
 
 
 
@@ -239,7 +225,7 @@ if ocha_data is not None:
             repo_name = "martivit/pin-calculation-app"
             branch_name = "develop_2025"
             commit_message = f"Add PiN results for {country_label}"
-            file_path_in_repo = f"platform_PiN_output/testPiN_results_{country_label}.xlsx"
+            file_path_in_repo = f"platform_PiN_output/testPiN_results3_{country_label}.xlsx"
             github_token = st.secrets["github"]["token"]
             #github_token = "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"
 
