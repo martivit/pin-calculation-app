@@ -263,10 +263,6 @@ if ocha_data is not None:
 
 
 
-
-
-
-
     if st.download_button(
         label=translations["download_word"],
         data=doc_output.getvalue(),
@@ -291,9 +287,9 @@ if ocha_data is not None:
                 token=github_token
             )
             st.success(f"File uploaded to GitHub successfully! [View File]({pr_url})")
-        except Exception:
-            pass  # Silently ignore the error
-            #st.error(f"Failed to upload to GitHub: {e}")
+        except Exception as e:
+            #pass  # Silently ignore the error
+            st.error(f"Failed to upload to GitHub: {e}")
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
 
