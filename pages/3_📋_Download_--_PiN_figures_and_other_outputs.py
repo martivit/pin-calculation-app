@@ -243,7 +243,6 @@ if ocha_data is not None:
             branch_name = "develop_2025"
             commit_message = f"Add PiN results for {country_label}"
             file_path_in_repo = f"platform_PiN_output/{country}/PiN_results_{country}_{timestamp}.xlsx"
-            file_path_doxc_in_repo = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
 
             github_token = st.secrets["github"]["token"]
             #github_token = "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"
@@ -251,14 +250,6 @@ if ocha_data is not None:
             pr_url = upload_to_github(
                 file_content=ocha_excel.getvalue(),
                 file_name=file_path_in_repo,
-                repo_name=repo_name,
-                branch_name=branch_name,
-                commit_message=commit_message,
-                token=github_token
-            )
-            pr_url_docx = upload_to_github(
-                file_content=doc_output.getvalue(),
-                file_name=file_path_doxc_in_repo,
                 repo_name=repo_name,
                 branch_name=branch_name,
                 commit_message=commit_message,
