@@ -276,12 +276,33 @@ if ocha_data is not None:
 
 
 
-    st.download_button(
+    if st.download_button(
         label=translations["download_word"],
         data=doc_output.getvalue(),
         file_name=f"PiN_snapshot_{country_label}.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
+    ):
+        try:
+            repo_name = "martivit/pin-calculation-app"
+            branch_name = "develop_2025"
+            commit_message = f"Add PiN results for {country_label}"
+            file_path_in_repo = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
+
+            github_token = st.secrets["github"]["token"]
+            #github_token = "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"
+
+            pr_url = upload_to_github(
+                file_content=doc_output.getvalue(),
+                file_name=file_path_in_repo,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=commit_message,
+                token=github_token
+            )
+            st.success(f"File uploaded to GitHub successfully! [View File]({pr_url})")
+        except Exception:
+            pass  # Silently ignore the error
+            #st.error(f"Failed to upload to GitHub: {e}")
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
 
