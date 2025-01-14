@@ -269,6 +269,7 @@ if ocha_data is not None:
         file_name=f"PiN_snapshot_{country_label}.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         try:
             repo_name = "martivit/pin-calculation-app"
             branch_name = "develop_2025"
