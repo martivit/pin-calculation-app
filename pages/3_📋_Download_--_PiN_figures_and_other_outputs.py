@@ -285,7 +285,7 @@ if ocha_data is not None:
         try:
             repo_name = "martivit/pin-calculation-app"
             branch_name = "develop_2025"
-            commit_message = f"Add PiN results for {country_label}"
+            commit_message = f"Add PiN snapshot for {country_label}"
             file_path_in_repo = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
 
             github_token = st.secrets["github"]["token"]
