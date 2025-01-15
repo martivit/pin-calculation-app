@@ -76,6 +76,8 @@ def generate_parameters(st_session_state):
 
 
 
+
+
 def generate_word_document(parameters):
     # Initialize the Word document
     doc = docx.Document()
