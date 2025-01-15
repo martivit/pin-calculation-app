@@ -177,7 +177,7 @@ parameters = {
             "details2": natural_hazard_var,
         },
         "severity_level_4": {
-            "description": "In-school children whose education disrupted due to: or OoS facing the following aggravating circumstances.",
+            "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
             "details1": idp_disruption_var,  # Pass displacement-related disruption indicator here
             "examples": selected_severity_4_barriers,  # Specific examples for severity level 4
         },

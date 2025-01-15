@@ -73,16 +73,24 @@ def generate_word_document(parameters):
             if "details1" in details and "details2" in details:
                 detail_1 = details["details1"]
                 detail_2 = details["details2"]
-                description += f" {detail_1} and {detail_2}."
-                severity_paragraph.add_run(description)
+                detail_run1 = severity_paragraph.add_run(detail_1)
+                detail_run1.bold = True
+                severity_paragraph.add_run(" and ")
+                detail_run2 = severity_paragraph.add_run(detail_2)
+                detail_run2.bold = True
+                severity_paragraph.add_run(".")
 
         # Handle Severity Levels 4 and 5 with one detail
         elif level in ["severity_level_4", "severity_level_5"]:
             description = details["description"]
+            description_parts = description.split("due to")
+            severity_paragraph.add_run(description_parts[0] + "due to ")
             if "details1" in details:
                 detail_1 = details["details1"]
-                description = description.replace("due to", f"due to {detail_1}")
-            severity_paragraph.add_run(description)
+                detail_run = severity_paragraph.add_run(detail_1)
+                detail_run.bold = True
+            if len(description_parts) > 1:
+                severity_paragraph.add_run(description_parts[1])
 
         # Add examples as sub-bullets
         if "examples" in details:
