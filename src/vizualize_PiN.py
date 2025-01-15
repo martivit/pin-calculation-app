@@ -403,7 +403,7 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
                 for key, value in parameters["general_info"].items()
             ] + [
                 {"Category": "MSNA Indicators", "Key": key, "Value": str(value)}
-                for key, value in parameters["msna indicators per PiN dimension"].items()
+                for key, value in parameters["msna_indicators_per_PiN_dimension"].items()
             ] + [
                 {"Category": "Severity Classification", "Key": key, "Value": str(value)}
                 for key, value in parameters["severity_classification"].items()

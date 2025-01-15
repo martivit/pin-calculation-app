@@ -35,7 +35,7 @@ def generate_parameters(st_session_state):
             "country": st_session_state.get('country'),
             "date_calculation": datetime.now().strftime("%d/%m/%Y %H:%M")  # Today's date with hour and minute
         },
-        "msna indicators per PiN dimension": {
+        "msna_indicators_per_PiN_dimension": {
             "access": st_session_state.get('access_var'),
             "learning condition": {
                 "Education disrupted due to teacher absences": st_session_state.get('teacher_disruption_var'),
@@ -92,7 +92,7 @@ def generate_word_document(parameters):
     # Add MSNA Indicators
     # Add MSNA Indicators
     doc.add_heading('MSNA indicators/variables by dimension', level=2)
-    msna_indicators = parameters["msna indicators per PiN dimension"]
+    msna_indicators = parameters["msna_indicators_per_PiN_dimension"]
     for category, indicators in msna_indicators.items():
         if isinstance(indicators, dict):  # Nested categories
             # Main bullet for the category with bold formatting
