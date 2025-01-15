@@ -35,38 +35,38 @@ def generate_parameters(st_session_state):
             "country": st_session_state.get('country'),
             "date_calculation": datetime.now().strftime("%d/%m/%Y %H:%M")  # Today's date with hour and minute
         },
-        "msna_indicators": {
+        "msna indicators per PiN dimension": {
             "access": st_session_state.get('access_var'),
-            "learning_condition": {
+            "learning condition": {
                 "Education disrupted due to teacher absences": st_session_state.get('teacher_disruption_var'),
                 "Education disrupted due to natural hazard": st_session_state.get('natural_hazard_disruption_var'),
             },
-            "protected_environment": {
+            "protected environment": {
                 "Education disrupted due to school being used as IDP shelter": st_session_state.get('idp_disruption_var'),
                 "Education disrupted due to school being occupied by armed groups": st_session_state.get('armed_disruption_var'),
             },
             "aggravating_circumstances": st_session_state.get('barrier_var'),
         },
         "severity_classification": {
-            "severity_level_3": {
+            "severity level 3": {
                 "description": "OoS children who do NOT endure aggravating circumstances or in-school children whose education was disrupted due to:",
-                "details1": st_session_state.get('teacher_disruption_var'),
-                "details2": st_session_state.get('natural_hazard_disruption_var'),
+                "ind1 in-school": st_session_state.get('teacher_disruption_var'),
+                "ind2 in-school": st_session_state.get('natural_hazard_disruption_var'),
             },
-            "severity_level_4": {
+            "severity level 4": {
                 "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
-                "details1": st_session_state.get('idp_disruption_var'),
-                "examples": st_session_state.get('selected_severity_4_barriers', []),
+                "ind in-school": st_session_state.get('idp_disruption_var'),
+                "aggravating circumstances": st_session_state.get('selected_severity_4_barriers', []),
             },
-            "severity_level_5": {
+            "severity level 5": {
                 "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
-                "details1": st_session_state.get('armed_disruption_var'),
-                "examples": st_session_state.get('selected_severity_5_barriers', []),
+                "ind in-school": st_session_state.get('armed_disruption_var'),
+                "aggravating circumstances": st_session_state.get('selected_severity_5_barriers', []),
             },
         },
         "admin_unit": {
-            "unit_of_analysis": st_session_state.get('admin_var'),
-            "mismatch_admin": st_session_state.get('mismatch_admin', False),
+            "HNO unit of analysis": st_session_state.get('admin_var'),
+            "mismatch admin": st_session_state.get('mismatch_admin', False),
         },
         "school_cycles": {
             "age_ranges": st_session_state.get('vector_cycle'),  # Age groups for educational cycles
@@ -90,7 +90,7 @@ def generate_word_document(parameters):
     # Add MSNA Indicators
     # Add MSNA Indicators
     doc.add_heading('MSNA indicators/variables by dimension', level=2)
-    msna_indicators = parameters["msna_indicators"]
+    msna_indicators = parameters["msna indicators per PiN dimension"]
     for category, indicators in msna_indicators.items():
         if isinstance(indicators, dict):  # Nested categories
             # Main bullet for the category with bold formatting
@@ -114,9 +114,9 @@ def generate_word_document(parameters):
     for level, details in severity_classification.items():
         # Define colors for severity levels
         color_map = {
-            "severity_level_3": RGBColor(255, 165, 0),  # Light orange
-            "severity_level_4": RGBColor(255, 140, 0),  # Darker orange
-            "severity_level_5": RGBColor(255, 69, 0),   # Red-orange
+            "severity level 3": RGBColor(255, 165, 0),  # Light orange
+            "severity level 4": RGBColor(255, 140, 0),  # Darker orange
+            "severity level 5": RGBColor(255, 69, 0),   # Red-orange
         }
 
         # Add severity level heading
@@ -127,14 +127,14 @@ def generate_word_document(parameters):
             severity_run.font.color.rgb = color_map[level]
 
         # Handle Severity Level 3 with two details
-        if level == "severity_level_3":
+        if level == "severity level 3":
             description = details["description"]
             # Add the description first
             severity_paragraph.add_run(description + " ")
             
-            if "details1" in details and "details2" in details:
-                detail_1 = details["details1"]
-                detail_2 = details["details2"]
+            if "ind1 in-school" in details and "ind2 in-school" in details:
+                detail_1 = details["ind1 in-school"]
+                detail_2 = details["ind2 in-school"]
                 
                 # Add the first detail in bold
                 detail_run1 = severity_paragraph.add_run(detail_1)
@@ -151,20 +151,20 @@ def generate_word_document(parameters):
                 severity_paragraph.add_run(".")
 
         # Handle Severity Levels 4 and 5 with one detail
-        elif level in ["severity_level_4", "severity_level_5"]:
+        elif level in ["severity level 4", "severity level 5"]:
             description = details["description"]
             description_parts = description.split("due to")
             severity_paragraph.add_run(description_parts[0] + "due to ")
-            if "details1" in details:
-                detail_1 = details["details1"]
+            if "ind in-school" in details:
+                detail_1 = details["ind in-school"]
                 detail_run = severity_paragraph.add_run(detail_1)
                 detail_run.bold = True
             if len(description_parts) > 1:
                 severity_paragraph.add_run(description_parts[1])
 
         # Add examples as sub-bullets
-        if "examples" in details:
-            for example in details["examples"]:
+        if "aggravating circumstances" in details:
+            for example in details["aggravating circumstances"]:
                 example_paragraph = doc.add_paragraph(style='List Bullet 2')
                 example_paragraph.add_run(f"      {example}")
 
