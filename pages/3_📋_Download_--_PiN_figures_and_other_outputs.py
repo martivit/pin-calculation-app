@@ -172,18 +172,18 @@ parameters = {
     },
     "severity_classification": {
         "severity_level_3": {
-            "description": "OoS children who do NOT endure aggravating circumstances or in-school children whose education was disrupted due to.",
+            "description": "OoS children who do NOT endure aggravating circumstances or in-school children whose education was disrupted due to:",
             "details1": teacher_disruption_var, 
             "details2": natural_hazard_var,
         },
         "severity_level_4": {
             "description": "In-school children whose education disrupted due to: or OoS facing the following aggravating circumstances.",
-            "details": idp_disruption_var,  # Pass displacement-related disruption indicator here
+            "details1": idp_disruption_var,  # Pass displacement-related disruption indicator here
             "examples": selected_severity_4_barriers,  # Specific examples for severity level 4
         },
         "severity_level_5": {
             "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
-            "details": armed_disruption_var,  # Pass occupation-related disruption indicator here
+            "details1": armed_disruption_var,  # Pass occupation-related disruption indicator here
             "examples": selected_severity_5_barriers,  # Specific examples for severity level 5
         },
     },
