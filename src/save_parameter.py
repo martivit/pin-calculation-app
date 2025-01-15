@@ -50,7 +50,7 @@ def generate_word_document(parameters):
 
     # Add Severity Classification
     doc.add_heading('Severity Classification used for this calculation', level=2)
-        # Add Severity Classification
+            # Add Severity Classification
     severity_classification = parameters["severity_classification"]
     for level, details in severity_classification.items():
         # Define colors for severity levels
@@ -73,27 +73,22 @@ def generate_word_document(parameters):
             if "details1" in details and "details2" in details:
                 detail_1 = details["details1"]
                 detail_2 = details["details2"]
-                # Append bold details directly
-                description_paragraph = severity_paragraph.add_run(description)
-                description_paragraph.add_run(f" {detail_1}").bold = True
-                description_paragraph.add_run(" and ")
-                description_paragraph.add_run(f"{detail_2}.").bold = True
+                description += f" **{detail_1}** and **{detail_2}**."
+            severity_paragraph.add_run(description)
 
         # Handle Severity Levels 4 and 5 with one detail
         elif level in ["severity_level_4", "severity_level_5"]:
             description = details["description"]
             if "details1" in details:
                 detail_1 = details["details1"]
-                # Append bold detail directly
-                description = description.replace("due to:", f"due to {detail_1}")
-                detail_paragraph = severity_paragraph.add_run(description)
-                detail_paragraph.bold = True
+                description = description.replace("due to:", f"due to **{detail_1}**")
+            severity_paragraph.add_run(description)
 
-        # Add examples as sub-bullets if present
+        # Add examples as sub-bullets
         if "examples" in details:
             for example in details["examples"]:
                 example_paragraph = doc.add_paragraph(style='List Bullet 2')
-                example_paragraph.add_run(example)
+                example_paragraph.add_run(f"- {example}")
 
 
                     
