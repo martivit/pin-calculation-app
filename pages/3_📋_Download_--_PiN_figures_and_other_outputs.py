@@ -11,7 +11,7 @@ from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from src.vizualize_PiN import create_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
-from src.save_parameter import create_parameters_document
+from src.save_parameter import generate_word_document
 from shared_utils import language_selector
 #from github import Github
 import requests
@@ -154,32 +154,54 @@ mismatch_admin = st.session_state.get('mismatch_admin', False)
 
 
 parameters = {
-    "start_school": start_school,
-    "vector_cycle": vector_cycle,
-    "country": country,
-    "edu_data": edu_data,
-    "household_data": household_data,
-    "status_var": status_var,
-    "survey_data": survey_data,
-    "choice_data": choice_data,
-    "label": label,
-    "age_var": age_var,
-    "gender_var": gender_var,
-    "access_var": access_var,
-    "teacher_disruption_var": teacher_disruption_var,
-    "idp_disruption_var": idp_disruption_var,
-    "armed_disruption_var": armed_disruption_var,
-    "natural_hazard_var": natural_hazard_var,
-    "barrier_var": barrier_var,
-    "selected_severity_4_barriers": selected_severity_4_barriers,
-    "selected_severity_5_barriers": selected_severity_5_barriers,
-    "admin_var": admin_var,
-    "ocha_data": ocha_data,
-    "mismatch_ocha_data": mismatch_ocha_data,
-    "no_ocha_data": no_ocha_data,
-    "mismatch_admin": mismatch_admin
+    "general_info": {
+        "country": country,
+        "date_calculation": datetime.now().strftime("%d/%m/%Y"),  # Example: Today's date
+        "start_school": start_school,
+        "vector_cycle": vector_cycle,
+    },
+    "msna_indicators": {
+        "access": access_var,
+        "learning_condition": {
+            "edu_disrupted_teacher": teacher_disruption_var,  # Based on the country's specific indicator
+            "natural_hazard_var": natural_hazard_var,         # For natural hazards
+        },
+        "protected_environment": {
+            "edu_disrupted_displaced": idp_disruption_var,    # Indicator for displacement
+            "edu_disrupted_occupation": armed_disruption_var, # Indicator for armed conflicts
+        },
+        "aggravating_circumstances": barrier_var,            # Barriers impacting education
+    },
+    "severity_classification": {
+        "severity_level_3": {
+            "description": "OoS children who do NOT endure aggravating circumstances or in-school children affected by teacher disruptions.",
+            "details": teacher_disruption_var,  # Pass teacher-related disruption indicator here
+        },
+        "severity_level_4": {
+            "description": "In-school children affected by displacement or OoS facing the following aggravating circumstances.",
+            "details": idp_disruption_var,  # Pass displacement-related disruption indicator here
+            "examples": selected_severity_4_barriers,  # Specific examples for severity level 4
+        },
+        "severity_level_5": {
+            "description": "In-school children affected by occupation-related disruptions or OoS facing the following aggravating circumstances.",
+            "details": armed_disruption_var,  # Pass occupation-related disruption indicator here
+            "examples": selected_severity_5_barriers,  # Specific examples for severity level 5
+        },
+    },
+    "admin_unit": {
+        "unit_of_analysis": admin_var,
+        "mismatch_admin": mismatch_admin,  # Whether there is a mismatch in admin levels
+    },
+    "school_cycles": {
+        "age_ranges": [6, 11, 12, 16, 17, 18],  # Age groups for educational cycles
+        "notes": "6-11, 12-16, 17-18",          # Textual representation of the age groups
+    },
+    "additional_info": {
+        "no_ocha_data": no_ocha_data,                          # Whether OCHA data is missing
+        "selected_severity_4_barriers": selected_severity_4_barriers,  # Barriers for severity level 4
+        "selected_severity_5_barriers": selected_severity_5_barriers,  # Barriers for severity level 5
+    },
 }
-
 
 
 
@@ -194,7 +216,7 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 
 
-doc_parameter_output = create_parameters_document(parameters)
+doc_parameter_output = generate_word_document(parameters)
 
 
 ## calculate PiN
