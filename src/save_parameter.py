@@ -30,28 +30,33 @@ def generate_word_document(parameters):
         doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}: {value}", style='List Bullet')
 
     # Add MSNA Indicators
-    doc.add_heading('MSNA Indicators', level=2)
+    doc.add_heading('MSNA indicators/variables by dimension', level=2)
     msna_indicators = parameters["msna_indicators"]
-    for key, value in msna_indicators.items():
-        if isinstance(value, dict):  # Handle nested dictionaries
-            doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}:", style='List Bullet')
-            for sub_key, sub_value in value.items():
-                doc.add_paragraph(f"  - {sub_key.replace('_', ' ').capitalize()}: {sub_value}", style='List Bullet')
+    for category, indicators in msna_indicators.items():
+        if isinstance(indicators, dict):  # Nested categories
+            doc.add_paragraph(f"{category.replace('_', ' ').capitalize()}:", style='List Bullet')
+            for description, indicator in indicators.items():
+                doc.add_paragraph(f"  - {description}: {indicator}", style='List Bullet')
         else:
-            doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}: {value}", style='List Bullet')
+            doc.add_paragraph(f"{category.replace('_', ' ').capitalize()}: {indicators}", style='List Bullet')
 
     # Add Severity Classification
-    doc.add_heading('Severity Classification', level=2)
+    doc.add_heading('Severity Classification used for this calculation', level=2)
     severity_classification = parameters["severity_classification"]
     for level, details in severity_classification.items():
-        doc.add_paragraph(f"{level.replace('_', ' ').capitalize()}:", style='List Bullet')
-        doc.add_paragraph(f"  - Description: {details['description']}", style='List Bullet')
-        if "examples" in details:
-            doc.add_paragraph("  - Examples:", style='List Bullet')
-            for example in details["examples"]:
-                doc.add_paragraph(f"    * {example}", style='List Bullet')
+        # Start with the description
+        description = details["description"]
+
+        # Integrate `details` if it exists
         if "details" in details:
-            doc.add_paragraph(f"  - Details: {details['details']}", style='List Bullet')
+            description = description.replace("disrupted due to:", f"disrupted due to {details['details']}")
+
+        doc.add_paragraph(f"{level.replace('_', ' ').capitalize()}: {description}", style='List Bullet')
+
+        # Add examples as bullet points
+        if "examples" in details:
+            for example in details["examples"]:
+                doc.add_paragraph(f"  - {example}", style='List Bullet')
 
     # Add Admin Unit
     doc.add_heading('Administrative Unit', level=2)
@@ -64,17 +69,6 @@ def generate_word_document(parameters):
     school_cycles = parameters["school_cycles"]
     doc.add_paragraph(f"Age Ranges: {', '.join(map(str, school_cycles['age_ranges']))}", style='List Bullet')
     doc.add_paragraph(f"Notes: {school_cycles['notes']}", style='List Bullet')
-
-    # Add Additional Information
-    doc.add_heading('Additional Information', level=2)
-    additional_info = parameters["additional_info"]
-    for key, value in additional_info.items():
-        if isinstance(value, list):  # Handle lists for selected_severity_4 and 5 barriers
-            doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}:", style='List Bullet')
-            for item in value:
-                doc.add_paragraph(f"  - {item}", style='List Bullet')
-        else:
-            doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}: {value}", style='List Bullet')
 
     # Save the Word document to a BytesIO object
     from io import BytesIO
