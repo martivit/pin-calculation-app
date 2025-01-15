@@ -66,9 +66,14 @@ def generate_word_document(parameters):
 
     # Add School Cycles
     doc.add_heading('School Cycles', level=2)
-    school_cycles = parameters["school_cycles"]
-    doc.add_paragraph(f"Age Ranges: {', '.join(map(str, school_cycles['age_ranges']))}", style='List Bullet')
-    doc.add_paragraph(f"Notes: {school_cycles['notes']}", style='List Bullet')
+    school_cycles = parameters.get("school_cycles", {})
+    # Report 'age_ranges' (vector_cycle) as-is
+    age_ranges = school_cycles.get("age_ranges", [])
+    doc.add_paragraph(f"Age Ranges: {age_ranges}", style='List Bullet')
+
+    # Handle 'notes' gracefully
+    notes = school_cycles.get("notes", "Not specified")
+    doc.add_paragraph(f"Notes: {notes}", style='List Bullet')
 
     # Save the Word document to a BytesIO object
     from io import BytesIO
