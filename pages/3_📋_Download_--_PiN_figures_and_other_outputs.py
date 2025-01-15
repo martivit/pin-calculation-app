@@ -13,6 +13,8 @@ from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
 from src.save_parameter import generate_parameters
+from src.save_parameter_FR import generate_word_document_FR
+from src.save_parameter_FR import generate_parameters_FR
 from shared_utils import language_selector
 #from github import Github
 import requests
@@ -154,6 +156,7 @@ mismatch_admin = st.session_state.get('mismatch_admin', False)
 
 
 parameters = generate_parameters(st.session_state)
+parameters_FR = generate_parameters_FR(st.session_state)
 
 
 
@@ -168,7 +171,6 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 
 
-doc_parameter_output = generate_word_document(parameters)
 
 
 ## calculate PiN
@@ -192,7 +194,7 @@ if ocha_data is not None:
     label_total_pin_sheet = "PiN TOTAL"
 
 
-    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language)
+    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language, parameters=parameters)
 
 
     # Check if the selected language is French and apply translation if necessary
@@ -204,8 +206,11 @@ if ocha_data is not None:
 
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
+        doc_parameter_output = generate_word_document(parameters)
+
     if selected_language == "French":
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
+        doc_parameter_output = generate_word_document_FR(parameters_FR)
 
     if st.download_button(
         label=translations["download_pin"],

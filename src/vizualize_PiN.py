@@ -376,7 +376,7 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
 
 
 # Function to create output with final formatting
-def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None, selected_language='English'):
+def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None, selected_language='English', parameters=None):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
 
     label_overall_severity = 'Overall PiN and severity'
@@ -396,7 +396,27 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
         for category, df in dataframes.items():
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
             df.to_excel(writer, sheet_name=sheet_name, index=False)
-    
+
+        if parameters:
+            parameters_df = pd.DataFrame([
+                {"Category": "General Information", "Key": key, "Value": value}
+                for key, value in parameters["general_info"].items()
+            ] + [
+                {"Category": "MSNA Indicators", "Key": key, "Value": str(value)}
+                for key, value in parameters["msna_indicators"].items()
+            ] + [
+                {"Category": "Severity Classification", "Key": key, "Value": str(value)}
+                for key, value in parameters["severity_classification"].items()
+            ] + [
+                {"Category": "Administrative Unit", "Key": key, "Value": str(value)}
+                for key, value in parameters["admin_unit"].items()
+            ] + [
+                {"Category": "School Cycles", "Key": key, "Value": str(value)}
+                for key, value in parameters["school_cycles"].items()
+            ])
+            parameters_df.to_excel(writer, sheet_name="Parameters Used", index=False)
+
+
     output.seek(0)
     workbook = load_workbook(output)
 
