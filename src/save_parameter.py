@@ -50,9 +50,10 @@ def generate_word_document(parameters):
 
     # Add Severity Classification
     doc.add_heading('Severity Classification used for this calculation', level=2)
+        # Add Severity Classification
     severity_classification = parameters["severity_classification"]
     for level, details in severity_classification.items():
-        # Color for severity level titles
+        # Define colors for severity levels
         color_map = {
             "severity_level_3": RGBColor(255, 165, 0),  # Light orange
             "severity_level_4": RGBColor(255, 140, 0),  # Darker orange
@@ -66,21 +67,23 @@ def generate_word_document(parameters):
         if level in color_map:
             severity_run.font.color.rgb = color_map[level]
 
-        # Add description
+        # Add description and embed details
         description = details["description"]
-        if "details" in details:
-            description = description.replace("disrupted due to:", f"disrupted due to {details['details']}")
+        if "details1" in details:
+            description += f" {details['details1']}"
+        if "details2" in details:
+            description += f" and {details['details2']}"
         severity_paragraph.add_run(description)
 
-        # Add examples as a numbered list
+        # Add examples as numbered lists
         if "examples" in details:
-            for i, example in enumerate(details["examples"], start=1):
-                example_paragraph = doc.add_paragraph(f"{i}. {example}", style='List Number')
-                # Underline specific keywords (for demonstration purposes)
+            for idx, example in enumerate(details["examples"], start=1):
+                # Add as a numbered list
+                example_paragraph = doc.add_paragraph(f"{idx}. {example}", style='List Number')
+                # Apply underline to specific keywords (e.g., "school")
                 if "school" in example.lower():
                     example_run = example_paragraph.runs[0]
                     example_run.underline = True
-
     # Add Admin Unit
     doc.add_heading('Administrative Unit', level=2)
     admin_unit = parameters["admin_unit"]
