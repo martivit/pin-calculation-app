@@ -17,6 +17,64 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 import matplotlib as mpl
 from docx import Document
 
+
+
+def generate_parameters(st_session_state):
+    """
+    Generate the parameters dictionary for PiN calculation.
+
+    Args:
+        st_session_state: Streamlit session state object containing relevant variables.
+
+    Returns:
+        dict: The generated parameters dictionary.
+    """
+    parameters = {
+        "general_info": {
+            "country": st_session_state.get('country'),
+            "date_calculation": datetime.now().strftime("%d/%m/%Y %H:%M")  # Today's date with hour and minute
+        },
+        "msna_indicators": {
+            "access": st_session_state.get('access_var'),
+            "learning_condition": {
+                "Education disrupted due to teacher absences": st_session_state.get('teacher_disruption_var'),
+                "Education disrupted due to natural hazard": st_session_state.get('natural_hazard_disruption_var'),
+            },
+            "protected_environment": {
+                "Education disrupted due to school being used as IDP shelter": st_session_state.get('idp_disruption_var'),
+                "Education disrupted due to school being occupied by armed groups": st_session_state.get('armed_disruption_var'),
+            },
+            "aggravating_circumstances": st_session_state.get('barrier_var'),
+        },
+        "severity_classification": {
+            "severity_level_3": {
+                "description": "OoS children who do NOT endure aggravating circumstances or in-school children whose education was disrupted due to:",
+                "details1": st_session_state.get('teacher_disruption_var'),
+                "details2": st_session_state.get('natural_hazard_disruption_var'),
+            },
+            "severity_level_4": {
+                "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
+                "details1": st_session_state.get('idp_disruption_var'),
+                "examples": st_session_state.get('selected_severity_4_barriers', []),
+            },
+            "severity_level_5": {
+                "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
+                "details1": st_session_state.get('armed_disruption_var'),
+                "examples": st_session_state.get('selected_severity_5_barriers', []),
+            },
+        },
+        "admin_unit": {
+            "unit_of_analysis": st_session_state.get('admin_var'),
+            "mismatch_admin": st_session_state.get('mismatch_admin', False),
+        },
+        "school_cycles": {
+            "age_ranges": st_session_state.get('vector_cycle'),  # Age groups for educational cycles
+        }
+    }
+    return parameters
+
+
+
 def generate_word_document(parameters):
     # Initialize the Word document
     doc = docx.Document()
@@ -125,10 +183,6 @@ def generate_word_document(parameters):
     # Report 'age_ranges' (vector_cycle) as-is
     age_ranges = school_cycles.get("age_ranges", [])
     doc.add_paragraph(f"Age Ranges: {age_ranges}", style='List Bullet')
-
-    # Handle 'notes' gracefully
-    notes = school_cycles.get("notes", "Not specified")
-    doc.add_paragraph(f"Notes: {notes}", style='List Bullet')
 
     # Save the Word document to a BytesIO object
     from io import BytesIO

@@ -12,6 +12,7 @@ from src.vizualize_PiN import create_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
+from src.save_parameter import generate_parameters
 from shared_utils import language_selector
 #from github import Github
 import requests
@@ -152,50 +153,7 @@ no_ocha_data = st.session_state.get('no_upload_ocha_data', False)
 mismatch_admin = st.session_state.get('mismatch_admin', False)
 
 
-
-parameters = {
-    "general_info": {
-        "country": country,
-        "date_calculation": datetime.now().strftime("%d/%m/%Y")  # Example: Today's date
-    },
-    "msna_indicators": {
-        "access": access_var,
-        "learning_condition": {
-            "Education disrupted due to teacher absences": teacher_disruption_var,  # Based on the country's specific indicator
-            "Education disrupted due to natural hazard": natural_hazard_var,         # For natural hazards
-        },
-        "protected_environment": {
-            "Education disrupted due to school being used as IDP shelter": idp_disruption_var,    # Indicator for displacement
-            "Education disrupted due to school being occupaied by armed groups": armed_disruption_var, # Indicator for armed conflicts
-        },
-        "aggravating_circumstances": barrier_var,            # Barriers impacting education
-    },
-    "severity_classification": {
-        "severity_level_3": {
-            "description": "OoS children who do NOT endure aggravating circumstances or in-school children whose education was disrupted due to:",
-            "details1": teacher_disruption_var, 
-            "details2": natural_hazard_var,
-        },
-        "severity_level_4": {
-            "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
-            "details1": idp_disruption_var,  # Pass displacement-related disruption indicator here
-            "examples": selected_severity_4_barriers,  # Specific examples for severity level 4
-        },
-        "severity_level_5": {
-            "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
-            "details1": armed_disruption_var,  # Pass occupation-related disruption indicator here
-            "examples": selected_severity_5_barriers,  # Specific examples for severity level 5
-        },
-    },
-    "admin_unit": {
-        "unit_of_analysis": admin_var,
-        "mismatch_admin": mismatch_admin,  # Whether there is a mismatch in admin levels
-    },
-    "school_cycles": {
-        "age_ranges": vector_cycle,  # Age groups for educational cycles
-        "notes": "6-11, 12-16, 17-18",          # Textual representation of the age groups
-    }
-}
+parameters = generate_parameters(st.session_state)
 
 
 
