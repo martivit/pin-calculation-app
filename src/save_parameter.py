@@ -70,14 +70,25 @@ def generate_word_document(parameters):
         # Handle Severity Level 3 with two details
         if level == "severity_level_3":
             description = details["description"]
+            # Add the description first
+            severity_paragraph.add_run(description + " ")
+            
             if "details1" in details and "details2" in details:
                 detail_1 = details["details1"]
                 detail_2 = details["details2"]
+                
+                # Add the first detail in bold
                 detail_run1 = severity_paragraph.add_run(detail_1)
                 detail_run1.bold = True
+                
+                # Add " and " between the details
                 severity_paragraph.add_run(" and ")
+                
+                # Add the second detail in bold
                 detail_run2 = severity_paragraph.add_run(detail_2)
                 detail_run2.bold = True
+                
+                # Add the period at the end
                 severity_paragraph.add_run(".")
 
         # Handle Severity Levels 4 and 5 with one detail
