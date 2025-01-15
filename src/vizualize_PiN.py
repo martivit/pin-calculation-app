@@ -402,13 +402,13 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
                 {"Category": "General Information", "Key": key, "Value": value}
                 for key, value in parameters["general_info"].items()
             ] + [
-                {"Category": "MSNA Indicators", "Key": key, "Value": str(value)}
+                {"Category": "MSNA Indicators per PiN dimension", "Key": key, "Value": str(value)}
                 for key, value in parameters["msna_indicators_per_PiN_dimension"].items()
             ] + [
                 {"Category": "Severity Classification", "Key": key, "Value": str(value)}
                 for key, value in parameters["severity_classification"].items()
             ] + [
-                {"Category": "Administrative Unit", "Key": key, "Value": str(value)}
+                {"Category": "HNO Unit of analysis", "Key": key, "Value": str(value)}
                 for key, value in parameters["admin_unit"].items()
             ] + [
                 {"Category": "School Cycles", "Key": key, "Value": str(value)}
