@@ -20,7 +20,7 @@ from docx import Document
 
 def generate_word_document(parameters):
     # Initialize the Word document
-    doc = Document()
+    doc = docx.Document()
     doc.add_heading('Parameters Used as Input for the PiN Calculation', level=1)
 
     # Add General Information
