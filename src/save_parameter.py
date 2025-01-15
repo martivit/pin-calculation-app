@@ -29,40 +29,57 @@ def generate_word_document(parameters):
         doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}: {value}", style='List Bullet')
 
     # Add MSNA Indicators
+    # Add MSNA Indicators
     doc.add_heading('MSNA indicators/variables by dimension', level=2)
     msna_indicators = parameters["msna_indicators"]
     for category, indicators in msna_indicators.items():
         if isinstance(indicators, dict):  # Nested categories
-            doc.add_paragraph(f"{category.replace('_', ' ').capitalize()}:", style='List Bullet')
+            # Main bullet for the category with bold formatting
+            category_paragraph = doc.add_paragraph(style='List Bullet')
+            category_run = category_paragraph.add_run(f"{category.replace('_', ' ').capitalize()}:")
+            category_run.bold = True
             for description, indicator in indicators.items():
-                doc.add_paragraph(f"  - {description}: {indicator}", style='List Bullet')
+                # Sub-bullets for each indicator
+                doc.add_paragraph(f"  - {description}: {indicator}", style='List Bullet 2')
         else:
-            doc.add_paragraph(f"{category.replace('_', ' ').capitalize()}: {indicators}", style='List Bullet')
+            # Main bullet for simple categories with bold formatting
+            category_paragraph = doc.add_paragraph(style='List Bullet')
+            category_run = category_paragraph.add_run(f"{category.replace('_', ' ').capitalize()}: {indicators}")
+            category_run.bold = True
+
 
     # Add Severity Classification
     doc.add_heading('Severity Classification used for this calculation', level=2)
     severity_classification = parameters["severity_classification"]
-
     for level, details in severity_classification.items():
-        # Start with the description
+        # Color for severity level titles
+        color_map = {
+            "severity_level_3": RGBColor(255, 165, 0),  # Light orange
+            "severity_level_4": RGBColor(255, 140, 0),  # Darker orange
+            "severity_level_5": RGBColor(255, 69, 0),   # Red-orange
+        }
+
+        # Add severity level heading
+        severity_paragraph = doc.add_paragraph(style='List Bullet')
+        severity_run = severity_paragraph.add_run(f"{level.replace('_', ' ').capitalize()}: ")
+        severity_run.bold = True
+        if level in color_map:
+            severity_run.font.color.rgb = color_map[level]
+
+        # Add description
         description = details["description"]
-
-        if level == "severity_level_3":
-            # Add details1 and details2 as separate sentences
-            description = f"{description} {details['details1']}."
-            description += f" Also includes cases of education disrupted due to {details['details2']}."
-        
-        elif "details" in details:
-            # For levels 4 and 5, integrate 'details' directly into the description
+        if "details" in details:
             description = description.replace("disrupted due to:", f"disrupted due to {details['details']}")
+        severity_paragraph.add_run(description)
 
-        # Add the main description as a bullet point
-        doc.add_paragraph(f"{level.replace('_', ' ').capitalize()}: {description}", style='List Bullet')
-
-        # Add examples as sub-bullets
+        # Add examples as a numbered list
         if "examples" in details:
-            for example in details["examples"]:
-                doc.add_paragraph(f"  - {example}", style='List Bullet')
+            for i, example in enumerate(details["examples"], start=1):
+                example_paragraph = doc.add_paragraph(f"{i}. {example}", style='List Number')
+                # Underline specific keywords (for demonstration purposes)
+                if "school" in example.lower():
+                    example_run = example_paragraph.runs[0]
+                    example_run.underline = True
 
     # Add Admin Unit
     doc.add_heading('Administrative Unit', level=2)
