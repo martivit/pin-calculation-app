@@ -40,7 +40,7 @@ def generate_word_document(parameters):
             category_run.bold = True
             for description, indicator in indicators.items():
                 # Sub-bullets for each indicator
-                doc.add_paragraph(f"     {description}: {indicator}", style='List Bullet 2')
+                doc.add_paragraph(f"      {description}: {indicator}", style='List Bullet 2')
         else:
             # Main bullet for simple categories with bold formatting
             category_paragraph = doc.add_paragraph(style='List Bullet')
@@ -71,14 +71,9 @@ def generate_word_document(parameters):
         if level == "severity_level_3":
             description = details["description"]
             if "details1" in details and "details2" in details:
-                description += " "
                 detail_1 = details["details1"]
                 detail_2 = details["details2"]
-                description_run = severity_paragraph.add_run(description)
-                severity_paragraph.add_run(f"{detail_1}").bold = True
-                severity_paragraph.add_run(" and ")
-                severity_paragraph.add_run(f"{detail_2}").bold = True
-            else:
+                description += f" {detail_1} and {detail_2}."
                 severity_paragraph.add_run(description)
 
         # Handle Severity Levels 4 and 5 with one detail
@@ -86,17 +81,14 @@ def generate_word_document(parameters):
             description = details["description"]
             if "details1" in details:
                 detail_1 = details["details1"]
-                description = description.replace("due to:", "due to ")
-                description_run = severity_paragraph.add_run(description)
-                severity_paragraph.add_run(f"{detail_1}").bold = True
-            else:
-                severity_paragraph.add_run(description)
+                description = description.replace("due to", f"due to {detail_1}")
+            severity_paragraph.add_run(description)
 
         # Add examples as sub-bullets
         if "examples" in details:
             for example in details["examples"]:
                 example_paragraph = doc.add_paragraph(style='List Bullet 2')
-                example_paragraph.add_run(f"- {example}")
+                example_paragraph.add_run(f"      {example}")
 
 
                     
