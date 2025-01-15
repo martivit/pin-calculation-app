@@ -11,6 +11,7 @@ from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from src.vizualize_PiN import create_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
+from src.save_parameter import create_parameters_document
 from shared_utils import language_selector
 #from github import Github
 import requests
@@ -152,7 +153,30 @@ mismatch_admin = st.session_state.get('mismatch_admin', False)
 
 
 
-
+parameters = {
+    start_school,
+    vector_cycle,
+    country,
+    edu_data,
+    household_data,
+    status_var,
+    survey_data,
+    choice_data,
+    label,
+    age_var,
+    gender_var,
+    access_var,
+    teacher_disruption_var,
+    idp_disruption_var,
+    armed_disruption_var,
+    natural_hazard_var,
+    barrier_var,
+    selected_severity_4_barriers,
+    selected_severity_5_barriers,
+    admin_var,
+    ocha_data,
+    mismatch_ocha_data
+}
 
 
 
@@ -168,6 +192,7 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 
 
+doc_parameter_output = create_parameters_document(parameters)
 
 
 ## calculate PiN
@@ -291,6 +316,15 @@ if ocha_data is not None:
         except Exception:
             pass  # Silently ignore the error
             #st.error(f"Failed to upload to GitHub: {e}")
+
+
+    st.download_button(
+        label="Download Parameters Document",
+        data=doc_parameter_output.getvalue(),
+        file_name="Parameters_Input_Document.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
 
