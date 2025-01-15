@@ -42,23 +42,24 @@ def generate_word_document(parameters):
     # Add Severity Classification
     doc.add_heading('Severity Classification used for this calculation', level=2)
     severity_classification = parameters["severity_classification"]
+
     for level, details in severity_classification.items():
         # Start with the description
         description = details["description"]
 
-        # Handle `details1` and `details2` explicitly
-        if "details1" in details and "details2" in details:
-            description = description.replace("disrupted due to.", 
-                                              f"disrupted due to {details['details1']} and {details['details2']}.")
-
-        # Integrate `details` for other cases
+        if level == "severity_level_3":
+            # Add details1 and details2 as separate sentences
+            description = f"{description} {details['details1']}."
+            description += f" Also includes cases of education disrupted due to {details['details2']}."
+        
         elif "details" in details:
-            description = description.replace("disrupted due to:", 
-                                              f"disrupted due to {details['details']}")
+            # For levels 4 and 5, integrate 'details' directly into the description
+            description = description.replace("disrupted due to:", f"disrupted due to {details['details']}")
 
+        # Add the main description as a bullet point
         doc.add_paragraph(f"{level.replace('_', ' ').capitalize()}: {description}", style='List Bullet')
 
-        # Add examples as bullet points
+        # Add examples as sub-bullets
         if "examples" in details:
             for example in details["examples"]:
                 doc.add_paragraph(f"  - {example}", style='List Bullet')
