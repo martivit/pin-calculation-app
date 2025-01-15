@@ -17,7 +17,6 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 import matplotlib as mpl
 from docx import Document
 
-
 def generate_word_document(parameters):
     # Initialize the Word document
     doc = docx.Document()
@@ -47,9 +46,15 @@ def generate_word_document(parameters):
         # Start with the description
         description = details["description"]
 
-        # Integrate `details` if it exists
-        if "details" in details:
-            description = description.replace("disrupted due to:", f"disrupted due to {details['details']}")
+        # Handle `details1` and `details2` explicitly
+        if "details1" in details and "details2" in details:
+            description = description.replace("disrupted due to.", 
+                                              f"disrupted due to {details['details1']} and {details['details2']}.")
+
+        # Integrate `details` for other cases
+        elif "details" in details:
+            description = description.replace("disrupted due to:", 
+                                              f"disrupted due to {details['details']}")
 
         doc.add_paragraph(f"{level.replace('_', ' ').capitalize()}: {description}", style='List Bullet')
 
