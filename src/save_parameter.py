@@ -67,23 +67,30 @@ def generate_word_document(parameters):
         if level in color_map:
             severity_run.font.color.rgb = color_map[level]
 
-        # Add description and embed details
-        description = details["description"]
-        if "details1" in details:
-            description += f" {details['details1']}"
-        if "details2" in details:
-            description += f" and {details['details2']}"
-        severity_paragraph.add_run(description)
+        # Handle Severity Level 3 with two details
+        if level == "severity_level_3":
+            description = details["description"]
+            if "details1" in details and "details2" in details:
+                description += f" {details['details1']} and {details['details2']}."
+            severity_paragraph.add_run(description)
 
-        # Add examples as numbered lists
+        # Handle Severity Levels 4 and 5 with one detail
+        elif level in ["severity_level_4", "severity_level_5"]:
+            description = details["description"]
+            if "details1" in details:
+                description = description.replace("due to:", f"due to {details['details1']}")
+            severity_paragraph.add_run(description)
+
+        # Add examples as sub-bullets if present
         if "examples" in details:
-            for idx, example in enumerate(details["examples"], start=1):
-                # Add as a numbered list
-                example_paragraph = doc.add_paragraph(f"{idx}. {example}", style='List Number')
+            for example in details["examples"]:
+                example_paragraph = doc.add_paragraph(f"  - {example}", style='List Bullet')
                 # Apply underline to specific keywords (e.g., "school")
                 if "school" in example.lower():
                     example_run = example_paragraph.runs[0]
                     example_run.underline = True
+
+                    
     # Add Admin Unit
     doc.add_heading('Administrative Unit', level=2)
     admin_unit = parameters["admin_unit"]
