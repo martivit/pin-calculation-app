@@ -194,15 +194,34 @@ if ocha_data is not None:
     label_total_pin_sheet = "PiN TOTAL"
 
 
-    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language, parameters=parameters)
+    #ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language, parameters=parameters)
+    if selected_language == "French":
+        ocha_excel = create_output(
+            country_label,
+            Tot_PiN_JIAF,
+            final_overview_df,
+            final_overview_df_OCHA,
+            label_total_pin_sheet,
+            admin_var,
+            ocha=True,
+            tot_severity=Tot_PiN_by_admin,
+            selected_language=selected_language,
+            parameters=parameters_FR  # Pass French parameters
+        )
+    else:
+        ocha_excel = create_output(
+            country_label,
+            Tot_PiN_JIAF,
+            final_overview_df,
+            final_overview_df_OCHA,
+            label_total_pin_sheet,
+            admin_var,
+            ocha=True,
+            tot_severity=Tot_PiN_by_admin,
+            selected_language=selected_language,
+            parameters=parameters  # Pass English parameters
+        )
 
-
-    # Check if the selected language is French and apply translation if necessary
-    #if st.session_state.get('selected_language') == 'French':
-        
-        # Pass the in-memory Excel data to the translation function
-        #ocha_excel = translate_excel_sheets_with_formatting(ocha_excel)
-        #st.write("French translation applied.")
 
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
