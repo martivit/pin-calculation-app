@@ -263,32 +263,43 @@ if ocha_data is not None:
 
             github_token = st.secrets["github"]["token"]
 
-            # Upload the Excel file
-            pr_url_excel = upload_to_github(
-                file_content=ocha_excel.getvalue(),
-                file_name=file_path_in_repo_excel,
-                repo_name=repo_name,
-                branch_name=branch_name,
-                commit_message=f"Add PiN results (Excel) for {country_label}",
-                token=github_token
-            )
+            # Initialize success messages for both uploads
+            pr_url_excel = None
+            pr_url_doc = None
 
-            # Upload the Word document
-            pr_url_doc = upload_to_github(
-                file_content=doc_output.getvalue(),
-                file_name=file_path_in_repo_doc,
-                repo_name=repo_name,
-                branch_name=branch_name,
-                commit_message=f"Add PiN snapshot (Word) for {country_label}",
-                token=github_token
-            )
+            # Try uploading both files
+            try:
+                pr_url_excel = upload_to_github(
+                    file_content=ocha_excel.getvalue(),
+                    file_name=file_path_in_repo_excel,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN results (Excel) for {country_label}",
+                    token=github_token
+                )
+            except Exception as e:
+                st.error(f"Failed to upload Excel file to GitHub: {e}")
 
-            # Success message
-            st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
-            st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
+            try:
+                pr_url_doc = upload_to_github(
+                    file_content=doc_output.getvalue(),
+                    file_name=file_path_in_repo_doc,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN snapshot (Word) for {country_label}",
+                    token=github_token
+                )
+            except Exception as e:
+                st.error(f"Failed to upload Word document to GitHub: {e}")
+
+            # Display success messages only if files were successfully uploaded
+            if pr_url_excel:
+                st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+            if pr_url_doc:
+                st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
 
         except Exception as e:
-            st.error(f"Failed to upload to GitHub: {e}")
+            st.error(f"Unexpected error during GitHub upload: {e}")
  
 
 
