@@ -416,7 +416,7 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
             ])
             parameters_df.to_excel(writer, sheet_name="Parameters Used", index=False)
 
-        if parameters and selected_language=='Spanish':
+        if parameters and selected_language=='French':
             parameters_df = pd.DataFrame([
                 {"Catégorie": "Informations générales", "Clé": key, "Valeur": value}
                 for key, value in parameters["general_info"].items()
