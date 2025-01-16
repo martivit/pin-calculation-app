@@ -104,7 +104,8 @@
     "scope_fix_empty_error_message": "This may have occurred due to an error or because this box was incorrectly ticked. If there is no mismatch between the representativeness of the assessment and the HNO's unit of analysis, you can safely untick this box. However, if a mismatch exists, please ensure the 'scope-fix' sheet is correctly filled to reflect the required adjustments for the HNO unit of analysis.",
     "scope_fix_warning": "Ticking this box indicates there is a mismatch between the level of representativeness of the assessment and the unit of analysis for the HNO. Please verify your data and selections carefully to avoid errors in the calculation.",
     "mismatch_admin_message": "There may be a mismatch between the HNO unit of analysis and the administrative level at which the MSNA is representative.",
-    "mismatch_admin_example": "For example, the MSNA data might be representative at Admin 2, while the HNO unit of analysis is Admin 3.<br>If you click this box, you are confirming that such a mismatch exists. In this case, ensure that the 'scope-fix' sheet in the OCHA file lists the mismatched administrative units and their corresponding levels. Refer to the provided template for guidance on how to correctly fill the 'scope-fix' sheet."
+    "mismatch_admin_example": "For example, the MSNA data might be representative at Admin 2, while the HNO unit of analysis is Admin 3.<br>If you click this box, you are confirming that such a mismatch exists. In this case, ensure that the 'scope-fix' sheet in the OCHA file lists the mismatched administrative units and their corresponding levels. Refer to the provided template for guidance on how to correctly fill the 'scope-fix' sheet.",
+    "download_all": "Download All PiN Documents"
 
 
 

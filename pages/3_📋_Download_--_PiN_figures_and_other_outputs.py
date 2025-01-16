@@ -247,7 +247,7 @@ if ocha_data is not None:
 
     # Create a single download button for the ZIP file
     if st.download_button(
-        label="Download All PiN Documents",
+        label=translations["download_all"],
         data=zip_file,
         file_name=zip_file_name,
         mime="application/zip"
