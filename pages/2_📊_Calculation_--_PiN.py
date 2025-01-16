@@ -479,15 +479,15 @@ def select_indicators():
 
         st.markdown(
                 """
-                <div style="background-color: #f9f9f9; border-left: 5px solid #4CAF50; padding: 10px; margin-bottom: 20px;">
-                    <h4 style="color: #4CAF50;">{}</h4>
+                <div style="background-color: #f9f9f9; border-left: 5px solid #21B1FF; padding: 10px; margin-bottom: 20px;">
+                    <h4 style="color: #21B1FF;">{}</h4>
                 </div>
                 """.format(translations['show_kobo']),
                 unsafe_allow_html=True
             )
         st.dataframe(
                 filtered_edu_kobo.style.set_properties(
-                    **{'background-color': '#e8f5e9', 'border': '1px solid #4CAF50'}
+                    **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
                 )
             )
 
