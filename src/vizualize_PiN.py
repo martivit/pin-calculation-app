@@ -397,7 +397,7 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
             df.to_excel(writer, sheet_name=sheet_name, index=False)
 
-        if parameters:
+        if parameters and selected_language=='English':
             parameters_df = pd.DataFrame([
                 {"Category": "General Information", "Key": key, "Value": value}
                 for key, value in parameters["general_info"].items()
@@ -416,6 +416,24 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
             ])
             parameters_df.to_excel(writer, sheet_name="Parameters Used", index=False)
 
+        if parameters and selected_language=='Spanish':
+            parameters_df = pd.DataFrame([
+                {"Catégorie": "Informations générales", "Clé": key, "Valeur": value}
+                for key, value in parameters["general_info"].items()
+            ] + [
+                {"Catégorie": "Indicateurs MSNA par dimension du PiN", "Clé": key, "Valeur": str(value)}
+                for key, value in parameters["msna_indicators_per_PiN_dimension"].items()
+            ] + [
+                {"Catégorie": "Classification de la sévérité", "Clé": key, "Valeur": str(value)}
+                for key, value in parameters["severity_classification"].items()
+            ] + [
+                {"Catégorie": "Unité d’analyse HNO", "Clé": key, "Valeur": str(value)}
+                for key, value in parameters["admin_unit"].items()
+            ] + [
+                {"Catégorie": "Cycles scolaires", "Clé": key, "Valeur": str(value)}
+                for key, value in parameters["school_cycles"].items()
+            ])
+            parameters_df.to_excel(writer, sheet_name="Paramètres Utilisés", index=False)
 
     output.seek(0)
     workbook = load_workbook(output)

@@ -54,12 +54,12 @@ def generate_parameters(st_session_state):
                 "ind2 in-school": st_session_state.get('natural_hazard_disruption_var'),
             },
             "severity level 4": {
-                "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
+                "description": "In-school children whose education disrupted due to (ind in-school) or OoS facing the following aggravating circumstances.",
                 "ind in-school": st_session_state.get('idp_disruption_var'),
                 "aggravating circumstances": st_session_state.get('selected_severity_4_barriers', []),
             },
             "severity level 5": {
-                "description": "In-school children whose education disrupted due to or OoS facing the following aggravating circumstances.",
+                "description": "In-school children whose education disrupted due to (ind in-school) or OoS facing the following aggravating circumstances.",
                 "ind in-school": st_session_state.get('armed_disruption_var'),
                 "aggravating circumstances": st_session_state.get('selected_severity_5_barriers', []),
             },
@@ -155,6 +155,7 @@ def generate_word_document(parameters):
         # Handle Severity Levels 4 and 5 with one detail
         elif level in ["severity level 4", "severity level 5"]:
             description = details["description"]
+            description = description.replace("due to (ind in-school)", "due to")
             description_parts = description.split("due to")
             severity_paragraph.add_run(description_parts[0] + "due to ")
             if "ind in-school" in details:
