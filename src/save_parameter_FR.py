@@ -31,9 +31,9 @@ def generate_parameters_FR(st_session_state):
     parameters = {
         "informations_generales": {
             "pays": st_session_state.get('country'),
-            "date_calcul": datetime.now().strftime("%d/%m/%Y %H:%M")  # Date actuelle avec heure et minute
+            "date_du_calcul": datetime.now().strftime("%d/%m/%Y %H:%M")  # Date actuelle avec heure et minute
         },
-        "indicateurs_msna": {
+        "indicateurs_msna_par_dimension": {
             "accès": st_session_state.get('access_var'),
             "conditions_d_apprentissage": {
                 "Éducation perturbée en raison de l'absence des enseignants": st_session_state.get('teacher_disruption_var'),
@@ -47,19 +47,19 @@ def generate_parameters_FR(st_session_state):
         },
         "classification_de_sévérité": {
             "niveau_de_sévérité_3": {
-                "description": "Enfants hors école qui ne subissent PAS de circonstances aggravantes ou enfants scolarisés dont l'éducation a été perturbée en raison de:",
-                "details1": st_session_state.get('teacher_disruption_var'),
-                "details2": st_session_state.get('natural_hazard_disruption_var'),
+                "description": "Enfants hors école qui ne subissent PAS de circonstances aggravantes ou enfants scolarisés dont l'éducation a été perturbée en raison de :",
+                "ind1_scolarisés": st_session_state.get('teacher_disruption_var'),
+                "ind2_scolarisés": st_session_state.get('natural_hazard_disruption_var'),
             },
             "niveau_de_sévérité_4": {
-                "description": "Enfants scolarisés dont l'éducation a été perturbée en raison de ou enfants hors école confrontés aux circonstances aggravantes suivantes.",
-                "details1": st_session_state.get('idp_disruption_var'),
-                "exemples": st_session_state.get('selected_severity_4_barriers', []),
+                "description": "Enfants scolarisés dont l'éducation a été perturbée en raison de (indicateur scolarisé) ou enfants hors école confrontés aux circonstances aggravantes suivantes.",
+                "indicateur_scolarisé": st_session_state.get('idp_disruption_var'),
+                "circonstances_aggravantes": st_session_state.get('selected_severity_4_barriers', []),
             },
             "niveau_de_sévérité_5": {
-                "description": "Enfants scolarisés dont l'éducation a été perturbée en raison de ou enfants hors école confrontés aux circonstances aggravantes suivantes.",
-                "details1": st_session_state.get('armed_disruption_var'),
-                "exemples": st_session_state.get('selected_severity_5_barriers', []),
+                "description": "Enfants scolarisés dont l'éducation a été perturbée en raison de (indicateur scolarisé) ou enfants hors école confrontés aux circonstances aggravantes suivantes.",
+                "indicateur_scolarisé": st_session_state.get('armed_disruption_var'),
+                "circonstances_aggravantes": st_session_state.get('selected_severity_5_barriers', []),
             },
         },
         "unité_administrative": {
@@ -72,7 +72,17 @@ def generate_parameters_FR(st_session_state):
     }
     return parameters
 
+
 def generate_word_document_FR(parameters):
+    """
+    Générer un document Word en français pour les paramètres.
+
+    Args:
+        parameters (dict): Dictionnaire des paramètres.
+
+    Returns:
+        BytesIO: Document Word généré.
+    """
     # Initialiser le document Word
     doc = docx.Document()
     doc.add_heading('Paramètres Utilisés comme Entrée pour le Calcul PiN', level=1)
@@ -84,48 +94,42 @@ def generate_word_document_FR(parameters):
         doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}: {value}", style='List Bullet')
 
     # Ajouter les Indicateurs MSNA
-    doc.add_heading('Indicateurs/variables MSNA par dimension', level=2)
-    msna_indicators = parameters["indicateurs_msna"]
+    doc.add_heading('Indicateurs/Variables MSNA par Dimension', level=2)
+    msna_indicators = parameters["indicateurs_msna_par_dimension"]
     for category, indicators in msna_indicators.items():
         if isinstance(indicators, dict):  # Catégories imbriquées
-            # Puce principale pour la catégorie avec formatage en gras
             category_paragraph = doc.add_paragraph(style='List Bullet')
             category_run = category_paragraph.add_run(f"{category.replace('_', ' ').capitalize()}:")
             category_run.bold = True
             for description, indicator in indicators.items():
-                # Sous-puces pour chaque indicateur
                 doc.add_paragraph(f"      {description}: {indicator}", style='List Bullet 2')
         else:
-            # Puce principale pour les catégories simples avec formatage en gras
             category_paragraph = doc.add_paragraph(style='List Bullet')
             category_run = category_paragraph.add_run(f"{category.replace('_', ' ').capitalize()}: {indicators}")
             category_run.bold = True
 
     # Ajouter la Classification de Sévérité
-    doc.add_heading('Classification de Sévérité utilisée pour ce calcul', level=2)
+    doc.add_heading('Classification de Sévérité Utilisée pour ce Calcul', level=2)
     severity_classification = parameters["classification_de_sévérité"]
     for level, details in severity_classification.items():
-        # Définir les couleurs pour les niveaux de sévérité
         color_map = {
-            "niveau_de_sévérité_3": RGBColor(255, 165, 0),  # Orange clair
-            "niveau_de_sévérité_4": RGBColor(255, 140, 0),  # Orange foncé
-            "niveau_de_sévérité_5": RGBColor(255, 69, 0),   # Rouge-orangé
+            "niveau_de_sévérité_3": RGBColor(255, 165, 0),
+            "niveau_de_sévérité_4": RGBColor(255, 140, 0),
+            "niveau_de_sévérité_5": RGBColor(255, 69, 0),
         }
 
-        # Ajouter le titre du niveau de sévérité
         severity_paragraph = doc.add_paragraph(style='List Bullet')
         severity_run = severity_paragraph.add_run(f"{level.replace('_', ' ').capitalize()}: ")
         severity_run.bold = True
         if level in color_map:
             severity_run.font.color.rgb = color_map[level]
 
-        # Gérer le Niveau de Sévérité 3 avec deux détails
         if level == "niveau_de_sévérité_3":
             description = details["description"]
             severity_paragraph.add_run(description + " ")
-            if "details1" in details and "details2" in details:
-                detail_1 = details["details1"]
-                detail_2 = details["details2"]
+            if "ind1_scolarisés" in details and "ind2_scolarisés" in details:
+                detail_1 = details["ind1_scolarisés"]
+                detail_2 = details["ind2_scolarisés"]
                 detail_run1 = severity_paragraph.add_run(detail_1)
                 detail_run1.bold = True
                 severity_paragraph.add_run(" et ")
@@ -133,21 +137,20 @@ def generate_word_document_FR(parameters):
                 detail_run2.bold = True
                 severity_paragraph.add_run(".")
 
-        # Gérer les Niveaux de Sévérité 4 et 5 avec un détail
         elif level in ["niveau_de_sévérité_4", "niveau_de_sévérité_5"]:
             description = details["description"]
+            description = description.replace("en raison de (indicateur scolarisé)", "en raison de")
             description_parts = description.split("en raison de")
             severity_paragraph.add_run(description_parts[0] + "en raison de ")
-            if "details1" in details:
-                detail_1 = details["details1"]
+            if "indicateur_scolarisé" in details:
+                detail_1 = details["indicateur_scolarisé"]
                 detail_run = severity_paragraph.add_run(detail_1)
                 detail_run.bold = True
             if len(description_parts) > 1:
                 severity_paragraph.add_run(description_parts[1])
 
-        # Ajouter des exemples comme sous-puces
-        if "exemples" in details:
-            for example in details["exemples"]:
+        if "circonstances_aggravantes" in details:
+            for example in details["circonstances_aggravantes"]:
                 example_paragraph = doc.add_paragraph(style='List Bullet 2')
                 example_paragraph.add_run(f"      {example}")
 
@@ -160,7 +163,6 @@ def generate_word_document_FR(parameters):
     # Ajouter les Cycles Scolaires
     doc.add_heading('Cycles Scolaires', level=2)
     school_cycles = parameters.get("cycles_scolaires", {})
-    # Rapporter les 'tranches_d_age' (vector_cycle) telles quelles
     age_ranges = school_cycles.get("tranches_d_age", [])
     doc.add_paragraph(f"Tranches d'âge: {age_ranges}", style='List Bullet')
 
