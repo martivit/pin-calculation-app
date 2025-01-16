@@ -449,6 +449,22 @@ def select_indicators():
         # taking out the edu_kobo
         label_selected = st.session_state['label_selected'] 
         survey_data = st.session_state['survey_data']
+
+        required_columns = ['name', label_selected]
+        missing_columns = [col for col in required_columns if col not in survey_data.columns]
+
+        if not missing_columns:
+            # Extract only the necessary columns
+            extracted_columns_edu_kobo = survey_data[['name', label_selected]]
+
+            st.write("Extracted Columns from Survey Data:")
+            st.dataframe(extracted_columns_edu_kobo)
+        else:
+            # Display error if required columns are missing
+            st.error(f"Missing columns in survey data: {', '.join(missing_columns)}")
+
+
+
         extracted_columns_edu_kobo = survey_data[['name', label_selected]]
 
         filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
