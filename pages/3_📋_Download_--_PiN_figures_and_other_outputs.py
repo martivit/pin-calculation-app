@@ -206,7 +206,7 @@ if ocha_data is not None:
             ocha=True,
             tot_severity=Tot_PiN_by_admin,
             selected_language=selected_language,
-            parameters=parameters_FR  # Pass French parameters
+            parameters=parameters_FR  
         )
     else:
         ocha_excel = create_output(
@@ -219,7 +219,7 @@ if ocha_data is not None:
             ocha=True,
             tot_severity=Tot_PiN_by_admin,
             selected_language=selected_language,
-            parameters=parameters  # Pass English parameters
+            parameters=parameters  
         )
 
 

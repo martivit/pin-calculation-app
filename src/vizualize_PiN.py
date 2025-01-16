@@ -417,22 +417,20 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
                 ])
                 parameters_df.to_excel(writer, sheet_name="Parameters Used", index=False)
             elif selected_language == "French":
-                parameters_df = pd.DataFrame([
-                    {"Catégorie": "Informations générales", "Clé": key, "Valeur": value}
-                    for key, value in parameters["informations_generales"].items()
-                ] + [
-                    {"Catégorie": "Indicateurs MSNA par dimension du PiN", "Clé": key, "Valeur": str(value)}
-                    for key, value in parameters["indicateurs_msna_par_dimension"].items()
-                ] + [
-                    {"Catégorie": "Classification de la sévérité", "Clé": key, "Valeur": str(value)}
-                    for key, value in parameters["classification_de_sévérité"].items()
-                ] + [
-                    {"Catégorie": "Unité d’analyse HNO", "Clé": key, "Valeur": str(value)}
-                    for key, value in parameters["unité_administrative"].items()
-                ] + [
-                    {"Catégorie": "Cycles scolaires", "Clé": key, "Valeur": str(value)}
-                    for key, value in parameters["cycles_scolaires"].items()
-                ])
+                parameters_df = pd.DataFrame(
+                    [{"Catégorie": "Informations générales", "Clé": key, "Valeur": value}
+                    for key, value in parameters["informations_generales"].items()] +
+                    [{"Catégorie": "Indicateurs MSNA par dimension du PiN", "Clé": f"{key} - {sub_key}", "Valeur": sub_value}
+                    for key, sub_dict in parameters["indicateurs_msna_par_dimension"].items()
+                    for sub_key, sub_value in (sub_dict.items() if isinstance(sub_dict, dict) else [(key, sub_dict)])] +
+                    [{"Catégorie": "Classification de la sévérité", "Clé": f"{key} - {sub_key}", "Valeur": sub_value}
+                    for key, sub_dict in parameters["classification_de_sévérité"].items()
+                    for sub_key, sub_value in sub_dict.items()] +
+                    [{"Catégorie": "Unité d’analyse HNO", "Clé": key, "Valeur": value}
+                    for key, value in parameters["unité_administrative"].items()] +
+                    [{"Catégorie": "Cycles scolaires", "Clé": key, "Valeur": value}
+                    for key, value in parameters["cycles_scolaires"].items()]
+                )
                 parameters_df.to_excel(writer, sheet_name="Paramètres Utilisés", index=False)
 
 
