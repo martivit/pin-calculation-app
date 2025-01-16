@@ -447,17 +447,17 @@ def select_indicators():
         edu_data = st.session_state['edu_data']
 
         # taking out the edu_kobo
-        label_selected = st.session_state['label_selected'] 
+        label =  st.session_state.get('label')
         survey_data = st.session_state['survey_data']
-        st.write(label_selected)
+        st.write(label)
         
 
 
-        #extracted_columns_edu_kobo = survey_data[['name', label_selected]]
+        extracted_columns_edu_kobo = survey_data[['name', label]]
 
-        #filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
-        #first_match_index = filtered_edu_access.index.min()
-        #filtered_edu_kobo = extracted_columns_edu_kobo.iloc[first_match_index:first_match_index + 15]
+        filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
+        first_match_index = filtered_edu_access.index.min()
+        filtered_edu_kobo = extracted_columns_edu_kobo.iloc[first_match_index:first_match_index + 15]
 
 
         # Display the translated subheader
@@ -480,8 +480,8 @@ def select_indicators():
         if gender_suggestions:
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
-        #st.write(translations['show_kobo'])
-        #st.dataframe(filtered_edu_kobo)
+        st.write(translations['show_kobo'])
+        st.dataframe(filtered_edu_kobo)
 
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
