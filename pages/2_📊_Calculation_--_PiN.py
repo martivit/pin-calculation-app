@@ -445,11 +445,16 @@ filter_strings = [
 def select_indicators():
     if 'edu_data' in st.session_state and 'survey_data' in st.session_state and st.session_state.get('label_selected', False) :
         edu_data = st.session_state['edu_data']
+
         # taking out the edu_kobo
+        label_selected = st.session_state['label_selected'] 
         survey_data = st.session_state['survey_data']
-        extracted_columns_edu_kobo = survey_data.iloc[:, [1, 2, 3]]
-        filtered_edu_kobo = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
-        filtered_edu_kobo = filtered_edu_kobo.head(15)
+        extracted_columns_edu_kobo = survey_data[['name', label_selected]]
+
+        filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
+        first_match_index = filtered_edu_access.index.min()
+        filtered_edu_kobo = extracted_columns_edu_kobo.iloc[first_match_index:first_match_index + 15]
+
 
         # Display the translated subheader
         st.subheader(translations["select_variables_and_indicators_subheader"])
@@ -471,8 +476,9 @@ def select_indicators():
         if gender_suggestions:
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
-        st.write("Use the kobo questionaire to identify the correct MSNA indicators:")
+        st.write(translations['show_kobo'])
         st.dataframe(filtered_edu_kobo)
+
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
         if education_indicator_suggestions:

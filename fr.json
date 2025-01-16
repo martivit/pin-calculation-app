@@ -107,7 +107,8 @@
     "scope_fix_warning": "Cocher cette case indique qu'il existe un décalage entre le niveau de représentativité de l'évaluation et l'unité d'analyse pour le HNO. Veuillez vérifier attentivement vos données et sélections pour éviter des erreurs dans le calcul.",
     "mismatch_admin_message": "Il peut y avoir un décalage entre l'unité d'analyse de l'HNO et le niveau administratif auquel les données de l'évaluation MSNA sont représentatives.",
     "mismatch_admin_example": "Par exemple, les données MSNA pourraient être représentatives au niveau Admin 2, tandis que l'unité d'analyse de l'HNO pourrait être au niveau Admin 3..<br>Si vous cochez cette case, vous confirmez qu'un tel décalage existe. Dans ce cas, assurez-vous que la feuille 'scope-fix' dans le fichier OCHA liste les unités administratives concernées par ce décalage ainsi que leurs niveaux correspondants. Consultez le modèle fourni pour des instructions sur la manière de remplir correctement la feuille 'scope-fix'.",
-    "download_all":"Télécharger tous les documents PiN"
+    "download_all":"Télécharger tous les documents PiN",
+    "show_kobo":"Utilisez le questionnaire kobo pour identifier les indicateurs MSNA corrects :"
 
 
 
