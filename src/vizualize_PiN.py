@@ -422,7 +422,7 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
                     for key, value in parameters["informations_generales"].items()
                 ] + [
                     {"Catégorie": "Indicateurs MSNA par dimension du PiN", "Clé": key, "Valeur": str(value)}
-                    for key, value in parameters["indicateurs_msna"].items()
+                    for key, value in parameters["indicateurs_msna_par_dimension"].items()
                 ] + [
                     {"Catégorie": "Classification de la sévérité", "Clé": key, "Valeur": str(value)}
                     for key, value in parameters["classification_de_sévérité"].items()
