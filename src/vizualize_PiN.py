@@ -399,22 +399,20 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
 
         if parameters:
             if selected_language == "English":
-                parameters_df = pd.DataFrame([
-                    {"Category": "General Information", "Key": key, "Value": value}
-                    for key, value in parameters["general_info"].items()
-                ] + [
-                    {"Category": "MSNA Indicators per PiN dimension", "Key": key, "Value": str(value)}
-                    for key, value in parameters["msna_indicators_per_PiN_dimension"].items()
-                ] + [
-                    {"Category": "Severity Classification", "Key": key, "Value": str(value)}
-                    for key, value in parameters["severity_classification"].items()
-                ] + [
-                    {"Category": "HNO Unit of analysis", "Key": key, "Value": str(value)}
-                    for key, value in parameters["admin_unit"].items()
-                ] + [
-                    {"Category": "School Cycles", "Key": key, "Value": str(value)}
-                    for key, value in parameters["school_cycles"].items()
-                ])
+                parameters_df = pd.DataFrame(
+                    [{"Category": "General Information", "Key": key, "Value": value}
+                    for key, value in parameters["general_info"].items()] +
+                    [{"Category": "MSNA Indicators per PiN dimension", "Key": f"{key} - {sub_key}", "Value": sub_value}
+                    for key, sub_dict in parameters["msna_indicators_per_PiN_dimension"].items()
+                    for sub_key, sub_value in (sub_dict.items() if isinstance(sub_dict, dict) else [(key, sub_dict)])] +
+                    [{"Category": "Severity Classification", "Key": f"{key} - {sub_key}", "Value": sub_value}
+                    for key, sub_dict in parameters["severity_classification"].items()
+                    for sub_key, sub_value in sub_dict.items()] +
+                    [{"Category": "HNO Unit of analysis", "Key": key, "Value": value}
+                    for key, value in parameters["admin_unit"].items()] +
+                    [{"Category": "School Cycles", "Key": key, "Value": value}
+                    for key, value in parameters["school_cycles"].items()]
+                )
                 parameters_df.to_excel(writer, sheet_name="Parameters Used", index=False)
             elif selected_language == "French":
                 parameters_df = pd.DataFrame(
