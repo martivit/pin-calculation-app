@@ -449,10 +449,7 @@ def select_indicators():
         # taking out the edu_kobo
         label =  st.session_state.get('label')
         survey_data = st.session_state['survey_data']
-        st.write(label)
         
-
-
         extracted_columns_edu_kobo = survey_data[['name', label]]
 
         filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
@@ -480,8 +477,19 @@ def select_indicators():
         if gender_suggestions:
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
-        st.write(translations['show_kobo'])
-        st.dataframe(filtered_edu_kobo)
+        st.markdown(
+                """
+                <div style="background-color: #f9f9f9; border-left: 5px solid #4CAF50; padding: 10px; margin-bottom: 20px;">
+                    <h4 style="color: #4CAF50;">{}</h4>
+                </div>
+                """.format(translations['show_kobo']),
+                unsafe_allow_html=True
+            )
+        st.dataframe(
+                filtered_edu_kobo.style.set_properties(
+                    **{'background-color': '#e8f5e9', 'border': '1px solid #4CAF50'}
+                )
+            )
 
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
