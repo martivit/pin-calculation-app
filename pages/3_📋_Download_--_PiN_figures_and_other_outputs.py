@@ -20,6 +20,7 @@ from shared_utils import language_selector
 import requests
 import base64
 from datetime import datetime
+import zipfile
 
 
 
@@ -106,7 +107,18 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
 
 
 
-
+def create_zip_file(country_label, excel_file, word_snapshot, word_parameters):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
+    zip_buffer = BytesIO()  # Create an in-memory ZIP file
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        # Add the Excel file with timestamp
+        zip_file.writestr(f"PiN_results_{country_label}_{timestamp}.xlsx", excel_file.getvalue())
+        # Add the Word Snapshot with timestamp
+        zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
+        # Add the Parameters Word Document with timestamp
+        zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", word_parameters.getvalue())
+    zip_buffer.seek(0)  # Reset the buffer to the beginning
+    return zip_buffer
 
 
 
@@ -193,7 +205,6 @@ if ocha_data is not None:
 
     label_total_pin_sheet = "PiN TOTAL"
 
-
     #ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language, parameters=parameters)
     if selected_language == "French":
         ocha_excel = create_output(
@@ -230,6 +241,57 @@ if ocha_data is not None:
     if selected_language == "French":
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
         doc_parameter_output = generate_word_document_FR(parameters_FR)
+
+    zip_file_name = f"PiN_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
+    zip_file = create_zip_file(country_label, ocha_excel, doc_output, doc_parameter_output)
+
+    # Create a single download button for the ZIP file
+    if st.download_button(
+        label="Download All PiN Documents",
+        data=zip_file,
+        file_name=zip_file_name,
+        mime="application/zip"
+    ):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        try:
+            repo_name = "martivit/pin-calculation-app"
+            branch_name = "develop_2025"
+
+            # File paths in the repository
+            file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_results_{country}_{timestamp}.xlsx"
+            file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
+
+            github_token = st.secrets["github"]["token"]
+
+            # Upload the Excel file
+            pr_url_excel = upload_to_github(
+                file_content=ocha_excel.getvalue(),
+                file_name=file_path_in_repo_excel,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=f"Add PiN results (Excel) for {country_label}",
+                token=github_token
+            )
+
+            # Upload the Word document
+            pr_url_doc = upload_to_github(
+                file_content=doc_output.getvalue(),
+                file_name=file_path_in_repo_doc,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=f"Add PiN snapshot (Word) for {country_label}",
+                token=github_token
+            )
+
+            # Success message
+            st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+            st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
+
+        except Exception as e:
+            st.error(f"Failed to upload to GitHub: {e}")
+ 
+
+
 
     if st.download_button(
         label=translations["download_pin"],
