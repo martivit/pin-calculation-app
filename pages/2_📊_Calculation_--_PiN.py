@@ -449,27 +449,15 @@ def select_indicators():
         # taking out the edu_kobo
         label_selected = st.session_state['label_selected'] 
         survey_data = st.session_state['survey_data']
-
-        required_columns = ['name', label_selected]
-        missing_columns = [col for col in required_columns if col not in survey_data.columns]
-
-        if not missing_columns:
-            # Extract only the necessary columns
-            extracted_columns_edu_kobo = survey_data[['name', label_selected]]
-
-            st.write("Extracted Columns from Survey Data:")
-            st.dataframe(extracted_columns_edu_kobo)
-        else:
-            # Display error if required columns are missing
-            st.error(f"Missing columns in survey data: {', '.join(missing_columns)}")
+        st.write(label_selected)
+        
 
 
+        #extracted_columns_edu_kobo = survey_data[['name', label_selected]]
 
-        extracted_columns_edu_kobo = survey_data[['name', label_selected]]
-
-        filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
-        first_match_index = filtered_edu_access.index.min()
-        filtered_edu_kobo = extracted_columns_edu_kobo.iloc[first_match_index:first_match_index + 15]
+        #filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
+        #first_match_index = filtered_edu_access.index.min()
+        #filtered_edu_kobo = extracted_columns_edu_kobo.iloc[first_match_index:first_match_index + 15]
 
 
         # Display the translated subheader
@@ -492,8 +480,8 @@ def select_indicators():
         if gender_suggestions:
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
-        st.write(translations['show_kobo'])
-        st.dataframe(filtered_edu_kobo)
+        #st.write(translations['show_kobo'])
+        #st.dataframe(filtered_edu_kobo)
 
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
