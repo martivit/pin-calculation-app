@@ -298,8 +298,9 @@ if ocha_data is not None:
             if pr_url_doc:
                 st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
 
-        except Exception as e:
-            st.error(f"Unexpected error during GitHub upload: {e}")
+        except Exception:
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
  
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
