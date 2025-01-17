@@ -342,7 +342,7 @@ def display_filtered_kobo(filtered_edu_kobo, string = 'show kobo'):
         filtered_edu_kobo = filtered_edu_kobo.reset_index(drop=True)
         
         # Display as a table to remove row numbers completely
-        st.table(filtered_edu_kobo.style.set_properties(
+        st.dataframe(filtered_edu_kobo.style.set_properties(
             **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
         ))
     else:
