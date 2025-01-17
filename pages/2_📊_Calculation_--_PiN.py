@@ -631,14 +631,16 @@ def finalize_details():
 
 
         ## -------------------- school cycle -----------------------------------
+        st.markdown("---")  # Markdown horizontal rule
+
         school_cycle_question = translations["school_cycle_question"]["question"]
         option_two = translations["school_cycle_question"]["option_two"]
         option_three = translations["school_cycle_question"]["option_three"]
         st.markdown(
             f"""
-            <div style="padding: 10px; background-color: #f9f9f9; border-radius: 5px; margin-bottom: 10px;">
-                <strong style="font-size: 18px;">{school_cycle_question}</strong>
-                <p style="font-size: 14px; color: #555;">
+            <div style="margin-bottom: 10px;">
+                <strong style="font-size: 20px;">{school_cycle_question}</strong>
+                <p style="font-size: 18px; color: #333; margin-top: 8px;">
                     {option_two}<br>
                     {option_three}
                 </p>
