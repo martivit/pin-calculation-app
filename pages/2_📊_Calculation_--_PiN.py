@@ -640,7 +640,7 @@ def finalize_details():
             f"""
             <div style="margin-bottom: 0;">
                 <strong style="font-size: 18px;">{school_cycle_question}</strong>
-                <p style="font-size: 16px; color: #333; margin-top: 8px;">
+                <p style="font-size: 16px; color: #333; margin-top: 5px;">
                     {option_two}<br>
                     {option_three}
                 </p>
@@ -649,8 +649,21 @@ def finalize_details():
             unsafe_allow_html=True
         )
 
+        # Custom style to reduce spacing in radio buttons
+        st.markdown(
+            """
+            <style>
+            div[data-baseweb="radio"] > div {
+                margin-top: -10px; /* Adjust this value to reduce spacing */
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Radio button for school cycle selection
         school_cycle_count = st.radio(
-            label="",  # Leave empty as question is rendered above
+            label="",  # Leave empty as the question is rendered above
             options=[2, 3],
             index=0,
             key="school_cycle_count"
