@@ -277,8 +277,9 @@ if ocha_data is not None:
                     commit_message=f"Add PiN results (Excel) for {country_label}",
                     token=github_token
                 )
-            except Exception as e:
-                st.error(f"Failed to upload Excel file to GitHub: {e}")
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Excel file to GitHub: {e}")
 
             try:
                 pr_url_doc = upload_to_github(
@@ -289,8 +290,9 @@ if ocha_data is not None:
                     commit_message=f"Add PiN snapshot (Word) for {country_label}",
                     token=github_token
                 )
-            except Exception as e:
-                st.error(f"Failed to upload Word document to GitHub: {e}")
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")
 
             # Display success messages only if files were successfully uploaded
             if pr_url_excel:
