@@ -335,6 +335,26 @@ def update_other_parameters_status():
 ##---------------------------------------------------------------------------------------------------------
 def find_matching_columns(dataframe, keywords):
     return [col for col in dataframe.columns if any(kw in col.lower() for kw in keywords)]
+##--------------------------------------------------------------------------------------------------------
+def display_filtered_kobo(filtered_edu_kobo, translations):
+    """Displays the filtered data with enhanced styling."""
+    if not filtered_edu_kobo.empty:
+        st.markdown("---")
+        st.markdown(
+            """
+            <div style="background-color: #f9f9f9; border-left: 5px solid #21B1FF; padding: 10px; margin-bottom: 20px;">
+                <h4 style="color: #21B1FF;">{}</h4>
+            </div>
+            """.format(translations['show_kobo']),
+            unsafe_allow_html=True
+        )
+        st.dataframe(
+            filtered_edu_kobo.style.set_properties(
+                **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
+            )
+        )
+    else:
+        st.warning(translations.get('no_data_found', "No matching data found for the selected criteria."))
  
 ##---------------------------------------------------------------------------------------------------------
 def handle_displacement_column_selection():
@@ -476,19 +496,8 @@ def select_indicators():
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
         st.markdown("---")  # Markdown horizontal rule
-        st.markdown(
-                """
-                <div style="background-color: #f9f9f9; border-left: 5px solid #21B1FF; padding: 10px; margin-bottom: 20px;">
-                    <h4 style="color: #21B1FF;">{}</h4>
-                </div>
-                """.format(translations['show_kobo']),
-                unsafe_allow_html=True
-            )
-        st.dataframe(
-                filtered_edu_kobo.style.set_properties(
-                    **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
-                )
-            )
+        with st.expander("Filtered Kobo Data"):
+            display_filtered_kobo(filtered_edu_kobo, translations)
 
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
@@ -707,7 +716,7 @@ def finalize_details():
             upper_primary_start = st.session_state['lower_primary_end'] + 1
             secondary_start = st.session_state['upper_primary_end'] + 1
 
-            if st.button('Confirm 3-Cycle Configuration and Age Ranges'):
+            if st.button(translations["school_confirm_3"]):
                 st.session_state.upper_primary_end_confirmed = True
                 if upper_primary_end != st.session_state['upper_primary_end']:
                     upper_primary_end = st.session_state['upper_primary_end'] 
@@ -744,7 +753,7 @@ def finalize_details():
                     key='lower_primary_end'
                 )
 
-            if st.button('Confirm 2-Cycle Configuration and Age Ranges'):
+            if st.button(translations["school_confirm_2"]):
                 st.session_state.upper_primary_end_confirmed = True
                 primary_end = st.session_state['lower_primary_end']
                 secondary_start = primary_end + 1
