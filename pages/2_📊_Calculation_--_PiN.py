@@ -637,7 +637,7 @@ def finalize_details():
         option_two = translations["school_cycle_question"]["option_two"]
         option_three = translations["school_cycle_question"]["option_three"]
         # Render the question and options in two columns
-        col1, col2 = st.columns([2, 1])  # Adjust width proportions as needed
+        col1, col2 = st.columns([1, 1])  # Adjust width proportions as needed
 
         # First column: Question and explanation
         with col1:
@@ -670,7 +670,7 @@ def finalize_details():
 
 
 
-            
+
         if school_cycle_count == 3:
             upper_primary_start = st.session_state['lower_primary_end'] +1
             if st.session_state['country'] != 'Afghanistan -- AFG':
