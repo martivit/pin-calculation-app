@@ -336,7 +336,7 @@ def update_other_parameters_status():
 def find_matching_columns(dataframe, keywords):
     return [col for col in dataframe.columns if any(kw in col.lower() for kw in keywords)]
 ##--------------------------------------------------------------------------------------------------------
-def display_filtered_kobo(filtered_edu_kobo, translations):
+def display_filtered_kobo(filtered_edu_kobo, string = 'show kobo'):
     """Displays the filtered data with enhanced styling."""
     if not filtered_edu_kobo.empty:
         st.markdown("---")
@@ -345,7 +345,7 @@ def display_filtered_kobo(filtered_edu_kobo, translations):
             <div style="background-color: #f9f9f9; border-left: 5px solid #21B1FF; padding: 10px; margin-bottom: 20px;">
                 <h4 style="color: #21B1FF;">{}</h4>
             </div>
-            """.format(translations['show_kobo']),
+            """.format(string),
             unsafe_allow_html=True
         )
         st.dataframe(
@@ -497,7 +497,7 @@ def select_indicators():
 
         st.markdown("---")  # Markdown horizontal rule
         with st.expander("Filtered Kobo Data"):
-            display_filtered_kobo(filtered_edu_kobo, translations)
+            display_filtered_kobo(filtered_edu_kobo, translations["show_kobo"])
 
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
