@@ -488,12 +488,12 @@ def select_indicators():
         if st.checkbox(translations["display_education_data_header_checkbox"]):
             st.dataframe(edu_data.head())
         
-        with st.container(border=True):
-            if age_suggestions:
-                age_found = handle_column_selection(age_suggestions, 'age')
-                st.session_state['age_var'] = age_found
-            if gender_suggestions:
-                st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
+       
+        if age_suggestions:
+            age_found = handle_column_selection(age_suggestions, 'age')
+            st.session_state['age_var'] = age_found
+        if gender_suggestions:
+            st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
         st.markdown(
             """
