@@ -636,38 +636,41 @@ def finalize_details():
         school_cycle_question = translations["school_cycle_question"]["question"]
         option_two = translations["school_cycle_question"]["option_two"]
         option_three = translations["school_cycle_question"]["option_three"]
-        st.markdown(
-            f"""
-            <div style="margin-bottom: 0;">
-                <strong style="font-size: 18px;">{school_cycle_question}</strong>
-                <p style="font-size: 16px; color: #333; margin-top: 5px;">
-                    {option_two}<br>
-                    {option_three}
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Render the question and options in two columns
+        col1, col2 = st.columns([2, 1])  # Adjust width proportions as needed
 
-        # Custom style to reduce spacing in radio buttons
-        st.markdown(
-            """
-            <style>
-            div[data-baseweb="radio"] > div {
-                margin-top: -10px; /* Adjust this value to reduce spacing */
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+        # First column: Question and explanation
+        with col1:
+            school_cycle_question = translations["school_cycle_question"]["question"]
+            option_two = translations["school_cycle_question"]["option_two"]
+            option_three = translations["school_cycle_question"]["option_three"]
 
-        # Radio button for school cycle selection
-        school_cycle_count = st.radio(
-            label="",  # Leave empty as the question is rendered above
-            options=[2, 3],
-            index=0,
-            key="school_cycle_count"
-        )
+            st.markdown(
+                f"""
+                <div style="margin-bottom: 0;">
+                    <strong style="font-size: 18px;">{school_cycle_question}</strong>
+                    <p style="font-size: 16px; color: #333; margin-top: 5px;">
+                        {option_two}<br>
+                        {option_three}
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        # Second column: Radio button
+        with col2:
+            school_cycle_count = st.radio(
+                label="",  # Leave empty as the question is rendered in col1
+                options=[2, 3],
+                index=0,
+                key="school_cycle_count"
+            )
+
+
+
+
+            
         if school_cycle_count == 3:
             upper_primary_start = st.session_state['lower_primary_end'] +1
             if st.session_state['country'] != 'Afghanistan -- AFG':
