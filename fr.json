@@ -113,7 +113,9 @@
       "question": "Combien de cycles l'école a-t-elle ?",
       "option_two": "2 → Primaire et secondaire",
       "option_three": "3 → Primaire, Intermédiaire et Secondaire "
-    }
+    },
+    "expand_kobo":"Indicateurs MSNA de l'éducation"
+
 
 
   }
