@@ -336,7 +336,7 @@ def update_other_parameters_status():
 def find_matching_columns(dataframe, keywords):
     return [col for col in dataframe.columns if any(kw in col.lower() for kw in keywords)]
 ##--------------------------------------------------------------------------------------------------------
-def display_filtered_kobo(filtered_edu_kobo, string = 'show kobo'):
+def display_filtered_kobo(filtered_edu_kobo, string_second_column = 'label'):
     """Displays the filtered data with enhanced styling."""
     if not filtered_edu_kobo.empty:       
         filtered_edu_kobo = filtered_edu_kobo.reset_index(drop=True)
@@ -345,8 +345,12 @@ def display_filtered_kobo(filtered_edu_kobo, string = 'show kobo'):
         st.dataframe(filtered_edu_kobo.style.set_properties(
             **{'background-color': '#DDE6D5', 'border': '1px solid #4CAF50'}
         ),
-        use_container_width=True  # Adjust the table to fit the container width
-
+        use_container_width=True,  # Adjust the table to fit the container width
+        hide_index=True,
+        column_config={
+            "name" : "Name indicator",
+            string_second_column: "Question"
+        }
         )
     else:
         st.warning(translations.get('no_data_found', "No matching data found for the selected criteria."))
@@ -500,7 +504,7 @@ def select_indicators():
             unsafe_allow_html=True
         )
         with st.expander(translations["expand_kobo"]):
-            display_filtered_kobo(filtered_edu_kobo, translations["show_kobo"])
+            display_filtered_kobo(filtered_edu_kobo, label)
 
 
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
