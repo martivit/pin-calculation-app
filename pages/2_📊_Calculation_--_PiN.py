@@ -638,7 +638,7 @@ def finalize_details():
         option_three = translations["school_cycle_question"]["option_three"]
         st.markdown(
             f"""
-            <div style="margin-bottom: 1px;">
+            <div style="margin-bottom: 0;">
                 <strong style="font-size: 18px;">{school_cycle_question}</strong>
                 <p style="font-size: 16px; color: #333; margin-top: 8px;">
                     {option_two}<br>
