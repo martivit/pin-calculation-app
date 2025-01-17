@@ -638,7 +638,7 @@ def finalize_details():
         option_three = translations["school_cycle_question"]["option_three"]
         # Render the question and options in two columns
         col1, col2 = st.columns([1, 1])  # Adjust width proportions as needed
-
+        school_cycle_count = 0
         # First column: Question and explanation
         with col1:
             school_cycle_question = translations["school_cycle_question"]["question"]
