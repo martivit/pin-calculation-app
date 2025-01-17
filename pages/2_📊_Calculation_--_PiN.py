@@ -510,19 +510,18 @@ def select_indicators():
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
         if education_indicator_suggestions:
-            st.markdown("---")  # Markdown horizontal rule
             with st.container(border=True):
                 st.session_state['access_var'] = handle_full_selection(current_country,education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
-            st.markdown("---")  # Markdown horizontal rule
-            st.session_state['teacher_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
-            st.markdown("---")  # Markdown horizontal rule
-            st.session_state['natural_hazard_disruption_var'] =  handle_natural_hazard_disruption_selection(current_country, education_indicator_suggestions) 
-            st.markdown("---")  # Markdown horizontal rule
-            st.session_state['idp_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
-            st.markdown("---")  # Markdown horizontal rule
-            st.session_state['armed_disruption_var'] =  handle_armed_disruption_selection(current_country, education_indicator_suggestions)  
-            st.markdown("---")  # Markdown horizontal rule
-            st.session_state['barrier_var'] = handle_full_selection(current_country, education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
+            with st.container(border=True):
+                st.session_state['teacher_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
+            with st.container(border=True):
+                st.session_state['natural_hazard_disruption_var'] =  handle_natural_hazard_disruption_selection(current_country, education_indicator_suggestions) 
+            with st.container(border=True):
+                st.session_state['idp_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
+            with st.container(border=True):
+                st.session_state['armed_disruption_var'] =  handle_armed_disruption_selection(current_country, education_indicator_suggestions)  
+            with st.container(border=True):
+                st.session_state['barrier_var'] = handle_full_selection(current_country, education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
             check_for_duplicate_selections()
         if st.button(translations["confirm_indicators"]):
             st.session_state.indicators_confirmed = True
