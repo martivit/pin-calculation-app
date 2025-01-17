@@ -511,7 +511,8 @@ def select_indicators():
             current_country = st.session_state['country']
         if education_indicator_suggestions:
             st.markdown("---")  # Markdown horizontal rule
-            st.session_state['access_var'] = handle_full_selection(current_country,education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
+            with st.container(border=True):
+                st.session_state['access_var'] = handle_full_selection(current_country,education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
             st.markdown("---")  # Markdown horizontal rule
             st.session_state['teacher_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
             st.markdown("---")  # Markdown horizontal rule
