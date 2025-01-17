@@ -545,10 +545,11 @@ def define_severity():
 
         # Encapsulate descriptions within a single box with a light gray background
         st.markdown(translations["severity_circumstances_html"], unsafe_allow_html=True)
-        
-        selected_severity_4_barriers = select_severity_barriers(barrier_options, 4)
+        with st.container(border=True):
+            selected_severity_4_barriers = select_severity_barriers(barrier_options, 4)
         barrier_options_5 = [option for option in barrier_options if option not in selected_severity_4_barriers]
-        selected_severity_5_barriers = select_severity_barriers(barrier_options_5, 5)
+        with st.container(border=True):
+            selected_severity_5_barriers = select_severity_barriers(barrier_options_5, 5)
         if st.button(translations["confirm_severity_all"]):
             st.session_state.severity_confirmed = True
             st.success(translations["success_severity_all"])
