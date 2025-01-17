@@ -462,6 +462,7 @@ def select_indicators():
         survey_data = st.session_state['survey_data']
         
         extracted_columns_edu_kobo = survey_data[['name', label]]
+        extracted_columns_edu_kobo = extracted_columns_edu_kobo.dropna(subset=[label])
 
         filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(edu_access_strings)]
         first_match_index = filtered_edu_access.index.min()
