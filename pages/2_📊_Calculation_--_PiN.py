@@ -658,10 +658,8 @@ def finalize_details():
                     key='lower_primary_end'
                 )
 
-            if st.button('Ok'):
-                st.session_state.single_cycle = False
-                lower_primary_end = st.session_state['lower_primary_end'] 
-                upper_primary_start = lower_primary_end +1                   
+            lower_primary_end = st.session_state['lower_primary_end'] 
+            upper_primary_start = lower_primary_end +1                   
 
             upper_primary_end = st.slider(
                 translations["school3"],
@@ -684,10 +682,10 @@ def finalize_details():
                 if st.session_state['country'] != 'Afghanistan -- AFG': school4_message = translations["school4"]
                 else: school4_message = translations["school4_afg"]
                 school4_content = school4_message.format(
-                lower_primary_end=lower_primary_end,
-                upper_primary_start=upper_primary_start,
-                upper_primary_end=upper_primary_end,
-                secondary_start=secondary_start
+                    lower_primary_end=lower_primary_end,
+                    upper_primary_start=upper_primary_start,
+                    upper_primary_end=upper_primary_end,
+                    secondary_start=secondary_start
                 )
                 st.markdown(school4_content, unsafe_allow_html=True)
 
@@ -711,6 +709,8 @@ def finalize_details():
                     key='lower_primary_end'
                 )
 
+            if st.button('Confirm 2-Cycle Configuration and Age Ranges'):
+                st.session_state.upper_primary_end_confirmed = True
                 primary_end = st.session_state['lower_primary_end']
                 secondary_start = primary_end + 1
                 vect1 =  st.session_state['lower_primary_end']  
@@ -724,8 +724,8 @@ def finalize_details():
                     secondary_start=secondary_start
                 )
 
-            # Display the HTML content
-            st.markdown(school5_content, unsafe_allow_html=True)
+                # Display the HTML content
+                st.markdown(school5_content, unsafe_allow_html=True)
 
 
 
