@@ -107,7 +107,7 @@
     "mismatch_admin_example": "For example, the MSNA data might be representative at Admin 2, while the HNO unit of analysis is Admin 3.<br>If you click this box, you are confirming that such a mismatch exists. In this case, ensure that the 'scope-fix' sheet in the OCHA file lists the mismatched administrative units and their corresponding levels. Refer to the provided template for guidance on how to correctly fill the 'scope-fix' sheet.",
     "download_all": "Download All PiN Documents",
     "show_kobo":"Use the kobo questionaire to identify the correct MSNA indicators:",
-    "expand_kobo":"Education MSNA indicators",
+    "expand_kobo":"Inspect MSNA indicator",
 
     "school_cycle_question": {
       "question": "How many cycles does the school have?",

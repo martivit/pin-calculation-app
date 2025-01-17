@@ -491,7 +491,7 @@ def select_indicators():
         st.markdown("---")  # Markdown horizontal rule
         st.markdown(
             """
-            <div style="background-color: #f9f9f9; border-left: 2px solid #21B1FF; padding: 10px; margin-bottom: 0px;">
+            <div style="background-color: #f9f9f9; border-left: 2px solid #21B1FF; padding: 1px; margin-bottom: 0px;">
                 <h4 style="color: #21B1FF;">{}</h4>
             </div>
             """.format(translations["show_kobo"]),
