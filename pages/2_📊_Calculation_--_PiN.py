@@ -338,9 +338,9 @@ def find_matching_columns(dataframe, keywords):
 ##--------------------------------------------------------------------------------------------------------
 def display_filtered_kobo(filtered_edu_kobo, string = 'show kobo'):
     """Displays the filtered data with enhanced styling."""
-    if not filtered_edu_kobo.empty:
-        st.markdown("---")
-        
+    if not filtered_edu_kobo.empty:       
+        filtered_edu_kobo = filtered_edu_kobo.reset_index(drop=True)
+ 
         st.dataframe(
             filtered_edu_kobo.style.set_properties(
                 **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
@@ -499,6 +499,7 @@ def select_indicators():
         )
         with st.expander(translations["expand_kobo"]):
             display_filtered_kobo(filtered_edu_kobo, translations["show_kobo"])
+
 
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             current_country = st.session_state['country']
