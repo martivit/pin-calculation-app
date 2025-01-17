@@ -439,9 +439,7 @@ def upload_and_select_data():
 
 ##-----------------------------
 # Function to select indicators
-filter_strings = [
-    'edu_access', 'e_enfant_scolarise_formel', 'enrolled_school', 'Q5_6_1_edu_attendance', 'education_access', 'edu_scolarise'
-]
+edu_access_strings = [ 'edu_access', 'e_enfant_scolarise_formel', 'enrolled_school', 'Q5_6_1_edu_attendance', 'education_access', 'edu_scolarise']
 def select_indicators():
     if 'edu_data' in st.session_state and 'survey_data' in st.session_state and st.session_state.get('label_selected', False) :
         edu_data = st.session_state['edu_data']
@@ -452,7 +450,7 @@ def select_indicators():
         
         extracted_columns_edu_kobo = survey_data[['name', label]]
 
-        filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(filter_strings)]
+        filtered_edu_access = extracted_columns_edu_kobo[extracted_columns_edu_kobo.iloc[:, 0].isin(edu_access_strings)]
         first_match_index = filtered_edu_access.index.min()
         filtered_edu_kobo = extracted_columns_edu_kobo.iloc[first_match_index:first_match_index + 15]
 
@@ -477,6 +475,7 @@ def select_indicators():
         if gender_suggestions:
             st.session_state['gender_var'] = handle_column_selection(gender_suggestions, 'gender')
 
+        st.markdown("---")  # Markdown horizontal rule
         st.markdown(
                 """
                 <div style="background-color: #f9f9f9; border-left: 5px solid #21B1FF; padding: 10px; margin-bottom: 20px;">
@@ -548,7 +547,7 @@ def finalize_details():
         #admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
 
         # Check if the country has been selected on the first page
-            # Check if the country has been selected on the first page
+        # Check if the country has been selected on the first page
         if 'country' in st.session_state and st.session_state['country'] != 'no selection':
             selected_country = st.session_state['country']
             # Get the administrative levels for the selected country
@@ -624,10 +623,7 @@ def finalize_details():
             if start_school_selection != 'No selection':
                 st.session_state.school_start_month_confirmed = True
                 st.session_state['start_school'] = start_school_selection 
-
                 st.success(translations["success_start_school"])
-                pluto =  st.session_state['start_school']
-                st.write(pluto)
             else:
                 st.error("Please select a valid month.")
             #update_other_parameters_status()
@@ -635,40 +631,38 @@ def finalize_details():
 
 
         ## -------------------- school cycle -----------------------------------
-        upper_primary_start = st.session_state['lower_primary_end'] +1
-        if st.session_state['country'] != 'Afghanistan -- AFG':
-            lower_primary_end = st.slider(
-                translations["school1"],
-                min_value=6, 
-                max_value=17, 
-                value=st.session_state['lower_primary_end'],
-                step=1,
-                key='lower_primary_end'
-            )
-        else:
-            lower_primary_end = st.slider(
-                translations["school1"],
-                min_value=7, 
-                max_value=17, 
-                value=st.session_state['lower_primary_end'],
-                step=1,
-                key='lower_primary_end'
-            )
+        school_cycle_count = st.radio(
+            translations["school_cycle_question"],
+            options=[2, 3],
+            index=0,
+            key="school_cycle_count"
+        )
+        if school_cycle_count == 3:
+            upper_primary_start = st.session_state['lower_primary_end'] +1
+            if st.session_state['country'] != 'Afghanistan -- AFG':
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=6, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
+            else:
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=7, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button('OK'):
+            if st.button('Ok'):
                 st.session_state.single_cycle = False
                 lower_primary_end = st.session_state['lower_primary_end'] 
                 upper_primary_start = lower_primary_end +1                   
 
-        with col2:
-            if st.button(translations["school2"]):
-                st.session_state.single_cycle = True
-
-        # Depending on user selection, show different sliders or information
-        if 'single_cycle' in st.session_state and not st.session_state['single_cycle']:
-            # Slider for the upper primary school cycle age range
             upper_primary_end = st.slider(
                 translations["school3"],
                 min_value=upper_primary_start, 
@@ -679,8 +673,8 @@ def finalize_details():
             )
             upper_primary_start = st.session_state['lower_primary_end'] + 1
             secondary_start = st.session_state['upper_primary_end'] + 1
-            # Button to confirm the final age ranges
-            if st.button('Confirm Age Ranges'):
+
+            if st.button('Confirm 3-Cycle Configuration and Age Ranges'):
                 st.session_state.upper_primary_end_confirmed = True
                 if upper_primary_end != st.session_state['upper_primary_end']:
                     upper_primary_end = st.session_state['upper_primary_end'] 
@@ -697,26 +691,43 @@ def finalize_details():
                 )
                 st.markdown(school4_content, unsafe_allow_html=True)
 
+        elif school_cycle_count == 2:
+            if st.session_state['country'] != 'Afghanistan -- AFG':
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=6, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
+            else:
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=7, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
 
-
-        elif 'single_cycle' in st.session_state and st.session_state['single_cycle']:
-            # Directly display age ranges for primary and secondary
-            primary_end = st.session_state['lower_primary_end']
-            secondary_start = primary_end + 1
-            vect1 =  st.session_state['lower_primary_end']  
-            vect2 =  0
-            st.session_state['vector_cycle'] = [vect1,vect2]
-            if st.session_state['country'] != 'Afghanistan -- AFG': school5_message = translations["school5"]
-            else: school5_message = translations["school5_afg"]
-            # Insert the dynamic values into the HTML template
-            school5_content = school5_message.format(
-                primary_end=primary_end,
-                secondary_start=secondary_start
-            )
+                primary_end = st.session_state['lower_primary_end']
+                secondary_start = primary_end + 1
+                vect1 =  st.session_state['lower_primary_end']  
+                vect2 =  0
+                st.session_state['vector_cycle'] = [vect1,vect2]
+                if st.session_state['country'] != 'Afghanistan -- AFG': school5_message = translations["school5"]
+                else: school5_message = translations["school5_afg"]
+                # Insert the dynamic values into the HTML template
+                school5_content = school5_message.format(
+                    primary_end=primary_end,
+                    secondary_start=secondary_start
+                )
 
             # Display the HTML content
             st.markdown(school5_content, unsafe_allow_html=True)
-        
+
+
 
             
         handle_displacement_column_selection()

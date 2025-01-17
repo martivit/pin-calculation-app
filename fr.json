@@ -63,7 +63,7 @@
     "choose_disaggregation_variables_subheader": "Choisissez les bonnes variables de désagrégation et leurs valeurs",
     "smallest_admin_level": "Quelle est l'unité d'analyse du **{selected_country}** HNO? <span style='color: darkred; font-weight: bold;'>Veuillez choisir le niveau administratif (par exemple, Admin 1, Admin 2) qui définit le cadre d'analyse pour le HNO. Assurez-vous que le niveau sélectionné correspond au niveau administratif utilisé dans le fichier des données de population de l'OCHA afin de garantir la cohérence des calculs.</span>",
     "start_message": "Quand l'année scolaire commence-t-elle officiellement ? Nécessaire pour l'estimation de l'âge correct",
-    "school1": "Quelle est la tranche d'âge pour le premier cycle de l'école primaire ?",
+    "school1": "Quelle est la tranche d'âge pour le cycle de l'école primaire ?",
     "school2": "Il n'y a qu'un seul cycle d'enseignement primaire, suivi d'un cycle d'enseignement secondaire",
     "school3": "Quelle est la tranche d'âge pour le niveau intermédiaire (école primaire supérieure / école secondaire inférieure) ?",
     "school4": "<div style='border: 1px solid #cccccc; border-radius: 5px; padding: 10px; margin-top: 5px; background-color: #f0f0f0;'><h6 style='color: #555555; margin-bottom: 5px;'>Tranches d'âge confirmées :</h6><div><strong>École primaire inférieure :</strong> 6 - {lower_primary_end}</div><div><strong>École primaire supérieure :</strong> {upper_primary_start} - {upper_primary_end}</div><div><strong>École secondaire :</strong> {secondary_start} - 17</div></div>",
@@ -108,8 +108,8 @@
     "mismatch_admin_message": "Il peut y avoir un décalage entre l'unité d'analyse de l'HNO et le niveau administratif auquel les données de l'évaluation MSNA sont représentatives.",
     "mismatch_admin_example": "Par exemple, les données MSNA pourraient être représentatives au niveau Admin 2, tandis que l'unité d'analyse de l'HNO pourrait être au niveau Admin 3..<br>Si vous cochez cette case, vous confirmez qu'un tel décalage existe. Dans ce cas, assurez-vous que la feuille 'scope-fix' dans le fichier OCHA liste les unités administratives concernées par ce décalage ainsi que leurs niveaux correspondants. Consultez le modèle fourni pour des instructions sur la manière de remplir correctement la feuille 'scope-fix'.",
     "download_all":"Télécharger tous les documents PiN",
-    "show_kobo":"Utilisez le questionnaire kobo pour identifier les indicateurs MSNA corrects :"
-
+    "show_kobo":"Utilisez le questionnaire kobo pour identifier les indicateurs MSNA corrects :",
+    "school_cycle_question": "Combien de cycles l'école compte-t-elle ? (2 --> primaire et secondaire -- 3 --> primaire, intermédiaire et secondaire) "
 
 
   }
