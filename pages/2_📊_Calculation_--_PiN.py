@@ -658,8 +658,9 @@ def finalize_details():
                     key='lower_primary_end'
                 )
 
-            lower_primary_end = st.session_state['lower_primary_end'] 
-            upper_primary_start = lower_primary_end +1                   
+
+                lower_primary_end = st.session_state['lower_primary_end'] 
+                upper_primary_start = lower_primary_end +1                   
 
             upper_primary_end = st.slider(
                 translations["school3"],
