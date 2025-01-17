@@ -340,12 +340,11 @@ def display_filtered_kobo(filtered_edu_kobo, string = 'show kobo'):
     """Displays the filtered data with enhanced styling."""
     if not filtered_edu_kobo.empty:       
         filtered_edu_kobo = filtered_edu_kobo.reset_index(drop=True)
- 
-        st.dataframe(
-            filtered_edu_kobo.style.set_properties(
-                **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
-            )
-        )
+        
+        # Display as a table to remove row numbers completely
+        st.table(filtered_edu_kobo.style.set_properties(
+            **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
+        ))
     else:
         st.warning(translations.get('no_data_found', "No matching data found for the selected criteria."))
  
