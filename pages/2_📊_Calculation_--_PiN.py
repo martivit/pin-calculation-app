@@ -344,7 +344,10 @@ def display_filtered_kobo(filtered_edu_kobo, string = 'show kobo'):
         # Display as a table to remove row numbers completely
         st.dataframe(filtered_edu_kobo.style.set_properties(
             **{'background-color': '#FFF1A4', 'border': '1px solid #4CAF50'}
-        ))
+        )
+        use_container_width=True  # Adjust the table to fit the container width
+
+        )
     else:
         st.warning(translations.get('no_data_found', "No matching data found for the selected criteria."))
  
