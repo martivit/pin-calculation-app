@@ -109,7 +109,11 @@
     "mismatch_admin_example": "Par exemple, les données MSNA pourraient être représentatives au niveau Admin 2, tandis que l'unité d'analyse de l'HNO pourrait être au niveau Admin 3..<br>Si vous cochez cette case, vous confirmez qu'un tel décalage existe. Dans ce cas, assurez-vous que la feuille 'scope-fix' dans le fichier OCHA liste les unités administratives concernées par ce décalage ainsi que leurs niveaux correspondants. Consultez le modèle fourni pour des instructions sur la manière de remplir correctement la feuille 'scope-fix'.",
     "download_all":"Télécharger tous les documents PiN",
     "show_kobo":"Utilisez le questionnaire kobo pour identifier les indicateurs MSNA corrects :",
-    "school_cycle_question": "Combien de cycles l'école compte-t-elle ? (2 --> primaire et secondaire -- 3 --> primaire, intermédiaire et secondaire) "
+    "school_cycle_question": {
+      "question": "Combien de cycles l'école a-t-elle ?",
+      "option_two": "2 → Primaire et secondaire",
+      "option_three": "3 → Primaire, Intermédiaire et Secondaire "
+    }
 
 
   }
