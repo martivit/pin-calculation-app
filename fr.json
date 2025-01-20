@@ -24,7 +24,7 @@
     "step2":"Sélectionnez les indicateurs d'éducation",
     "step3":"Définir les circonstances aggravantes",
     "step4":"Définir les variables de désagrégation",
-    "full_message": "Veuillez sélectionner la variable requise pour mesurer  <span style='color: #014bb4;'><strong>{custom_message}</strong></span><span style='color: #36454F;'> {custom_message_part2}</span>",
+    "full_message": "Veuillez sélectionner la variable requise pour mesurer  <span style='color: #014bb4;'><strong>{custom_message}</strong></span><span style='color: #6082B6;'> {custom_message_part2}</span>",
     "confirm_button_label": "Confirmer {column_type}",
     "column_confirmed_message": "La colonne {column_type} '{selected_column}' a été sélectionnée manuellement.",
     "error_message": "Veuillez sélectionner une option valide pour {column_type} avant de confirmer.",
