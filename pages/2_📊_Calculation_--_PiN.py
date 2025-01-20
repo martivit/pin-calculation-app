@@ -152,7 +152,7 @@ def handle_armed_disruption_selection(current_country, suggestions):
         st.session_state[f'{column_type}_column_confirmed'] = True
     else:
         # If checkbox is not checked, proceed with the regular selection
-        armed_disruption_var = handle_full_selection(current_country, suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"])
+        armed_disruption_var = handle_full_selection(current_country, suggestions, 'disruption_armed', translations["armed_disruption_var_prompt"],translations["armed_disruption_var_prompt_2"] )
 
     return armed_disruption_var
 ##-----------------------------
@@ -168,7 +168,8 @@ def handle_natural_hazard_disruption_selection(current_country, suggestions):
             current_country, 
             suggestions, 
             'disruption_natural_hazard', 
-            translations["natural_hazard_disruption_var_prompt"]
+            translations["natural_hazard_disruption_var_prompt"],
+            translations["natural_hazard_disruption_var_prompt_2"]
         )
     else:
         # If checkbox is not checked, mark natural hazard disruption as 'no_indicator'
@@ -513,17 +514,17 @@ def select_indicators():
             current_country = st.session_state['country']
         if education_indicator_suggestions:
             with st.container(border=True):
-                st.session_state['access_var'] = handle_full_selection(current_country,education_indicator_suggestions, 'education_access', translations["access_var_prompt"])    
+                st.session_state['access_var'] = handle_full_selection(current_country,education_indicator_suggestions, 'education_access', translations["access_var_prompt"], translations["access_var_prompt_2"])    
             with st.container(border=True):
-                st.session_state['teacher_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"]) 
+                st.session_state['teacher_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_teacher',translations["teacher_disruption_var_prompt"], translations["teacher_disruption_var_prompt_2"]) 
             with st.container(border=True):
                 st.session_state['natural_hazard_disruption_var'] =  handle_natural_hazard_disruption_selection(current_country, education_indicator_suggestions) 
             with st.container(border=True):
-                st.session_state['idp_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"]) 
+                st.session_state['idp_disruption_var'] =  handle_full_selection(current_country,education_indicator_suggestions, 'disruption_idp', translations["idp_disruption_var_prompt"], translations["idp_disruption_var_prompt_2"]) 
             with st.container(border=True):
                 st.session_state['armed_disruption_var'] =  handle_armed_disruption_selection(current_country, education_indicator_suggestions)  
             with st.container(border=True):
-                st.session_state['barrier_var'] = handle_full_selection(current_country, education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"]) 
+                st.session_state['barrier_var'] = handle_full_selection(current_country, education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"], translations["barrier_var_prompt_2"]) 
             check_for_duplicate_selections()
         if st.button(translations["confirm_indicators"]):
             st.session_state.indicators_confirmed = True
