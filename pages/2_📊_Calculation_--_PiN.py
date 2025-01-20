@@ -94,10 +94,12 @@ def display_status(description, status):
     color = 'green' if status else 'gray'
     st.markdown(f"<span style='color: {color}; font-size: 20px; margin-right: 5px;'>●</span> {description}", unsafe_allow_html=True)
 ##---------------------------------------------------------------------------------------------------------
-def handle_full_selection(current_country, suggestions, column_type, custom_message):
+def handle_full_selection(current_country, suggestions, column_type, custom_message, custom_message_part2):
     # Construct the full message with custom formatting
     message_template = translations["full_message"]
-    full_message = message_template.format(custom_message=custom_message)
+    #full_message = message_template.format(custom_message=custom_message)
+    full_message = message_template.format(custom_message=custom_message, custom_message_part2=custom_message_part2)
+
     #full_message = f"Please select the variable required for measuring the <span style='color: #014bb4;'><strong>{custom_message}</strong></span>"
     st.markdown(full_message, unsafe_allow_html=True)
 
