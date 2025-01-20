@@ -24,7 +24,7 @@
     "step2": "Select education indicators",
     "step3": "Define aggravating circumstances",
     "step4": "Define disaggregation variables",
-    "full_message": "Please select the variable required for measuring the <span style='color: #014bb4;'><strong>{custom_message}</strong></span><span style='color: #014bb4;'> {custom_message_part2}</span>",
+    "full_message": "Please select the variable required for measuring the <span style='color: #014bb4;'><strong>{custom_message}</strong></span><span style='color: #36454F;'> {custom_message_part2}</span>",
     "confirm_button_label": "Confirm {column_type}",
     "column_confirmed_message": "{column_type} column '{selected_column}' has been manually selected.",
     "error_message": "Please select a valid option for {column_type} before confirming.",
