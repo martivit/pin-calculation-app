@@ -482,8 +482,8 @@ def upload_and_select_data():
                     if selected_label and selected_label != 'No selection':
                         st.session_state['label'] = selected_label
                         st.session_state.label_selected = True
-                        message_label_success = translations["success_label_kobo"].format(selected_label=selected_label)
-                        st.success(message_label_success)
+                        #message_label_success = translations["success_label_kobo"].format(selected_label=selected_label)
+                        #st.success(message_label_success)
                         st.markdown(translations["proceed_to_next_step"], unsafe_allow_html=True)
                 else:
                     st.warning("No label columns found in the survey data.")
