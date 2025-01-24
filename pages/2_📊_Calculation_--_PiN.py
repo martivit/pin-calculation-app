@@ -443,18 +443,52 @@ def upload_and_select_data():
                 st.session_state.data_selections_confirmed = True
                 st.success(label_success_1)
 
+
             if 'survey_data' in st.session_state:
                 survey_data = st.session_state['survey_data']
-                label_columns = [col for col in survey_data.columns if col.startswith('label')]
+                # Extract label columns from the survey data
+                label_columns = [col for col in survey_data.columns if col.lower().startswith('label')]
+                
                 if label_columns:
-                    selected_label = st.selectbox(translations["label_json"], ['No selection'] + label_columns, key='selected_label')
-                    if selected_label != 'No selection':
+                    # Define prioritized labels (case-insensitive)
+                    prioritized_labels = ['label::english', 'label::french', 'label']
+                    selected_label = None
+                    
+                    # Convert columns to lowercase for comparison
+                    label_columns_lower = [col.lower() for col in label_columns]
+                    
+                    # Find the first matching prioritized label (case-insensitive)
+                    for priority_label in prioritized_labels:
+                        for idx, label in enumerate(label_columns_lower):
+                            if priority_label == label:
+                                selected_label = label_columns[idx]  # Preserve original case
+                                break
+                        if selected_label:
+                            break
+
+                    # If no prioritized label is found, select the first available label or ask the user
+                    if not selected_label:
+                        if len(label_columns) == 1:
+                            selected_label = label_columns[0]  # Automatically select the only available label
+                        else:
+                            # If no match, fallback to asking the user
+                            selected_label = st.selectbox(
+                                translations["label_json"], 
+                                ['No selection'] + label_columns, 
+                                key='selected_label'
+                            )
+                    
+                    # Set the selected label in session state
+                    if selected_label and selected_label != 'No selection':
                         st.session_state['label'] = selected_label
-                        if st.button(label_confirm_2):
-                            st.session_state.label_selected = True
-                            message_label_sucess =  translations["success_label_kobo"].format(selected_label=selected_label)
-                            st.success(message_label_sucess)
-                            st.markdown(translations["proceed_to_next_step"], unsafe_allow_html=True)
+                        st.session_state.label_selected = True
+                        message_label_success = translations["success_label_kobo"].format(selected_label=selected_label)
+                        st.success(message_label_success)
+                        st.markdown(translations["proceed_to_next_step"], unsafe_allow_html=True)
+                else:
+                    st.warning("No label columns found in the survey data.")
+
+            
 
     else:
         st.warning(translations["no_data"])     
