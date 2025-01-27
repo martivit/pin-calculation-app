@@ -253,11 +253,11 @@ if 'uploaded_data' in st.session_state:
 
             scope_fix = non_empty_count >= 2           
             st.write(translations["ok_upload"])
-            st.write("OCHA Data Preview:")
-            st.dataframe(ocha_data.head())  # Show a preview of the 'ocha' sheet data
+            #st.write("OCHA Data Preview:")
+            #st.dataframe(ocha_data.head())  # Show a preview of the 'ocha' sheet data
             
 
-            st.write("Scope-Fix Data Preview:")
+            #st.write("Scope-Fix Data Preview:")
             #st.dataframe(ocha_mismatch_data.head())  # Show a preview of the 'scope-fix' sheet data
         else:
             # OCHA data uploader
