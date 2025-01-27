@@ -626,7 +626,7 @@ def finalize_details():
 
             st.markdown(
                 f"""
-                <div style="font-size:18px; font-weight:bold;">
+                <div style="font-size:16px; font-weight:bold;">
                     {translations['mismatch_admin_message']}<br>
                     <span style="color:darkred;">{translations['mismatch_admin_example']}</span>
                 </div>
