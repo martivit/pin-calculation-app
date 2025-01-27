@@ -54,7 +54,8 @@ selected_country = st.selectbox(
     countries,
     index=countries.index(st.session_state.get('country', 'no selection'))
 )
-st.session_state['country'] = selected_country
+if selected_country != st.session_state.get('country'):
+    st.session_state['country'] = selected_country
 
 
 
@@ -257,7 +258,7 @@ if 'uploaded_data' in st.session_state:
             
 
             st.write("Scope-Fix Data Preview:")
-            st.dataframe(ocha_mismatch_data.head())  # Show a preview of the 'scope-fix' sheet data
+            #st.dataframe(ocha_mismatch_data.head())  # Show a preview of the 'scope-fix' sheet data
         else:
             # OCHA data uploader
             uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["xlsx"])
