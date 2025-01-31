@@ -1,3 +1,4 @@
 output_validation/
 to_be_ingnored_checked/
 .streamlit/secrets.toml
+*.jpeg

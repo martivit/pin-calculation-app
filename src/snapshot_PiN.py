@@ -1206,7 +1206,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     bullet_points = [
         "Lack of access to school: This applies to children who fall into severity 3 and are not accessing school at all.",
         "Studying in unacceptable basic learning conditions: These children are assigned to severity 3, but they do have access to school. However, the quality of their learning environment is extremely poor and inadequate.",
-        "Evolve in a non-protective education environment: Children assigned to severity 4 who are attending school but in an environment that does not ensure their safety or protection.",
+        "Evolve in a non-protective education environment: Children assigned to severity 4 or 5 who are attending school but in an environment that does not ensure their safety or protection.",
         "Face aggravating circumstances preventing their access to education: Children assigned to either severity 4 or 5, where external factors significantly affect their ability to attend school, leading to a lack of access to education."
     ]
 

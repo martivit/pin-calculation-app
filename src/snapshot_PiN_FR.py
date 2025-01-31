@@ -1213,7 +1213,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     bullet_points = [
         "Absence d'accès à l'école : Ces enfants n’ont pas accès à l’école, mais ne souffrent pas de circonstance individuelle aggravante.",
         "Étudier dans des conditions d'apprentissage de base inacceptables : Ces enfants sont classés en sévérité 3, bien qu'ils aient accès à l'école. Cependant, la qualité de leur environnement d'apprentissage est considérée inacceptable.",
-        "Évoluer dans un environnement éducatif non protecteur : Les enfants alloués en sévérité 4 fréquentent l'école mais dans un environnement qui ne garantit pas leur sécurité ou leur protection.",
+        "Évoluer dans un environnement éducatif non protecteur : Les enfants alloués en sévérité 4 or 5 fréquentent l'école mais dans un environnement qui ne garantit pas leur sécurité ou leur protection.",
         "Faire face à des circonstances aggravantes empêchant l'accès à l'éducation : Les enfants classés en sévérité 4 ou 5, ne fréquentent pas l’école en raison de barrières d’accès/ circonstances individuelles aggravantes."
     ]
 

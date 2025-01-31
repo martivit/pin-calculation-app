@@ -165,6 +165,83 @@ def calculate_severity(country, gender, age, access, barrier, armed_disruption, 
         return None  # Default fallback in case none of the conditions are met
 
 ##--------------------------------------------------------------------------------------------
+def add_indicator_columns(data, access_var, teacher_disruption_var, natural_hazard_var, idp_disruption_var, armed_disruption_var, barrier_var, names_severity_4, names_severity_5):
+    """
+    Add indicator columns to the dataset and set their values based on conditions,
+    taking severity into account.
+
+    Args:
+        data (pd.DataFrame): The input DataFrame.
+        access_var (str): Column name for access indicator.
+        teacher_disruption_var (str): Column name for teacher disruption indicator.
+        natural_hazard_var (str): Column name for natural hazard indicator.
+        idp_disruption_var (str): Column name for IDP disruption indicator.
+        armed_disruption_var (str): Column name for armed disruption indicator.
+        barrier_var (str): Column name for barrier indicator.
+        names_severity_4 (list): List of barrier names for severity 4.
+        names_severity_5 (list): List of barrier names for severity 5.
+
+    Returns:
+        pd.DataFrame: The updated DataFrame with new indicator columns.
+    """
+    # Helper function to normalize string inputs
+    def normalize(input_value):
+        if isinstance(input_value, str):
+            return input_value.lower()
+        elif isinstance(input_value, (int, float)):  # Handle numeric values directly
+            return input_value
+        return ""  # Default to empty string if input is not a string or number
+
+    # Define the conditions for yes and no answers
+    yes_answers = ['yes', 'oui', '1', 1]
+    no_answers = ['no', 'non', '0', 0]
+
+    no_indicator = 'no_indicator'
+
+    # Initialize new columns with 0
+    data['indicator.access'] = 0
+    data['indicator.teacher'] = 0
+    data['indicator.hazard'] = 0
+    data['indicator.idp'] = 0
+    data['indicator.occupation'] = 0
+    data['indicator.barrier4'] = 0
+    data['indicator.barrier5'] = 0
+
+    # Apply conditions with severity filtering
+    data['indicator.access'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 3 and normalize(row[access_var]) in no_answers else 0, axis=1
+    )
+
+    if teacher_disruption_var != no_indicator:
+        data['indicator.teacher'] = data.apply(
+            lambda row: 1 if row['severity_category'] not in [4, 5] and normalize(row[teacher_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    if natural_hazard_var != no_indicator:
+        data['indicator.hazard'] = data.apply(
+            lambda row: 1 if row['severity_category'] not in [4, 5] and row[teacher_disruption_var] != 1 and normalize(row[natural_hazard_var]) in yes_answers else 0, axis=1
+        )
+
+    if idp_disruption_var != no_indicator:
+        data['indicator.idp'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 4 and row['severity_category'] != 5 and normalize(row[idp_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    if armed_disruption_var != no_indicator:
+        data['indicator.occupation'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 5 and normalize(row[armed_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    data['indicator.barrier4'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 4 and row[barrier_var] in names_severity_4 else 0, axis=1
+    )
+
+    data['indicator.barrier5'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 5 and row[barrier_var] in names_severity_5 else 0, axis=1
+    )
+
+    return data
+##--------------------------------------------------------------------------------------------
 def assign_dimension_pin(access, severity):
     # Normalize access status
     def normalize(input_string):
@@ -204,22 +281,6 @@ def print_subtables(severity_admin_status, pop_group_var):
         print(f"\nSubtable for {pop_group_var} = {group}")
         print(subtable)
         print("\n" + "-"*50 + "\n")
-
-##--------------------------------------------------------------------------------------------
-def save_subtables_to_excel(severity_admin_status, pop_group_var, file_path):
-    # Get the level number for pop_group_var
-    level_number = severity_admin_status.index.names.index(pop_group_var)
-    
-    # Get unique groups
-    unique_groups = severity_admin_status.index.get_level_values(level_number).unique()
-    
-    # Create a Pandas Excel writer using XlsxWriter as the engine
-    with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
-        # Iterate and save subtables
-        for group in unique_groups:
-            subtable = severity_admin_status.xs(group, level=level_number)
-            subtable.to_excel(writer, sheet_name=f"{pop_group_var}_{group}")
-            print(f"-------------------- Subtable for {pop_group_var} = {group} saved to sheet {pop_group_var}_{group}")
 
 
 ##--------------------------------------------------------------------------------------------
@@ -497,7 +558,17 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         severity= row['severity_category']
         ), axis=1)
 
-
+    edu_data = add_indicator_columns(
+        data=edu_data,
+        access_var=access_var,
+        teacher_disruption_var=teacher_disruption_var,
+        natural_hazard_var=natural_hazard_var,
+        idp_disruption_var=idp_disruption_var,
+        armed_disruption_var=armed_disruption_var,
+        barrier_var=barrier_var,
+        names_severity_4=names_severity_4,
+        names_severity_5=names_severity_5
+    )
 
 
     return edu_data

@@ -187,7 +187,7 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 ## calculate PiN
 if ocha_data is not None:
-    (severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,
+    (severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,
     female_pin_per_admin_status, male_pin_per_admin_status, 
     pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary, 
     Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
