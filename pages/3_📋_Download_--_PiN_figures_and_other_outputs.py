@@ -236,7 +236,6 @@ if ocha_data is not None:
         )
 
     indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
-    st.write(f"Indicator Output Exists: {indicator_output is not None}")
 
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
