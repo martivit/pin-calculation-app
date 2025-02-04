@@ -108,13 +108,13 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
 
 
 
-def create_zip_file(country_label, excel_file, excel_file_2,word_snapshot, word_parameters):
+def create_zip_file(country_label, excel_file, indicator_output,word_snapshot, word_parameters):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
         zip_file.writestr(f"PiN_results_{country_label}_{timestamp}.xlsx", excel_file.getvalue())
-        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", excel_file_2.getvalue())
+        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
         # Add the Word Snapshot with timestamp
         zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
         # Add the Parameters Word Document with timestamp
@@ -236,6 +236,7 @@ if ocha_data is not None:
         )
 
     indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
+    st.write(f"Indicator Output Exists: {indicator_output is not None}")
 
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
