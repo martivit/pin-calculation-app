@@ -9,6 +9,7 @@ from src.add_PiN_severity import add_severity
 from src.calculation_for_PiN_Dimension import calculatePIN
 from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from src.vizualize_PiN import create_output
+from src.vizualize_PiN import create_indicator_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
@@ -107,12 +108,13 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
 
 
 
-def create_zip_file(country_label, excel_file, word_snapshot, word_parameters):
+def create_zip_file(country_label, excel_file, excel_file_2,word_snapshot, word_parameters):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
         zip_file.writestr(f"PiN_results_{country_label}_{timestamp}.xlsx", excel_file.getvalue())
+        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", excel_file_2.getvalue())
         # Add the Word Snapshot with timestamp
         zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
         # Add the Parameters Word Document with timestamp
@@ -233,6 +235,7 @@ if ocha_data is not None:
             parameters=parameters  
         )
 
+    indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
 
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
@@ -243,7 +246,7 @@ if ocha_data is not None:
         doc_parameter_output = generate_word_document_FR(parameters_FR)
 
     zip_file_name = f"PiN_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
-    zip_file = create_zip_file(country_label, ocha_excel, doc_output, doc_parameter_output)
+    zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
 
     # Create a single download button for the ZIP file
     if st.download_button(
