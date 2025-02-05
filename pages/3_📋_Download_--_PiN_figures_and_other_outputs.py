@@ -261,10 +261,10 @@ if ocha_data is not None:
     ):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        if "github" in st.secrets and "token" in st.secrets["github"]:
-            st.write("✅ GitHub token found in secrets.")
-        else:
-            st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
+        #if "github" in st.secrets and "token" in st.secrets["github"]:
+            #st.write("✅ GitHub token found in secrets.")
+        #else:
+            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
 
         try:
             repo_name = "martivit/pin-calculation-app"
@@ -303,9 +303,9 @@ if ocha_data is not None:
                     commit_message=f"Add PiN snapshot (Word) for {country_label}",
                     token=github_token
                 )
-            except Exception as e :
-                #pass
-                st.error(f"Failed to upload Word document to GitHub: {e}")
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")
 
             # Display success messages only if files were successfully uploaded
             if pr_url_excel:
@@ -313,9 +313,9 @@ if ocha_data is not None:
             if pr_url_doc:
                 st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
 
-        except Exception as e:
-            st.error(f"Unexpected error during GitHub upload: {e}")
-            #pass
+        except Exception :
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
  
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
