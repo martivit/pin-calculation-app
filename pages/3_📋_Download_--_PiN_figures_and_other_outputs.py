@@ -100,13 +100,13 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
         raise Exception(f"Failed to check file existence: {response.status_code} {response.text}")
 
     # Handle response
-    if response.status_code in [200, 201]:
+    #if response.status_code in [200, 201]:
         # Successful creation or update
-        st.write("✅ Upload successful!")
-        return response.json()["html_url"]
-    else:
-        st.error(f"⚠️ Upload failed: {response.status_code} - {response.text}")
-        return None
+        #st.write("✅ Upload successful!")
+        #return response.json()["html_url"]
+    #else:
+        #st.error(f"⚠️ Upload failed: {response.status_code} - {response.text}")
+        #return None
 
 
 def create_zip_file(country_label, excel_file, indicator_output,word_snapshot, word_parameters):
