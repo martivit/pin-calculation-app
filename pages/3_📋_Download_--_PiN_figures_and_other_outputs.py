@@ -248,6 +248,27 @@ if ocha_data is not None:
     zip_file_name = f"PiN_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
     zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
 
+
+    GITHUB_TOKEN = "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"
+    repo_name = "martivit/pin-calculation-app"
+
+    # Check repository access
+    response = requests.get(
+        f"https://api.github.com/repos/{repo_name}",
+        headers={"Authorization": f"Bearer {GITHUB_TOKEN}"}
+    )
+
+    if response.status_code == 200:
+        print("✅ GitHub authentication successful.")
+    else:
+        print(f"❌ GitHub authentication failed: {response.status_code} - {response.text}")
+
+    response = requests.get(
+    f"https://api.github.com/repos/{repo_name}/branches/develop_2025",
+    headers={"Authorization": f"Bearer {GITHUB_TOKEN}"}
+    )
+    print(response.status_code, response.text)
+
     # Create a single download button for the ZIP file
     if st.download_button(
         label=translations["download_all"],
