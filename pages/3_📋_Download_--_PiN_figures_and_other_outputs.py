@@ -102,10 +102,11 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
     # Handle response
     if response.status_code in [200, 201]:
         # Successful creation or update
+        st.write("✅ Upload successful!")
         return response.json()["html_url"]
     else:
-        raise Exception(f"Failed to upload file: {response.status_code} {response.text}")
-
+        st.error(f"⚠️ Upload failed: {response.status_code} - {response.text}")
+        return None
 
 
 def create_zip_file(country_label, excel_file, indicator_output,word_snapshot, word_parameters):
@@ -260,26 +261,10 @@ if ocha_data is not None:
     ):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        GITHUB_TOKEN = "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"
-        repo_name = "martivit/pin-calculation-app"
-
-        # Check repository access
-        response = requests.get(
-            f"https://api.github.com/repos/{repo_name}",
-            headers={"Authorization": f"Bearer {GITHUB_TOKEN}"}
-        )
-
-        if response.status_code == 200:
-            print("✅ GitHub authentication successful.")
+        if "github" in st.secrets and "token" in st.secrets["github"]:
+            st.write("✅ GitHub token found in secrets.")
         else:
-            print(f"❌ GitHub authentication failed: {response.status_code} - {response.text}")
-
-        response = requests.get(
-        f"https://api.github.com/repos/{repo_name}/branches/develop_2025",
-        headers={"Authorization": f"Bearer {GITHUB_TOKEN}"}
-        )
-        print(response.status_code, response.text)
-
+            st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
 
         try:
             repo_name = "martivit/pin-calculation-app"
@@ -318,9 +303,9 @@ if ocha_data is not None:
                     commit_message=f"Add PiN snapshot (Word) for {country_label}",
                     token=github_token
                 )
-            except Exception :
-                pass
-                #st.error(f"Failed to upload Word document to GitHub: {e}")
+            except Exception as e :
+                #pass
+                st.error(f"Failed to upload Word document to GitHub: {e}")
 
             # Display success messages only if files were successfully uploaded
             if pr_url_excel:
@@ -328,9 +313,9 @@ if ocha_data is not None:
             if pr_url_doc:
                 st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
 
-        except Exception:
-            #st.error(f"Unexpected error during GitHub upload: {e}")
-            pass
+        except Exception as e:
+            st.error(f"Unexpected error during GitHub upload: {e}")
+            #pass
  
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
