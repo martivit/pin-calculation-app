@@ -11,7 +11,7 @@
     "upload_msna": "Upload your input MSNA file.",
     "wait": "This process may take some time;   please wait a bit longer. 🐌🐌🐌🐌",
     "ok_upload":"Data uploaded successfully!",
-    "download_template_message": "\n<div style=\"background-color: #FFDBBB; padding: 1px; border-radius: 1px;\">\n    <span style=\"color: #000000;\">\n Download the template and enter the population figures provided by OCHA. Ensure that you follow the template format strictly to avoid errors.\n </span>   <span style=\"color: red; margin-top: 0;margin-bottom: 0;\">⚠️ Columns highlighted in yellow are mandatory and must be completed\n    </span>\n</div>",
+    "download_template_message": "\n<div style=\"background-color: #FFDBBB; padding: 1px; border-radius: 1px;\">\n    <span style=\"color: #000000;\">\n Download the template and enter the population figures provided by OCHA. Ensure that you follow the template format strictly to avoid errors.\n </span>   <p style=\"color: red; margin-top: 0;margin-bottom: 0;\">⚠️ Columns highlighted in yellow are mandatory and must be completed\n    </p>\n</div>",
     "template": "Download OCHA Population Data Template",
     "missing_columns_message": "Missing mandatory columns: {missing_columns}",
     "children_sum_mismatch_error": "Row {index} (Admin: {admin}): The sum of the individual population-group categories does not match 'ToT -- Children/Enfants (5-17)'",
