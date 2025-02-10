@@ -166,6 +166,8 @@ def perform_ocha_data_checks(ocha_data):
 #######################################################################################################################
 
 #------ Step 1: Country Selection
+st.subheader(translations["country_section"])
+
 selected_country = st.selectbox(
     translations["page1_country"],
     countries,
@@ -175,14 +177,13 @@ if selected_country != st.session_state.get('country'):
     st.session_state['country'] = selected_country
 
 #------ Step 2: OCHA Data Upload
+st.subheader(translations["ocha_data_section"])
+
 st.markdown(st.session_state.translations["download_template_message"], unsafe_allow_html=True) # Provide a message and download button for the OCHA data template with a highlighted section
 st.download_button(label=translations["template"],# Add a download button for the existing template
                    data=load_template(),
                    file_name='Template_Population_figures.xlsx',
                    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-
-st.subheader(translations["ocha_data_section"])
 no_ocha_data_checkbox = st.checkbox(f"**{translations['no_ocha_data']}**")
 
 if no_ocha_data_checkbox:

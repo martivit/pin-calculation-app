@@ -122,7 +122,8 @@
     },
     "school_confirm_3": "Confirm 3-Cycle Configuration and Age Ranges",
     "school_confirm_2": "Confirm 2-Cycle Configuration and Age Ranges",
-    "ocha_data_section": "OCHA Population Figures: Upload or Skip"
+    "ocha_data_section": "2) OCHA Population Figures: Upload or Skip",
+    "country_section": "1) Country selection"
 
 
 
