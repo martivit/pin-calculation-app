@@ -249,21 +249,17 @@ data_source = st.radio(
 
 
 
-# Step 4: ---- MSNA ----- Data Upload (if selected)
-if data_source == "MSNA" or data_source == "Multiple":
-
+# Step 3.a: ---- MSNA ----- Data Upload 
+if data_source == "MSNA":
     if 'uploaded_data' in st.session_state:
         data = st.session_state['uploaded_data']
         st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
-        
     else:
         # MSNA data uploader
         uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
-
         if uploaded_file is not None:
             st.write(translations["wait"])
             bar = st.progress(0)
-
             try:
                 # Load all sheets
                 all_sheets = pd.read_excel(uploaded_file, sheet_name=None, engine='openpyxl')
@@ -273,31 +269,27 @@ if data_source == "MSNA" or data_source == "Multiple":
                 # Validate columns across sheets
                 column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
                 bar.progress(60)
-
-                # Display results
-                #st.write("### ✅ **Column Mapping Across Sheets:**")
-                #for key, match in column_matches.items():
-                    #if match:
-                        #st.write(f"- **{key}** → Found in sheet: **{match[0]}** as column: `{match[1]}`")
-
                 if unmatched_columns:
                     st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
                     for col in unmatched_columns:
                         st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
                 else:
                     st.success(f"✅ {translations['all_mandatory_columns_found']}") 
-
-
                 bar.progress(100)
-            
             except Exception as e:
                 st.error(f"Failed to process the uploaded file: {e}")
                 bar.progress(0)
 
 
-
-
-# Check if data already uploaded and preserved in session state
+# Step 3.b: ---- EMIS ----- Data Upload 
+if data_source == "EMIS":
+    st.markdown(
+                    f"""
+                    <div style="font-size:16px; font-weight:bold;">
+                        {translations['emis_intro']}
+                    </div>
+                    """, unsafe_allow_html=True
+                )
 
 
 st.markdown("---")  # Markdown horizontal rule

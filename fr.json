@@ -124,7 +124,8 @@
     "ocha_data_section": "2) OCHA Chiffres de la population : Télécharger ou sauter",
     "country_section": "1) Sélection du pays", 
     "select_data_section": "3) Sélectionner la source de données",
-    "data_source_question": "Veuillez préciser la (les) source(s) de données pour le calcul du PiN éducation"
+    "data_source_question": "Veuillez préciser la (les) source(s) de données pour le calcul du PiN éducation",
+    "emis_intro": "es données EMIS, vous devrez saisir les données indicateur par indicateur en suivant le modèle fourni. Téléchargez le modèle et saisissez les chiffres de population fournis par OCHA. Veillez à respecter scrupuleusement le format du modèle afin d'éviter les erreurs. ⚠️ Les colonnes surlignées en jaune sont obligatoires et doivent être complétées."
 
 
 
