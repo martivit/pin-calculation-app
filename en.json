@@ -124,7 +124,8 @@
     "school_confirm_2": "Confirm 2-Cycle Configuration and Age Ranges",
     "ocha_data_section": "2) OCHA Population Figures: Upload or Skip",
     "country_section": "1) Country selection",
-    "select_data_section": "3) Please select the data source to be used for the Education PiN calculation"
+    "select_data_section": "3) Select the data source",
+    "data_source_question": "Please specify the data source(s) for calculating the Education PiN"
 
 
 
