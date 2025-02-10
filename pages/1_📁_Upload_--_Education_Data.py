@@ -244,7 +244,7 @@ else:
 st.subheader(translations["select_data_section"])
 st.markdown(
             f"""
-            <div style="font-size 18px; font-weight:bold;">
+            <div style="font-size 20px; font-weight:bold;">
                 {translations['explaination_data_dimension']}
             </div>
             """, unsafe_allow_html=True
