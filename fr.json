@@ -11,7 +11,7 @@
     "upload_msna": "Téléchargez votre fichier MSNA d'entrée.",
     "wait": "Ce processus peut prendre un certain temps ; veuillez patienter encore un peu. 🐌🐌🐌🐌",
     "ok_upload":"Données téléchargées avec succès !",
-    "download_template_message": "\n<div style=\"background-color: #e6f7ff; padding: 10px; border-radius: 5px;\">\n    <p style=\"color: #00529B;\">\n        Vous pouvez télécharger le modèle et le remplir avec les chiffres de population fournis par l'OCHA.\n        Veuillez vous assurer de suivre le format du modèle.\n    </p>\n    <p style=\"color: red; margin-top: 0;\">\n        LES COLONNES JAUNES SONT OBLIGATOIRES\n    </p>\n</div>",
+    "download_template_message": "\n<div style=\"background-color: #FFDBBB; padding: 1px; border-radius: 1px;\">\n    <span style=\"color: #000000;\">\n Téléchargez le modèle et saisissez les chiffres de population fournis par OCHA. Veillez à respecter scrupuleusement le format du modèle afin d'éviter les erreurs.\n   </span>   <span style=\"color: red; margin-top: 0;margin-bottom: 0;\">⚠️ Les colonnes surlignées en jaune sont obligatoires et doivent être complétées.\n    </span>\n</div>",
     "template": "Télécharger le modèle de données sur la population d'OCHA",
     "missing_columns_message": "Colonnes obligatoires manquantes : {missing_columns}",
     "children_sum_mismatch_error": "Ligne {index} (Admin: {admin}) : La somme des catégories de groupes de population individuelles ne correspond pas au total des 'Enfants (5-17)'",
