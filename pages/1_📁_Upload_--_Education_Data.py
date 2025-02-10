@@ -201,12 +201,6 @@ else:
 
         scope_fix = non_empty_count >= 2           
         st.write(translations["ok_upload"])
-        #st.write("OCHA Data Preview:")
-        #st.dataframe(ocha_data.head())  # Show a preview of the 'ocha' sheet data
-        
-
-        #st.write("Scope-Fix Data Preview:")
-        #st.dataframe(ocha_mismatch_data.head())  # Show a preview of the 'scope-fix' sheet data
     else:
         # OCHA data uploader
         uploaded_ocha_file = st.file_uploader(translations["upload_ocha"], type=["xlsx"])
@@ -232,21 +226,27 @@ else:
                         else:
                             df.at[0, col] = np.nan
 
-                    st.dataframe(df) 
+                    #st.dataframe(df) 
                     second_row = df.iloc[0]
 
                     non_empty_count = second_row.notna().sum()
                     scope_fix = non_empty_count >= 2
                     if scope_fix:
                         st.session_state['scope_fix'] = True
-
-                    
                     st.success(translations["ok_upload"])
                 else:
                     st.error(check_message_ocha)  # Display the error message for 'ocha' sheet if checks fail
                     
             except Exception as e:
                 st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets
+
+#----- Step 3: Select Available Data Sources
+st.subheader(translations["select_data_section"])
+data_source = st.radio(
+    translations["data_source_question"],
+    ["MSNA", "EMIS", "JENA", "Multiple"]
+)
+
 
 
 # Check if data already uploaded and preserved in session state

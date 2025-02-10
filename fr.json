@@ -122,7 +122,8 @@
     "natural_hazard_disruption_var_prompt_2": "        (Sample questionnaire Question : Au cours de l’année scolaire 2024-2025, l’éducation de (nom) a-t-elle été perturbée par l’un des événements suivants :Risques naturels tels qu’inondation, cyclone, sécheresse, incendie ou tremblement de terre ? )",
     "barrier_var_prompt_2": "        (Sample questionnaire Question : Au cours de l'année scolaire 2024-2025, quelle était la raison principale pour laquelle [enfant] n'avait pas accès à l'école formelle / un établissement scolaire formel ?",
     "ocha_data_section": "2) OCHA Chiffres de la population : Télécharger ou sauter",
-    "country_section": "1) Sélection du pays"
+    "country_section": "1) Sélection du pays", 
+    "select_data_section": "3) Veuillez sélectionner la source de données à utiliser pour le calcul du PiN éducation"
 
 
 
