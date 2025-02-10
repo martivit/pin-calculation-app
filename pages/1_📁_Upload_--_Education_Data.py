@@ -244,7 +244,7 @@ else:
 st.subheader(translations["select_data_section"])
 data_source = st.radio(
     translations["data_source_question"],
-    ["MSNA", "EMIS", "JENA", "Multiple"]
+    ["MSNA", "EMIS", "JENA", "Multiple (MSNA+EMIS, MSNA+JENA)"]
 )
 
 
