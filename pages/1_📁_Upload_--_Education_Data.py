@@ -284,7 +284,6 @@ if data_source == "MSNA":
 # Step 3.b: ---- EMIS ----- Data Upload 
 if data_source == "EMIS":
     with st.container(border=True):
-     
         st.markdown(
             f"""
             <div style="font-size:16px; font-weight:bold;">
@@ -293,7 +292,6 @@ if data_source == "EMIS":
             </div>
             """, unsafe_allow_html=True
         )
-
 
 st.markdown("---")  # Markdown horizontal rule
 
