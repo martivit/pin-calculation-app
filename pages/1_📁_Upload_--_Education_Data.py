@@ -302,8 +302,8 @@ if data_source == "EMIS":
         )
 
         emis_templates = {
-            "Access dimension → Enrolment numbers": "Template_EMIS_Access.xlsx",
-            "Access dimension & Learning conditions → Enrolment numbers & Teacher counts (PTR indicator)": "Template_EMIS_Access_PTR.xlsx",
+            "Access dimension → Enrolment numbers, ToT enrolled children by school/area": "Template_EMIS_Access.xlsx",
+            "Access dimension & Learning conditions → Enrolment numbers (ToT enrolled children by school/area) & Teacher counts (PTR indicator)": "Template_EMIS_Access_PTR.xlsx",
             "Indicator protection": "Template_EMIS_Protection.xlsx"
         }
 
