@@ -294,6 +294,29 @@ if data_source == "EMIS":
             """, unsafe_allow_html=True
         )
 
+        emis_indicator = st.radio(
+            translations["emis_indicator_selection"],
+            ["Access dimension → Enrolment numbers, ToT enrolled children by school/area", 
+            "Access dimension & Learning conditions → Enrolment numbers (ToT enrolled children by school/area) & Teacher counts (PTR indicator)", 
+            "Indicator protection"]
+        )
+
+        emis_templates = {
+            "Access dimension → Enrolment numbers": "Template_EMIS_Access.xlsx",
+            "Access dimension & Learning conditions → Enrolment numbers & Teacher counts (PTR indicator)": "Template_EMIS_Access_PTR.xlsx",
+            "Indicator protection": "Template_EMIS_Protection.xlsx"
+        }
+
+        template_file = emis_templates[emis_indicator]
+        with open(f"input/{template_file}", "rb") as file:
+            st.download_button(
+                label=translations["emis_template_download"],
+                data=file,
+                file_name=template_file,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+
+
 st.markdown("---")  # Markdown horizontal rule
 
 
