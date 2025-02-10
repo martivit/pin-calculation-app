@@ -294,6 +294,7 @@ if data_source == "EMIS":
             """, unsafe_allow_html=True
         )
 
+        st.markdown("---")
         emis_indicator = st.radio(
             translations["emis_indicator_selection"],
             ["Access dimension → Enrolment numbers, ToT enrolled children by school/area", 
