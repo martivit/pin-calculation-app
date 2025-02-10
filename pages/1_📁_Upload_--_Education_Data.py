@@ -251,34 +251,35 @@ data_source = st.radio(
 
 # Step 3.a: ---- MSNA ----- Data Upload 
 if data_source == "MSNA":
-    if 'uploaded_data' in st.session_state:
-        data = st.session_state['uploaded_data']
-        st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
-    else:
-        # MSNA data uploader
-        uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
-        if uploaded_file is not None:
-            st.write(translations["wait"])
-            bar = st.progress(0)
-            try:
-                # Load all sheets
-                all_sheets = pd.read_excel(uploaded_file, sheet_name=None, engine='openpyxl')
-                st.session_state['uploaded_data'] = all_sheets
-                bar.progress(30)
+    with st.container(border=True):
+        if 'uploaded_data' in st.session_state:
+            data = st.session_state['uploaded_data']
+            st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
+        else:
+            # MSNA data uploader
+            uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
+            if uploaded_file is not None:
+                st.write(translations["wait"])
+                bar = st.progress(0)
+                try:
+                    # Load all sheets
+                    all_sheets = pd.read_excel(uploaded_file, sheet_name=None, engine='openpyxl')
+                    st.session_state['uploaded_data'] = all_sheets
+                    bar.progress(30)
 
-                # Validate columns across sheets
-                column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
-                bar.progress(60)
-                if unmatched_columns:
-                    st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
-                    for col in unmatched_columns:
-                        st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
-                else:
-                    st.success(f"✅ {translations['all_mandatory_columns_found']}") 
-                bar.progress(100)
-            except Exception as e:
-                st.error(f"Failed to process the uploaded file: {e}")
-                bar.progress(0)
+                    # Validate columns across sheets
+                    column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
+                    bar.progress(60)
+                    if unmatched_columns:
+                        st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
+                        for col in unmatched_columns:
+                            st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
+                    else:
+                        st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+                    bar.progress(100)
+                except Exception as e:
+                    st.error(f"Failed to process the uploaded file: {e}")
+                    bar.progress(0)
 
 
 # Step 3.b: ---- EMIS ----- Data Upload 
