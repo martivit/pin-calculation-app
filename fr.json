@@ -120,7 +120,8 @@
     "idp_disruption_var_prompt_2": "        (Sample questionnaire Question : Au cours de l'année scolaire 2024-2025, l'enseignement de (nom) a-t-il été perturbé par l'un des événements suivants : L'école a servi d'abri à des personnes déplacées ? )",
     "armed_disruption_var_prompt_2": "        (Sample questionnaire Question : Au cours de l'année scolaire 2024-2025, l'éducation de l'enfant a-t-elle été perturbée par : Une attaque directe contre l'éducation, telle que l'occupation de l'école par des forces armées/groupes armés non étatiques, ou l'attaque de l'école par des munitions/brûlures ou le vol/le pillage ?  )",
     "natural_hazard_disruption_var_prompt_2": "        (Sample questionnaire Question : Au cours de l’année scolaire 2024-2025, l’éducation de (nom) a-t-elle été perturbée par l’un des événements suivants :Risques naturels tels qu’inondation, cyclone, sécheresse, incendie ou tremblement de terre ? )",
-    "barrier_var_prompt_2": "        (Sample questionnaire Question : Au cours de l'année scolaire 2024-2025, quelle était la raison principale pour laquelle [enfant] n'avait pas accès à l'école formelle / un établissement scolaire formel ?"
+    "barrier_var_prompt_2": "        (Sample questionnaire Question : Au cours de l'année scolaire 2024-2025, quelle était la raison principale pour laquelle [enfant] n'avait pas accès à l'école formelle / un établissement scolaire formel ?",
+    "ocha_data_section": "OCHA Chiffres de la population : Télécharger ou sauter"
 
 
 
