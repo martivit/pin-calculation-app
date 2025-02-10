@@ -283,13 +283,16 @@ if data_source == "MSNA":
 
 # Step 3.b: ---- EMIS ----- Data Upload 
 if data_source == "EMIS":
-    st.markdown(
-                    f"""
-                    <div style="font-size:16px; font-weight:bold;">
-                        {translations['emis_intro']}
-                    </div>
-                    """, unsafe_allow_html=True
-                )
+    with st.container(border=True):
+     
+        st.markdown(
+            f"""
+            <div style="font-size:16px; font-weight:bold;">
+                {translations['emis_intro']}<br>
+                <span style="color:darkred;">{translations['yellow_column']}</span>
+            </div>
+            """, unsafe_allow_html=True
+        )
 
 
 st.markdown("---")  # Markdown horizontal rule
