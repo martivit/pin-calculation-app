@@ -130,7 +130,9 @@
     "emis_intro": "For the EMIS data, you will be required to enter the data indicator by indicator following the provided templates. Ensure that you follow the templates format strictly to avoid errors.",
     "yellow_column" : "⚠️ Columns highlighted in yellow are mandatory and must be completed."  ,
     "emis_indicator_selection":"Select the PiN dimension and the corresponding indicator you want to upload using EMIS data as the source",
-    "emis_template_download": "Download the corresponding EMIS template."
+    "emis_template_download": "Download the corresponding EMIS template.",
+    "dimension_selection": "Select the data source for each PiN dimension.",
+    "download_template"]:"Download the corresponding template."
 
 
 
