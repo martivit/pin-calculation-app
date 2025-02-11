@@ -126,11 +126,22 @@
     "ocha_data_section": "2) OCHA Chiffres de la population : Télécharger ou sauter",
     "country_section": "1) Sélection du pays", 
     "select_data_section": "3) Sélectionner la source de données",
-    "data_source_question": "Veuillez préciser la (les) source(s) de données pour le calcul du PiN éducation",
-    "emis_intro": "Pour les données EMIS, vous devrez saisir les données indicateur par indicateur en suivant le modèle fourni. Veillez à respecter scrupuleusement le format du modèle afin d'éviter les erreurs. ",
-    "yellow_column": "⚠️ Les colonnes surlignées en jaune sont obligatoires et doivent être complétées.",
-    "explaination_data_dimension": "Pour chaque dimension du PiN, sélectionnez les données pertinentes pour le(s) indicateur(s) correspondant(s). Une fois toutes les sélections effectuées, vous pourrez télécharger les modèles et il vous sera demandé de télécharger les données."
+  
+    "explaination_data_dimension": "Pour chaque dimension du PiN, sélectionnez les données pertinentes pour le(s) indicateur(s) correspondant(s). Une fois toutes les sélections effectuées, vous pourrez télécharger les modèles et il vous sera demandé de télécharger les données.",
 
+   "data_source_question" :"Veuillez préciser la ou les sources de données pour le calcul du PiN éducation", 
+   "emis_intro" :"Pour les données du SIME, vous devrez saisir les données indicateur par indicateur en suivant les modèles fournis. Veillez à respecter scrupuleusement le format des modèles afin d'éviter les erreurs.",
+   "yellow_column" :"⚠️ Les colonnes surlignées en jaune sont obligatoires et doivent être complétées."  ,
+   "emis_indicator_selection" : "Sélectionnez la dimension PiN et l'indicateur correspondant que vous souhaitez télécharger en utilisant les données du SIME comme source",
+   "emis_template_download" :"Télécharger le modèle EMIS correspondant",
+   "dimension_selection" :"Sélectionnez la source de données :",
+   "download_template" : "Télécharger le modèle correspondant",
+   "explaination_mmmm" :"Vous avez sélectionné MSNA comme seule source de données. Veuillez télécharger votre fichier de données MSNA ci-dessous.",
+   "explaination_emmm" :"Vous avez sélectionné une combinaison de sources de données. Veuillez télécharger le modèle à remplir avec les données EMIS/JENA et télécharger à la fois vos données MSNA et le modèle complété",
+   "msna_only" :"Télécharger les données MSNA",
+   "msna_other" :"Télécharger les données MSNA et le modèle rempli mis à jour",
+   "other_only" :"Télécharger le modèle rempli mis à jour",
+   "upload_other" :"Télécharger les données EMIS/JENA dans le format du modèle"
 
 
   }
