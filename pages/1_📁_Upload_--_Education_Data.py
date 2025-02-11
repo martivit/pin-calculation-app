@@ -39,6 +39,14 @@ REQUIRED_COLUMNS = {
     'survey start': {'start', 'date'}
 }
 FUZZY_THRESHOLD = 90  # Match similarity percentage (higher = stricter)
+pin_dimensions = [
+    "Access to education",
+    "Learning conditions",
+    "Protected environment",
+    "Individual aggravating circumstances"
+]
+data_sources = ["MSNA", "EMIS", "JENA"]
+
 ##-------------------------------------   functions   -----------------------------------------------------
 ##---------------------------------------------------------------------------------------------------------
 def check_conditions_and_proceed():
@@ -252,17 +260,20 @@ st.markdown(
 )
 
 
-
-
-data_source = st.radio(
-    translations["data_source_question"],
-    ["MSNA", "EMIS", "JENA", "Multiple (MSNA+EMIS, MSNA+JENA)"]
-)
-
+user_selection = ""
+selections = {}
+for dimension in pin_dimensions:
+    selected_source = st.pills(
+        label=f"{translations['dimension_selection']} - {dimension}",
+        options=data_sources,
+        selection_mode="single",
+        key=f"{dimension}_source"
+    )
+    selections[dimension] = selected_source if selected_source else "M"
 
 
 # Step 3.a: ---- MSNA ----- Data Upload 
-if data_source == "MSNA":
+if data_sources == "MSNA":
     with st.container(border=True):
         if 'uploaded_data' in st.session_state:
             data = st.session_state['uploaded_data']
@@ -295,7 +306,7 @@ if data_source == "MSNA":
 
 
 # Step 3.b: ---- EMIS ----- Data Upload 
-if data_source == "EMIS":
+if data_sources == "EMIS":
     with st.container(border=True):
         st.markdown(
             f"""
