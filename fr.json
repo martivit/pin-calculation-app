@@ -128,7 +128,8 @@
     "select_data_section": "3) Sélectionner la source de données",
     "data_source_question": "Veuillez préciser la (les) source(s) de données pour le calcul du PiN éducation",
     "emis_intro": "Pour les données EMIS, vous devrez saisir les données indicateur par indicateur en suivant le modèle fourni. Veillez à respecter scrupuleusement le format du modèle afin d'éviter les erreurs. ",
-    "yellow_column": "⚠️ Les colonnes surlignées en jaune sont obligatoires et doivent être complétées."
+    "yellow_column": "⚠️ Les colonnes surlignées en jaune sont obligatoires et doivent être complétées.",
+    "explaination_data_dimension": "Pour chaque dimension du PiN, sélectionnez les données pertinentes pour le(s) indicateur(s) correspondant(s). Une fois toutes les sélections effectuées, vous pourrez télécharger les modèles et il vous sera demandé de télécharger les données."
 
 
 
