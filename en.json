@@ -132,7 +132,9 @@
     "emis_indicator_selection":"Select the PiN dimension and the corresponding indicator you want to upload using EMIS data as the source",
     "emis_template_download": "Download the corresponding EMIS template.",
     "dimension_selection": "Select the data source:",
-    "download_template":"Download the corresponding template."
+    "download_template":"Download the corresponding template.",
+    "explaination_mmmm": "You have selected MSNA as the only data source. Please upload your MSNA data file below.",
+    "explaination_emmm": "ou have selected a combination of data sources. Please download the template to be filled with EMIS/JENA data and upload both your MSNA data and the completed template."
 
 
 
