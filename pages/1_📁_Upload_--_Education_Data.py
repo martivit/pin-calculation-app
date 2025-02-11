@@ -261,6 +261,7 @@ st.markdown(
 
 
 user_selection = ""
+# Store user selections
 selections = {}
 
 for label, dimension in pin_dimensions:
@@ -270,16 +271,72 @@ for label, dimension in pin_dimensions:
         selection_mode="single",
         key=f"{dimension}_source"
     )
-    selections[dimension] = selected_source if selected_source else "M"
+    selections[dimension] = selected_source if selected_source else "o"
 
 # Convert selections to string in correct order
 user_selection = "".join([
     "m" if selections[dim] == "MSNA" else
     "e" if selections[dim] == "EMIS" else
-    "j" for _, dim in pin_dimensions
+    "j" if selections[dim] == "JENA" else "o" for _, dim in pin_dimensions
 ])
-
 st.write(user_selection)
+
+# Ensure all selections are made
+if "o" in user_selection:
+    st.warning("⚠️ Please select a data source for all PiN dimensions before proceeding.")
+
+else:
+    # Define template mapping
+    template_mapping = {
+        "emmm": "Template_EMIS_Access.xlsx",
+        "eemm": "Template_EMIS_Access_PTR.xlsx",
+        "memm": "Template_EMIS_Access_PTR.xlsx",
+        "eeee": "Template_EMIS_All.xlsx",
+        "mmem": "Template_EMIS_Access_protection.xlsx"
+    }
+
+    template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
+
+    st.markdown("---")
+
+
+     # Handle MSNA data upload
+    if user_selection == "mmmm":
+        st.subheader("Upload MSNA Data")
+        if 'uploaded_data' in st.session_state:
+            data = st.session_state['uploaded_data']
+            st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
+        else:
+            # MSNA data uploader
+            uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
+            if uploaded_file is not None:
+                st.write(translations["wait"])
+                bar = st.progress(0)
+                try:
+                    # Load all sheets
+                    all_sheets = pd.read_excel(uploaded_file, sheet_name=None, engine='openpyxl')
+                    st.session_state['uploaded_data'] = all_sheets
+                    bar.progress(30)
+
+                    # Validate columns across sheets
+                    column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
+                    bar.progress(60)
+                    if unmatched_columns:
+                        st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
+                        for col in unmatched_columns:
+                            st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
+                    else:
+                        st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+                    bar.progress(100)
+                except Exception as e:
+                    st.error(f"Failed to process the uploaded file: {e}")
+                    bar.progress(0)
+
+
+
+
+
+
 # Step 3.a: ---- MSNA ----- Data Upload 
 if data_sources == "MSNA":
     with st.container(border=True):
