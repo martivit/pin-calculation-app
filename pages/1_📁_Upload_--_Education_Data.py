@@ -282,6 +282,8 @@ user_selection = "".join([
     "e" if selections[dim] == "EMIS" else
     "j" if selections[dim] == "JENA" else "o" for _, dim in pin_dimensions
 ])
+st.session_state['data_combination'] = user_selection 
+
 
 # Ensure all selections are made
 if "o" in user_selection:
