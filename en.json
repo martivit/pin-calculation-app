@@ -7,7 +7,7 @@
     "warning_MSNA":"Please upload the MSNA data to proceed.",
     "no_user": "Please Login from the Home page and try again.",
     "page1_country": "Which country do you want to calculate the PiN for?",
-    "refresh":"MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page",
+    "refresh":"Data already uploaded. If you want to change the data, just refresh 🔄 the page",
     "upload_msna": "Upload your input MSNA file.",
     "wait": "This process may take some time;   please wait a bit longer. 🐌🐌🐌🐌",
     "ok_upload":"Data uploaded successfully!",
@@ -137,7 +137,8 @@
     "explaination_emmm": "You have selected a combination of data sources. Please download the template to be filled with EMIS/JENA data and upload both your MSNA data and the completed template.",
     "msna_only": "Upload MSNA data",
     "msna_other": "Upload MSNA data and the updated filled template",
-    "other_only": "Upload the updated filled template"
+    "other_only": "Upload the updated filled template",
+    "upload_other": "Upload the EMIS/JENA data in the template format"
 
 
 
