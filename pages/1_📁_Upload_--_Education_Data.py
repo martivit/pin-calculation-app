@@ -244,12 +244,12 @@ else:
 st.subheader(translations["select_data_section"])
 
 st.markdown(
-            f"""
-            <span style="font-size 20px; font-weight:bold;">
-                {translations['explaination_data_dimension']}
-            </span>
-            """, unsafe_allow_html=True
-        )
+    f"""
+    <span style="font-size: 20px; font-weight: bold;">
+        {translations['explaination_data_dimension']}
+    </span>
+    """, unsafe_allow_html=True
+)
 
 
 
