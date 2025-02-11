@@ -293,7 +293,7 @@ else:
         "emmm": "Template_EMIS_Access.xlsx",
         "eemm": "Template_EMIS_Access_PTR.xlsx",
         "memm": "Template_EMIS_Access_PTR.xlsx",
-        "eeee": "Template_EMIS_All.xlsx",
+        "eeem": "Template_EMIS_All.xlsx",
         "mmem": "Template_EMIS_Access_protection.xlsx",
         "eeem": "Template_EMIS_Access_PTR_protection.xlsx",
         "meem": "Template_EMIS_PTR_protection.xlsx"
@@ -387,10 +387,10 @@ label_text = st.session_state.translations["proceed_to_calculation_label"]
 
 scope_test = st.session_state.get('scope_fix')
 
-if scope_test:
-    st.write("Scope-Fix sheet contains data!")
-else:
-    st.write("Scope-Fix sheet is empty!")
+#if scope_test:
+    #st.write("Scope-Fix sheet contains data!")
+#else:
+    #st.write("Scope-Fix sheet is empty!")
 
 with col2: 
     st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
