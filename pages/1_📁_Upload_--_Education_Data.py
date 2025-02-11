@@ -40,10 +40,10 @@ REQUIRED_COLUMNS = {
 }
 FUZZY_THRESHOLD = 90  # Match similarity percentage (higher = stricter)
 pin_dimensions = [
-    "Access to education",
-    "Learning conditions",
-    "Protected environment",
-    "Individual aggravating circumstances"
+    ("a) **Access to education**", "Access to education"),
+    ("b) **Learning conditions**", "Learning conditions"),
+    ("c) **Protected environment**", "Protected environment"),
+    ("d) **Individual protected circumstances**", "Individual protected circumstances")
 ]
 data_sources = ["MSNA", "EMIS", "JENA"]
 
@@ -262,16 +262,24 @@ st.markdown(
 
 user_selection = ""
 selections = {}
-for dimension in pin_dimensions:
+
+for label, dimension in pin_dimensions:
     selected_source = st.pills(
-        label=f"{translations['dimension_selection']} - {dimension}",
+        label=f"{label} - {translations['dimension_selection']}",
         options=data_sources,
         selection_mode="single",
         key=f"{dimension}_source"
     )
     selections[dimension] = selected_source if selected_source else "M"
 
+# Convert selections to string in correct order
+user_selection = "".join([
+    "m" if selections[dim] == "MSNA" else
+    "e" if selections[dim] == "EMIS" else
+    "j" for _, dim in pin_dimensions
+])
 
+st.write(user_selection)
 # Step 3.a: ---- MSNA ----- Data Upload 
 if data_sources == "MSNA":
     with st.container(border=True):

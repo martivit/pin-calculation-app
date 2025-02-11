@@ -125,7 +125,7 @@
     "ocha_data_section": "2) OCHA Population Figures: Upload or Skip",
     "country_section": "1) Country selection",
     "select_data_section": "3) Select the data sources",
-    "explaination_data_dimension": "For each PiN dimension, select the relevant data for the corresponding indicator (s). Once all selections are made, you will be able to download the templates and be prompted to upload the data.",
+    "explaination_data_dimension": "For each PiN dimension, select the relevant data for the corresponding indicator (s). Once all selections are made, you will be able to download the templates and you will be asked to upload the data.",
     "data_source_question": "Please specify the data source(s) for calculating the Education PiN", 
     "emis_intro": "For the EMIS data, you will be required to enter the data indicator by indicator following the provided templates. Ensure that you follow the templates format strictly to avoid errors.",
     "yellow_column" : "⚠️ Columns highlighted in yellow are mandatory and must be completed."  ,
