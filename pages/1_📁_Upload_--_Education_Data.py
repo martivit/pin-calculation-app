@@ -295,7 +295,8 @@ else:
         "memm": "Template_EMIS_Access_PTR.xlsx",
         "eeee": "Template_EMIS_All.xlsx",
         "mmem": "Template_EMIS_Access_protection.xlsx",
-        "eeem": "Template_EMIS_Access_PTR_protection.xlsx"
+        "eeem": "Template_EMIS_Access_PTR_protection.xlsx",
+        "meem": "Template_EMIS_PTR_protection.xlsx"
 
     }
 
