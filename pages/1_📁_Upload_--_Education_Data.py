@@ -242,6 +242,7 @@ else:
 
 #----- Step 3: Select Available Data Sources
 st.subheader(translations["select_data_section"])
+st.text_area(translations['explaination_data_dimension'])
 st.markdown(
             f"""
             <div style="font-size 20px; font-weight:bold;">
