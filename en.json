@@ -132,7 +132,7 @@
     "emis_indicator_selection":"Select the PiN dimension and the corresponding indicator you want to upload using EMIS data as the source",
     "emis_template_download": "Download the corresponding EMIS template.",
     "dimension_selection": "Select the data source for each PiN dimension.",
-    "download_template"]:"Download the corresponding template."
+    "download_template":"Download the corresponding template."
 
 
 
