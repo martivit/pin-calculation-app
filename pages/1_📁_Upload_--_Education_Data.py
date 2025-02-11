@@ -335,7 +335,7 @@ else:
         if "m" in user_selection:
             if 'uploaded_data' in st.session_state:
                 data = st.session_state['uploaded_data']
-                st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
+                st.write(translations["refresh_msna"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
             else:
                 # MSNA data uploader
                 uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
@@ -366,7 +366,7 @@ else:
         if user_selection != "mmmm":
             if 'uploaded_other_data' in st.session_state:
                 data = st.session_state['uploaded_other_data']
-                st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
+                st.write(translations["refresh_other"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
             else:
                 uploaded_template_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
                 st.session_state['uploaded_other_data'] = uploaded_template_file

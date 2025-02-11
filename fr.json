@@ -7,7 +7,9 @@
     "warning_MSNA":"Veuillez télécharger les données MSNA pour continuer.",
     "no_user": "Veuillez vous connecter à partir de la page d'accueil et réessayer.",
     "page1_country": "Quel est le pays pour lequel vous voulez calculer le PiN ?",
-    "refresh":"Données déjà téléchargées. Si vous souhaitez modifier les données, il vous suffit de rafraîchir la page 🔄",
+    "refresh_msna":"Données MSNA déjà téléchargées. Si vous souhaitez modifier les données, il vous suffit de rafraîchir la page 🔄",
+    "refresh_other":"Données EMIS/JENA déjà téléchargées. Si vous souhaitez modifier les données, il vous suffit de rafraîchir la page 🔄",
+
     "upload_msna": "Téléchargez votre fichier MSNA d'entrée.",
     "wait": "Ce processus peut prendre un certain temps ; veuillez patienter encore un peu. 🐌🐌🐌🐌",
     "ok_upload":"Données téléchargées avec succès !",
