@@ -285,7 +285,7 @@ user_selection = "".join([
 
 # Ensure all selections are made
 if "o" in user_selection:
-    st.warning("⚠️ Please select a data source for all PiN dimensions before proceeding.")
+    st.warning(translations["warning_upload_data"])
 
 else:
     # Define template mapping

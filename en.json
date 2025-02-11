@@ -140,7 +140,8 @@
     "msna_only": "Upload MSNA data",
     "msna_other": "Upload MSNA data and the updated filled template",
     "other_only": "Upload the updated filled template",
-    "upload_other": "Upload the EMIS/JENA data in the template format"
+    "upload_other": "Upload the EMIS/JENA data in the template format",
+    "warning_upload_data":"⚠️ Please select a data source for all PiN dimensions before proceeding."
   
   
   
