@@ -248,6 +248,7 @@ else:
             except Exception as e:
                 st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets
 
+
 #----- Step 3: Select Available Data Sources
 st.subheader(translations["select_data_section"])
 
@@ -259,6 +260,7 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
+#----- Step 3.a: Select combinantion according to dimension
 
 user_selection = ""
 # Store user selections
@@ -297,12 +299,9 @@ else:
 
     template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
 
-    st.markdown("---")
 
-
-     # Handle MSNA data upload
+    #----- Step 3.b: only MSNA
     if user_selection == "mmmm":
-        st.subheader("Upload MSNA Data")
         if 'uploaded_data' in st.session_state:
             data = st.session_state['uploaded_data']
             st.write(translations["refresh"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
@@ -332,6 +331,17 @@ else:
                     st.error(f"Failed to process the uploaded file: {e}")
                     bar.progress(0)
 
+    #----- Step 3.c: combination
+    else:
+        # Provide template download if not all MSNA
+        template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
+        with open(f"input/{template_file}", "rb") as file:
+            st.download_button(
+                label=translations["download_template"],
+                data=file,
+                file_name=template_file,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
 
 
