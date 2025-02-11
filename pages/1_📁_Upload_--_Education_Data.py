@@ -46,7 +46,7 @@ pin_dimensions = [
     ("d) **Individual protected circumstances**", "Individual protected circumstances")
 ]
 data_sources = ["MSNA", "EMIS", "JENA"]
-
+data_sources_individual_circumstances = ["MSNA", "JENA"]
 ##-------------------------------------   functions   -----------------------------------------------------
 ##---------------------------------------------------------------------------------------------------------
 def check_conditions_and_proceed():
@@ -267,9 +267,10 @@ user_selection = ""
 selections = {}
 
 for label, dimension in pin_dimensions:
+    options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
     selected_source = st.pills(
         label=f"{label} - {translations['dimension_selection']}",
-        options=data_sources,
+        options=options,
         selection_mode="single",
         key=f"{dimension}_source"
     )
@@ -301,6 +302,12 @@ else:
 
     template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
 
+    # Explanation of the selected approach
+    if user_selection == "mmmm":
+        st.markdown("**You have selected MSNA as the only data source. Please upload your MSNA data file below.**")
+    else:
+        st.markdown("**You have selected a combination of data sources. Please download the template to be filled with EMIS/JENA data and upload both your MSNA data and the completed template.**")
+    
 
     #----- Step 3.b: only MSNA
     if user_selection == "mmmm":
