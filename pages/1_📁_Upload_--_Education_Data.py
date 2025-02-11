@@ -313,6 +313,17 @@ else:
             </div>
             """, unsafe_allow_html=True
         )
+        if user_selection != "mmmm":
+            template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
+            with open(f"input/{template_file}", "rb") as file:
+                st.download_button(
+                    label=translations["download_template"],
+                    data=file,
+                    file_name=template_file,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+
+
 
         if user_selection == "mmmm":
             st.subheader(translations["msna_only"])
@@ -352,15 +363,6 @@ else:
 
         
         if user_selection != "mmmm":
-            template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
-            with open(f"input/{template_file}", "rb") as file:
-                st.download_button(
-                    label=translations["download_template"],
-                    data=file,
-                    file_name=template_file,
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-
             uploaded_template_file = st.file_uploader("Upload your completed template", type=["xlsx"])
             if uploaded_template_file is not None:
                 st.success("Processed template uploaded successfully!")
