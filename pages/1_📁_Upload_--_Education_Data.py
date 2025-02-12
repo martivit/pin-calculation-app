@@ -306,76 +306,80 @@ else:
 
     }
 
-    template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
-
-    with st.container(border=True):
-
-        explanation_message = translations['explaination_mmmm'] if user_selection == "mmmm" else translations['explaination_emmm']
-        st.markdown(
-            f"""
-            <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
-                <p style="color: #00529B; font-weight: bold; font-size: 16px;">
-                    {explanation_message}
-                </p>
-            </div>
-            """, unsafe_allow_html=True
-        )
-        if user_selection != "mmmm":
-            template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
-            with open(f"input/{template_file}", "rb") as file:
-                st.download_button(
-                    label=translations["download_template"],
-                    data=file,
-                    file_name=template_file,
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
+    if user_selection not in template_mapping and user_selection != "mmmm":
+        st.error("⚠️ The selected combination of data sources is not supported. Please review your choices.")
+    else:
+        template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
 
 
+        with st.container(border=True):
 
-        if user_selection == "mmmm":
-            st.subheader(translations["msna_only"])
-        
-        else:
-            st.subheader(translations["msna_other"] if "m" in user_selection else translations["other_only"])
+            explanation_message = translations['explaination_mmmm'] if user_selection == "mmmm" else translations['explaination_emmm']
+            st.markdown(
+                f"""
+                <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
+                    <p style="color: #00529B; font-weight: bold; font-size: 16px;">
+                        {explanation_message}
+                    </p>
+                </div>
+                """, unsafe_allow_html=True
+            )
+            if user_selection != "mmmm":
+                template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
+                with open(f"input/{template_file}", "rb") as file:
+                    st.download_button(
+                        label=translations["download_template"],
+                        data=file,
+                        file_name=template_file,
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
 
-        if "m" in user_selection:
-            if 'uploaded_data' in st.session_state:
-                data = st.session_state['uploaded_data']
-                st.write(translations["refresh_msna"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
+
+
+            if user_selection == "mmmm":
+                st.subheader(translations["msna_only"])
+            
             else:
-                # MSNA data uploader
-                uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
-                if uploaded_file is not None:
-                    st.write(translations["wait"])
-                    bar = st.progress(0)
-                    try:
-                        # Load all sheets
-                        all_sheets = pd.read_excel(uploaded_file, sheet_name=None, engine='openpyxl')
-                        st.session_state['uploaded_data'] = all_sheets
-                        bar.progress(30)
+                st.subheader(translations["msna_other"] if "m" in user_selection else translations["other_only"])
 
-                        # Validate columns across sheets
-                        column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
-                        bar.progress(60)
-                        if unmatched_columns:
-                            st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
-                            for col in unmatched_columns:
-                                st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
-                        else:
-                            st.success(f"✅ {translations['all_mandatory_columns_found']}") 
-                        bar.progress(100)
-                    except Exception as e:
-                        st.error(f"Failed to process the uploaded file: {e}")
-                        bar.progress(0)
+            if "m" in user_selection:
+                if 'uploaded_data' in st.session_state:
+                    data = st.session_state['uploaded_data']
+                    st.write(translations["refresh_msna"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
+                else:
+                    # MSNA data uploader
+                    uploaded_file = st.file_uploader(translations["upload_msna"], type=["csv", "xlsx"])
+                    if uploaded_file is not None:
+                        st.write(translations["wait"])
+                        bar = st.progress(0)
+                        try:
+                            # Load all sheets
+                            all_sheets = pd.read_excel(uploaded_file, sheet_name=None, engine='openpyxl')
+                            st.session_state['uploaded_data'] = all_sheets
+                            bar.progress(30)
 
-        
-        if user_selection != "mmmm":
-           
-            uploaded_template_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
-            st.session_state['uploaded_other_data'] = uploaded_template_file
+                            # Validate columns across sheets
+                            column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
+                            bar.progress(60)
+                            if unmatched_columns:
+                                st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
+                                for col in unmatched_columns:
+                                    st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
+                            else:
+                                st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+                            bar.progress(100)
+                        except Exception as e:
+                            st.error(f"Failed to process the uploaded file: {e}")
+                            bar.progress(0)
 
-            if uploaded_template_file is not None:
-                st.success("Processed template uploaded successfully!")
+            
+            if user_selection != "mmmm":
+            
+                uploaded_template_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
+                st.session_state['uploaded_other_data'] = uploaded_template_file
+
+                if uploaded_template_file is not None:
+                    st.success("Processed template uploaded successfully!")
 
 
 
