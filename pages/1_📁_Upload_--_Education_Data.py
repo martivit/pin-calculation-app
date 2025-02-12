@@ -47,6 +47,9 @@ pin_dimensions = [
 ]
 data_sources = ["MSNA", "EMIS", "JENA"]
 data_sources_individual_circumstances = ["MSNA", "JENA", "no-data"]
+
+
+
 ##-------------------------------------   functions   -----------------------------------------------------
 ##---------------------------------------------------------------------------------------------------------
 def check_conditions_and_proceed():
@@ -66,7 +69,24 @@ def check_conditions_and_proceed():
     # Display success message if ready to proceed
     if st.session_state.get('ready_to_proceed', False):
         st.success("You have completed all necessary steps!")
+##---------------------------------------------------------------------------------------------------------
+def check_conditions_and_proceed_onlymsna():
+    if selected_country != 'no selection' and 'uploaded_data'  in st.session_state:
+        if 'no_upload_ocha_data' in st.session_state or 'uploaded_ocha_data' in st.session_state:
+            st.session_state.ready_to_proceed = True
+        else:
+            st.session_state.ready_to_proceed = False
+            st.warning(translations["warning_ocha"])#Please upload the OCHA data to proceed."
+    else:
+        st.session_state.ready_to_proceed = False
+        if selected_country == 'no selection':
+            st.warning(translations["warning_missing_country"])#Please select a valid country to proceed.
+        else:
+            st.warning(translations["warning_MSNA"])#Please upload the MSNA data to proceed
 
+    # Display success message if ready to proceed
+    if st.session_state.get('ready_to_proceed', False):
+        st.success("You have completed all necessary steps!")
 ##---------------------------------------------------------------------------------------------------------
 def validate_columns_across_sheets(all_sheets):
     """Validate mandatory columns across all sheets while excluding 'end'."""
@@ -342,6 +362,7 @@ else:
             else:
                 st.subheader(translations["msna_other"] if "m" in user_selection else translations["other_only"])
 
+
             if "m" in user_selection:
                 if 'uploaded_data' in st.session_state:
                     data = st.session_state['uploaded_data']
@@ -387,7 +408,11 @@ else:
 
 
 # Check conditions to allow proceeding
-check_conditions_and_proceed()
+if user_selection == 'mmmm':
+    check_conditions_and_proceed_onlymsna()
+else:
+    check_conditions_and_proceed()
+
 
 col1, col2 = st.columns([0.60, 0.40])
 label_text = st.session_state.translations["proceed_to_calculation_label"]
