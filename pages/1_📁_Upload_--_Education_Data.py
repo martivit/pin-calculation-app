@@ -370,15 +370,12 @@ else:
 
         
         if user_selection != "mmmm":
-            if 'uploaded_other_data' in st.session_state:
-                data = st.session_state['uploaded_other_data']
-                st.write(translations["refresh_other"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
-            else:
-                uploaded_template_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
-                st.session_state['uploaded_other_data'] = uploaded_template_file
+           
+            uploaded_template_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
+            st.session_state['uploaded_other_data'] = uploaded_template_file
 
-                if uploaded_template_file is not None:
-                    st.success("Processed template uploaded successfully!")
+            if uploaded_template_file is not None:
+                st.success("Processed template uploaded successfully!")
 
 
 
