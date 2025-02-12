@@ -307,7 +307,7 @@ else:
     }
 
     if user_selection not in template_mapping and user_selection != "mmmm":
-        st.error("⚠️ The selected combination of data sources is not supported. Please review your choices.")
+        st.error(translations["error_combination"]"⚠️ The selected combination of data sources is not supported. Please review your choices.")
     else:
         template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
 
