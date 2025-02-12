@@ -5,6 +5,8 @@
     "warning_ocha":"Veuillez télécharger les données OCHA pour continuer.",
     "warning_missing_country": "Veuillez sélectionner un pays valide pour continuer",
     "warning_MSNA":"Veuillez télécharger les données MSNA pour continuer.",
+    "warning_MSNA_other":"Veuillez télécharger les données MSNA/EMIS pour continuer.",
+
     "no_user": "Veuillez vous connecter à partir de la page d'accueil et réessayer.",
     "page1_country": "Quel est le pays pour lequel vous voulez calculer le PiN ?",
     "refresh_msna":"Données MSNA déjà téléchargées. Si vous souhaitez modifier les données, il vous suffit de rafraîchir la page 🔄",

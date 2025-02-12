@@ -64,7 +64,7 @@ def check_conditions_and_proceed():
         if selected_country == 'no selection':
             st.warning(translations["warning_missing_country"])#Please select a valid country to proceed.
         else:
-            st.warning(translations["warning_MSNA"])#Please upload the MSNA data to proceed
+            st.warning(translations["warning_MSNA_other"])#Please upload the MSNA data to proceed
 
     # Display success message if ready to proceed
     if st.session_state.get('ready_to_proceed', False):

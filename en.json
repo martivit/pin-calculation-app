@@ -5,6 +5,8 @@
     "warning_ocha": "Please upload the OCHA data to proceed.",
     "warning_missing_country": "Please select a valid country to proceed",
     "warning_MSNA":"Please upload the MSNA data to proceed.",
+    "warning_MSNA_other":"Please upload the MSNA/EMIS data to proceed.",
+
     "no_user": "Please Login from the Home page and try again.",
     "page1_country": "Which country do you want to calculate the PiN for?",
     "refresh_msna":"MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page",
