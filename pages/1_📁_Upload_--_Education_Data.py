@@ -43,7 +43,7 @@ pin_dimensions = [
     ("a) **Access to education**", "Access to education"),
     ("b) **Learning conditions**", "Learning conditions"),
     ("c) **Protected environment**", "Protected environment"),
-    ("d) **Individual aggravating circumstances**", "Individual aggravating circumstances")
+    ("d) **Individual protected circumstances**", "Individual protected circumstances")
 ]
 data_sources = ["MSNA", "EMIS", "JENA"]
 data_sources_individual_circumstances = ["MSNA", "JENA", "no-data"]
@@ -267,7 +267,9 @@ user_selection = ""
 selections = {}
 
 for label, dimension in pin_dimensions:
+    # Restrict options for "Individual protected circumstances" to exclude EMIS
     options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
+    
     selected_source = st.pills(
         label=f"{label} - {translations['dimension_selection']}",
         options=options,
@@ -276,12 +278,12 @@ for label, dimension in pin_dimensions:
     )
     selections[dimension] = selected_source if selected_source else "o"
 
-# Convert selections to string in correct order
+# Convert selections to a string in the correct order
 user_selection = "".join([
     "m" if selections[dim] == "MSNA" else
     "e" if selections[dim] == "EMIS" else
     "j" if selections[dim] == "JENA" else
-    "n" if selections[dim] == "no-data" else "o" 
+    "n" if selections[dim] == "no-data" else "o"
     for _, dim in pin_dimensions
 ])
 st.session_state['data_combination'] = user_selection 
