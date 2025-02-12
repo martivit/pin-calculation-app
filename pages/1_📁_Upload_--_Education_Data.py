@@ -43,10 +43,10 @@ pin_dimensions = [
     ("a) **Access to education**", "Access to education"),
     ("b) **Learning conditions**", "Learning conditions"),
     ("c) **Protected environment**", "Protected environment"),
-    ("d) **Individual protected circumstances**", "Individual protected circumstances")
+    ("d) **Individual aggravating circumstances**", "Individual aggravating circumstances")
 ]
 data_sources = ["MSNA", "EMIS", "JENA"]
-data_sources_individual_circumstances = ["MSNA", "JENA"]
+data_sources_individual_circumstances = ["MSNA", "JENA", "no-data"]
 ##-------------------------------------   functions   -----------------------------------------------------
 ##---------------------------------------------------------------------------------------------------------
 def check_conditions_and_proceed():
@@ -280,7 +280,9 @@ for label, dimension in pin_dimensions:
 user_selection = "".join([
     "m" if selections[dim] == "MSNA" else
     "e" if selections[dim] == "EMIS" else
-    "j" if selections[dim] == "JENA" else "o" for _, dim in pin_dimensions
+    "j" if selections[dim] == "JENA" else
+    "n" if selections[dim] == "no-data" else "o" 
+    for _, dim in pin_dimensions
 ])
 st.session_state['data_combination'] = user_selection 
 
@@ -295,7 +297,7 @@ else:
         "emmm": "Template_EMIS_Access.xlsx",
         "eemm": "Template_EMIS_Access_PTR.xlsx",
         "memm": "Template_EMIS_Access_PTR.xlsx",
-        "eeem": "Template_EMIS_All.xlsx",
+        "eeen": "Template_EMIS_All.xlsx",
         "mmem": "Template_EMIS_Access_protection.xlsx",
         "eeem": "Template_EMIS_Access_PTR_protection.xlsx",
         "meem": "Template_EMIS_PTR_protection.xlsx"
@@ -309,7 +311,7 @@ else:
         explanation_message = translations['explaination_mmmm'] if user_selection == "mmmm" else translations['explaination_emmm']
         st.markdown(
             f"""
-            <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; border-left: 5px solid #00529B;">
+            <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
                 <p style="color: #00529B; font-weight: bold; font-size: 16px;">
                     {explanation_message}
                 </p>
