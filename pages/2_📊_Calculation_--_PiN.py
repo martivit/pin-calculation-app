@@ -87,6 +87,7 @@ admin_levels_per_country = {
 }
 
 
+##-----------------------------------------  functions   --------------------------------------------------
 
 ##---------------------------------------------------------------------------------------------------------
 # Function to display status indicators
@@ -524,8 +525,7 @@ def select_indicators():
         # Checkbox to show/hide the data header
         if st.checkbox(translations["display_education_data_header_checkbox"]):
             st.dataframe(edu_data.head())
-        
-       
+
         if age_suggestions:
             age_found = handle_column_selection(age_suggestions, 'age')
             st.session_state['age_var'] = age_found
