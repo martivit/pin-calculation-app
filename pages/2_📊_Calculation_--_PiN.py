@@ -15,8 +15,7 @@ translations = st.session_state.translations
 
 st.title(translations["title_page2"])
 
-combination_data = st.session_state.get('data_combination')
-st.subheader(combination_data)
+data_combination = st.session_state.get('data_combination')
 
 
 
