@@ -1054,7 +1054,7 @@ def display_step_content():
             finalize_details()
     else:
         # Skip directly to final step if 'm' is absent
-        st.session_state['current_step'] = 0  # Ensure stepper starts at finalize_details()
+        st.session_state['current_step'] = 3  # Ensure stepper starts at finalize_details()
         finalize_details_nomsna()  # Call modified finalize_details directly
 
 display_step_content()
