@@ -16,7 +16,7 @@ translations = st.session_state.translations
 st.title(translations["title_page2"])
 
 data_combination = st.session_state.get('data_combination')
-
+st.write (data_combination)
 
 
 #if 'password_correct' not in st.session_state:
