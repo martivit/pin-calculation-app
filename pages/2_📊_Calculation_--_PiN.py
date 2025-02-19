@@ -829,6 +829,209 @@ def finalize_details():
             st.session_state.final_confirmed = True
             #st.success("All details confirmed and finalized!")
 
+##-----------------------------
+# Function to handle administrative details and final confirmations
+def finalize_details_nomsna():
+
+    st.subheader(translations["choose_disaggregation_variables_subheader"])
+    #admin_level_options = ['No selection', 'Admin0', 'Admin1', 'Admin2', 'Admin3']
+
+    with st.container(border=True):
+        # Check if the country has been selected on the first page
+        if 'country' in st.session_state and st.session_state['country'] != 'no selection':
+            selected_country = st.session_state['country']
+            # Get the administrative levels for the selected country
+            admin_level_options = ['No selection'] + admin_levels_per_country.get(selected_country, [])
+        else:
+            # Default to a generic or empty option if no country is selected
+            selected_country = "No selection"
+            admin_level_options = ['No selection']
+
+        # Display the selectbox with an integrated markdown for instructions
+        admin_message = translations["smallest_admin_level"]
+        markdown_message = admin_message.format(selected_country=selected_country)
+        st.markdown(markdown_message, unsafe_allow_html=True)
+
+        admin_target = st.selectbox(
+            "Select",
+            admin_level_options,
+            index=0,  # Default to 'No selection'
+            key='admin_target'
+        )
+
+
+        
+        if st.button(translations["confirm_admin"], key='confirm_admin_level'):
+            if admin_target != 'No selection':
+                st.session_state['admin_var'] = admin_target
+                st.session_state.admin_level_confirmed = True
+                success_message_admin=  translations["success_admin"].format(admin_target=admin_target)
+    
+                st.success(success_message_admin)
+            else:
+                st.error("Please select a valid administrative level.")
+
+
+    #st.markdown("---")  # Markdown horizontal rule
+
+
+    months = ['No selection','January', 'February', 'March', 'April', 'May', 'June', 
+            'July', 'August', 'September', 'October', 'November', 'December']
+    with st.container(border=True):
+        start_school_selection = st.selectbox(
+            translations["start_message"],
+            months,
+            index=0,  # Default to 'No selection'
+            key='start_school_selection'
+        )
+        if st.button(translations["confirm_school"], key='confirm_start_school'):
+            if start_school_selection != 'No selection':
+                st.session_state.school_start_month_confirmed = True
+                st.session_state['start_school'] = start_school_selection 
+                st.success(translations["success_start_school"])
+            else:
+                st.error("Please select a valid month.")
+            #update_other_parameters_status()
+
+
+
+    ## -------------------- school cycle -----------------------------------
+    
+    with st.container(border=True):
+        school_cycle_question = translations["school_cycle_question"]["question"]
+        option_two = translations["school_cycle_question"]["option_two"]
+        option_three = translations["school_cycle_question"]["option_three"]
+        # Render the question and options in two columns
+        col1, col2 = st.columns([1, 1])  # Adjust width proportions as needed
+        school_cycle_count = 0
+        # First column: Question and explanation
+        with col1:
+            school_cycle_question = translations["school_cycle_question"]["question"]
+            option_two = translations["school_cycle_question"]["option_two"]
+            option_three = translations["school_cycle_question"]["option_three"]
+
+            st.markdown(
+                f"""
+                <div style="margin-bottom: 0;">
+                    <strong style="font-size: 18px;">{school_cycle_question}</strong>
+                    <p style="font-size: 16px; color: #333; margin-top: 5px;">
+                        {option_two}<br>
+                        {option_three}
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        # Second column: Radio button
+        with col2:
+            school_cycle_count = st.radio(
+                label="",  # Leave empty as the question is rendered in col1
+                options=[2, 3],
+                index=0,
+                key="school_cycle_count"
+            )
+
+
+
+
+
+        if school_cycle_count == 3:
+            upper_primary_start = st.session_state['lower_primary_end'] +1
+            if st.session_state['country'] != 'Afghanistan -- AFG':
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=6, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
+            else:
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=7, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
+
+
+                lower_primary_end = st.session_state['lower_primary_end'] 
+                upper_primary_start = lower_primary_end +1                   
+
+            upper_primary_end = st.slider(
+                translations["school3"],
+                min_value=upper_primary_start, 
+                max_value=17, 
+                value=st.session_state['upper_primary_end'],
+                step=1,
+                key='upper_primary_end'
+            )
+            upper_primary_start = st.session_state['lower_primary_end'] + 1
+            secondary_start = st.session_state['upper_primary_end'] + 1
+
+            if st.button(translations["school_confirm_3"]):
+                st.session_state.upper_primary_end_confirmed = True
+                if upper_primary_end != st.session_state['upper_primary_end']:
+                    upper_primary_end = st.session_state['upper_primary_end'] 
+                vect1 =  st.session_state['lower_primary_end']  
+                vect2 =  st.session_state['upper_primary_end']
+                st.session_state['vector_cycle'] = [vect1,vect2]
+                if st.session_state['country'] != 'Afghanistan -- AFG': school4_message = translations["school4"]
+                else: school4_message = translations["school4_afg"]
+                school4_content = school4_message.format(
+                    lower_primary_end=lower_primary_end,
+                    upper_primary_start=upper_primary_start,
+                    upper_primary_end=upper_primary_end,
+                    secondary_start=secondary_start
+                )
+                st.markdown(school4_content, unsafe_allow_html=True)
+
+        elif school_cycle_count == 2:
+            if st.session_state['country'] != 'Afghanistan -- AFG':
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=6, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
+            else:
+                lower_primary_end = st.slider(
+                    translations["school1"],
+                    min_value=7, 
+                    max_value=17, 
+                    value=st.session_state['lower_primary_end'],
+                    step=1,
+                    key='lower_primary_end'
+                )
+
+            if st.button(translations["school_confirm_2"]):
+                st.session_state.upper_primary_end_confirmed = True
+                primary_end = st.session_state['lower_primary_end']
+                secondary_start = primary_end + 1
+                vect1 =  st.session_state['lower_primary_end']  
+                vect2 =  0
+                st.session_state['vector_cycle'] = [vect1,vect2]
+                if st.session_state['country'] != 'Afghanistan -- AFG': school5_message = translations["school5"]
+                else: school5_message = translations["school5_afg"]
+                # Insert the dynamic values into the HTML template
+                school5_content = school5_message.format(
+                    primary_end=primary_end,
+                    secondary_start=secondary_start
+                )
+
+                # Display the HTML content
+                st.markdown(school5_content, unsafe_allow_html=True)
+
+
+    if st.button(translations["last_confirm"]):
+        st.session_state.final_confirmed = True
+        #st.success("All details confirmed and finalized!")
+
 
 
         #st.markdown("---")
@@ -837,14 +1040,22 @@ def finalize_details():
 ###########################################################################################################
 
 def display_step_content():
-    if st.session_state['current_step'] == 0:
-        upload_and_select_data()
-    elif st.session_state['current_step'] == 1:
-        select_indicators()
-    elif st.session_state['current_step'] == 2:
-        define_severity()
-    elif st.session_state['current_step'] == 3:
-        finalize_details()          
+    data_combination = st.session_state.get('data_combination', "")
+
+    # Check if 'm' is in the data_combination string
+    if 'm' in data_combination:
+        if st.session_state['current_step'] == 0:
+            upload_and_select_data()
+        elif st.session_state['current_step'] == 1:
+            select_indicators()
+        elif st.session_state['current_step'] == 2:
+            define_severity()
+        elif st.session_state['current_step'] == 3:
+            finalize_details()
+    else:
+        # Skip directly to final step if 'm' is absent
+        st.session_state['current_step'] = 0  # Ensure stepper starts at finalize_details()
+        finalize_details_nomsna()  # Call modified finalize_details directly
 
 display_step_content()
 
