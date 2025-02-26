@@ -1063,6 +1063,7 @@ def display_step_content():
         st.session_state['current_step'] = 0  # Ensure stepper starts at finalize_details()
         st.session_state.data_selections_confirmed = True
         st.session_state.age_column_confirmed = True
+        st.session_state.label_selected = True
         st.session_state.gender_column_confirmed = True
         st.session_state.indicators_confirmed = True
         st.session_state.severity_4_confirmed = True
@@ -1085,6 +1086,7 @@ all_steps_confirmed = all([
     st.session_state.get('other_parameters_confirmed', False)
 ])
 
+st.write(all_steps_confirmed)
 
 if all_steps_confirmed:
     st.markdown("""
