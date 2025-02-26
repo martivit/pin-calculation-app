@@ -6,12 +6,10 @@
     "warning_missing_country": "Veuillez sélectionner un pays valide pour continuer",
     "warning_MSNA":"Veuillez télécharger les données MSNA pour continuer.",
     "warning_MSNA_other":"Veuillez télécharger les données MSNA/EMIS pour continuer.",
-
     "no_user": "Veuillez vous connecter à partir de la page d'accueil et réessayer.",
     "page1_country": "Quel est le pays pour lequel vous voulez calculer le PiN ?",
     "refresh_msna":"Données MSNA déjà téléchargées. Si vous souhaitez modifier les données, il vous suffit de rafraîchir la page 🔄",
     "refresh_other":"Données EMIS/JENA déjà téléchargées. Si vous souhaitez modifier les données, il vous suffit de rafraîchir la page 🔄",
-
     "upload_msna": "Téléchargez votre fichier MSNA d'entrée.",
     "wait": "Ce processus peut prendre un certain temps ; veuillez patienter encore un peu. 🐌🐌🐌🐌",
     "ok_upload":"Données téléchargées avec succès !",
@@ -118,6 +116,8 @@
       "option_two": "2 → Primaire et secondaire",
       "option_three": "3 → Primaire, Intermédiaire et Secondaire "
     },
+    "school_confirm_3": "Confirmer la configuration du cycle 3 et les tranches d'âge ",
+    "school_confirm_2": "Confirmer la configuration à 2 cycles et les tranches d'âge ",
     "expand_kobo":"Inspecter les indicateurs MSNA",
     "access_var_prompt_2": "        (Sample questionnaire Question : A n’importe quel moment durant l’année scolaire actuelle (2024-2025), est-ce que (nom) a fréquenté l’école ou un programme d’éducation pré-primaire ? )",
     "teacher_disruption_var_prompt_2": "        (Sample questionnaire Question : Au cours de l'année scolaire 2024-2025, l'éducation de (nom) a-t-elle été perturbée par l'un des événements suivants : Absence de l'enseignant? )",
@@ -128,9 +128,7 @@
     "ocha_data_section": "2) OCHA Chiffres de la population : Télécharger ou sauter",
     "country_section": "1) Sélection du pays", 
     "select_data_section": "3) Sélectionner la source de données",
-  
     "explaination_data_dimension": "Pour chaque dimension du PiN, sélectionnez les données pertinentes pour le(s) indicateur(s) correspondant(s). Une fois toutes les sélections effectuées, vous pourrez télécharger les modèles et il vous sera demandé de télécharger les données.",
-
    "data_source_question" :"Veuillez préciser la ou les sources de données pour le calcul du PiN éducation", 
    "emis_intro" :"Pour les données du SIME, vous devrez saisir les données indicateur par indicateur en suivant les modèles fournis. Veillez à respecter scrupuleusement le format des modèles afin d'éviter les erreurs.",
    "yellow_column" :"⚠️ Les colonnes surlignées en jaune sont obligatoires et doivent être complétées."  ,

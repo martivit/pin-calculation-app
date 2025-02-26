@@ -37,10 +37,6 @@ if 'm' in data_combination:
 else:
     new_step = stx.stepper_bar(steps=steps_nomsna)
 
-
-
-
-
 if new_step is not None and new_step != st.session_state['current_step']:
     st.session_state['current_step'] = new_step
 
