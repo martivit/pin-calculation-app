@@ -1061,13 +1061,14 @@ def display_step_content():
     else:
         # Skip directly to final step if 'm' is absent
         st.session_state['current_step'] = 0  # Ensure stepper starts at finalize_details()
-        st.session_state.data_selections_confirmed = True
-        st.session_state.age_column_confirmed = True
-        st.session_state.label_selected = True
-        st.session_state.gender_column_confirmed = True
-        st.session_state.indicators_confirmed = True
-        st.session_state.severity_4_confirmed = True
-        st.session_state.severity_5_confirmed = True
+        st.session_state['data_selections_confirmed'] = True
+        st.session_state['age_column_confirmed'] = True
+        st.session_state['label_selected'] = True
+        st.session_state['gender_column_confirmed'] = True
+        st.session_state['severity_4_confirmed'] = True
+        st.session_state['severity_5_confirmed'] = True
+        st.session_state['indicators_confirmed'] = True
+
         finalize_details_nomsna()  # Call modified finalize_details directly
 
 display_step_content()
