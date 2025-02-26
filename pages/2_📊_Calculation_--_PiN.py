@@ -28,8 +28,16 @@ if 'current_step' not in st.session_state:
 
 # Define the steps for the stepper bar
 steps = [translations["step1"],translations["step2"],translations["step3"],translations["step4"]]
+steps_nomsna = [translations["step4"]]
+
 current_step = st.session_state['current_step']
 new_step = stx.stepper_bar(steps=steps)
+
+if 'm' not in data_combination:
+    new_step = stx.stepper_bar(steps=steps_nomsna)
+
+
+
 
 if new_step is not None and new_step != st.session_state['current_step']:
     st.session_state['current_step'] = new_step
@@ -1054,7 +1062,7 @@ def display_step_content():
             finalize_details()
     else:
         # Skip directly to final step if 'm' is absent
-        st.session_state['current_step'] = 3  # Ensure stepper starts at finalize_details()
+        st.session_state['current_step'] = 0  # Ensure stepper starts at finalize_details()
         finalize_details_nomsna()  # Call modified finalize_details directly
 
 display_step_content()
