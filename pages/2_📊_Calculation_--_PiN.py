@@ -1074,20 +1074,16 @@ display_step_content()
 
 st.markdown("---")  # Markdown horizontal rule
 
-
-if 'm' in data_combination:
-    all_steps_confirmed = all([
-        st.session_state.get('data_selections_confirmed', False),
-        st.session_state.get('label_selected', False),
-        st.session_state.get('age_column_confirmed', False),
-        st.session_state.get('gender_column_confirmed', False),
-        st.session_state.get('indicators_confirmed', False),
-        st.session_state.get('severity_4_confirmed', False),
-        st.session_state.get('severity_5_confirmed', False),
-        st.session_state.get('other_parameters_confirmed', False)
-    ])
-else:
-    all_steps_confirmed = st.session_state.get('other_parameters_confirmed', False)
+all_steps_confirmed = all([
+    st.session_state.get('data_selections_confirmed', False),
+    st.session_state.get('label_selected', False),
+    st.session_state.get('age_column_confirmed', False),
+    st.session_state.get('gender_column_confirmed', False),
+    st.session_state.get('indicators_confirmed', False),
+    st.session_state.get('severity_4_confirmed', False),
+    st.session_state.get('severity_5_confirmed', False),
+    st.session_state.get('other_parameters_confirmed', False)
+])
 
 
 if all_steps_confirmed:
