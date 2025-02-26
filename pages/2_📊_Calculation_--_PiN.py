@@ -33,8 +33,11 @@ steps_nomsna = [translations["step4"]]
 current_step = st.session_state['current_step']
 new_step = stx.stepper_bar(steps=steps)
 
-if 'm' not in data_combination:
+if 'm' in data_combination:
+    new_step = stx.stepper_bar(steps=steps)
+else:
     new_step = stx.stepper_bar(steps=steps_nomsna)
+
 
 
 
