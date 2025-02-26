@@ -1073,6 +1073,7 @@ def display_step_content():
         st.session_state['disruption_armed_column_confirmed'] = True
         st.session_state['barriers_column_confirmed'] = True
         st.session_state['indicators_confirmed'] = True
+        st.session_state['displacement_column_confirmed'] = True
 
         finalize_details_nomsna()  # Call modified finalize_details directly
 
