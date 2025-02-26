@@ -1067,6 +1067,11 @@ def display_step_content():
         st.session_state['gender_column_confirmed'] = True
         st.session_state['severity_4_confirmed'] = True
         st.session_state['severity_5_confirmed'] = True
+        st.session_state['education_access_column_confirmed'] = True
+        st.session_state['disruption_teacher_column_confirmed'] = True
+        st.session_state['disruption_idp_column_confirmed'] = True
+        st.session_state['disruption_armed_column_confirmed'] = True
+        st.session_state['barriers_column_confirmed'] = True
         st.session_state['indicators_confirmed'] = True
 
         finalize_details_nomsna()  # Call modified finalize_details directly
