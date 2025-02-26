@@ -45,7 +45,7 @@ selected_language = st.session_state.get('selected_language', 'English')
     #st.error(translations["no_user"])
     #st.stop()
 
-if 'uploaded_data' not in st.session_state:
+if 'uploaded_data' not in st.session_state and 'uploaded_other_data' not in st.session_state:
     st.warning(translations["no_data"])  
     st.stop()
 
