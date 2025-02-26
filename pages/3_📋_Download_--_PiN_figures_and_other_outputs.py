@@ -52,6 +52,9 @@ if 'uploaded_data' not in st.session_state and 'uploaded_other_data' not in st.s
 
 github_token = st.secrets["github"]["token"]
 
+
+###########################################################################################################
+##--------------------------------------------------------------------------------------------------------------------
 def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
     """
     Uploads a file to a GitHub repository using the GitHub REST API.
@@ -108,7 +111,7 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
         #st.error(f"⚠️ Upload failed: {response.status_code} - {response.text}")
         #return None
 
-
+##--------------------------------------------------------------------------------------------------------------------
 def create_zip_file(country_label, excel_file, indicator_output,word_snapshot, word_parameters):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
