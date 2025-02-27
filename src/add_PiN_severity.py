@@ -241,6 +241,66 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
     )
 
     return data
+
+##--------------------------------------------------------------------------------------------
+def add_indicator_columns_for_EMIS(data, access_var, teacher_disruption_var, natural_hazard_var, idp_disruption_var, armed_disruption_var, barrier_var, names_severity_4, names_severity_5):
+    # Helper function to normalize string inputs
+    def normalize(input_value):
+        if isinstance(input_value, str):
+            return input_value.lower()
+        elif isinstance(input_value, (int, float)):  # Handle numeric values directly
+            return input_value
+        return ""  # Default to empty string if input is not a string or number
+
+    # Define the conditions for yes and no answers
+    yes_answers = ['yes', 'oui', '1', 1]
+    no_answers = ['no', 'non', '0', 0]
+
+    no_indicator = 'no_indicator'
+
+    # Initialize new columns with 0
+    data['var.access'] = 0
+    data['var.teacher'] = 0
+    data['var.hazard'] = 0
+    data['var.idp'] = 0
+    data['var.occupation'] = 0
+    data['var.barrier4'] = 0
+    data['var.barrier5'] = 0
+
+    # Apply conditions with severity filtering
+    data['var.access'] = data.apply(
+        lambda row: 1 if normalize(row[access_var]) in yes_answers else 0, axis=1
+    )
+
+    if teacher_disruption_var != no_indicator:
+        data['var.teacher'] = data.apply(
+            lambda row: 1 if row['severity_category'] not in [4, 5] and normalize(row[teacher_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    if natural_hazard_var != no_indicator:
+        data['var.hazard'] = data.apply(
+            lambda row: 1 if row['severity_category'] not in [4, 5] and row[teacher_disruption_var] != 1 and normalize(row[natural_hazard_var]) in yes_answers else 0, axis=1
+        )
+
+    if idp_disruption_var != no_indicator:
+        data['var.idp'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 4 and row['severity_category'] != 5 and normalize(row[idp_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    if armed_disruption_var != no_indicator:
+        data['var.occupation'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 5 and normalize(row[armed_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    data['var.barrier4'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 4 and row[barrier_var] in names_severity_4 else 0, axis=1
+    )
+
+    data['var.barrier5'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 5 and row[barrier_var] in names_severity_5 else 0, axis=1
+    )
+
+    return data
 ##--------------------------------------------------------------------------------------------
 def assign_dimension_pin(access, severity):
     # Normalize access status
@@ -559,6 +619,18 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         ), axis=1)
 
     edu_data = add_indicator_columns(
+        data=edu_data,
+        access_var=access_var,
+        teacher_disruption_var=teacher_disruption_var,
+        natural_hazard_var=natural_hazard_var,
+        idp_disruption_var=idp_disruption_var,
+        armed_disruption_var=armed_disruption_var,
+        barrier_var=barrier_var,
+        names_severity_4=names_severity_4,
+        names_severity_5=names_severity_5
+    )
+
+    edu_data = add_indicator_columns_for_EMIS(
         data=edu_data,
         access_var=access_var,
         teacher_disruption_var=teacher_disruption_var,
