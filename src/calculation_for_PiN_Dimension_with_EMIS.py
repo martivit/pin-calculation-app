@@ -486,13 +486,117 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
             pin_by_indicator_status[category] = pop_group_ind_df
 
     return pin_by_indicator_status   
+##--------------------------------------------------------------------------------------------        
+def map_template_to_status(template_values, suggestions_mapping, status_values):
+    results = {}
+    for template in template_values:
+        suggestions = suggestions_mapping.get(template, [])
+        # Search for the first matching status with direct comparisons
+        match = next((status for status in status_values if status in suggestions), None)
+        if match:
+            results[template] = match
+        else:
+            results[template] = 'No match found'
+    return results
 
+##--------------------------------------------------------------------------------------------        
+def extract_status_data(ocha_data, mapped_statuses, pop_group_var):
+    # Data frames dictionary to store each category's DataFrame
+    data_frames = {}
+    
+    for category, status in mapped_statuses.items():
+        if status != 'No match found':
+            # Use the status as the category name for clarity and direct mapping
+            category_name = status  # This changes the category name to the matched status value
+            
+            # Prepare the column names to extract based on the matched status
+            children_col = f"{category} -- Children/Enfants (5-17)"
+            
+            # Check if these columns exist in the DataFrame
+            if all(col in ocha_data.columns for col in [children_col]):
+                # Create a new DataFrame for this category using the status as the category name
+                category_df = ocha_data[['Admin', children_col]].copy()
+                category_df.rename(columns={
+                    children_col: 'TotN'
+                }, inplace=True)
+                category_df['Category'] = category_name  # Set the category name to the matched status
+                category_df[pop_group_var] = status
+                data_frames[category_name] = category_df
+            else:
+                print(f"Columns for {category} not found in OCHA data.")
+        else:
+            print(f"No match found for the category: {category}, skipping data extraction for this category.")
+
+    return data_frames
+##--------------------------------------------------------------------------------------------
+def cap_and_redistribute(enrollment_df, valid_mappings, max_iterations=10):
+    """
+    For each pop group (e.g., 'host', 'idp', 'ret'), if the column 
+    "{pop_group} -- E" exceeds the cap given in "{pop_group} -- TotN",
+    cap it and redistribute the excess proportionally to the TotN of the other groups.
+    
+    Parameters:
+      enrollment_df : pandas DataFrame with columns like:
+          "{pop_group} -- E" and "{pop_group} -- TotN"
+      valid_mappings: dictionary mapping original labels to pop group names, e.g.,
+          {'Host/Hôte': 'host', 'IDP/PDI': 'idp', 'Returnees/Retournés': 'ret'}
+      max_iterations: maximum number of iterations to perform
+    Returns:
+      Modified enrollment_df with reallocated E values.
+    """
+    
+    iteration = 0
+    # Loop until no changes occur or until maximum iterations are reached.
+    while iteration < max_iterations:
+        any_adjustment = False  # To track if any group needed adjustment in this iteration
+        
+        # For each pop group, check if its E value is above its TotN
+        for pop_group in valid_mappings.values():
+            e_col = f"{pop_group} -- E"
+            tot_col = f"{pop_group} -- TotN"
+            
+            # Calculate the excess amount for rows where E > TotN
+            excess = enrollment_df[e_col] - enrollment_df[tot_col]
+            mask = excess > 0
+            
+            if mask.any():
+                any_adjustment = True
+                # For rows where the value exceeds the cap, store the excess
+                excess_amount = excess[mask]
+                
+                # Cap the group's E at TotN for those rows
+                enrollment_df.loc[mask, e_col] = enrollment_df.loc[mask, tot_col]
+                
+                # Identify the other groups to which we will redistribute the excess
+                other_groups = [pg for pg in valid_mappings.values() if pg != pop_group]
+                # For these rows, compute the sum of TotN for the other groups
+                tot_sum = enrollment_df.loc[mask, [f"{pg} -- TotN" for pg in other_groups]].sum(axis=1)
+                
+                # For each other group, add a share of the excess proportional to its TotN
+                for other in other_groups:
+                    other_e_col = f"{other} -- E"
+                    other_tot_col = f"{other} -- TotN"
+                    
+                    # The allocated excess for this group is:
+                    # excess * (TotN_other / sum_{other groups} TotN)
+                    allocation = excess_amount * enrollment_df.loc[mask, other_tot_col] / tot_sum
+                    
+                    # Increase the current E value by the allocated excess
+                    enrollment_df.loc[mask, other_e_col] = enrollment_df.loc[mask, other_e_col] + allocation
+        
+        # If no adjustment was made in this iteration, we are done.
+        if not any_adjustment:
+            break
+        
+        iteration += 1
+    
+    return enrollment_df
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
 ########################################################################################################################################
 ########################################################################################################################################
-def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
+def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,emis_data,
                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
@@ -682,6 +786,8 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
     )
 
 
+    ################### use enrolled numbers in emis to calculate the tot number of enrolled kids per pop_grop
+    ####### ** 1 **       ------------------------------ step 1: extract access rate from MSNA by pop group
     access_rate_df = None
 
     for category, rate_pop_df in pin_by_indicator_status_list.items():
@@ -702,26 +808,88 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
 
     print(access_rate_df)
 
+    ####### ** 2 **       ------------------------------ step 2: group by admin the emis data
+    emis_df = emis_data.groupby("Admin Pcode")["Enrolled students -- Children/Enfants (5-17)"].sum().reset_index()
+    emis_df = emis_df.rename(columns={'Admin Pcode': admin_var})
+    emis_df = emis_df.rename(columns={'Enrolled students -- Children/Enfants (5-17)': 'enrolled_emis'})
+
+    print(emis_df)
+
+    ## ----- step 3.1: organize and label ocha data
+    ####### ** 3 **       ------------------------------ step 3: matching between the admin and the ocha population data
+    ## finding the match between the OCHA status cathegory and the country status. 
+    status_values = [status for status in edu_data[pop_group_var].unique() if status not in status_to_be_excluded]# Retrieve unique values directly without converting to lowercase
+    for key, suggestions in suggestions_mapping.items():
+        suggestions_mapping[key] = suggestions  # keeping original case
+
+    mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
+    print (mapped_statuses)
+    category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)# Extract population figures based on mapped statuses without modifying the case
+
+    for category, df in category_data_frames.items():
+        df.rename(columns={'Admin': admin_var}, inplace=True)
+
+    ocha_data_frames_for_emis = category_data_frames
+    for category, df in ocha_data_frames_for_emis.items():
+        df.rename(columns={'Admin': admin_var}, inplace=True)
+        df.rename(columns={'TotN': f"{category} -- TotN"}, inplace=True)
+        
+        # Remove 'Category' and 'pop_group' columns if they exist
+        df.drop(columns=['Category', pop_group_var], errors='ignore', inplace=True)
+
+    ocha_number_df = None
+    for category, ocha_pop_df in ocha_data_frames_for_emis.items():
+        # Start with the base DataFrame for this category
+        ocha_pop_df = ocha_pop_df.copy()
+        # Merge with previous categories
+        if ocha_number_df is None:
+            ocha_number_df = ocha_pop_df
+        else:
+            ocha_number_df = ocha_number_df.merge(ocha_pop_df, on=admin_var, how="outer")
+
+    ####### ** 4 **       ------------------------------ step 4: merge OCHA, EMiS, rate MSNA
+    enrollment_df = ocha_number_df
+    enrollment_df = enrollment_df.merge(emis_df, on=admin_var, how="outer")
+    enrollment_df = enrollment_df.merge(access_rate_df, on=admin_var, how="outer")
+
+    print(enrollment_df)
+
+    ####### ** 5 **       ------------------------------ step 5: CALCULATION
+    valid_mappings = {k: v for k, v in mapped_statuses.items() if v != 'No match found'}
+
+    for label, pop_group in valid_mappings.items():
+        tot_col = f"{pop_group} -- TotN"
+        rate_col = f"{pop_group} -- rate_indicator_access"
+        einitial_col = f"{pop_group} -- E_initial"
+        # Calculate Einitial as TotN * rate_indicator_access
+        enrollment_df[einitial_col] = enrollment_df[tot_col] * enrollment_df[rate_col]
+
+    einitial_cols = [f"{pop_group} -- E_initial" for pop_group in valid_mappings.values()]
+    enrollment_df['k_factor'] = enrollment_df['enrolled_emis'] / enrollment_df[einitial_cols].sum(axis=1)
+
+    for pop_group in valid_mappings.values():
+        einitial_col = f"{pop_group} -- E_initial"
+        e_col = f"{pop_group} -- E"
+        enrollment_df[e_col] = enrollment_df['k_factor'] * enrollment_df[einitial_col]
 
 
 
+    # To check the result:
+    print(enrollment_df)
 
 
 
+    enrollment_df = cap_and_redistribute(enrollment_df, valid_mappings)
 
+    for label, pop_group in valid_mappings.items():
+        tot_col = f"{pop_group} -- TotN"
+        e_col = f"{pop_group} -- E"
+        oos_col = f"{pop_group} -- OoS"
 
+        # Calculate Einitial as TotN * rate_indicator_access
+        enrollment_df[oos_col] = enrollment_df[tot_col] - enrollment_df[e_col]
 
-
-
-
-
-
-
-
-
-
-
-
+    print(enrollment_df)
     
     
-    return pin_by_indicator_status_list
+    return pin_by_indicator_status_list, enrollment_df

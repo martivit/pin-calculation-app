@@ -65,6 +65,8 @@ label = 'label::English'
 # Path to your Excel file
 excel_path = 'input/Lemuria_MSNA_2022.xlsx'
 excel_path_ocha = 'input/OCHA_pop_LMR.xlsx'
+excel_path_emis = 'input/emis_LMR.xlsx'
+
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -89,6 +91,9 @@ ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
+
+emis_xls = pd.ExcelFile(excel_path_emis, engine='openpyxl')
+emis_data = pd.read_excel(emis_xls)  # 'ocha' sheet
 
 
 selected_language = "English"
@@ -116,7 +121,7 @@ edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
 
 
 if ocha_data is not None:
-    (pin_by_indicator_status_list) = calculatePIN_with_EMIS (data_combination,country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
+    (pin_by_indicator_status_list, enrollment_df) = calculatePIN_with_EMIS (data_combination,country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,emis_data,
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
@@ -128,12 +133,16 @@ if ocha_data is not None:
 
 
 
-    file_path_pin_1 = 'output_validation/01_pin_percentage_per_EMIS.xlsx'
- 
+    file_path_E_1 = 'output_validation/E_indicator_results_withright_subset.xlsx'
+    file_path_E_2 = 'output_validation/E_enrolment_by_pop_group.xlsx'
+
 
     # Create an Excel writer object
-    with pd.ExcelWriter(file_path_pin_1) as writer:
+    with pd.ExcelWriter(file_path_E_1) as writer:
         # Iterate over each category and DataFrame in the dictionary
         for category, df in pin_by_indicator_status_list.items():
             # Write the DataFrame to a sheet named after the category
             df.to_excel(writer, sheet_name=category, index=False)
+
+
+    enrollment_df.to_excel(file_path_E_2, index=False, engine='openpyxl')
