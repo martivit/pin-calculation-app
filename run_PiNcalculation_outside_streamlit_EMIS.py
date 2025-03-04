@@ -121,7 +121,9 @@ edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
 
 
 if ocha_data is not None:
-    (pin_by_indicator_status_list, enrollment_df) = calculatePIN_with_EMIS (data_combination,country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,emis_data,
+    (pin_by_indicator_status_list, enrollment_df, pop_figures_E_OoS_by_pop_group, severity_by_pop_group, 
+     pin_by_pop_group, 
+     pin_by_dimension_in_need_pop_group,pin_by_indicator_pop_group) = calculatePIN_with_EMIS (data_combination,country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,emis_data,
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
@@ -135,6 +137,11 @@ if ocha_data is not None:
 
     file_path_E_1 = 'output_validation/E_indicator_results_withright_subset.xlsx'
     file_path_E_2 = 'output_validation/E_enrolment_by_pop_group.xlsx'
+    file_path_E_3 = 'output_validation/E_E_OoS_pop_group.xlsx'
+    file_path_E_4 = 'output_validation/E_severity_pop_group.xlsx'
+    file_path_E_5 = 'output_validation/E_PiN_pop_group.xlsx'
+    file_path_E_6 = 'output_validation/E_PiN_by_dimension_in_need.xlsx'
+    file_path_E_7 = 'output_validation/E_PiN_by_indicator.xlsx'
 
 
     # Create an Excel writer object
@@ -146,3 +153,35 @@ if ocha_data is not None:
 
 
     enrollment_df.to_excel(file_path_E_2, index=False, engine='openpyxl')
+
+    # Create an Excel writer object
+    with pd.ExcelWriter(file_path_E_3) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in pop_figures_E_OoS_by_pop_group.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
+
+     # Create an Excel writer object
+    with pd.ExcelWriter(file_path_E_4) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in severity_by_pop_group.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
+
+    with pd.ExcelWriter(file_path_E_5) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in pin_by_pop_group.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
+
+    with pd.ExcelWriter(file_path_E_6) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in pin_by_dimension_in_need_pop_group.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)     
+
+    with pd.ExcelWriter(file_path_E_7) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in pin_by_indicator_pop_group.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)     

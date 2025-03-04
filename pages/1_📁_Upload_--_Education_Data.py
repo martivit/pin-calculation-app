@@ -318,7 +318,6 @@ else:
     template_mapping = {
         "emmm": "Template_EMIS_Access.xlsx",
         "eemm": "Template_EMIS_Access_PTR.xlsx",
-        "memm": "Template_EMIS_Access_PTR.xlsx",
         "eeen": "Template_EMIS_All.xlsx",
         "mmem": "Template_EMIS_Access_protection.xlsx",
         "eeem": "Template_EMIS_Access_PTR_protection.xlsx",

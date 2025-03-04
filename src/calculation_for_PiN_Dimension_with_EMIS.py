@@ -25,6 +25,9 @@ label_perc_tot = '% Tot PiN (severity levels 3-5)'
 label_tot = '# Tot PiN (severity levels 3-5)'
 label_admin_severity = 'Area severity'
 label_tot_population = 'TotN'
+label_tot_enrolled = 'E'
+label_tot_OoS = 'OoS'
+
 
 int_acc = 'access'
 int_agg= 'aggravating circumstances'
@@ -44,6 +47,22 @@ label_tot_out = '# Not in need'
 label_dimension_perc_tot = '% Tot in PiN Dimensions'
 label_dimension_tot = '# Tot in PiN Dimensions'
 label_dimension_tot_population = 'TotN'
+
+label_tot_sev3_indicator_access= 'severity level 3: (ToT # children) indicator Access'
+label_tot_sev3_indicator_teacher = 'severity level 3: (ToT # children) indicator Teacher Absence Disruption'
+label_tot_sev3_indicator_hazard = 'severity level 3: (ToT # children) indicator Natural Hazard Disruption'
+label_tot_sev4_indicator_idp = 'severity level 4: (ToT # children) indicator School Used As Shelter Disruption'
+label_tot_sev5_indicator_occupation = 'severity level 5: (ToT # children) indicator School Occupation Disruption'
+label_tot_sev4_aggravating_circumstances = 'severity level 4: (ToT # children) indicator aggravating circumstances (cumulative of all Level 4 aggravating circumstances)'
+label_tot_sev5_aggravating_circumstances = 'severity level 5: (ToT # children) indicator aggravating circumstances (cumulative of all Level 5 aggravating circumstances)'
+
+label_perc_sev3_indicator_access= 'severity level 3: (% of children) indicator Access'
+label_perc_sev3_indicator_teacher = 'severity level 3: (% of children) indicator Teacher Absence Disruption'
+label_perc_sev3_indicator_hazard = 'severity level 3: (% of children) indicator Natural Hazard Disruption'
+label_perc_sev4_indicator_idp = 'severity level 4: (% of children) indicator School Used As Shelter Disruption'
+label_perc_sev5_indicator_occupation = 'severity level 5: (% of children) indicator School Occupation Disruption'
+label_perc_sev4_aggravating_circumstances = 'severity level 4: (% of children) indicator aggravating circumstances (cumulative of all Level 4 aggravating circumstances)'
+label_perc_sev5_aggravating_circumstances = 'severity level 5: (% of children) indicator aggravating circumstances (cumulative of all Level 5 aggravating circumstances)'
 
 ##--------------------------------------------------------------------------------------------
 ## finding admin        
@@ -451,18 +470,18 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         essential_column_rename = {
             col: new_name for col, new_name in {
                 'indicator_access': 'rate_indicator_access',
-                'indicator_teacher': 'subsetInSchool_indicator_teacher',
-                'indicator_hazard': 'subsetInSchool_indicator_hazard',
-                'indicator_idp': 'subsetInSchool_indicator_idp',
-                'indicator_occupation': 'subsetInSchool_indicator_occupation',
-                'indicator_barrier4': 'subsetOoS_aggravating_circumstances',
-                'indicator_barrier5': 'subsetOoS_aggravating_circumstances'
+                'indicator_teacher': 'subsetInSchool_sev3_indicator_teacher',
+                'indicator_hazard': 'subsetInSchool_sev3_indicator_hazard',
+                'indicator_idp': 'subsetInSchool_sev4_indicator_idp',
+                'indicator_occupation': 'subsetInSchool_sev5_indicator_occupation',
+                'indicator_barrier4': 'subsetOoS_sev4_aggravating_circumstances',
+                'indicator_barrier5': 'subsetOoS_sev5_aggravating_circumstances'
             }.items() if col in essential_columns
         }
 
         # Severity 4 and 5 column renaming
-        severity_4_rename = {entry['name']: f"subsetOoS: {entry['label']}" for entry in severity_4_matches}
-        severity_5_rename = {entry['name']: f"subsetOoS: {entry['label']}" for entry in severity_5_matches}
+        severity_4_rename = {entry['name']: f"subsetOoS_sev4: {entry['label']}" for entry in severity_4_matches}
+        severity_5_rename = {entry['name']: f"subsetOoS_sev5: {entry['label']}" for entry in severity_5_matches}
 
         # Merge all renaming mappings
         rename_mapping = {**essential_column_rename, **severity_4_rename, **severity_5_rename}
@@ -591,6 +610,164 @@ def cap_and_redistribute(enrollment_df, valid_mappings, max_iterations=10):
         iteration += 1
     
     return enrollment_df
+
+##--------------------------------------------------------------------------------------------
+def add_figures_columns(df, enrolled_col="E", oos_col="OoS"):
+    for col in df.columns:
+        # Check for in-school severity columns
+        if "subsetInSchool_" in col:
+            df["N___" +col] = df[col] * df[enrolled_col]
+        # Check for out-of-school severity columns
+        elif "subsetOoS_" in col:
+            df["N___"+ col ] = df[col] * df[oos_col]
+    return df
+##--------------------------------------------------------------------------------------------
+def add_additional_severity_columns(df, enrolled_col="E", oos_col="OoS"):
+    # For in-school: sum all weighted columns with prefix "N___subsetInSchool_"
+    in_school_cols = [col for col in df.columns if col.startswith("N___subsetInSchool_")]
+    df["N__subsetInSchool_sev2"] = df[enrolled_col] - df[in_school_cols].sum(axis=1)
+    
+    # For out-of-school: subtract the sum of the two specific weighted columns
+    oos_subset_cols = ["N___subsetOoS_sev4_aggravating_circumstances", "N___subsetOoS_sev5_aggravating_circumstances"]
+    # It is assumed these columns exist; if not, you might want to check or handle errors.
+    df["N___subsetOoS_sev3"] = df[oos_col] - df[oos_subset_cols].sum(axis=1)
+    
+    return df
+##--------------------------------------------------------------------------------------------
+def final_severity_columns(df,  admin_var = 'admin', pop_group_var = 'pop_group'):
+
+    df = df.rename(columns={'E': 'In-School Children'})
+    df = df.rename(columns={'OoS': 'Out-of-School Children'})
+
+    df = df.rename(columns={'N__subsetInSchool_sev2': label_tot2})
+
+    in_school_cols_sev3 = [col for col in df.columns if col.startswith("N___subsetInSchool_sev3")]
+    in_school_cols_sev4 = [col for col in df.columns if col.startswith("N___subsetInSchool_sev4")]
+    in_school_cols_sev5 = [col for col in df.columns if col.startswith("N___subsetInSchool_sev5")]
+
+    df[label_tot3] = df['N___subsetOoS_sev3'] + df[in_school_cols_sev3].sum(axis=1)
+    df[label_tot4] = df['N___subsetOoS_sev4_aggravating_circumstances'] + df[in_school_cols_sev4].sum(axis=1)
+    df[label_tot5] = df['N___subsetOoS_sev5_aggravating_circumstances'] + df[in_school_cols_sev5].sum(axis=1)
+    
+    allowed_cols = [admin_var, label_tot_population,   "In-School Children", "Out-of-School Children", pop_group_var,
+                    label_tot2, label_tot3, label_tot4, label_tot5]
+    df = df[allowed_cols]
+
+    return df
+
+##--------------------------------------------------------------------------------------------
+def final_dimension_columns(df,  admin_var = 'admin', pop_group_var = 'pop_group'):
+
+    df = df.rename(columns={'E': 'In-School Children'})
+    df = df.rename(columns={'OoS': 'Out-of-School Children'})
+
+    in_school_cols_sev3 = [col for col in df.columns if col.startswith("N___subsetInSchool_sev3")]
+    in_school_cols_sev4 = [col for col in df.columns if col.startswith("N___subsetInSchool_sev4")]
+    in_school_cols_sev5 = [col for col in df.columns if col.startswith("N___subsetInSchool_sev5")]
+
+
+    df[label_tot_acc] = df ['N___subsetOoS_sev3']
+    df[label_tot_lc] = df[in_school_cols_sev3].sum(axis=1)
+    df[label_tot_penv] = df[in_school_cols_sev4].sum(axis=1) + df[in_school_cols_sev5].sum(axis=1)
+    df[label_tot_agg] = df['N___subsetOoS_sev4_aggravating_circumstances'] + df['N___subsetOoS_sev5_aggravating_circumstances']
+
+    df[label_dimension_tot] = df[label_tot_acc] + df[label_tot_lc] + df[label_tot_penv] + df[label_tot_agg]
+    
+    allowed_cols = [admin_var, label_tot_population,   "In-School Children", "Out-of-School Children", pop_group_var,
+                    label_tot_acc, label_tot_lc, label_tot_penv, label_tot_agg, label_dimension_tot]
+    df = df[allowed_cols]
+    return df
+
+
+##--------------------------------------------------------------------------------------------
+def final_indicator_columns(df,  admin_var = 'admin', pop_group_var = 'pop_group'):
+
+    df = df.rename(columns={'E': 'In-School Children',
+                            'OoS': 'Out-of-School Children'})
+    
+    rename_dict = {
+        'N___subsetOoS_sev3': label_tot_sev3_indicator_access,
+        'N___subsetInSchool_sev3_indicator_teacher': label_tot_sev3_indicator_teacher,
+        'N___subsetInSchool_sev3_indicator_hazard': label_tot_sev3_indicator_hazard,
+        'N___subsetInSchool_sev4_indicator_idp': label_tot_sev4_indicator_idp,
+        'N___subsetOoS_sev4_aggravating_circumstances': label_tot_sev4_aggravating_circumstances,
+        'N___subsetInSchool_sev5_indicator_occupation': label_tot_sev5_indicator_occupation,
+        'N___subsetOoS_sev5_aggravating_circumstances': label_tot_sev5_aggravating_circumstances
+    }
+
+    # Only keep keys that exist in the dataframe:
+    rename_dict = {k: v for k, v in rename_dict.items() if k in df.columns}
+
+    df = df.rename(columns=rename_dict)
+
+    new_cols = {}
+    for col in df.columns:
+        if col.startswith("N___subsetOoS_sev5: "):
+            new_cols[col] = col.replace("N___subsetOoS_sev5: ", "severity level 5: (ToT # children) ")
+        elif col.startswith("N___subsetOoS_sev4: "):
+            new_cols[col] = col.replace("N___subsetOoS_sev4: ", "severity level 4: (ToT # children) ")
+    df = df.rename(columns=new_cols)
+
+    
+    basic_allowed  = [admin_var, label_tot_population,   "In-School Children", "Out-of-School Children", pop_group_var,
+                    label_tot_sev3_indicator_access, label_tot_sev3_indicator_teacher, label_tot_sev3_indicator_hazard, label_tot_sev4_indicator_idp, label_tot_sev5_indicator_occupation,
+                    label_tot_sev4_aggravating_circumstances,label_tot_sev5_aggravating_circumstances ]
+    
+    basic_allowed = [col for col in basic_allowed if col in df.columns]
+
+    extra_cols = [col for col in df.columns 
+                  if col.startswith("severity level 4: (ToT # children)") 
+                  or col.startswith("severity level 5: (ToT # children)")]
+    
+    # Combine the basic and extra columns (preserving the order in basic_allowed first)
+    allowed_cols = basic_allowed + extra_cols
+    df = df[allowed_cols]
+    return df
+
+##--------------------------------------------------------------------------------------------
+def reorder_severity_columns(df, admin_var = 'admin1', pop_gorup_var = 'pop_group'):
+    # Define the fixed order for admin-related columns
+    admin_cols = [admin_var, label_tot_population, 'In-School Children', 'Out-of-School Children', pop_gorup_var]
+
+    # Extract all columns
+    all_columns = list(df.columns)
+
+    # Dictionary to hold severity levels
+    severity_groups = {3: [], 4: [], 5: []}
+    total_columns_map = {}
+
+    # Categorize columns into % of children and ToT # children groups
+    for col in all_columns:
+        if "severity level 3" in col and "(ToT # children)" not in col:
+            severity_groups[3].append(col)
+        elif "severity level 4" in col and "(ToT # children)" not in col:
+            severity_groups[4].append(col)
+        elif "severity level 5" in col and "(ToT # children)" not in col:
+            severity_groups[5].append(col)
+
+        if "(ToT # children)" in col:
+            base_col = col.replace(" (ToT # children)", "")
+            total_columns_map[base_col] = col  # Map the base name to its total column
+
+    # Construct the final column order
+    final_columns = admin_cols  # Start with admin columns
+
+    for severity in [3, 4, 5]:  # Order by severity level
+        for perc_col in severity_groups[severity]:
+            final_columns.append(perc_col)  # Add % of children column first
+            base_col = perc_col.replace(" (% of children)", "")  # Get base column name
+
+            if base_col in total_columns_map:  # If a total column exists, add it right after
+                final_columns.append(total_columns_map[base_col])
+
+    # Ensure missing total columns are still included at the end
+    remaining_tot_cols = [col for col in df.columns if col not in final_columns and "(ToT # children)" in col]
+    final_columns.extend(remaining_tot_cols)
+
+    # Reorder the DataFrame
+    return df[final_columns]
+
+
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
@@ -813,6 +990,7 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
     emis_df = emis_df.rename(columns={'Admin Pcode': admin_var})
     emis_df = emis_df.rename(columns={'Enrolled students -- Children/Enfants (5-17)': 'enrolled_emis'})
 
+    print('--------------------------------------------------')
     print(emis_df)
 
     ## ----- step 3.1: organize and label ocha data
@@ -847,16 +1025,26 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
         else:
             ocha_number_df = ocha_number_df.merge(ocha_pop_df, on=admin_var, how="outer")
 
+
     ####### ** 4 **       ------------------------------ step 4: merge OCHA, EMiS, rate MSNA
     enrollment_df = ocha_number_df
     enrollment_df = enrollment_df.merge(emis_df, on=admin_var, how="outer")
     enrollment_df = enrollment_df.merge(access_rate_df, on=admin_var, how="outer")
 
+    ####### ** 4.1 **       ------------------------------ step 4.1: sanity check EMIS < OCHA figures
+    ocha_totn_cols = [col for col in enrollment_df.columns if " -- TotN" in col]
+    enrollment_df['ocha_sum'] = enrollment_df[ocha_totn_cols].sum(axis=1)
+    enrollment_df['enrolled_emis'] = enrollment_df.apply(
+        lambda row: row['ocha_sum'] if row['enrolled_emis'] > row['ocha_sum'] else row['enrolled_emis'],
+        axis=1
+    )
+    enrollment_df.drop(columns=['ocha_sum'], inplace=True)
     print(enrollment_df)
 
     ####### ** 5 **       ------------------------------ step 5: CALCULATION
     valid_mappings = {k: v for k, v in mapped_statuses.items() if v != 'No match found'}
 
+    # ------ step 5.1: calculate preliminary pop group enrolled
     for label, pop_group in valid_mappings.items():
         tot_col = f"{pop_group} -- TotN"
         rate_col = f"{pop_group} -- rate_indicator_access"
@@ -865,31 +1053,311 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
         enrollment_df[einitial_col] = enrollment_df[tot_col] * enrollment_df[rate_col]
 
     einitial_cols = [f"{pop_group} -- E_initial" for pop_group in valid_mappings.values()]
+
+    # ------ step 5.2: extract k factor
     enrollment_df['k_factor'] = enrollment_df['enrolled_emis'] / enrollment_df[einitial_cols].sum(axis=1)
 
+    # ------ step 5.3: re-calcualte the correct enrolled by pop group
     for pop_group in valid_mappings.values():
         einitial_col = f"{pop_group} -- E_initial"
         e_col = f"{pop_group} -- E"
         enrollment_df[e_col] = enrollment_df['k_factor'] * enrollment_df[einitial_col]
 
-
-
-    # To check the result:
-    print(enrollment_df)
-
-
-
+    # ------ step 5.4: check E > OCHA and cap to 100% and redistribute the rest
     enrollment_df = cap_and_redistribute(enrollment_df, valid_mappings)
-
     for label, pop_group in valid_mappings.items():
         tot_col = f"{pop_group} -- TotN"
         e_col = f"{pop_group} -- E"
         oos_col = f"{pop_group} -- OoS"
 
         # Calculate Einitial as TotN * rate_indicator_access
-        enrollment_df[oos_col] = enrollment_df[tot_col] - enrollment_df[e_col]
+        enrollment_df[oos_col] = np.where(
+            np.abs(enrollment_df[tot_col] - enrollment_df[e_col]) < 1,
+            0,
+            enrollment_df[tot_col] - enrollment_df[e_col]
+        )
+
 
     print(enrollment_df)
+    print(enrollment_df.columns)
     
-    
-    return pin_by_indicator_status_list, enrollment_df
+    ####### ** 6 **       ------------------------------ step 6: assigning in-school and OoS in the correct severity category
+
+    # ------ step 6.1: re-organize the enrollment_df by pop group
+    pop_figures_E_OoS_by_pop_group = {}
+
+    for label, pop_group in valid_mappings.items():
+        # Define the columns to keep: the admin identifier plus the three columns for the current pop group.
+        cols = [
+            admin_var, 
+            f"{pop_group} -- TotN", 
+            f"{pop_group} -- E", 
+            f"{pop_group} -- OoS"
+        ]
+        pop_group_df = enrollment_df[cols].copy()
+        pop_group_df.columns = [admin_var, label_tot_population, label_tot_enrolled, label_tot_OoS]
+        
+        # Store the resulting dataframe in the dictionary, keyed by the pop_group value.
+        pop_figures_E_OoS_by_pop_group[pop_group] = pop_group_df
+
+    # Optionally, print out the first few rows of each dataframe to verify:
+    for pop_group, df in pop_figures_E_OoS_by_pop_group.items():
+        print(f"Data for pop group '{pop_group}':")
+        print(df, "\n")
+
+
+    # ------ step 6.2: merge with pin_by_indicator_status_list
+    severity_by_pop_group = {}
+
+    for pop_group in pop_figures_E_OoS_by_pop_group:
+        # Check if there is a corresponding indicator dataframe for this pop group
+        if pop_group in pin_by_indicator_status_list:
+            df_indicators = pin_by_indicator_status_list[pop_group]
+            df_pop = pop_figures_E_OoS_by_pop_group[pop_group]
+            
+            # Merge using the admin variable (for example, 'admin1')
+            merged_df = pd.merge(df_pop, df_indicators, on=admin_var, how="outer")
+            severity_by_pop_group[pop_group] = merged_df
+        else:
+            print(f"Warning: No indicator dataframe found for pop group '{pop_group}'.")
+
+
+    # ------ step 6.3: calculate the ToT# for each indicator
+    severity_by_pop_group = { 
+        pop_group: add_figures_columns(df.copy()) 
+        for pop_group, df in severity_by_pop_group.items() 
+    }
+    # ------ step 6.4: calculate the severity 2 as difference between tot E and inschool-sev3 and calculate OoS sev3 as difference between OoS and sev4 and sev5
+    severity_by_pop_group = {
+        pop_group: add_additional_severity_columns(df.copy())
+        for pop_group, df in severity_by_pop_group.items()
+    }
+
+    for pop_group, df in severity_by_pop_group.items():
+        print(f"Weighted severity data for pop group '{pop_group}':")
+        print(df, "\n")
+        print(df.columns)
+
+
+    pin_by_dimension = severity_by_pop_group
+    pin_by_indicator = severity_by_pop_group
+
+    # ------ step 6.5: aggregate same severity # for OoS and in-school
+    pin_by_pop_group = {
+        pop_group: final_severity_columns(df.copy(), admin_var=admin_var, pop_group_var=pop_group_var)
+        for pop_group, df in severity_by_pop_group.items()
+    }
+
+    # ------ step 6.6: calculate the % for each severity
+    for pop_group, pop_group_df in pin_by_pop_group.items():
+        pop_group_df.columns = [str(col) for col in pop_group_df.columns]
+
+        ## Arranging columns 
+        cols = list(pop_group_df.columns)
+        pop_group_df = pop_group_df[cols]
+
+        # Initialize total columns with zeros
+        for label in [label_perc2, label_perc3, label_perc4, label_perc5]:
+            pop_group_df[label] = 0
+
+
+        cols = list(pop_group_df.columns)
+        for perc, tot in [(label_perc2, label_tot2), 
+                        (label_perc3, label_tot3), 
+                        (label_perc4, label_tot4), 
+                        (label_perc5, label_tot5)]:
+            # Get the current index of the tot column.
+            insert_idx = cols.index(tot)
+            perc_col = cols.pop(cols.index(perc))
+            cols.insert(insert_idx, perc_col)
+
+        pop_group_df = pop_group_df[cols]     
+
+        # Calculate total PiN for each severity level
+        for perc_label, total_label in [(label_perc2, label_tot2), 
+                                        (label_perc3, label_tot3), 
+                                        (label_perc4, label_tot4), 
+                                        (label_perc5, label_tot5)]:
+            pop_group_df[perc_label] = pop_group_df[total_label] / pop_group_df[label_tot_population]
+
+        pop_group_df[label_perc_tot] = (pop_group_df[label_tot3] +pop_group_df[label_tot4] +pop_group_df[label_tot5]) / pop_group_df[label_tot_population]
+
+
+        pop_group_df[label_tot] = (pop_group_df[label_tot3] +
+                        pop_group_df[label_tot4] +
+                        pop_group_df[label_tot5])
+
+        pin_by_pop_group[pop_group] = pop_group_df
+
+
+
+    # ------ step 6.7: aggregate same severity # for OoS and in-school
+    pin_by_dimension_pop_group = {
+        pop_group: final_dimension_columns(df.copy(), admin_var=admin_var, pop_group_var = pop_group_var)
+        for pop_group, df in pin_by_dimension.items()
+    }
+    # ------ step 6.8: PiN by dimension in need!!! for the word document 
+    pin_by_dimension_in_need_pop_group = pin_by_dimension_pop_group
+    # ------ step 6.9: calculate the % for each severity
+    for pop_group, pop_group_df in pin_by_dimension_in_need_pop_group.items():
+        pop_group_df.columns = [str(col) for col in pop_group_df.columns]
+
+        ## Arranging columns 
+        cols = list(pop_group_df.columns)
+        pop_group_df = pop_group_df[cols]
+        # Initialize total columns with zeros
+        for label in [label_perc_acc, label_perc_agg, label_perc_lc, label_perc_penv]:
+            pop_group_df[label] = 0
+
+
+        cols = list(pop_group_df.columns)
+        for perc, tot in [(label_perc_acc, label_tot_acc), 
+                        (label_perc_agg, label_tot_agg), 
+                        (label_perc_lc, label_tot_lc), 
+                        (label_perc_penv, label_tot_penv)]:
+            # Get the current index of the tot column.
+            insert_idx = cols.index(tot)
+            perc_col = cols.pop(cols.index(perc))
+            cols.insert(insert_idx, perc_col)
+
+        pop_group_df = pop_group_df[cols]     
+
+        # Calculate total PiN for each severity level
+        for perc_label, total_label in [(label_perc_acc, label_tot_acc), 
+                                        (label_perc_agg, label_tot_agg), 
+                                        (label_perc_lc, label_tot_lc), 
+                                        (label_perc_penv, label_tot_penv)]:
+            pop_group_df[perc_label] = pop_group_df[total_label] / pop_group_df[label_dimension_tot]
+
+        pop_group_df[label_dimension_perc_tot] = 100
+        pop_group_df[label_dimension_tot] = pop_group_df[label_tot_population]
+
+        pop_group_df = pop_group_df.drop(["In-School Children", "Out-of-School Children"], axis=1)
+        pin_by_dimension_in_need_pop_group[pop_group] = pop_group_df
+
+
+
+
+    # ------ step 6.10: PiN by indicators
+    pin_by_indicator_pop_group = {
+        pop_group: final_indicator_columns(df.copy(), admin_var=admin_var, pop_group_var = pop_group_var)
+        for pop_group, df in pin_by_indicator.items()
+    }
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~') 
+
+    # ------ step 6.11: calculate the % for each severity
+    # ------ step 6.11: calculate the % for each severity
+    # Ensure column names are unique before processing
+    # Ensure column names are unique before processing
+    for pop_group, pop_group_df in pin_by_indicator_pop_group.items():
+        pop_group_df.columns = [str(col) for col in pop_group_df.columns]
+
+        # Save original column list before deduplication
+        original_columns = pop_group_df.columns.tolist()
+
+        # Remove duplicate column names before proceeding
+        pop_group_df = pop_group_df.loc[:, ~pop_group_df.columns.duplicated()]
+
+        # Save deduplicated column list
+        deduplicated_columns = pop_group_df.columns.tolist()
+
+        # Find removed columns
+        removed_columns = [col for col in original_columns if col not in deduplicated_columns]
+
+        if removed_columns:
+            print(f"⚠️ Removed duplicate columns in pop_group '{pop_group}':\n {removed_columns}\n")
+        
+        ## Arranging columns
+        cols = list(pop_group_df.columns)
+        pop_group_df = pop_group_df[cols]
+
+        if label_tot_population not in pop_group_df.columns:
+            print(f"Warning: Missing '{label_tot_population}' in pop_group '{pop_group}'. Skipping calculations.")
+            continue
+
+        # Avoid division by zero by replacing 0 with NaN
+        pop_group_df.loc[:, label_tot_population] = pop_group_df[label_tot_population].replace(0, np.nan)
+
+        predefined_tot_to_perc = {
+            label_tot_sev3_indicator_access: label_perc_sev3_indicator_access,
+            label_tot_sev3_indicator_teacher: label_perc_sev3_indicator_teacher,
+            label_tot_sev3_indicator_hazard: label_perc_sev3_indicator_hazard,
+            label_tot_sev4_indicator_idp: label_perc_sev4_indicator_idp,
+            label_tot_sev5_indicator_occupation: label_perc_sev5_indicator_occupation,
+            label_tot_sev4_aggravating_circumstances: label_perc_sev4_aggravating_circumstances,
+            label_tot_sev5_aggravating_circumstances: label_perc_sev5_aggravating_circumstances
+        }
+
+        # **Only keep pairs where the total column exists in the DataFrame**
+        valid_tot_to_perc = {
+            tot_col: perc_col for tot_col, perc_col in predefined_tot_to_perc.items() if tot_col in pop_group_df.columns
+        }
+
+        # Compute % columns for valid pairs only using `.loc`
+        for tot_col, perc_col in valid_tot_to_perc.items():
+            if perc_col not in pop_group_df.columns:  # Prevent duplicate creation
+                pop_group_df.loc[:, perc_col] = pop_group_df[tot_col] / pop_group_df[label_tot_population]
+
+        # Dynamically generate % columns for any "ToT # children" indicators
+        for col in list(pop_group_df.columns):  # Convert to list to avoid runtime errors during iteration
+            match = re.match(r"(severity level \d+:) \(ToT # children\) (.+)", col)
+            if match:
+                severity_level, description = match.groups()
+                perc_col = f"{severity_level} (% of children) {description}"  # Create new column name
+
+                if perc_col not in pop_group_df.columns:
+                    pop_group_df.loc[:, perc_col] = pop_group_df[col] / pop_group_df[label_tot_population]        
+
+        pop_group_df = reorder_severity_columns(pop_group_df)
+
+
+        # Save the cleaned DataFrame
+        pin_by_indicator_pop_group[pop_group] = pop_group_df
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~') 
+
+
+    for pop_group, df in pin_by_dimension_pop_group.items():
+        print(f"pin by dimension 2 '{pop_group}':")
+        print(df, "\n")
+        print(df.columns)
+        
+    for pop_group, df in pin_by_indicator_pop_group.items():
+        print(f"pin by indicartor 2 '{pop_group}':")
+        print(df, "\n")
+        print(df.columns)
+
+    return pin_by_indicator_status_list, enrollment_df, pop_figures_E_OoS_by_pop_group, severity_by_pop_group, pin_by_pop_group, pin_by_dimension_in_need_pop_group,pin_by_indicator_pop_group

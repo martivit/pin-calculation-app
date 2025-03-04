@@ -113,3 +113,48 @@
     dimension_primary_list = ensure_columns(dimension_primary_list, dimension_needed_columns)
     dimension_secondary_list = ensure_columns(dimension_secondary_list, dimension_needed_columns)
     if not single_cycle:    dimension_intermediate_list = ensure_columns(dimension_intermediate_list, dimension_needed_columns)
+
+
+
+
+
+        # Ensure population column exists and avoid division by zero
+        if label_tot_population not in pop_group_df.columns:
+            print(f"Warning: Missing '{label_tot_population}' in pop_group '{pop_group}'. Skipping calculations.")
+            continue
+
+        # Avoid division by zero by replacing 0 with NaN
+        pop_group_df.loc[:, label_tot_population] = pop_group_df[label_tot_population].replace(0, np.nan)
+
+        predefined_tot_to_perc = {
+            label_tot_sev3_indicator_access: label_perc_sev3_indicator_access,
+            label_tot_sev3_indicator_teacher: label_perc_sev3_indicator_teacher,
+            label_tot_sev3_indicator_hazard: label_perc_sev3_indicator_hazard,
+            label_tot_sev4_indicator_idp: label_perc_sev4_indicator_idp,
+            label_tot_sev5_indicator_occupation: label_perc_sev5_indicator_occupation,
+            label_tot_sev4_aggravating_circumstances: label_perc_sev4_aggravating_circumstances,
+            label_tot_sev5_aggravating_circumstances: label_perc_sev5_aggravating_circumstances
+        }
+
+        # Compute predefined % columns using .loc to avoid SettingWithCopyWarning
+        for tot_col, perc_col in predefined_tot_to_perc.items():
+            if tot_col in pop_group_df.columns:
+                pop_group_df.loc[:, perc_col] = pop_group_df[tot_col] / pop_group_df[label_tot_population]
+
+
+        # Dynamically generate % columns for any "ToT # children" indicators
+        for col in list(pop_group_df.columns):  # Convert to list to avoid runtime errors during iteration
+            match = re.match(r"(severity level \d+:) \(ToT # children\) (.+)", col)
+            if match:
+                severity_level, description = match.groups()
+                perc_col = f"{severity_level} (% of children) {description}"  # Create new column name
+
+                if perc_col not in pop_group_df.columns:
+                    pop_group_df.loc[:, perc_col] = pop_group_df[col] / pop_group_df[label_tot_population]
+
+        # Reorder columns correctly
+        pop_group_df = reorder_severity_columns(pop_group_df)
+
+        # Drop unnecessary columns
+        columns_to_drop = ["In-School Children", "Out-of-School Children"]
+        pop_group_df.drop(columns=[col for col in columns_to_drop if col in pop_group_df.columns], inplace=True)
