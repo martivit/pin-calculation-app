@@ -329,12 +329,15 @@ if ocha_data is not None:
 if no_ocha_data:
     (severity_admin_status_list, dimension_admin_status_list,
     severity_female_list, severity_male_list ,
-    country_label) = calculatePIN_NO_OCHA (country, edu_data_severity, household_data, choice_data, survey_data, 
-                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+    indicator_per_admin_status,
+    country_label) = calculatePIN_NO_OCHA (country, edu_data_severity, household_data, choice_data, survey_data, mismatch_ocha_data,
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
-                                                                                    admin_var, vector_cycle, start_school, status_var)
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    mismatch_admin,
+                                                                                    selected_language)
 
     # Create an in-memory BytesIO buffer to hold the Excel file
     excel_pin = BytesIO()

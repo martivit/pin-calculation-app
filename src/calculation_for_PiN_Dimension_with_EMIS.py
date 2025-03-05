@@ -1317,36 +1317,6 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~') 
 
 
@@ -1359,5 +1329,22 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
         print(f"pin by indicartor 2 '{pop_group}':")
         print(df, "\n")
         print(df.columns)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     return pin_by_indicator_status_list, enrollment_df, pop_figures_E_OoS_by_pop_group, severity_by_pop_group, pin_by_pop_group, pin_by_dimension_in_need_pop_group,pin_by_indicator_pop_group

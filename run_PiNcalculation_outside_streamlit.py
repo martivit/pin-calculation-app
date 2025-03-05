@@ -10,6 +10,7 @@ from io import BytesIO
 from src.add_PiN_severity import add_severity
 from src.calculation_for_PiN_Dimension import calculatePIN
 from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
+from src.calculation_for_PiN_Dimension_NO_OCHA_2025 import calculatePIN_NO_OCHA_2025
 from src.vizualize_PiN import create_output
 from src.vizualize_PiN import create_indicator_output
 from src.snapshot_PiN import create_snapshot_PiN
