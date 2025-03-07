@@ -1115,7 +1115,6 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
 
-    df = pd.DataFrame(edu_data)
     # Filtering data based on gender
     female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin'])]
     male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin'])]
@@ -1127,6 +1126,13 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
         intermediate_df = edu_data[edu_data['school_cycle'].isin(['intermediate level'])]
     # filtering only kids in need == 3+
     in_need_df = edu_data[edu_data['severity_category'].isin([3, 4, 5])]
+
+    edu_data["barrier_var_copy"] = edu_data[barrier_var].apply(
+        lambda x: x if pd.notna(x) and x != "" else "in-school-child"
+    )
+
+    df = pd.DataFrame(edu_data)
+
 
 
     analysis_config = {
@@ -1147,7 +1153,7 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
         'indicator.occupation': {'df': df, 'target_var': 'indicator.occupation'},
         'indicator.barrier4': {'df': df, 'target_var': 'indicator.barrier4'},
         'indicator.barrier5': {'df': df, 'target_var': 'indicator.barrier5'},
-        barrier_var: {'df': df, 'target_var': barrier_var}
+        'barrier_var_copy': {'df': df, 'target_var': 'barrier_var_copy'}
     }
 
     if not single_cycle:
@@ -1212,7 +1218,7 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
     indicator_occupation_list = results_dict.get('indicator.occupation')
     indicator_barrier4_list = results_dict.get('indicator.barrier4')
     indicator_barrier5_list = results_dict.get('indicator.barrier5')
-    indicator_barrier_list = results_dict.get(barrier_var)
+    indicator_barrier_list = results_dict.get('barrier_var_copy')
 
     ## checking number of columns
     # Ensure columns for severity
@@ -1413,6 +1419,8 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
                     df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)
                 elif "severity level" in col and "indicator" in col and "(ToT # children)" not in col:
                     # Convert to numeric, multiply by 100, and round as percentage
+                    df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
+                elif ", aggravating circumnstance:" in col  and "(ToT # children)" not in col:
                     df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
                 elif "severity level" in col and "(ToT # children)" not in col:
                     # Convert to numeric and round normally (for other severity-level values)

@@ -1035,8 +1035,8 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         }
 
         # Severity 4 and 5 column renaming
-        severity_4_rename = {entry['name']: f"severity level 4: {entry['label']}" for entry in severity_4_matches}
-        severity_5_rename = {entry['name']: f"severity level 5: {entry['label']}" for entry in severity_5_matches}
+        severity_4_rename = {entry['name']: f"severity level 4, aggravating circumnstance: {entry['label']}" for entry in severity_4_matches}
+        severity_5_rename = {entry['name']: f"severity level 5, aggravating circumnstance: {entry['label']}" for entry in severity_5_matches}
 
         # Merge all renaming mappings
         rename_mapping = {**essential_column_rename, **severity_4_rename, **severity_5_rename}
@@ -1157,7 +1157,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
 
-    df = pd.DataFrame(edu_data)
     # Filtering data based on gender
     female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin'])]
     male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin'])]
@@ -1170,6 +1169,11 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # filtering only kids in need == 3+
     in_need_df = edu_data[edu_data['severity_category'].isin([3, 4, 5])]
 
+    edu_data["barrier_var_copy"] = edu_data[barrier_var].apply(
+        lambda x: x if pd.notna(x) and x != "" else "in-school-child"
+    )
+
+    df = pd.DataFrame(edu_data)
 
     analysis_config = {
         'severity_category': {'df': df, 'target_var': 'severity_category'},
@@ -1189,8 +1193,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         'indicator.occupation': {'df': df, 'target_var': 'indicator.occupation'},
         'indicator.barrier4': {'df': df, 'target_var': 'indicator.barrier4'},
         'indicator.barrier5': {'df': df, 'target_var': 'indicator.barrier5'},
-        barrier_var: {'df': df, 'target_var': barrier_var}
-    }
+        'barrier_var_copy': {'df': df, 'target_var': 'barrier_var_copy'}
+         }
 
     if not single_cycle:
         analysis_config['dimension_intermediate'] = {'df': intermediate_df, 'target_var': 'dimension_pin'}
@@ -1253,7 +1257,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     indicator_occupation_list = results_dict.get('indicator.occupation')
     indicator_barrier4_list = results_dict.get('indicator.barrier4')
     indicator_barrier5_list = results_dict.get('indicator.barrier5')
-    indicator_barrier_list = results_dict.get(barrier_var)
+    indicator_barrier_list = results_dict.get('barrier_var_copy')
+
 
     ## checking number of columns
     # Ensure columns for severity
@@ -2202,6 +2207,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             elif "severity level" in col and "indicator" in col and "(ToT # children)" not in col:
                 # Convert to numeric, multiply by 100, and round as percentage
                 df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
+            elif ", aggravating circumnstance:" in col and "(ToT # children)" not in col:
+                    df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)    
             elif "severity level" in col and "(ToT # children)" not in col:
                 # Convert to numeric and round normally (for other severity-level values)
                 df[col] = pd.to_numeric(df[col], errors='coerce').round(2)
@@ -2254,4 +2261,4 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     print(final_overview_df_OCHA)
     
 
-    return severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,Tot_PiN_by_admin, country_label
+    return indicator_barrier4_list,indicator_barrier_list,severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,Tot_PiN_by_admin, country_label

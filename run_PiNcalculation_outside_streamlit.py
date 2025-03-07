@@ -85,10 +85,10 @@ survey_data = dfs['survey']
 choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
-no_ocha_data = True
+no_ocha_data = False
 # Read specific sheets into separate dataframes
 ocha_data = None
-#ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
 
@@ -118,7 +118,7 @@ edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
 
 
 if ocha_data is not None:
-    (severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,
+    (indicator_barrier4_list,indicator_barrier_list,severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,
     female_pin_per_admin_status, male_pin_per_admin_status, 
     pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary, 
     Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
@@ -154,6 +154,11 @@ if ocha_data is not None:
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
     ##   ***********************************    save for intermediate check:
+    file_path_pin_test1 = 'output_validation/01_pin_sev4.xlsx'
+    file_path_pin_test2 = 'output_validation/01_pin_barrier.xlsx'
+
+
+
     file_path_pin_1 = 'output_validation/01_pin_percentage.xlsx'
     file_path_dimension_1 = 'output_validation/01_dimension_percentage.xlsx'
     file_path_pin_female_1 = 'output_validation/0a_pin_female_percentage.xlsx'
@@ -180,6 +185,21 @@ if ocha_data is not None:
 
 
     file_path_pin_tot_by_admin = 'output_validation/06_pin_tot_by_admin_area_severity.xlsx'
+
+
+    # Create an Excel writer object
+    with pd.ExcelWriter(file_path_pin_test1) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in indicator_barrier4_list.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
+
+    # Create an Excel writer object
+    with pd.ExcelWriter(file_path_pin_test2) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in indicator_barrier_list.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
 
 
     # Create an Excel writer object
