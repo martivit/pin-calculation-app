@@ -13,6 +13,7 @@ from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from src.calculation_for_PiN_Dimension_NO_OCHA_2025 import calculatePIN_NO_OCHA_2025
 from src.vizualize_PiN import create_output
 from src.vizualize_PiN import create_indicator_output
+from src.vizualize_PiN import create_indicator_output_no_ocha
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
@@ -84,9 +85,10 @@ survey_data = dfs['survey']
 choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
-
+no_ocha_data = True
 # Read specific sheets into separate dataframes
-ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+ocha_data = None
+#ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
 
@@ -305,3 +307,44 @@ if ocha_data is not None:
     file_path = "output_validation/pin_snapshot_with_charts_and_text2.docx"
     with open(file_path, "wb") as f:
         f.write(doc_output.getvalue())
+
+
+
+if no_ocha_data:
+    (severity_admin_status_list, dimension_admin_status_list,
+    indicator_per_admin_status,
+    country_label) = calculatePIN_NO_OCHA_2025 (country, edu_data_severity, household_data, choice_data, survey_data,mismatch_ocha_data,
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                                                                                    barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                    age_var, gender_var,
+                                                                                    label, 
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    mismatch_admin,
+                                                                                    selected_language= selected_language)
+    
+    indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var)
+
+    with open("output_validation/no_ocha__indicator__platform_output.xlsx", "wb") as f:
+        f.write(indicator_output.getbuffer())   
+     
+    file_path_pin_no_ocha = 'output_validation/no_ocha_pin_percentage.xlsx'
+    file_path_no_ocha_dimension = 'output_validation/no_ocha_dimension_percentage.xlsx'
+    file_path_no_ocha_pin_by_indicator = 'output_validation/no_ocha_pin_by_indicator.xlsx'
+
+    with pd.ExcelWriter(file_path_pin_no_ocha) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in severity_admin_status_list.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
+
+    with pd.ExcelWriter(file_path_no_ocha_dimension) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in dimension_admin_status_list.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
+
+    with pd.ExcelWriter(file_path_no_ocha_pin_by_indicator) as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in indicator_per_admin_status.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)            

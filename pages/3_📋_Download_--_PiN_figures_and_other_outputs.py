@@ -8,8 +8,10 @@ from openpyxl.cell.cell import MergedCell  # Import MergedCell
 from src.add_PiN_severity import add_severity
 from src.calculation_for_PiN_Dimension import calculatePIN
 from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
+from src.calculation_for_PiN_Dimension_NO_OCHA_2025 import calculatePIN_NO_OCHA_2025
 from src.vizualize_PiN import create_output
 from src.vizualize_PiN import create_indicator_output
+from src.vizualize_PiN import create_indicator_output_no_ocha
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
@@ -121,6 +123,18 @@ def create_zip_file(country_label, excel_file, indicator_output,word_snapshot, w
         zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
         # Add the Word Snapshot with timestamp
         zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
+        # Add the Parameters Word Document with timestamp
+        zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", word_parameters.getvalue())
+    zip_buffer.seek(0)  # Reset the buffer to the beginning
+    return zip_buffer
+
+##--------------------------------------------------------------------------------------------------------------------
+def create_zip_file_no_ocha(country_label,  indicator_output,word_parameters):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
+    zip_buffer = BytesIO()  # Create an in-memory ZIP file
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        # Add the Excel file with timestamp
+        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
         # Add the Parameters Word Document with timestamp
         zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", word_parameters.getvalue())
     zip_buffer.seek(0)  # Reset the buffer to the beginning
@@ -326,18 +340,107 @@ if ocha_data is not None:
 
 
 ######################################################################### no ocha data
+
 if no_ocha_data:
     (severity_admin_status_list, dimension_admin_status_list,
-    severity_female_list, severity_male_list ,
     indicator_per_admin_status,
-    country_label) = calculatePIN_NO_OCHA (country, edu_data_severity, household_data, choice_data, survey_data, mismatch_ocha_data,
+    country_label) = calculatePIN_NO_OCHA_2025 (country, edu_data_severity, household_data, choice_data, survey_data,mismatch_ocha_data,
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
                                                                                     admin_var, vector_cycle, start_school, status_var,
                                                                                     mismatch_admin,
-                                                                                    selected_language)
+                                                                                    selected_language= selected_language)
+
+    indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var)
+
+    
+    if selected_language == "English":
+        doc_parameter_output = generate_word_document(parameters)
+
+    if selected_language == "French":
+        doc_parameter_output = generate_word_document_FR(parameters_FR)
+
+    zip_file_name = f"PiN_by_indicator_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
+    zip_file = create_zip_file_no_ocha(country_label, indicator_output,  doc_parameter_output)
+
+
+    
+
+    # Create a single download button for the ZIP file
+    if st.download_button(
+        label=translations["download_all"],
+        data=zip_file,
+        file_name=zip_file_name,
+        mime="application/zip"
+    ):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        #if "github" in st.secrets and "token" in st.secrets["github"]:
+            #st.write("✅ GitHub token found in secrets.")
+        #else:
+            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
+
+        try:
+            repo_name = "martivit/pin-calculation-app"
+            branch_name = "develop_2025"
+
+            # File paths in the repository
+            file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_by_indicator_results_{country}_{timestamp}.xlsx"
+            file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameters_{country}_{timestamp}.docx"
+
+            github_token = st.secrets["github"]["token"]
+
+            # Initialize success messages for both uploads
+            pr_url_excel = None
+            pr_url_doc = None
+
+            # Try uploading both files
+            try:
+                pr_url_excel = upload_to_github(
+                    file_content=indicator_output.getvalue(),
+                    file_name=file_path_in_repo_excel,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN results no ocha (Excel) for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Excel file to GitHub: {e}")
+
+            try:
+                pr_url_doc = upload_to_github(
+                    file_content=doc_parameter_output.getvalue(),
+                    file_name=file_path_in_repo_doc,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN parameters (Word) for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")
+
+            # Display success messages only if files were successfully uploaded
+            if pr_url_excel:
+                st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+            if pr_url_doc:
+                st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
+
+        except Exception :
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
+ 
+    st.subheader(translations["hno_guidelines_subheader"])
+    st.markdown(translations["hno_guidelines_message"])
+
+
+
+
+
+
 
     # Create an in-memory BytesIO buffer to hold the Excel file
     excel_pin = BytesIO()

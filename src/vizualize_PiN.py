@@ -548,3 +548,112 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
     formatted_output.seek(0)
 
     return formatted_output
+
+
+
+
+
+
+
+def create_indicator_output_no_ocha(country_label, indicator_dataframes, admin_var, selected_language='English'):
+    """
+    Creates an Excel file for indicator-based data, applying formatting.
+
+    Parameters:
+    - country_label (str): The name of the country (used in the file name).
+    - indicator_dataframes (dict): Dictionary of DataFrames categorized by indicator.
+    - admin_var (str): The administrative variable used in the dataset.
+    - selected_language (str, default='English'): Language setting for headers.
+
+    Returns:
+    - BytesIO: The formatted Excel file as an in-memory object.
+    """
+    country_name = country_label.split('__')[0]  # Extract country name
+
+    # File output buffer
+    output = BytesIO()
+    
+    with pd.ExcelWriter(output) as writer:
+        # Modify column names BEFORE writing them to the Excel file
+        modified_dataframes = {}
+
+        for category, df in indicator_dataframes.items():
+            # Rename columns: Add (% of children) after ":" unless they have (ToT # children)
+            new_columns = {}
+
+            df = df.rename(columns=new_columns)
+            modified_dataframes[category] = df
+
+            # Write to Excel, ensuring sheet names stay within limits
+            df.to_excel(writer, sheet_name=category[:30], index=False)
+
+    # Load the workbook for formatting
+    output.seek(0)
+    workbook = load_workbook(output)
+
+    for ws in workbook.worksheets:
+        ws.insert_rows(1, 4)  # Add empty rows at the top
+        ws.insert_cols(1, 4)  # Add empty columns on the left
+
+        # **Increase header row thickness more**
+        ws.row_dimensions[5].height = 80  # Make row even thicker
+
+        # Title formatting
+        title = ws.title
+        max_col = ws.max_column
+        ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
+        title_cell = ws.cell(row=1, column=5)
+        title_cell.value = f"Children (5–17 years old) classified by severity and indicators"
+        title_cell.font = Font(bold=True, size=14)
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        # Extract headers from row 5
+        headers = [ws.cell(row=5, column=col).value for col in range(1, ws.max_column + 1)]
+        
+        # **Increase Column Widths Based on Content & Enable Wrap Text**
+        for col_idx, col_name in enumerate(headers, start=1):
+            max_length = max((len(str(ws.cell(row=row_idx, column=col_idx).value)) for row_idx in range(5, ws.max_row + 1)), default=10)
+            adjusted_width = max(15, min(max_length + 2, 25))  # Ensure minimum width but not too wide
+            ws.column_dimensions[ws.cell(row=5, column=col_idx).column_letter].width = adjusted_width
+
+            # Apply **wrap text** to headers
+            header_cell = ws.cell(row=5, column=col_idx)
+            header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            header_cell.font = Font(bold=True, size=10)  # **Reduce font size**
+
+        # Apply color to specific columns and make borders visible
+        for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+            for cell in row:
+                col_index = cell.column  # Get column index
+                col_name = headers[col_index - 1] if col_index - 1 < len(headers) else None  # Prevent index error
+
+                if col_name and isinstance(col_name, str):  # Ensure col_name is valid
+                    # Apply color based on severity level
+                    if "severity level 3" in col_name:
+                        cell.fill = PatternFill(start_color=colors["light_orange"], end_color=colors["light_orange"], fill_type="solid")
+                    elif "severity level 4" in col_name:
+                        cell.fill = PatternFill(start_color=colors["dark_orange"], end_color=colors["dark_orange"], fill_type="solid")
+                    elif "severity level 5" in col_name:
+                        cell.fill = PatternFill(start_color=colors["darker_orange"], end_color=colors["darker_orange"], fill_type="solid")
+                    elif "Area severity" in col_name:  # Apply light blue for "Area severity"
+                        cell.fill = PatternFill(start_color=colors["light_blue"], end_color=colors["light_blue"], fill_type="solid")
+
+                # Apply wrap text and reduce font size for all data cells
+                cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
+                cell.font = Font(size=10)  # Reduce font size for better readability
+
+                # Apply border formatting
+                if col_index > 4:
+                    if row[0].row == 5:  # Bold top border for header
+                        cell.border = Border(top=Side(style="medium"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+                    elif row[0].row == ws.max_row:  # Bold bottom border for last row
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="medium"))
+                    else:
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+
+    # Save formatted workbook
+    formatted_output = BytesIO()
+    workbook.save(formatted_output)
+    formatted_output.seek(0)
+
+    return formatted_output
