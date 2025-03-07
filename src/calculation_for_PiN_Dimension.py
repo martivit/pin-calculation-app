@@ -1574,7 +1574,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             ## ✅ Column Reordering
             all_columns = list(pop_group_df.columns)
 
-            admin_cols = ["admin1", "Population group", "TotN"]
+            admin_cols = [admin_var, "Population group", "TotN"]
             # Extract severity levels and corresponding total columns dynamically
             severity_groups = {3: [], 4: [], 5: []}
             total_columns_map = {}
