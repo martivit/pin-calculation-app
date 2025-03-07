@@ -11,7 +11,7 @@ from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from src.calculation_for_PiN_Dimension_NO_OCHA_2025 import calculatePIN_NO_OCHA_2025
 from src.vizualize_PiN import create_output
 from src.vizualize_PiN import create_indicator_output
-#from src.vizualize_PiN import create_indicator_output_no_ocha
+from src.vizualize_PiN import create_indicator_output_no_ocha
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document

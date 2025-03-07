@@ -554,20 +554,8 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
 
 
 
-
 def create_indicator_output_no_ocha(country_label, indicator_dataframes, admin_var, selected_language='English'):
-    """
-    Creates an Excel file for indicator-based data, applying formatting.
-
-    Parameters:
-    - country_label (str): The name of the country (used in the file name).
-    - indicator_dataframes (dict): Dictionary of DataFrames categorized by indicator.
-    - admin_var (str): The administrative variable used in the dataset.
-    - selected_language (str, default='English'): Language setting for headers.
-
-    Returns:
-    - BytesIO: The formatted Excel file as an in-memory object.
-    """
+    
     country_name = country_label.split('__')[0]  # Extract country name
 
     # File output buffer
