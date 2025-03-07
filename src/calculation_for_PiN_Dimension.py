@@ -1310,9 +1310,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     )
 
 
-    print("=================================================================================")
-    print(pin_by_indicator_status_list)  
-    print(pin_by_indicator_status_list['idp'].columns) 
 
     ####### ** 4 **       ------------------------------ matching between the admin and the ocha population data ------------------------------------------     #######
     ## finding the match between the OCHA status cathegory and the country status. 
@@ -1612,9 +1609,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             # Save modified DataFrame back into the dictionary under the category key
             indicator_per_admin_status[category] = pop_group_df
 
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print(indicator_per_admin_status['idp'].columns)
-    print(indicator_per_admin_status['idp'])
 
 
  ####### ** strata 6.A **       ------------------------------ %PiN AND #PiN PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
