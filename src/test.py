@@ -1,160 +1,127 @@
 
 
-        severity_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='severity_category',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        dimension_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        dimension_admin_status_in_need_list = run_mismatch_admin_analysis(in_need_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)      
-        severity_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='severity_category',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
-        severity_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='severity_category',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
-        dimension_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)        
-        dimension_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
-        dimension_ece_list = run_mismatch_admin_analysis(ece_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
-        dimension_primary_list = run_mismatch_admin_analysis(primary_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
-        dimension_secondary_list = run_mismatch_admin_analysis(secondary_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
+######################################################################### no ocha data
+
+if no_ocha_data:
+    (severity_admin_status_list, dimension_admin_status_list,
+    indicator_per_admin_status,
+    country_label) = calculatePIN_NO_OCHA_2025 (country, edu_data_severity, household_data, choice_data, survey_data,mismatch_ocha_data,
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                                                                                    barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                    age_var, gender_var,
+                                                                                    label, 
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    mismatch_admin,
+                                                                                    selected_language= selected_language)
+
+    indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var)
+
+    
+    if selected_language == "English":
+        doc_parameter_output = generate_word_document(parameters)
+
+    if selected_language == "French":
+        doc_parameter_output = generate_word_document_FR(parameters_FR)
+
+    zip_file_name = f"PiN_by_indicator_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
+    zip_file = create_zip_file_no_ocha(country_label, indicator_output,  doc_parameter_output)
 
 
+    
 
-        indicator_access_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='indicator.access',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        indicator_teacher_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='indicator.teacher',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        indicator_hazard_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='indicator.hazard',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        indicator_idp_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='indicator.idp',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        indicator_occupation_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='indicator.occupation',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        indicator_barrier4_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='indicator.barrier4',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        indicator_barrier5_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='indicator.barrier5',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        indicator_barrier_list =  run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable=barrier_var,
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
+    # Create a single download button for the ZIP file
+    if st.download_button(
+        label=translations["download_all"],
+        data=zip_file,
+        file_name=zip_file_name,
+        mime="application/zip"
+    ):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+        #if "github" in st.secrets and "token" in st.secrets["github"]:
+            #st.write("✅ GitHub token found in secrets.")
+        #else:
+            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
 
+        try:
+            repo_name = "martivit/pin-calculation-app"
+            branch_name = "develop_2025"
 
+            # File paths in the repository
+            file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_by_indicator_results_{country}_{timestamp}.xlsx"
+            file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameters_{country}_{timestamp}.docx"
 
+            github_token = st.secrets["github"]["token"]
 
- #------    CORRECT PIN    -------            
-        severity_admin_status = calculate_prop (df=df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'severity_category')
-        #-------    CORRECT TARGETTING    -------          
-        dimension_admin_status = calculate_prop (df=df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
-        ## subset in need
-        dimension_admin_status_in_need = calculate_prop (df=in_need_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
-        # -------- GENDER DISAGGREGATION  ---------    
-        severity_female = calculate_prop (df=female_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'severity_category')
-        severity_male = calculate_prop (df=male_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'severity_category')
-        dimension_female = calculate_prop (df=female_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
-        dimension_male = calculate_prop (df=male_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
-        # -------- SCHOOL-CYCLE DISAGGREGATION  ---------    
-        dimension_ece = calculate_prop (df=ece_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
-        dimension_primary = calculate_prop (df=primary_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
-        dimension_secondary = calculate_prop (df=secondary_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
-        if not single_cycle:
-            dimension_intermediate =  calculate_prop (df=intermediate_df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= 'dimension_pin')
+            # Initialize success messages for both uploads
+            pr_url_excel = None
+            pr_url_doc = None
 
+            # Try uploading both files
+            try:
+                pr_url_excel = upload_to_github(
+                    file_content=indicator_output.getvalue(),
+                    file_name=file_path_in_repo_excel,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN results no ocha (Excel) for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Excel file to GitHub: {e}")
 
+            try:
+                pr_url_doc = upload_to_github(
+                    file_content=doc_parameter_output.getvalue(),
+                    file_name=file_path_in_repo_doc,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN parameters (Word) for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")
 
+            # Display success messages only if files were successfully uploaded
+            if pr_url_excel:
+                st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+            if pr_url_doc:
+                st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
 
-            ## reducing the multiindex of the panda dataframe
-        severity_admin_status_list = reduce_index(severity_admin_status, 0, pop_group_var)
-        dimension_admin_status_list = reduce_index(dimension_admin_status, 0, pop_group_var)
-        dimension_admin_status_in_need_list = reduce_index(dimension_admin_status_in_need,  0, pop_group_var) ## only who is in need we check the distriburion of need
-        severity_female_list = reduce_index(severity_female, 0, pop_group_var)
-        severity_male_list = reduce_index(severity_male, 0, pop_group_var)
-        dimension_female_list = reduce_index(dimension_female, 0, pop_group_var)
-        dimension_male_list = reduce_index(dimension_male, 0, pop_group_var)
-        dimension_ece_list = reduce_index(dimension_ece, 0, pop_group_var)
-        dimension_primary_list = reduce_index(dimension_primary, 0, pop_group_var)
-        dimension_secondary_list = reduce_index(dimension_secondary, 0, pop_group_var)
-        if not single_cycle: dimension_intermediate_list = reduce_index(dimension_intermediate, 0, pop_group_var)
-
-
-
-
-    ## checking number of columns
-    severity_needed_columns = [2.0, 3.0, 4.0, 5.0]
-    dimension_needed_columns = ['access','aggravating circumstances', 'learning condition', 'protected environment']
-    severity_admin_status_list = ensure_columns(severity_admin_status_list, severity_needed_columns)
-    severity_female_list = ensure_columns(severity_female_list, severity_needed_columns)
-    severity_male_list = ensure_columns(severity_male_list, severity_needed_columns)
-    dimension_admin_status_list = ensure_columns(dimension_admin_status_list, dimension_needed_columns)
-    dimension_admin_status_in_need_list = ensure_columns(dimension_admin_status_in_need_list, dimension_needed_columns)
-    dimension_female_list = ensure_columns(dimension_female_list, dimension_needed_columns)
-    dimension_male_list = ensure_columns(dimension_male_list, dimension_needed_columns)
-    dimension_ece_list = ensure_columns(dimension_ece_list, dimension_needed_columns)
-    dimension_primary_list = ensure_columns(dimension_primary_list, dimension_needed_columns)
-    dimension_secondary_list = ensure_columns(dimension_secondary_list, dimension_needed_columns)
-    if not single_cycle:    dimension_intermediate_list = ensure_columns(dimension_intermediate_list, dimension_needed_columns)
+        except Exception :
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
+ 
+    st.subheader(translations["hno_guidelines_subheader"])
+    st.markdown(translations["hno_guidelines_message"])
 
 
 
 
 
-        # Ensure population column exists and avoid division by zero
-        if label_tot_population not in pop_group_df.columns:
-            print(f"Warning: Missing '{label_tot_population}' in pop_group '{pop_group}'. Skipping calculations.")
-            continue
-
-        # Avoid division by zero by replacing 0 with NaN
-        pop_group_df.loc[:, label_tot_population] = pop_group_df[label_tot_population].replace(0, np.nan)
-
-        predefined_tot_to_perc = {
-            label_tot_sev3_indicator_access: label_perc_sev3_indicator_access,
-            label_tot_sev3_indicator_teacher: label_perc_sev3_indicator_teacher,
-            label_tot_sev3_indicator_hazard: label_perc_sev3_indicator_hazard,
-            label_tot_sev4_indicator_idp: label_perc_sev4_indicator_idp,
-            label_tot_sev5_indicator_occupation: label_perc_sev5_indicator_occupation,
-            label_tot_sev4_aggravating_circumstances: label_perc_sev4_aggravating_circumstances,
-            label_tot_sev5_aggravating_circumstances: label_perc_sev5_aggravating_circumstances
-        }
-
-        # Compute predefined % columns using .loc to avoid SettingWithCopyWarning
-        for tot_col, perc_col in predefined_tot_to_perc.items():
-            if tot_col in pop_group_df.columns:
-                pop_group_df.loc[:, perc_col] = pop_group_df[tot_col] / pop_group_df[label_tot_population]
 
 
-        # Dynamically generate % columns for any "ToT # children" indicators
-        for col in list(pop_group_df.columns):  # Convert to list to avoid runtime errors during iteration
-            match = re.match(r"(severity level \d+:) \(ToT # children\) (.+)", col)
-            if match:
-                severity_level, description = match.groups()
-                perc_col = f"{severity_level} (% of children) {description}"  # Create new column name
+    # Create an in-memory BytesIO buffer to hold the Excel file
+    excel_pin = BytesIO()
 
-                if perc_col not in pop_group_df.columns:
-                    pop_group_df.loc[:, perc_col] = pop_group_df[col] / pop_group_df[label_tot_population]
+    # Create an Excel writer object and write the DataFrames to it
+    with pd.ExcelWriter(excel_pin, engine='xlsxwriter') as writer:
+        # Iterate over each category and DataFrame in the dictionary
+        for category, df in severity_admin_status_list.items():
+            # Write the DataFrame to a sheet named after the category
+            df.to_excel(writer, sheet_name=category, index=False)
 
-        # Reorder columns correctly
-        pop_group_df = reorder_severity_columns(pop_group_df)
+    # Set the buffer position to the start
+    excel_pin.seek(0)
 
-        # Drop unnecessary columns
-        columns_to_drop = ["In-School Children", "Out-of-School Children"]
-        pop_group_df.drop(columns=[col for col in columns_to_drop if col in pop_group_df.columns], inplace=True)
+    # Create a download button for the Excel file in Streamlit
+    st.download_button(
+        label="Download PiN percentages by admin and by population group",
+        data=excel_pin,
+        file_name=f"PiN_percentages_{country_label}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
