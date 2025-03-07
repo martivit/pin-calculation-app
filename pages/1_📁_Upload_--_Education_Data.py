@@ -34,7 +34,7 @@ REQUIRED_COLUMNS = {
     'edu access': {'edu_access', 'enrolled_school'},
     'distruption teacher':{'edu_disrupted_teacher', 'teacher'},
     'distruption hazard':{'edu_disrupted_hazards', 'hazard'},
-    'distruption displaced':{'edu_disrupted_displaced', 'distrupted_idp'},
+    'distruption displaced':{'edu_disrupted_displaced', 'distrupted_idp', 'education_disrupted_School_used_shelter_displaced_persons'},
     'edu barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel'},
     'survey start': {'start', 'date'}
 }
