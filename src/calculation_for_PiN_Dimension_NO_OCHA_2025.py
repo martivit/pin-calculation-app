@@ -1508,8 +1508,7 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
             label_perc_sev5_aggravating_circumstances  : "Niveau de sévérité 5, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 5) -- % d'enfants",
             "severity level 4, aggravating circumstance:": "niveau de sévérité 4, circonstance aggravante:",
             "severity level 5, aggravating circumstance:": "niveau de sévérité 5, circonstance aggravante:",
-            "% of children": "% d'enfants"
-}
+            "% of children": "% d'enfants"}
 
     if selected_language == 'French':
         indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)
