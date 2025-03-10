@@ -1030,20 +1030,44 @@ def extract_severity_level(col):
 ##--------------------------------------------------------------------------------------------
 # Function to translate labels
 def translate_labels(data, translation_dict):
+    """
+    Translates column names and text values inside a DataFrame or dictionary of DataFrames.
+    Supports partial matches in column names.
+
+    Args:
+        data (pd.DataFrame or dict): DataFrame or dictionary of DataFrames to be translated.
+        translation_dict (dict): Dictionary where keys are words/phrases to translate and values are translations.
+
+    Returns:
+        Translated DataFrame(s).
+    """
+    
+    def translate_column_names(column_name):
+        """Apply translation to parts of column names based on dictionary."""
+        for eng, fr in translation_dict.items():
+            if eng in column_name:  # Check if part of the column matches
+                column_name = column_name.replace(eng, fr)  # Replace only that part
+        return column_name
+    
     # Check if 'data' is a DataFrame or a dictionary of DataFrames
     if isinstance(data, pd.DataFrame):
-        # Translate column names
-        data.columns = [translation_dict.get(col, col) for col in data.columns]
-        # Translate values inside the DataFrame
+        # Translate column names with partial replacements
+        data.columns = [translate_column_names(col) for col in data.columns]
+
+        # Translate values inside the DataFrame (only for string columns)
         for col in data.columns:
             if data[col].dtype == 'object':  # Apply replacement only for string columns
-                data[col] = data[col].replace(translation_dict)
+                for eng, fr in translation_dict.items():
+                    data[col] = data[col].str.replace(eng, fr, regex=True)
+
         return data
+
     elif isinstance(data, dict):
         # If 'data' is a dictionary, apply translation to each DataFrame
         for key in data:
             data[key] = translate_labels(data[key], translation_dict)
         return data
+
     else:
         raise TypeError("Input must be a pandas DataFrame or a dictionary of DataFrames.")
 ########################################################################################################################################
@@ -1481,8 +1505,11 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
             label_perc_sev4_indicator_idp : "Niveau de sévérité 4, indicateur : L'enseignement a été perturbé par l'utilisation de l'école comme abri -- % d'enfants",
             label_perc_sev5_indicator_occupation : "Niveau de sévérité 5, indicateur : L'éducation a été perturbée par l'occupation de l'école par des groupes armés -- % d'enfants",
             label_perc_sev4_aggravating_circumstances : "Niveau de sévérité 4, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 4) -- % d'enfants",
-            label_perc_sev5_aggravating_circumstances  : "Niveau de grsévéritéavité 5, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 5) -- % d'enfants",
-    }
+            label_perc_sev5_aggravating_circumstances  : "Niveau de sévérité 5, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 5) -- % d'enfants",
+            "severity level 4, aggravating circumstance:": "niveau de sévérité 4, circonstance aggravante:",
+            "severity level 5, aggravating circumstance:": "niveau de sévérité 5, circonstance aggravante:",
+            "% of children": "% d'enfants"
+}
 
     if selected_language == 'French':
         indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)
