@@ -85,10 +85,10 @@ survey_data = dfs['survey']
 choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
-no_ocha_data = False
+no_ocha_data = True
 # Read specific sheets into separate dataframes
 ocha_data = None
-ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+#ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
 
@@ -342,7 +342,7 @@ if no_ocha_data:
                                                                                     mismatch_admin,
                                                                                     selected_language= selected_language)
     
-    indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var)
+    indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var, selected_language=selected_language)
 
     with open("output_validation/no_ocha__indicator__platform_output.xlsx", "wb") as f:
         f.write(indicator_output.getbuffer())   

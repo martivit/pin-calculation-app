@@ -995,8 +995,8 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         }
 
         # Severity 4 and 5 column renaming
-        severity_4_rename = {entry['name']: f"severity level 4, aggravating circumnstance: {entry['label']}" for entry in severity_4_matches}
-        severity_5_rename = {entry['name']: f"severity level 5, aggravating circumnstance: {entry['label']}" for entry in severity_5_matches}
+        severity_4_rename = {entry['name']: f"severity level 4, aggravating circumnstance: {entry['label']} -- % of children" for entry in severity_4_matches}
+        severity_5_rename = {entry['name']: f"severity level 5, aggravating circumnstance: {entry['label']} -- % of children" for entry in severity_5_matches}
 
         # Merge all renaming mappings
         rename_mapping = {**essential_column_rename, **severity_4_rename, **severity_5_rename}
@@ -1020,11 +1020,32 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
             pin_by_indicator_status[category] = pop_group_ind_df
 
     return pin_by_indicator_status  
-
+##--------------------------------------------------------------------------------------------
 # Function to extract the severity level
 def extract_severity_level(col):
     match = re.search(r'severity level (\d+)', col)
     return int(match.group(1)) if match else None
+
+
+##--------------------------------------------------------------------------------------------
+# Function to translate labels
+def translate_labels(data, translation_dict):
+    # Check if 'data' is a DataFrame or a dictionary of DataFrames
+    if isinstance(data, pd.DataFrame):
+        # Translate column names
+        data.columns = [translation_dict.get(col, col) for col in data.columns]
+        # Translate values inside the DataFrame
+        for col in data.columns:
+            if data[col].dtype == 'object':  # Apply replacement only for string columns
+                data[col] = data[col].replace(translation_dict)
+        return data
+    elif isinstance(data, dict):
+        # If 'data' is a dictionary, apply translation to each DataFrame
+        for key in data:
+            data[key] = translate_labels(data[key], translation_dict)
+        return data
+    else:
+        raise TypeError("Input must be a pandas DataFrame or a dictionary of DataFrames.")
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
@@ -1433,6 +1454,38 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
             indicator_per_admin_status[category] = df
 
 
+
+
+    translation_dict = {
+            label_perc2: '% niveaux de sévérité 1-2',
+            label_perc3: '% niveau de sévérité 3',
+            label_perc4: '% niveau de sévérité 4',
+            label_perc5: '% niveau de sévérité 5',
+            label_tot2: '# niveaux de sévérité 1-2',
+            label_tot3: '# niveau de sévérité 3',
+            label_tot4: '# niveau de sévérité 4',
+            label_tot5: '# niveau de sévérité 5',
+            label_perc_tot: '% Tot PiN (niveaux de sévérité 3-5)',
+            label_tot: '# Tot PiN (niveaux de sévérité 3-5)',
+            label_admin_severity: 'Sévérité de la zone',
+            label_tot_population: 'Population totale',
+            'All population groups': 'Tous les groupes de population',
+            'Population group': 'Groupe de population',
+            'Children with disability': 'Enfants en situation de handicap',
+            "Primary school": "École primaire",
+            "Intermediate school-level": "Niveau scolaire intermédiaire",
+            "Secondary school":"École secondaire",
+            label_perc_sev3_indicator_access: "Niveau de sévérité 3, indicateur Accès à l'éducation -- % d'enfants",
+            label_perc_sev3_indicator_teacher : "Niveau de sévérité 3, indicateur : L'éducation a été perturbée par l'absence d'un enseignant -- % d'enfants",
+            label_perc_sev3_indicator_hazard : "Niveau de sévérité 3, indicateur : L'enseignement a été perturbé par un risque naturel -- % d'enfants",
+            label_perc_sev4_indicator_idp : "Niveau de sévérité 4, indicateur : L'enseignement a été perturbé par l'utilisation de l'école comme abri -- % d'enfants",
+            label_perc_sev5_indicator_occupation : "Niveau de sévérité 5, indicateur : L'éducation a été perturbée par l'occupation de l'école par des groupes armés -- % d'enfants",
+            label_perc_sev4_aggravating_circumstances : "Niveau de sévérité 4, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 4) -- % d'enfants",
+            label_perc_sev5_aggravating_circumstances  : "Niveau de grsévéritéavité 5, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 5) -- % d'enfants",
+    }
+
+    if selected_language == 'French':
+        indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)
 
 
     return pin_per_admin_status, dimension_admin_status_list, indicator_per_admin_status ,country_label

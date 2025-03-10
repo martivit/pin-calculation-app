@@ -591,7 +591,10 @@ def create_indicator_output_no_ocha(country_label, indicator_dataframes, admin_v
         max_col = ws.max_column
         ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
         title_cell = ws.cell(row=1, column=5)
-        title_cell.value = f"Children (5–17 years old) classified by severity and indicators"
+        if selected_language.lower() == 'french':
+            title_cell.value = "Enfants (5-17 ans) classés par niveau de sévérité et indicateurs"
+        else:
+            title_cell.value = "Children (5–17 years old) classified by severity and indicators"
         title_cell.font = Font(bold=True, size=14)
         title_cell.alignment = Alignment(horizontal='center', vertical='center')
 
@@ -617,13 +620,13 @@ def create_indicator_output_no_ocha(country_label, indicator_dataframes, admin_v
 
                 if col_name and isinstance(col_name, str):  # Ensure col_name is valid
                     # Apply color based on severity level
-                    if "severity level 3" in col_name:
+                    if "severity level 3" in col_name or "Niveau de sévérité 3" in col_name:
                         cell.fill = PatternFill(start_color=colors["light_orange"], end_color=colors["light_orange"], fill_type="solid")
-                    elif "severity level 4" in col_name:
+                    elif "severity level 4" in col_name or "Niveau de sévérité 4" in col_name:
                         cell.fill = PatternFill(start_color=colors["dark_orange"], end_color=colors["dark_orange"], fill_type="solid")
-                    elif "severity level 5" in col_name:
+                    elif "severity level 5" in col_name or "Niveau de sévérité 5" in col_name:
                         cell.fill = PatternFill(start_color=colors["darker_orange"], end_color=colors["darker_orange"], fill_type="solid")
-                    elif "Area severity" in col_name:  # Apply light blue for "Area severity"
+                    elif "Area severity" in col_name or "Sévérité de la zone" in col_name:  # Apply light blue for "Area severity"
                         cell.fill = PatternFill(start_color=colors["light_blue"], end_color=colors["light_blue"], fill_type="solid")
 
                 # Apply wrap text and reduce font size for all data cells
