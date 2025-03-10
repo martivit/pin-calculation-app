@@ -354,7 +354,7 @@ if no_ocha_data:
                                                                                     mismatch_admin,
                                                                                     selected_language= selected_language)
 
-    indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var)
+    indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var, selected_language=selected_language)
 
     
     if selected_language == "English":
