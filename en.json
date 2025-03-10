@@ -143,7 +143,9 @@
     "other_only": "Upload the updated filled template",
     "upload_other": "Upload the EMIS/JENA data in the template format",
     "warning_upload_data":"⚠️ Please select a data source for all PiN dimensions before proceeding.",
-    "error_combination":"⚠️ The selected combination of data sources is not supported. Please review your choices."
+    "error_combination":"⚠️ The selected combination of data sources is not supported. Please review your choices.",
+    "upload_scope_fix": "Upload Scope-Fix Sheet"
+
   
   
   

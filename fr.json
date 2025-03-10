@@ -143,7 +143,8 @@
    "other_only" :"Télécharger le modèle rempli mis à jour",
    "upload_other" :"Télécharger les données EMIS/JENA dans le format du modèle",
    "warning_upload_data":"⚠️ Veuillez sélectionner une source de données pour toutes les dimensions PiN avant de continuer. ",
-   "error_combination": "⚠️ La combinaison de sources de données sélectionnée n'est pas prise en charge. Veuillez revoir vos choix."
+   "error_combination": "⚠️ La combinaison de sources de données sélectionnée n'est pas prise en charge. Veuillez revoir vos choix.",
+   "upload_scope_fix": "Upload Scope-Fix Sheet"
 
   }
 
