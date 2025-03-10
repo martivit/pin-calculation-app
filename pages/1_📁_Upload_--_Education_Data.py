@@ -216,6 +216,32 @@ st.download_button(label=translations["template"],# Add a download button for th
 
 if no_ocha_data_checkbox:
     st.session_state['no_upload_ocha_data'] = True
+    upload_scope_fix_checkbox = st.checkbox("Upload Scope-Fix Sheet")
+    if upload_scope_fix_checkbox:
+        uploaded_scope_fix_file = st.file_uploader(translations["upload_scope_fix"], type=["xlsx"])
+        if uploaded_scope_fix_file is not None:
+            try:
+                ocha_mismatch_data = pd.read_excel(uploaded_scope_fix_file, sheet_name='scope-fix', engine='openpyxl')
+                st.session_state['ocha_mismatch_data'] = ocha_mismatch_data
+                st.success("Scope-Fix sheet uploaded successfully!")
+                df = pd.DataFrame(ocha_mismatch_data)
+                # Replace all non-NaN/non-None values in the second row with 1
+                for col in df.columns:
+                    if pd.notna(df.at[0, col]) and df.at[0, col] != '':
+                        df.at[0, col] = 1
+                    else:
+                        df.at[0, col] = np.nan
+
+                #st.dataframe(df) 
+                second_row = df.iloc[0]
+
+                non_empty_count = second_row.notna().sum()
+                scope_fix = non_empty_count >= 2
+                if scope_fix:
+                    st.session_state['scope_fix'] = True
+                st.success(translations["ok_upload"])
+            except Exception as e:
+                st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets        
 else:
     if 'no_upload_ocha_data' in st.session_state:
         del st.session_state['no_upload_ocha_data']
