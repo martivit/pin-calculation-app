@@ -14,6 +14,7 @@ from src.calculation_for_PiN_Dimension_NO_OCHA_2025 import calculatePIN_NO_OCHA_
 from src.vizualize_PiN import create_output
 from src.vizualize_PiN import create_indicator_output
 from src.vizualize_PiN import create_indicator_output_no_ocha
+from src.vizualize_PiN import create_pin_raw_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
@@ -343,9 +344,13 @@ if no_ocha_data:
                                                                                     selected_language= selected_language)
     
     indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var, selected_language=selected_language)
+    pin_percentage_output    =     create_pin_raw_output(country_label, severity_admin_status_list, admin_var=admin_var, selected_language=selected_language)
+
 
     with open("output_validation/no_ocha__indicator__platform_output.xlsx", "wb") as f:
         f.write(indicator_output.getbuffer())   
+    with open("output_validation/no_ocha__pin_percentage__platform_output.xlsx", "wb") as f:
+        f.write(pin_percentage_output.getbuffer())      
      
     file_path_pin_no_ocha = 'output_validation/no_ocha_pin_percentage.xlsx'
     file_path_no_ocha_dimension = 'output_validation/no_ocha_dimension_percentage.xlsx'

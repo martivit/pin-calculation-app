@@ -12,6 +12,7 @@ from src.calculation_for_PiN_Dimension_NO_OCHA_2025 import calculatePIN_NO_OCHA_
 from src.vizualize_PiN import create_output
 from src.vizualize_PiN import create_indicator_output
 from src.vizualize_PiN import create_indicator_output_no_ocha
+from src.vizualize_PiN import create_pin_raw_output
 from src.snapshot_PiN import create_snapshot_PiN
 from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
@@ -114,7 +115,7 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
         #return None
 
 ##--------------------------------------------------------------------------------------------------------------------
-def create_zip_file(country_label, excel_file, indicator_output,word_snapshot, word_parameters):
+def create_zip_file(country_label, excel_file,indicator_output,word_snapshot, word_parameters):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
@@ -129,10 +130,11 @@ def create_zip_file(country_label, excel_file, indicator_output,word_snapshot, w
     return zip_buffer
 
 ##--------------------------------------------------------------------------------------------------------------------
-def create_zip_file_no_ocha(country_label,  indicator_output,word_parameters):
+def create_zip_file_no_ocha(country_label, pin_percentage, indicator_output,word_parameters):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        zip_file.writestr(f"PiN_percentage_{country_label}_{timestamp}.xlsx", pin_percentage.getvalue())
         # Add the Excel file with timestamp
         zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
         # Add the Parameters Word Document with timestamp
@@ -355,6 +357,7 @@ if no_ocha_data:
                                                                                     selected_language= selected_language)
 
     indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var, selected_language=selected_language)
+    pin_percentage_output    =     create_pin_raw_output(country_label, severity_admin_status_list, admin_var=admin_var, selected_language=selected_language)
 
     
     if selected_language == "English":
@@ -364,8 +367,7 @@ if no_ocha_data:
         doc_parameter_output = generate_word_document_FR(parameters_FR)
 
     zip_file_name = f"PiN_by_indicator_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
-    zip_file = create_zip_file_no_ocha(country_label, indicator_output,  doc_parameter_output)
-
+    zip_file = create_zip_file_no_ocha(country_label, pin_percentage_output, indicator_output,  doc_parameter_output)
 
     
 
@@ -389,7 +391,7 @@ if no_ocha_data:
 
             # File paths in the repository
             file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_by_indicator_results_{country}_{timestamp}.xlsx"
-            file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameters_{country}_{timestamp}.docx"
+            file_path_in_repo_excel2 = f"platform_PiN_output/{country}/PiN_percentage_{country}_{timestamp}.xlsx"
 
             github_token = st.secrets["github"]["token"]
 
@@ -413,11 +415,11 @@ if no_ocha_data:
 
             try:
                 pr_url_doc = upload_to_github(
-                    file_content=doc_parameter_output.getvalue(),
-                    file_name=file_path_in_repo_doc,
+                    file_content=pin_percentage_output.getvalue(),
+                    file_name=file_path_in_repo_excel2,
                     repo_name=repo_name,
                     branch_name=branch_name,
-                    commit_message=f"Add PiN parameters (Word) for {country_label}",
+                    commit_message=f"Add PiN pergentage for {country_label}",
                     token=github_token
                 )
             except Exception :

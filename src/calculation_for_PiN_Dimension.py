@@ -46,6 +46,21 @@ label_dimension_perc_tot = '% Tot in PiN Dimensions'
 label_dimension_tot = '# Tot in PiN Dimensions'
 label_dimension_tot_population = 'TotN'
 
+label_perc_sev3_indicator_access= 'severity level 3 -- OoS children -- % of children not accessing education who dot not face any aggravating circumstances'
+label_perc_sev3_indicator_teacher = 'severity level 3 -- in-school children -- % of children whose ducation was disrupted by teacher absence'
+label_perc_sev3_indicator_hazard = 'severity level 3 -- in-school children -- % of children whose education was disrupted by natural hazard'
+label_perc_sev4_indicator_idp = 'severity level 4 -- in-school children -- % of children whose education was disrupted by the school being used as shelter'
+label_perc_sev5_indicator_occupation = 'severity level 5 -- in-school children -- % of children whose education was disrupted by the school being occupied by armed groups'
+label_perc_sev4_aggravating_circumstances = 'severity level 4, indicator: individual aggravating circumstances (cumulative of all Level 4 aggravating circumstances) -- % of children'
+label_perc_sev5_aggravating_circumstances = 'severity level 5, indicator: individual aggravating circumstances (cumulative of all Level 5 aggravating circumstances) -- % of children'
+
+label_tot_sev3_indicator_access= 'severity level 3 -- OoS children -- # of children not accessing education who dot not face any aggravating circumstances'
+label_tot_sev3_indicator_teacher = 'severity level 3 -- in-school children -- # of children whose ducation was disrupted by teacher absence'
+label_tot_sev3_indicator_hazard = 'severity level 3 -- in-school children -- # of children whose education was disrupted by natural hazard'
+label_tot_sev4_indicator_idp = 'severity level 4 -- in-school children -- # of children whose education was disrupted by the school being used as shelter'
+label_tot_sev5_indicator_occupation = 'severity level 5 -- in-school children -- # of children whose education was disrupted by the school being occupied by armed groups'
+label_tot_sev4_aggravating_circumstances = 'severity level 4, indicator: individual aggravating circumstances (cumulative of all Level 4 aggravating circumstances) -- % of children'
+label_tot_sev5_aggravating_circumstances = 'severity level 5, indicator: individual aggravating circumstances (cumulative of all Level 5 aggravating circumstances) -- % of children'
 
 
 
@@ -917,23 +932,48 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
 
     return admin_columns_representative
 
+
 ##--------------------------------------------------------------------------------------------
 # Function to translate labels
 def translate_labels(data, translation_dict):
+    """
+    Translates column names and text values inside a DataFrame or dictionary of DataFrames.
+    Supports partial matches in column names.
+
+    Args:
+        data (pd.DataFrame or dict): DataFrame or dictionary of DataFrames to be translated.
+        translation_dict (dict): Dictionary where keys are words/phrases to translate and values are translations.
+
+    Returns:
+        Translated DataFrame(s).
+    """
+    
+    def translate_column_names(column_name):
+        """Apply translation to parts of column names based on dictionary."""
+        for eng, fr in translation_dict.items():
+            if eng in column_name:  # Check if part of the column matches
+                column_name = column_name.replace(eng, fr)  # Replace only that part
+        return column_name
+    
     # Check if 'data' is a DataFrame or a dictionary of DataFrames
     if isinstance(data, pd.DataFrame):
-        # Translate column names
-        data.columns = [translation_dict.get(col, col) for col in data.columns]
-        # Translate values inside the DataFrame
+        # Translate column names with partial replacements
+        data.columns = [translate_column_names(col) for col in data.columns]
+
+        # Translate values inside the DataFrame (only for string columns)
         for col in data.columns:
             if data[col].dtype == 'object':  # Apply replacement only for string columns
-                data[col] = data[col].replace(translation_dict)
+                for eng, fr in translation_dict.items():
+                    data[col] = data[col].str.replace(eng, fr, regex=True)
+
         return data
+
     elif isinstance(data, dict):
         # If 'data' is a dictionary, apply translation to each DataFrame
         for key in data:
             data[key] = translate_labels(data[key], translation_dict)
         return data
+
     else:
         raise TypeError("Input must be a pandas DataFrame or a dictionary of DataFrames.")
 
@@ -1016,7 +1056,7 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         # Essential columns that must be kept
         essential_columns = [admin_var, pop_group_var]
         optional_columns = [
-            'indicator_access', 'indicator_teacher', 'indicator_hazard',
+            'indicator_teacher', 'indicator_hazard','indicator_access', 
             'indicator_idp', 'indicator_occupation', 'indicator_barrier4', 'indicator_barrier5'
         ]
         essential_columns += [col for col in optional_columns if col in sample_df.columns]
@@ -1024,9 +1064,9 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         # Step 4: Prepare Column Renaming
         essential_column_rename = {
             col: new_name for col, new_name in {
-                'indicator_access': 'sev3_indicator_access',
                 'indicator_teacher': 'sev3_indicator_teacher',
                 'indicator_hazard': 'sev3_indicator_hazard',
+                'indicator_access': 'sev3_indicator_access',
                 'indicator_idp': 'sev4_indicator_idp',
                 'indicator_occupation': 'sev5_indicator_occupation',
                 'indicator_barrier4': 'sev4_aggravating_circumstances',
@@ -1035,8 +1075,8 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         }
 
         # Severity 4 and 5 column renaming
-        severity_4_rename = {entry['name']: f"severity level 4, aggravating circumnstance: {entry['label']}" for entry in severity_4_matches}
-        severity_5_rename = {entry['name']: f"severity level 5, aggravating circumnstance: {entry['label']}" for entry in severity_5_matches}
+        severity_4_rename = {entry['name']: f"severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance: {entry['label']}" for entry in severity_4_matches}
+        severity_5_rename = {entry['name']: f"severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance: {entry['label']}" for entry in severity_5_matches}
 
         # Merge all renaming mappings
         rename_mapping = {**essential_column_rename, **severity_4_rename, **severity_5_rename}
@@ -1516,43 +1556,43 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             pop_group_df = pd.merge(grouped_df, df, on=[admin_var, pop_group_var])
             pop_group_df.columns = [str(col) for col in pop_group_df.columns]
 
-            ## ✅ Ensure `label_tot_population` is numeric before using it
+            ##  Ensure `label_tot_population` is numeric before using it
             pop_group_df[label_tot_population] = pd.to_numeric(pop_group_df[label_tot_population], errors='coerce').fillna(0)
 
-            ## ✅ Rename columns
+            ##  Rename columns
             pop_group_df = pop_group_df.rename(columns={
                 pop_group_var: 'Population group',
-                'sev3_indicator_access': 'severity level 3: indicator Access',
-                'sev3_indicator_teacher': 'severity level 3: indicator Teacher Absence Disruption',
-                'sev3_indicator_hazard': 'severity level 3: indicator Natural Hazard Disruption',
-                'sev4_indicator_idp': 'severity level 4: indicator School Used As Shelter Disruption',
-                'sev5_indicator_occupation': 'severity level 5: indicator School Occupation Disruption',
-                'sev4_aggravating_circumstances': 'severity level 4: indicator aggravating circumstances (cumulative of all Level 4 aggravating circumstances)',
-                'sev5_aggravating_circumstances': 'severity level 5: indicator aggravating circumstances (cumulative of all Level 5 aggravating circumstances)'
+               'sev3_indicator_teacher': label_perc_sev3_indicator_teacher,
+                'sev3_indicator_hazard': label_perc_sev3_indicator_hazard,
+                'sev3_indicator_access': label_perc_sev3_indicator_access,
+                'sev4_indicator_idp': label_perc_sev4_indicator_idp,
+                'sev5_indicator_occupation': label_perc_sev5_indicator_occupation,
+                'sev4_aggravating_circumstances': label_perc_sev4_aggravating_circumstances,
+                'sev5_aggravating_circumstances': label_perc_sev5_aggravating_circumstances
             })
 
             if 'Category' in pop_group_df.columns:
                 del pop_group_df['Category']
 
-            ## ✅ Find matching columns for percentage & total number calculation
+            ##  Find matching columns for percentage & total number calculation
             total_columns = {}
             for col in pop_group_df.columns:
                 if col not in ["Population group", admin_var]:  # Exclude these
                     if "severity level" in col and "(ToT # children)" not in col:
-                        total_columns[col] = col.replace(":", ": (ToT # children)", 1)
+                        total_columns[col] = col.replace("% of children", "# of children", 1)
 
             print(total_columns)            
 
-            ## ✅ Debug: Print column pairs to verify matching
+            ##  Debug: Print column pairs to verify matching
             print("\n🔹 Matching Columns for Multiplication:")
             for perc_col, tot_col in total_columns.items():
                 print(f"✔ {perc_col}  --->  {tot_col}")
 
-            ## ✅ Ensure percentage columns are numeric before multiplying
+            ##  Ensure percentage columns are numeric before multiplying
             for perc_col in total_columns.keys():
                 pop_group_df[perc_col] = pd.to_numeric(pop_group_df[perc_col], errors='coerce').fillna(0)
 
-            ## ✅ Compute (ToT # children) values correctly
+            ##  Compute (ToT # children) values correctly
             for perc_col, tot_col in total_columns.items():
                 if tot_col not in pop_group_df.columns:
                     pop_group_df[tot_col] = 0  # Ensure column exists
@@ -1562,21 +1602,11 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 populations = pop_group_df[label_tot_population]
                 computed_totals = (percentages * populations).round(0)
 
-                # ✅ Perform correct multiplication and rounding
+                #  Perform correct multiplication and rounding
                 pop_group_df[tot_col] = computed_totals
 
-                # ✅ Debugging: Print each calculation for verification
-                print(f"\n🔍 Debugging Calculation for {perc_col} --> {tot_col}")
-                debug_df = pd.DataFrame({
-                    'Admin': pop_group_df[admin_var],
-                    'Population Group': pop_group_df['Population group'],
-                    'Total Population': populations,
-                    'Percentage': percentages,
-                    'Computed Total': computed_totals
-                })
-                print(debug_df.head(20))  # Show first 10 rows for verification
 
-            ## ✅ Column Reordering
+            ##  Column Reordering
             all_columns = list(pop_group_df.columns)
 
             admin_cols = [admin_var, "Population group", "TotN"]
@@ -1585,15 +1615,15 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             total_columns_map = {}
 
             for col in all_columns:
-                if "severity level 3" in col and "(ToT # children)" not in col:
+                if "severity level 3" in col and "# of children" not in col:
                     severity_groups[3].append(col)
-                elif "severity level 4" in col and "(ToT # children)" not in col:
+                elif "severity level 4" in col and "# of children" not in col:
                     severity_groups[4].append(col)
-                elif "severity level 5" in col and "(ToT # children)" not in col:
+                elif "severity level 5" in col and "# of children" not in col:
                     severity_groups[5].append(col)
 
-                if "(ToT # children)" in col:
-                    base_col = col.replace(" (ToT # children)", "")
+                if "# of children" in col:
+                    base_col = col.replace(" # of children", "")
                     total_columns_map[base_col] = col  # Map to its corresponding ToT column
 
             # Build ordered columns ensuring (ToT # children) comes immediately after its indicator
@@ -1607,7 +1637,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             # Apply new order
             pop_group_df = pop_group_df[final_columns]
 
-            # ✅ Debugging: Print sample data to verify calculations
+            #  Debugging: Print sample data to verify calculations
             print("\n📌 Sample Data After Calculation:")
             print(pop_group_df.head(5))  # Show first few rows to verify correctness
 
@@ -2201,17 +2231,13 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         df[label_tot_population] = pd.to_numeric(df[label_tot_population], errors='coerce').round(figures_round)
 
         for col in df.columns:
-            if "(ToT # children)" in col:
+            if "# of children" in col:
                 # Convert to numeric and round (total numbers)
                 df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)
-            elif "severity level" in col and "indicator" in col and "(ToT # children)" not in col:
+            elif "severity level" in col and "# of children" not in col:
                 # Convert to numeric, multiply by 100, and round as percentage
-                df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
-            elif ", aggravating circumnstance:" in col and "(ToT # children)" not in col:
-                    df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)    
-            elif "severity level" in col and "(ToT # children)" not in col:
-                # Convert to numeric and round normally (for other severity-level values)
-                df[col] = pd.to_numeric(df[col], errors='coerce').round(2)
+                df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)  
+
 
         # Ensure no NaNs remain
         df.fillna(0, inplace=True)
@@ -2246,8 +2272,21 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         'Children with disability': 'Enfants en situation de handicap',
         "Primary school": "École primaire",
         "Intermediate school-level": "Niveau scolaire intermédiaire",
-        "Secondary school":"École secondaire"
-    }
+        "Secondary school":"École secondaire",
+        label_perc_sev3_indicator_access: "Niveau de sévérité 3 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+        label_perc_sev3_indicator_teacher : "Niveau de sévérité 3 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+        label_perc_sev3_indicator_hazard : "Niveau de sévérité 3 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par un risque naturel",
+        label_perc_sev4_indicator_idp : "Niveau de sévérité 4 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+        label_perc_sev5_indicator_occupation : "Niveau de sévérité 5 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+        label_tot_sev3_indicator_access: "Niveau de sévérité 3 -- enfants non scolarisés ~~~ # d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+        label_tot_sev3_indicator_teacher : "Niveau de sévérité 3 -- enfants scolarisés ~~~ # d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+        label_tot_sev3_indicator_hazard : "Niveau de sévérité 3 -- enfants scolarisés ~~~ # d'enfants dont l'éducation a été perturbée par un risque naturel",
+        label_tot_sev4_indicator_idp : "Niveau de sévérité 4 -- enfants scolarisés ~~~ # d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+        label_tot_sev5_indicator_occupation : "Niveau de sévérité 5 -- enfants scolarisés ~~~ # d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+        "severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+        "severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "}
+
+    
 
 
     if selected_language == 'French':
@@ -2257,8 +2296,10 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         final_overview_dimension_df_in_need = translate_labels(final_overview_dimension_df_in_need, translation_dict)
         Tot_PiN_by_admin = translate_labels(Tot_PiN_by_admin, translation_dict)
         Tot_PiN_JIAF = translate_labels(Tot_PiN_JIAF,translation_dict)
+        pin_per_admin_status = translate_labels(pin_per_admin_status, translation_dict)
+        indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)
+        pin_per_admin_status = translate_labels(pin_per_admin_status, translation_dict)
 
-    print(final_overview_df_OCHA)
     
 
     return indicator_barrier4_list,indicator_barrier_list,severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,Tot_PiN_by_admin, country_label

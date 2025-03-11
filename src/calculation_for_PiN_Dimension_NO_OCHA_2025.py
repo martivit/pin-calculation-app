@@ -47,11 +47,11 @@ label_dimension_tot = '# Tot in PiN Dimensions'
 label_dimension_tot_population = 'TotN'
 
 
-label_perc_sev3_indicator_access= 'severity level 3, indicator Access to education -- % of children'
-label_perc_sev3_indicator_teacher = 'severity level 3, indicator: Education was disrupted by teacher absence -- % of children'
-label_perc_sev3_indicator_hazard = 'severity level 3, indicator: Education was disrupted by natural hazard -- % of children'
-label_perc_sev4_indicator_idp = 'severity level 4, indicator: Education was disrupted by the school being used as shelter -- % of children'
-label_perc_sev5_indicator_occupation = 'severity level 5, indicator: Education was disrupted by school being occupied by armed groups -- % of children'
+label_perc_sev3_indicator_access= 'severity level 3 -- OoS children -- % of children not accessing education who dot not face any aggravating circumstances'
+label_perc_sev3_indicator_teacher = 'severity level 3 -- in-school children -- % of children whose ducation was disrupted by teacher absence'
+label_perc_sev3_indicator_hazard = 'severity level 3 -- in-school children -- % of children whose education was disrupted by natural hazard'
+label_perc_sev4_indicator_idp = 'severity level 4 -- in-school children -- % of children whose education was disrupted by the school being used as shelter'
+label_perc_sev5_indicator_occupation = 'severity level 5 -- in-school children -- % of children whose education was disrupted by the school being occupied by armed groups'
 label_perc_sev4_aggravating_circumstances = 'severity level 4, indicator: individual aggravating circumstances (cumulative of all Level 4 aggravating circumstances) -- % of children'
 label_perc_sev5_aggravating_circumstances = 'severity level 5, indicator: individual aggravating circumstances (cumulative of all Level 5 aggravating circumstances) -- % of children'
 
@@ -976,7 +976,7 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         # Essential columns that must be kept
         essential_columns = [admin_var, pop_group_var]
         optional_columns = [
-            'indicator_access', 'indicator_teacher', 'indicator_hazard',
+             'indicator_teacher', 'indicator_hazard','indicator_access',
             'indicator_idp', 'indicator_occupation', 'indicator_barrier4', 'indicator_barrier5'
         ]
         essential_columns += [col for col in optional_columns if col in sample_df.columns]
@@ -995,8 +995,8 @@ def process_indicator_dataframes(indicator_access_list, indicator_dataframes, ch
         }
 
         # Severity 4 and 5 column renaming
-        severity_4_rename = {entry['name']: f"severity level 4, aggravating circumnstance: {entry['label']} -- % of children" for entry in severity_4_matches}
-        severity_5_rename = {entry['name']: f"severity level 5, aggravating circumnstance: {entry['label']} -- % of children" for entry in severity_5_matches}
+        severity_4_rename = {entry['name']: f"severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance: {entry['label']}" for entry in severity_4_matches}
+        severity_5_rename = {entry['name']: f"severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance: {entry['label']}" for entry in severity_5_matches}
 
         # Merge all renaming mappings
         rename_mapping = {**essential_column_rename, **severity_4_rename, **severity_5_rename}
@@ -1343,8 +1343,24 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
             4.0: label_perc4,
             5.0: label_perc5
         })
+        new_columns = {
+            label_perc2: label_tot2,
+            label_perc3: label_tot3,
+            label_perc4: label_tot4,
+            label_perc5: label_tot5
+        }
+        for perc_col, tot_col in new_columns.items():
+            if perc_col in pop_group_df.columns:
+                col_index = pop_group_df.columns.get_loc(perc_col) + 1  # Find index of the percentage column
+                pop_group_df.insert(col_index, tot_col, np.nan)  # Insert new column right after
+
+        if 'Population group' in pop_group_df.columns:
+            col_index = pop_group_df.columns.get_loc('Population group') + 1
+            pop_group_df.insert(col_index, label_tot_population, np.nan)
+
         # Update the dictionary with the renamed DataFrame
         pin_per_admin_status[category] = pop_group_df
+
 
 
     for pop_group, df in pin_per_admin_status.items():
@@ -1393,14 +1409,16 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
         pop_group_df = df
         pop_group_df = pop_group_df.rename(columns={
             pop_group_var: 'Population group',
-            'sev3_indicator_access': label_perc_sev3_indicator_access,
+
             'sev3_indicator_teacher': label_perc_sev3_indicator_teacher,
             'sev3_indicator_hazard': label_perc_sev3_indicator_hazard,
+            'sev3_indicator_access': label_perc_sev3_indicator_access,
             'sev4_indicator_idp': label_perc_sev4_indicator_idp,
             'sev5_indicator_occupation': label_perc_sev5_indicator_occupation,
             'sev4_aggravating_circumstances': label_perc_sev4_aggravating_circumstances,
             'sev5_aggravating_circumstances': label_perc_sev5_aggravating_circumstances
         })
+
         # Update the dictionary with the renamed DataFrame
         indicator_per_admin_status[category] = pop_group_df
 
@@ -1431,9 +1449,13 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
 
         # Maintain the original order of non-severity columns, while sorting severity columns
         final_columns = non_severity_columns[:2] + severity_columns_sorted + non_severity_columns[2:]
+        # Drop unwanted columns if they exist in the DataFrame
+    # Drop unwanted columns only if they exist
+        columns_to_remove = [label_perc_sev4_aggravating_circumstances, label_perc_sev5_aggravating_circumstances]
+        df = df.drop(columns=[col for col in columns_to_remove if col in df.columns], errors='ignore')
 
-        # Reorder DataFrame columns
-        indicator_per_admin_status[category] = df[final_columns]  # Now using updated df
+        # Reorder DataFrame columns safely
+        indicator_per_admin_status[category] = df[[col for col in final_columns if col in df.columns]]
 
 
 
@@ -1465,11 +1487,9 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
                 elif "severity level" in col and "indicator" in col and "(ToT # children)" not in col:
                     # Convert to numeric, multiply by 100, and round as percentage
                     df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
-                elif ", aggravating circumnstance:" in col  and "(ToT # children)" not in col:
+                elif "% of children" in col  and "(ToT # children)" not in col:
                     df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
-                elif "severity level" in col and "(ToT # children)" not in col:
-                    # Convert to numeric and round normally (for other severity-level values)
-                    df[col] = pd.to_numeric(df[col], errors='coerce').round(2)
+
 
             # Ensure no NaNs remain
             df.fillna(0, inplace=True)
@@ -1477,6 +1497,21 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
             # Save modified DataFrame back into the dictionary
             indicator_per_admin_status[category] = df
 
+
+    for category, df in pin_per_admin_status.items():
+
+            for col in df.columns:
+                if "(ToT # children)" in col:
+                    # Convert to numeric and round (total numbers)
+                    df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)
+                elif "severity level" in col  and "(ToT # children)" not in col:
+                    # Convert to numeric, multiply by 100, and round as percentage
+                    df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
+            # Ensure no NaNs remain
+            #df.fillna(0, inplace=True)
+
+            # Save modified DataFrame back into the dictionary
+            pin_per_admin_status[category] = df
 
 
 
@@ -1499,19 +1534,19 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
             "Primary school": "École primaire",
             "Intermediate school-level": "Niveau scolaire intermédiaire",
             "Secondary school":"École secondaire",
-            label_perc_sev3_indicator_access: "Niveau de sévérité 3, indicateur Accès à l'éducation -- % d'enfants",
-            label_perc_sev3_indicator_teacher : "Niveau de sévérité 3, indicateur : L'éducation a été perturbée par l'absence d'un enseignant -- % d'enfants",
-            label_perc_sev3_indicator_hazard : "Niveau de sévérité 3, indicateur : L'enseignement a été perturbé par un risque naturel -- % d'enfants",
-            label_perc_sev4_indicator_idp : "Niveau de sévérité 4, indicateur : L'enseignement a été perturbé par l'utilisation de l'école comme abri -- % d'enfants",
-            label_perc_sev5_indicator_occupation : "Niveau de sévérité 5, indicateur : L'éducation a été perturbée par l'occupation de l'école par des groupes armés -- % d'enfants",
-            label_perc_sev4_aggravating_circumstances : "Niveau de sévérité 4, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 4) -- % d'enfants",
-            label_perc_sev5_aggravating_circumstances  : "Niveau de sévérité 5, indicateur : circonstances aggravantes individuelles (cumul de toutes les circonstances aggravantes de niveau 5) -- % d'enfants",
-            "severity level 4, aggravating circumstance:": "niveau de sévérité 4, circonstance aggravante:",
-            "severity level 5, aggravating circumstance:": "niveau de sévérité 5, circonstance aggravante:",
-            "% of children": "% d'enfants"}
+            label_perc_sev3_indicator_access: "Niveau de sévérité 3 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+            label_perc_sev3_indicator_teacher : "Niveau de sévérité 3 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+            label_perc_sev3_indicator_hazard : "Niveau de sévérité 3 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par un risque naturel",
+            label_perc_sev4_indicator_idp : "Niveau de sévérité 4 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+            label_perc_sev5_indicator_occupation : "Niveau de sévérité 5 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+            "severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+            "severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "}
 
     if selected_language == 'French':
         indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)
-
+        pin_per_admin_status = translate_labels(pin_per_admin_status, translation_dict)
 
     return pin_per_admin_status, dimension_admin_status_list, indicator_per_admin_status ,country_label
+
+
+
