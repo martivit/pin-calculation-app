@@ -125,3 +125,108 @@ if no_ocha_data:
     )
 
 
+
+
+
+
+
+
+
+    indicator_per_admin_status = {}
+    # Assume category_data_frames is a dictionary of DataFrames, indexed by category
+    for category, df in category_data_frames.items():
+        # Ensure both DataFrames are ready to merge
+        if category in pin_by_indicator_status_list:
+            # Fetch the corresponding DataFrame from the grouped data
+            grouped_df = pin_by_indicator_status_list[category]     
+            # Merge on specified columns
+            pop_group_df = pd.merge(grouped_df, df, on=[admin_var, pop_group_var])
+            pop_group_df.columns = [str(col) for col in pop_group_df.columns]
+
+            ##  Ensure `label_tot_population` is numeric before using it
+            pop_group_df[label_tot_population] = pd.to_numeric(pop_group_df[label_tot_population], errors='coerce').fillna(0)
+
+            ##  Rename columns
+            pop_group_df = pop_group_df.rename(columns={
+                pop_group_var: 'Population group',
+                'sev3_indicator_teacher': label_perc_sev3_indicator_teacher,
+                'sev3_indicator_hazard': label_perc_sev3_indicator_hazard,
+                'sev3_indicator_access': label_perc_sev3_indicator_access,
+                'sev4_indicator_idp': label_perc_sev4_indicator_idp,
+                'sev5_indicator_occupation': label_perc_sev5_indicator_occupation,
+                'sev4_aggravating_circumstances': label_perc_sev4_aggravating_circumstances,
+                'sev5_aggravating_circumstances': label_perc_sev5_aggravating_circumstances
+            })
+
+            if 'Category' in pop_group_df.columns:
+                del pop_group_df['Category']
+
+            ##  Find matching columns for percentage & total number calculation
+            total_columns = {}
+            for col in pop_group_df.columns:
+                if col not in ["Population group", admin_var]:  # Exclude these
+                    if "severity level" in col and "# of children" not in col:
+                        total_columns[col] = re.sub(r"% of children", "# of children", col)
+
+            print(total_columns)            
+
+            ##  Debug: Print column pairs to verify matching
+            print("\n🔹 Matching Columns for Multiplication:")
+            for perc_col, tot_col in total_columns.items():
+                print(f"✔ {perc_col}  --->  {tot_col}")
+
+            ##  Ensure percentage columns are numeric before multiplying
+            for perc_col in total_columns.keys():
+                pop_group_df[perc_col] = pd.to_numeric(pop_group_df[perc_col], errors='coerce').fillna(0)
+
+            ##  Compute (ToT # children) values correctly
+            for perc_col, tot_col in total_columns.items():
+                if tot_col not in pop_group_df.columns:
+                    pop_group_df[tot_col] = 0  # Ensure column exists
+
+                # Extract values for debugging
+                percentages = pop_group_df[perc_col]
+                populations = pop_group_df[label_tot_population]
+                computed_totals = (percentages * populations).round(0)
+
+                #  Perform correct multiplication and rounding
+                pop_group_df[tot_col] = computed_totals
+
+
+            ##  Column Reordering
+            all_columns = list(pop_group_df.columns)
+
+            admin_cols = [admin_var, "Population group", "TotN"]
+            # Extract severity levels and corresponding total columns dynamically
+            severity_groups = {3: [], 4: [], 5: []}
+            total_columns_map = {}
+
+            for col in all_columns:
+                if "severity level 3" in col and "# of children" not in col:
+                    severity_groups[3].append(col)
+                elif "severity level 4" in col and "# of children" not in col:
+                    severity_groups[4].append(col)
+                elif "severity level 5" in col and "# of children" not in col:
+                    severity_groups[5].append(col)
+
+                if "# of children" in col:
+                    base_col = col.replace(" # of children", "")
+                    total_columns_map[base_col] = col  # Map to its corresponding ToT column
+
+            # Build ordered columns ensuring (ToT # children) comes immediately after its indicator
+            final_columns = admin_cols
+            for severity in [3, 4, 5]:  # Ordered severity levels
+                for col in severity_groups[severity]:
+                    final_columns.append(col)
+                    if col in total_columns_map:  # Insert its total column immediately after
+                        final_columns.append(total_columns_map[col])
+
+            # Apply new order
+            pop_group_df = pop_group_df[final_columns]
+
+            #  Debugging: Print sample data to verify calculations
+            print("\n📌 Sample Data After Calculation:")
+            print(pop_group_df.columns)  # Show first few rows to verify correctness
+
+            # Save modified DataFrame back into the dictionary under the category key
+            indicator_per_admin_status[category] = pop_group_df

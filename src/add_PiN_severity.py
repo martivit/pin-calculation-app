@@ -212,15 +212,23 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
         lambda row: 1 if row['severity_category'] == 3 and normalize(row[access_var]) in no_answers else 0, axis=1
     )
 
-    if teacher_disruption_var != no_indicator:
-        data['indicator.teacher'] = data.apply(
-            lambda row: 1 if row['severity_category'] not in [4, 5] and normalize(row[teacher_disruption_var]) in yes_answers else 0, axis=1
-        )
+    # Ensure teacher and hazard are mutually exclusive (teacher has priority)
+    def set_teacher_hazard(row):
+        if teacher_disruption_var != no_indicator and natural_hazard_var != no_indicator:
+            t_val = normalize(row[teacher_disruption_var])
+            h_val = normalize(row[natural_hazard_var])
+            
+            if row['severity_category'] not in [4, 5]:
+                if t_val in yes_answers:
+                    return 1, 0  # Teacher = 1, Hazard = 0 (teacher takes priority)
+                elif h_val in yes_answers:
+                    return 0, 1  # Teacher = 0, Hazard = 1
+        return 0, 0  # Default case if none of the conditions are met
 
-    if natural_hazard_var != no_indicator:
-        data['indicator.hazard'] = data.apply(
-            lambda row: 1 if row['severity_category'] not in [4, 5] and row[teacher_disruption_var] != 1 and normalize(row[natural_hazard_var]) in yes_answers else 0, axis=1
-        )
+    # Apply mutually exclusive logic
+    data[['indicator.teacher', 'indicator.hazard']] = data.apply(
+        lambda row: set_teacher_hazard(row), axis=1, result_type='expand'
+    )
 
     if idp_disruption_var != no_indicator:
         data['indicator.idp'] = data.apply(
@@ -588,6 +596,16 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
     else:
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 6) & (edu_data['edu_age_corrected'] <= 17)]
+
+       
+    if country == 'Afghanistan -- AFG':
+        edu_data.loc[
+            (edu_data[gender_var] == 'female') & 
+            (edu_data[age_var] > 12) & 
+            (edu_data[access_var].isin(['no', 'non', '0', 0])),
+            barrier_var
+        ] = 'ban'
+
 
 
     ####### ** 2 **       ------------------------------ severity definition and calculation ------------------------------------------     #######

@@ -1480,22 +1480,22 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
     figures_round = 0
     for category, df in indicator_per_admin_status.items():
 
-            for col in df.columns:
-                if "(ToT # children)" in col:
-                    # Convert to numeric and round (total numbers)
-                    df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)
-                elif "severity level" in col and "indicator" in col and "(ToT # children)" not in col:
-                    # Convert to numeric, multiply by 100, and round as percentage
-                    df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
-                elif "% of children" in col  and "(ToT # children)" not in col:
-                    df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
+        for col in df.columns:
+            if "(ToT # children)" in col:
+                # Convert to numeric and round (total numbers)
+                df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)
+            elif "severity level" in col and "indicator" in col and "(ToT # children)" not in col:
+                # Convert to numeric, multiply by 100, and round as percentage
+                df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
+            elif "% of children" in col  and "(ToT # children)" not in col:
+                df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
 
 
-            # Ensure no NaNs remain
-            df.fillna(0, inplace=True)
+        # Ensure no NaNs remain
+        df.fillna(0, inplace=True)
 
-            # Save modified DataFrame back into the dictionary
-            indicator_per_admin_status[category] = df
+        # Save modified DataFrame back into the dictionary
+        indicator_per_admin_status[category] = df
 
 
     for category, df in pin_per_admin_status.items():
@@ -1534,13 +1534,13 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
             "Primary school": "École primaire",
             "Intermediate school-level": "Niveau scolaire intermédiaire",
             "Secondary school":"École secondaire",
-            label_perc_sev3_indicator_access: "Niveau de sévérité 3 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
-            label_perc_sev3_indicator_teacher : "Niveau de sévérité 3 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
-            label_perc_sev3_indicator_hazard : "Niveau de sévérité 3 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par un risque naturel",
-            label_perc_sev4_indicator_idp : "Niveau de sévérité 4 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
-            label_perc_sev5_indicator_occupation : "Niveau de sévérité 5 -- enfants scolarisés ~~~ % d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
-            "severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
-            "severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés ~~~ % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "}
+            label_perc_sev3_indicator_access: "Niveau de sévérité 3 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+            label_perc_sev3_indicator_teacher : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+            label_perc_sev3_indicator_hazard : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par un risque naturel",
+            label_perc_sev4_indicator_idp : "Niveau de sévérité 4 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+            label_perc_sev5_indicator_occupation : "Niveau de sévérité 5 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+            "severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+            "severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "}
 
     if selected_language == 'French':
         indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)

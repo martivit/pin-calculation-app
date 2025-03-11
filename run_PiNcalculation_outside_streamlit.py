@@ -51,7 +51,7 @@ selected_severity_4_barriers = [
 "Child participating in income generating activities outside of the home"
 
 ]
-selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+selected_severity_5_barriers = ["There is a ban preventing child from attending"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'ind_age'

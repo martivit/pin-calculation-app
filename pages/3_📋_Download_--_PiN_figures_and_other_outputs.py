@@ -357,7 +357,7 @@ if no_ocha_data:
                                                                                     selected_language= selected_language)
 
     indicator_output = create_indicator_output_no_ocha(country_label, indicator_per_admin_status, admin_var=admin_var, selected_language=selected_language)
-    pin_percentage_output    =     create_pin_raw_output(country_label, severity_admin_status_list, admin_var=admin_var, selected_language=selected_language)
+    pin_percentage_output = create_pin_raw_output(country_label, severity_admin_status_list, admin_var=admin_var, selected_language=selected_language)
 
     
     if selected_language == "English":
@@ -380,10 +380,6 @@ if no_ocha_data:
     ):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        #if "github" in st.secrets and "token" in st.secrets["github"]:
-            #st.write("✅ GitHub token found in secrets.")
-        #else:
-            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
 
         try:
             repo_name = "martivit/pin-calculation-app"
