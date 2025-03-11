@@ -439,32 +439,3 @@ if no_ocha_data:
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
 
-
-
-
-
-
-
-    # Create an in-memory BytesIO buffer to hold the Excel file
-    excel_pin = BytesIO()
-
-    # Create an Excel writer object and write the DataFrames to it
-    with pd.ExcelWriter(excel_pin, engine='xlsxwriter') as writer:
-        # Iterate over each category and DataFrame in the dictionary
-        for category, df in severity_admin_status_list.items():
-            # Write the DataFrame to a sheet named after the category
-            df.to_excel(writer, sheet_name=category, index=False)
-
-    # Set the buffer position to the start
-    excel_pin.seek(0)
-
-    # Create a download button for the Excel file in Streamlit
-    st.download_button(
-        label="Download PiN percentages by admin and by population group",
-        data=excel_pin,
-        file_name=f"PiN_percentages_{country_label}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-
-

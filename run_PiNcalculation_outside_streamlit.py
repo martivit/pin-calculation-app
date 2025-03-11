@@ -36,37 +36,43 @@ from docx.shared import Inches
 
 
 
-## Lemuria
-status_var = 'pop_group'
+## AFG
+status_var = 'urbanity'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
-armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'no_indicator'
-barrier_var = 'edu_barrier'
-selected_severity_4_barriers = ['Cannot afford education-related costs (e.g. tuition, supplies, transportation)', 'There is a lack of interest/Education is not a priority either for the child or the household']#"L'école a été fermée en raison de dommages, d'une catastrophe naturelle ou d'un conflit.",, "Discrimination ou stigmatisation de l'enfant pour quelque raison que ce soit"
-selected_severity_5_barriers = ['School has been closed due to natural disaster', 'School has been closed due to conflict', 'Lack of or poor quality of teachers', 'Protection/safety risks while commuting to school', 'Protection/safety risks while at school', 'Child marriage, engagement or pregnancies']
+armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'edu_disrupted_hazards'
+barrier_var = 'resn_no_access'
+selected_severity_4_barriers = [
+ "Protection risks whilst at the school " ,
+"Protection risks whilst travelling to the school ",
+"Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income) ",
+"Child participating in income generating activities outside of the home"
+
+]
+selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'ind_age'
-gender_var = 'ind_gender'
+gender_var = 'edu_ind_gender'
 start_school = 'September'
-country= 'Lemuria -- LMR'
+country= 'Afghanistan -- AFG'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_2: District'#'Admin_2: Regions' 
+admin_var = 'Admin_2'#'Admin_2: Regions' 
 
-vector_cycle = [12,16]
+vector_cycle = [12,0]
 single_cycle = (vector_cycle[1] == 0)
-primary_start = 6
+primary_start = 7
 secondary_end = 17
 label = 'label::English'
 
 # Path to your Excel file
-excel_path = 'input/Lemuria_MSNA_2022.xlsx'
-excel_path_ocha = 'input/OCHA_pop_LMR.xlsx'
+excel_path = 'input/AFG_WoAA_2024_data.xlsx'
+excel_path_ocha = 'input/AFG_ocha_admin2.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -80,19 +86,19 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['01_clean_data_main']
-edu_data = dfs['02_clean_data_indiv']
+household_data = dfs['AFG_WoAA_2024_data_main_recoded']
+edu_data = dfs['AFG_WoAA_2024_edu_loop']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
-no_ocha_data = True
-# Read specific sheets into separate dataframes
-ocha_data = None
-#ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
-mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
-mismatch_admin = False
 
+# Read specific sheets into separate dataframes
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
+
+mismatch_admin = False
+no_ocha_data = False
 
 selected_language = "English"
 
