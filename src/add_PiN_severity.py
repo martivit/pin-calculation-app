@@ -165,6 +165,7 @@ def calculate_severity(country, gender, age, access, barrier, armed_disruption, 
         return None  # Default fallback in case none of the conditions are met
 
 ##--------------------------------------------------------------------------------------------
+##--------------------------------------------------------------------------------------------
 def add_indicator_columns(data, access_var, teacher_disruption_var, natural_hazard_var, idp_disruption_var, armed_disruption_var, barrier_var, names_severity_4, names_severity_5):
     """
     Add indicator columns to the dataset and set their values based on conditions,
@@ -184,6 +185,7 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
     Returns:
         pd.DataFrame: The updated DataFrame with new indicator columns.
     """
+
     # Helper function to normalize string inputs
     def normalize(input_value):
         if isinstance(input_value, str):
@@ -214,15 +216,16 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
 
     # Ensure teacher and hazard are mutually exclusive (teacher has priority)
     def set_teacher_hazard(row):
-        if teacher_disruption_var != no_indicator and natural_hazard_var != no_indicator:
-            t_val = normalize(row[teacher_disruption_var])
-            h_val = normalize(row[natural_hazard_var])
-            
-            if row['severity_category'] not in [4, 5]:
-                if t_val in yes_answers:
-                    return 1, 0  # Teacher = 1, Hazard = 0 (teacher takes priority)
-                elif h_val in yes_answers:
-                    return 0, 1  # Teacher = 0, Hazard = 1
+        """ Ensure teacher has priority over hazard, and handle missing hazard data """
+        t_val = normalize(row[teacher_disruption_var]) if teacher_disruption_var != no_indicator else ""
+        h_val = normalize(row[natural_hazard_var]) if natural_hazard_var != no_indicator else ""
+
+        if row['severity_category'] not in [4, 5]:  # Apply only if severity is not 4 or 5
+            if t_val in yes_answers:
+                return 1, 0  # Teacher = 1, Hazard = 0 (teacher takes priority)
+            elif h_val in yes_answers:
+                return 0, 1  # Teacher = 0, Hazard = 1
+        
         return 0, 0  # Default case if none of the conditions are met
 
     # Apply mutually exclusive logic
@@ -232,7 +235,7 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
 
     if idp_disruption_var != no_indicator:
         data['indicator.idp'] = data.apply(
-            lambda row: 1 if row['severity_category'] == 4 and row['severity_category'] != 5 and normalize(row[idp_disruption_var]) in yes_answers else 0, axis=1
+            lambda row: 1 if row['severity_category'] == 4 and normalize(row[idp_disruption_var]) in yes_answers else 0, axis=1
         )
 
     if armed_disruption_var != no_indicator:
@@ -249,6 +252,7 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
     )
 
     return data
+
 
 ##--------------------------------------------------------------------------------------------
 def add_indicator_columns_for_EMIS(data, access_var, teacher_disruption_var, natural_hazard_var, idp_disruption_var, armed_disruption_var, barrier_var, names_severity_4, names_severity_5):
