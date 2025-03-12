@@ -279,7 +279,7 @@ if ocha_data is not None:
         doc_output = doc_parameter_output
 
     zip_file_name = f"PiN_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
-    zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
+    #zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
 
     if selected_language == "English":
         zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
@@ -314,8 +314,6 @@ if ocha_data is not None:
             file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_results_{country}_{timestamp}.xlsx"
             if selected_language == "English":
                 file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
-
-
             if selected_language == "French":
                 file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameter_{country}_{timestamp}.docx"
 
