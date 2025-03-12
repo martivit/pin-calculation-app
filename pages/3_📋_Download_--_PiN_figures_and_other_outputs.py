@@ -14,7 +14,7 @@ from src.vizualize_PiN import create_indicator_output
 from src.vizualize_PiN import create_indicator_output_no_ocha
 from src.vizualize_PiN import create_pin_raw_output
 from src.snapshot_PiN import create_snapshot_PiN
-from src.snapshot_PiN_FR import create_snapshot_PiN_FR
+#from src.snapshot_PiN_FR import create_snapshot_PiN_FR
 from src.save_parameter import generate_word_document
 from src.save_parameter import generate_parameters
 from src.save_parameter_FR import generate_word_document_FR
