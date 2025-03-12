@@ -205,3 +205,19 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 
 
 
+## calculate PiN
+if ocha_data is not None:
+    (severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,
+    female_pin_per_admin_status, male_pin_per_admin_status, 
+    pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary, 
+    Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
+    final_overview_dimension_df,final_overview_dimension_df_in_need,
+    Tot_PiN_by_admin,
+    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                                                                                    barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                    age_var, gender_var,
+                                                                                    label, 
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    mismatch_admin,
+                                                                                    selected_language)
