@@ -225,20 +225,20 @@ if no_ocha_data_checkbox:
                 st.session_state['ocha_mismatch_data'] = ocha_mismatch_data
                 st.success("Scope-Fix sheet uploaded successfully!")
                 df = pd.DataFrame(ocha_mismatch_data)
-                # Replace all non-NaN/non-None values in the second row with 1
-                for col in df.columns:
-                    if pd.notna(df.at[0, col]) and df.at[0, col] != '':
-                        df.at[0, col] = 1
-                    else:
-                        df.at[0, col] = np.nan
 
-                #st.dataframe(df) 
-                second_row = df.iloc[0]
+                # Check the first three columns of the first row
+                first_row_check = df.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
 
-                non_empty_count = second_row.notna().sum()
-                scope_fix = non_empty_count >= 2
+                if first_row_check == 0:  # Only modify row if all three columns are empty
+                    df.iloc[0, :] = 1
+                else:
+                    df.iloc[0, :] = np.nan
+
+                # Check if scope_fix should be True
+                scope_fix = first_row_check >= 2
                 if scope_fix:
                     st.session_state['scope_fix'] = True
+
                 st.success(translations["ok_upload"])
             except Exception as e:
                 st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets        
@@ -273,26 +273,27 @@ else:
                     st.session_state['ocha_mismatch_data'] = ocha_mismatch_data
 
                     df = pd.DataFrame(ocha_mismatch_data)
-                    # Replace all non-NaN/non-None values in the second row with 1
-                    for col in df.columns:
-                        if pd.notna(df.at[0, col]) and df.at[0, col] != '':
-                            df.at[0, col] = 1
-                        else:
-                            df.at[0, col] = np.nan
 
-                    #st.dataframe(df) 
-                    second_row = df.iloc[0]
+                    # Check the first three columns of the first row
+                    first_row_check = df.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
 
-                    non_empty_count = second_row.notna().sum()
-                    scope_fix = non_empty_count >= 2
+                    if first_row_check == 0:  # Only modify row if all three columns are empty
+                        df.iloc[0, :] = 1
+                    else:
+                        df.iloc[0, :] = np.nan
+
+                    # Check if scope_fix should be True
+                    scope_fix = first_row_check >= 2
                     if scope_fix:
                         st.session_state['scope_fix'] = True
+
                     st.success(translations["ok_upload"])
                 else:
                     st.error(check_message_ocha)  # Display the error message for 'ocha' sheet if checks fail
                     
             except Exception as e:
                 st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets
+
 
 
 #----- Step 3: Select Available Data Sources
