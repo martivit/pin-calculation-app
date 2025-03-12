@@ -129,6 +129,19 @@ def create_zip_file(country_label, excel_file,indicator_output,word_snapshot, wo
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
 
+def create_zip_file_FR(country_label, excel_file,indicator_output, word_parameters):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
+    zip_buffer = BytesIO()  # Create an in-memory ZIP file
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        # Add the Excel file with timestamp
+        zip_file.writestr(f"PiN_results_{country_label}_{timestamp}.xlsx", excel_file.getvalue())
+        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
+        # Add the Word Snapshot with timestamp
+        #zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
+        # Add the Parameters Word Document with timestamp
+        zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", word_parameters.getvalue())
+    zip_buffer.seek(0)  # Reset the buffer to the beginning
+    return zip_buffer
 ##--------------------------------------------------------------------------------------------------------------------
 def create_zip_file_no_ocha(country_label, pin_percentage, indicator_output,word_parameters):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
@@ -261,11 +274,20 @@ if ocha_data is not None:
         doc_parameter_output = generate_word_document(parameters)
 
     if selected_language == "French":
-        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
+        #doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
         doc_parameter_output = generate_word_document_FR(parameters_FR)
+        doc_output = doc_parameter_output
 
     zip_file_name = f"PiN_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
     zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
+
+    if selected_language == "English":
+        zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
+
+
+    if selected_language == "French":
+        zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
+
 
 
     
@@ -290,7 +312,12 @@ if ocha_data is not None:
 
             # File paths in the repository
             file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_results_{country}_{timestamp}.xlsx"
-            file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
+            if selected_language == "English":
+                file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
+
+
+            if selected_language == "French":
+                file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameter_{country}_{timestamp}.docx"
 
             github_token = st.secrets["github"]["token"]
 
