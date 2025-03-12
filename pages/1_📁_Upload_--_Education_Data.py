@@ -224,15 +224,16 @@ if no_ocha_data_checkbox:
                 ocha_mismatch_data = pd.read_excel(uploaded_scope_fix_file, sheet_name='scope-fix', engine='openpyxl')
                 st.session_state['ocha_mismatch_data'] = ocha_mismatch_data
                 st.success("Scope-Fix sheet uploaded successfully!")
-                df = pd.DataFrame(ocha_mismatch_data)
+                # Work on a copy to avoid modifying the original dataset
+                df_copy = ocha_mismatch_data.copy()
 
                 # Check the first three columns of the first row
-                first_row_check = df.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
+                first_row_check = df_copy.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
 
-                if first_row_check == 0:  # Only modify row if all three columns are empty
-                    df.iloc[0, :] = 1
+                if first_row_check == 0:  # Only modify the copy for the check
+                    df_copy.iloc[0, :] = 1  # Modify the copy, not the original
                 else:
-                    df.iloc[0, :] = np.nan
+                    df_copy.iloc[0, :] = np.nan  # Modify the copy, not the original
 
                 # Check if scope_fix should be True
                 scope_fix = first_row_check >= 2
@@ -250,7 +251,10 @@ else:
         ocha_data = st.session_state['uploaded_ocha_data']
         ocha_mismatch_data = st.session_state['ocha_mismatch_data']
 
-        second_row = ocha_mismatch_data.iloc[1]
+        # Work on a copy to avoid modifying the original data
+        df_copy = ocha_mismatch_data.copy()
+
+        second_row = df_copy.iloc[1]
         non_empty_count = second_row.iloc[:3].astype(str).str.strip().replace("", pd.NA).notna().sum()
 
         scope_fix = non_empty_count >= 2           
@@ -272,15 +276,16 @@ else:
                     st.session_state['uploaded_ocha_data'] = ocha_data
                     st.session_state['ocha_mismatch_data'] = ocha_mismatch_data
 
-                    df = pd.DataFrame(ocha_mismatch_data)
+                    # Work on a copy to avoid modifying the original dataset
+                    df_copy = ocha_mismatch_data.copy()
 
                     # Check the first three columns of the first row
-                    first_row_check = df.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
+                    first_row_check = df_copy.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
 
-                    if first_row_check == 0:  # Only modify row if all three columns are empty
-                        df.iloc[0, :] = 1
+                    if first_row_check == 0:  # Only modify the copy for the check
+                        df_copy.iloc[0, :] = 1  # Modify the copy, not the original
                     else:
-                        df.iloc[0, :] = np.nan
+                        df_copy.iloc[0, :] = np.nan  # Modify the copy, not the original
 
                     # Check if scope_fix should be True
                     scope_fix = first_row_check >= 2
@@ -293,6 +298,7 @@ else:
                     
             except Exception as e:
                 st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets
+
 
 
 
