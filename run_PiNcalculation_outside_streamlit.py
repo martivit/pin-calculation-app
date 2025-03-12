@@ -37,46 +37,40 @@ from docx.shared import Inches
 
 
 
-
-## NER
-
-status_var = 'd_statut_deplacement'
-access_var = 'edu_access'
-teacher_disruption_var = 'edu_disrupted_teacher'
-idp_disruption_var = 'edu_disrupted_displaced'
-armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
+## BFA
+status_var = 'i_type_pop'
+access_var = 'e_enfant_scolarise_formel'
+teacher_disruption_var = 'e_absence_enseignant'
+idp_disruption_var = 'e_ecole_protection'
+armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
 natural_hazard_var = 'no_indicator'
-barrier_var = 'edu_barrier'
-selected_severity_4_barriers = ["Mariage, fiançailles et/ou grossesse", "L'enfant doit travailler à la maison ou dans la ferme du ménage (c'est-à-dire qu'il ne gagne pas de revenu pour ces activités, mais peut permettre à d'autres membres de la famille de gagner un revenu)",
-                 "L'enfant participe à des activités génératrices de revenus en dehors du foyer"   , "Discrimination ou stigmatisation de l'enfant pour quelque raison que ce soit",  
-                 "Impossibilité de s'inscrire à l'école en raison d'un déplacement/retour récent (déplacement après le début de l'année scolaire)",         "Impossibilité de s'inscrire à l'école en raison d'un manque de documents" ,
-    "Risques de protection à l'école",
-"Risques de protection pendant le trajet vers l'école", 
-"L'école a été fermée en raison de dommages, d'une catastrophe naturelle ou d'un conflit."
+barrier_var = 'e_raison_pas_educ_formel'
+selected_severity_4_barriers = [
+    "Risques de protection à l’école (tels que le harcèlement physique et verbal, risque de viol, les attaques contre les écoles ou d’autres incidents de protection)",
+"Risques de protection pendant le trajet vers l’école (tels que les incidents de harcèlement physique et verbal, risque de viol ou d’autres incidents de protection)"
 ]
-
 selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'ind_age'
-gender_var = 'ind_gender'
-start_school = 'October'
-country= 'Niger -- NER'
+age_var = 'sne_enfant_ind_age'
+gender_var = 'sne_enfant_ind_genre'
+start_school = 'September'
+country= 'Burkina Faso -- BFA'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_2: Départements'#'Admin_2: Regions' 
+admin_var = 'Admin_3: Department (Département)'#'Admin_2: Regions' 
 
-vector_cycle = [12,16]
+vector_cycle = [10,14]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
-label = 'label::french'
+label = 'label'
 
 # Path to your Excel file
-excel_path = 'input/ner_msna_clean_data_FINAL.xlsx'
-excel_path_ocha = 'input/ocha_NER_update.xlsx'
+excel_path = 'input/BFA2402_MSNA_2024_DATA_CLEANED_MV.xlsx'
+excel_path_ocha = 'input/BFA_ocha_FINAL__1909.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -90,22 +84,19 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['raw_data_clean']
-edu_data = dfs['loop_data_clean']
-survey_data = dfs['kobo_survey']
-choice_data = dfs['kobo_choices']
+edu_data = dfs['loop_sne_cleaned']
+household_data = dfs['main_cleaned']
+survey_data = dfs['survey']
+choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 
 # Read specific sheets into separate dataframes
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
-mismatch_admin = False
-
-
-selected_language = "French"
+mismatch_admin = True
+selected_language = 'French'
 no_ocha_data = False
-
 
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################

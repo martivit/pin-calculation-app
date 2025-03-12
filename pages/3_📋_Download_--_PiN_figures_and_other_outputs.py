@@ -216,7 +216,7 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
                                                                                 admin_var, vector_cycle, start_school, status_var,
                                                                                 selected_language)
 
-
+st.dataframe(mismatch_ocha_data)
 
 ## calculate PiN
 if ocha_data is not None:
