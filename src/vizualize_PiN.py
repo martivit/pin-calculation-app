@@ -484,7 +484,7 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
         ws.insert_cols(1, 4)  # Add empty columns on the left
 
         # **Increase header row thickness more**
-        ws.row_dimensions[5].height = 80  # Make row even thicker
+        ws.row_dimensions[5].height = 90  # Make row even thicker
 
         # Title formatting
         title = ws.title
@@ -520,11 +520,11 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
 
                 if col_name and isinstance(col_name, str):  # Ensure col_name is valid
                     # Apply color based on severity level
-                    if "severity level 3" in col_name:
+                    if "severity level 3" in col_name or "Niveau de sévérité 3" in col_name:
                         cell.fill = PatternFill(start_color=colors["light_orange"], end_color=colors["light_orange"], fill_type="solid")
-                    elif "severity level 4" in col_name:
+                    elif "severity level 4" in col_name or "Niveau de sévérité 4" in col_name or "niveau de sévérité 4" in col_name:
                         cell.fill = PatternFill(start_color=colors["dark_orange"], end_color=colors["dark_orange"], fill_type="solid")
-                    elif "severity level 5" in col_name:
+                    elif "severity level 5" in col_name or "Niveau de sévérité 5" in col_name or "niveau de sévérité 5" in col_name:
                         cell.fill = PatternFill(start_color=colors["darker_orange"], end_color=colors["darker_orange"], fill_type="solid")
                     elif "Area severity" in col_name or "Sévérité de la zone" in col_name:  # Apply light blue for "Area severity"
                         cell.fill = PatternFill(start_color=colors["light_blue"], end_color=colors["light_blue"], fill_type="solid")

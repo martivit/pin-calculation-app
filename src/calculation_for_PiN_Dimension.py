@@ -2300,10 +2300,10 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 "severity level 4: (ToT # children) indicator School Used As Shelter Disruption",
                 "severity level 4 -- in-school children -- ToT # of children whose education was disrupted by the school being used as shelter"
             ).replace(
-                "severity level 5: indicator School Occupied By Armed Groups Disruption",
+                "severity level 5: indicator School Occupation Disruption",
                 "severity level 5 -- in-school children -- % of children whose education was disrupted by the school being occupied by armed groups"
             ).replace(
-                "severity level 5: (ToT # children) indicator School Occupied By Armed Groups Disruption",
+                "severity level 5: (ToT # children) indicator School Occupation Disruption",
                 "severity level 5 -- in-school children -- ToT # of children whose education was disrupted by the school being occupied by armed groups"
             ).replace(
                 "severity level 3: indicator Access",
@@ -2385,18 +2385,20 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         "Primary school": "École primaire",
         "Intermediate school-level": "Niveau scolaire intermédiaire",
         "Secondary school":"École secondaire",
-        label_perc_sev3_indicator_access: "Niveau de sévérité 3 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
-        label_perc_sev3_indicator_teacher : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
-        label_perc_sev3_indicator_hazard : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par un risque naturel",
-        label_perc_sev4_indicator_idp : "Niveau de sévérité 4 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
-        label_perc_sev5_indicator_occupation : "Niveau de sévérité 5 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
-        label_tot_sev3_indicator_access: "Niveau de sévérité 3 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
-        label_tot_sev3_indicator_teacher : "Niveau de sévérité 3 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
-        label_tot_sev3_indicator_hazard : "Niveau de sévérité 3 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par un risque naturel",
-        label_tot_sev4_indicator_idp : "Niveau de sévérité 4 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
-        label_tot_sev5_indicator_occupation : "Niveau de sévérité 5 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+        "severity level 3 -- OoS children -- % of children not accessing education who do not face any aggravating circumstances": "Niveau de sévérité 3 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+        "severity level 3 -- in-school children -- % of children whose education was disrupted by teacher absence" : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+        "severity level 3 -- in-school children -- % of children whose education was disrupted by natural hazard" : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par un risque naturel",
+        "severity level 4 -- in-school children -- % of children whose education was disrupted by the school being used as shelter" : "Niveau de sévérité 4 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+        "severity level 5 -- in-school children -- % of children whose education was disrupted by the school being occupied by armed groups" : "Niveau de sévérité 5 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+        "severity level 3 -- OoS children -- ToT # of children not accessing education who do not face any aggravating circumstances": "Niveau de sévérité 3 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+        "severity level 3 -- in-school children -- ToT # of children whose education was disrupted by teacher absence" : "Niveau de sévérité 3 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+        "severity level 3 -- in-school children -- ToT # of children whose education was disrupted by natural hazard" : "Niveau de sévérité 3 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par un risque naturel",
+        "severity level 4 -- in-school children -- ToT # of children whose education was disrupted by the school being used as shelter" : "Niveau de sévérité 4 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+        "severity level 5 -- in-school children -- ToT # of children whose education was disrupted by the school being occupied by armed groups" : "Niveau de sévérité 5 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
         "severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
-        "severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "
+        "severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+        "severity level 4 -- OoS children -- ToT # of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+        "severity level 5 -- OoS children -- ToT # of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "
         }
 
     
