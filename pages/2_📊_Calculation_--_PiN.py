@@ -588,6 +588,8 @@ def define_severity():
 
         barrier_var = st.session_state.get('barrier_var', 'Default Value if not set')
         selected_label = st.session_state['label'] 
+        st.write(selected_label)
+
         barrier_options = find_barrier_details(barrier_var, survey_data, choices_data, selected_label)
 
         # Encapsulate descriptions within a single box with a light gray background
