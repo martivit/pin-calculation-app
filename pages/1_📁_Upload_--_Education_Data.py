@@ -22,7 +22,7 @@ st.title(translations["title_page1"])
 
 countries = ['no selection',
     'Afghanistan -- AFG', 'Burkina Faso -- BFA', 'Cameroon -- CMR', 'Central African Republic -- CAR', 
-    'Democratic Republic of the Congo -- DRC', 'Haiti -- HTI', 'Iraq -- IRQ', 'Lemuria -- LMR','Kenya -- KEN', 
+    'Democratic Republic of the Congo -- DRC', 'Ethiopia -- ETH','Haiti -- HTI', 'Iraq -- IRQ', 'Lemuria -- LMR','Kenya -- KEN', 
     'Bangladesh -- BGD', 'Lebanon -- LBN', 'Moldova -- MDA', 'Mali -- MLI', 'Mozambique -- MOZ', 
     'Myanmar -- MMR', 'Niger -- NER', 'Syria -- SYR', 'Ukraine -- UKR', 'Somalia -- SOM', 'South Sudan -- SSD'
 ]

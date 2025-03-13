@@ -79,6 +79,7 @@ admin_levels_per_country = {
     'Cameroon -- CMR': ['Admin_1', 'Admin_2', 'Admin_3'],
     'Central African Republic -- CAR': ['Admin_1: Prefectures (préfectures)', 'Admin_2: Sub-prefectures (sous-préfectures)', 'Admin_3: Communes'],
     'Democratic Republic of the Congo -- DRC': ['Admin_1', 'Admin_2', 'Admin_3'],
+    'Ethiopia -- ETH':['Admin_1', 'Admin_2', 'Admin_3'],
     'Haiti -- HTI': ['Admin_1: Departments (départements)', 'Admin_2: Arrondissements', 'Admin_3: Communes'],
     'Iraq -- IRQ': ['Admin_1: Governorates', 'Admin_2: Districts (aqḍyat)', 'Admin_3: Sub-districts (naḥiyat)'],
     'Lemuria -- LMR':['Admin_1: Province', 'Admin_2: District', 'Admin_3: Subdistrict'] ,
