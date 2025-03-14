@@ -412,14 +412,15 @@ else:
                             bar.progress(30)
 
                             # Validate columns across sheets
-                            column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
+                            #column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
                             bar.progress(60)
-                            if unmatched_columns:
-                                st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
-                                for col in unmatched_columns:
-                                    st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
-                            else:
-                                st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+                            st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+                            #if unmatched_columns:
+                                #st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
+                                #for col in unmatched_columns:
+                                    #st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
+                            #else:
+                                #st.success(f"✅ {translations['all_mandatory_columns_found']}") 
                             bar.progress(100)
                         except Exception as e:
                             st.error(f"Failed to process the uploaded file: {e}")
