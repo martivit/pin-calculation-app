@@ -31,12 +31,12 @@ REQUIRED_COLUMNS = {
     'individual gender': {'ind_gender', 'edu_gender', 'ind_sex', 'sne_enfant_ind_genre', 'sex','edu_sex', 'edu_ind_sex', 'gender_member', 'genre'},
     'individual age': {'ind_age', 'age', 'edu_age', 'edu_ind_age', 'age'},
     'admin': {'admin1', 'admin2', 'admin3', 'camp', 'state', 'county', 'district'},
-    'edu access': {'edu_access', 'enrolled_school'},
-    'distruption teacher':{'edu_disrupted_teacher', 'teacher'},
-    'distruption hazard':{'edu_disrupted_hazards', 'hazard'},
-    'distruption displaced':{'edu_disrupted_displaced', 'distrupted_idp', 'education_disrupted_School_used_shelter_displaced_persons'},
+    'edu access': {'edu_access', 'enrolled_school', 'e_enfant_scolarise_formel'},
+    'distruption teacher': {'edu_disrupted_teacher', 'teacher', 'e_absence_enseignant'},
+    'distruption hazard': {'edu_disrupted_hazards', 'hazard', 'e_alea'},
+    'distruption displaced': {'edu_disrupted_displaced', 'distrupted_idp', 'e_ecole_abris'},
     'edu barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel'},
-    'survey start': {'start', 'date'}
+    'survey start': {'start', 'date', 'start_time', 'Start_datetime', 'survey_start_date', 'today'}
 }
 FUZZY_THRESHOLD = 90  # Match similarity percentage (higher = stricter)
 pin_dimensions = [
@@ -93,46 +93,36 @@ def validate_columns_across_sheets(all_sheets):
     column_matches = {key: None for key in REQUIRED_COLUMNS}  # Track matches per key
     unmatched_columns = set(REQUIRED_COLUMNS.keys())  # Track remaining unmatched keys
     
-    # Iterate through sheets
     for sheet_name, sheet_df in all_sheets.items():
         if sheet_name.lower() in ['survey', 'choices']:
             continue  # Skip unwanted sheets
 
-        # Exclude 'end' column from matching
         valid_columns = [col for col in sheet_df.columns if col.lower() != 'end']
-
 
         for key, alternatives in REQUIRED_COLUMNS.items():
             if column_matches[key]:  # Skip if already matched
                 continue
-            
-            # Step 1: Case-insensitive Exact Match
+
+            alternatives_lower = {alt.lower() for alt in alternatives}
+
+            # Step 1: Substring Matching (more flexible)
             found_column = next(
-                (col for col in valid_columns if col.lower() in {alt.lower() for alt in alternatives}),
+                (col for col in valid_columns if any(alt in col.lower() or col.lower() in alt for alt in alternatives_lower)),
                 None
             )
-            
-            
-            # Step 2: Partial Substring Matching (Manually Check Substrings)
-            if not found_column:
-                found_column = next(
-                    (col for col in valid_columns if any(alt in col.lower() for alt in {alt.lower() for alt in alternatives})),
-                    None
-                )
-            
-            # Step 3: Fuzzy Match as Backup
+
+            # Step 2: Fuzzy Matching (with a lower threshold for flexibility)
             if not found_column:
                 best_match, score = process.extractOne(
                     key, valid_columns, scorer=fuzz.partial_ratio
                 )
-                if best_match and score >= FUZZY_THRESHOLD:
+                if best_match and score >= 70:  # Adjusted threshold for flexibility
                     found_column = best_match
             
-            # Record the match
             if found_column:
                 column_matches[key] = (sheet_name, found_column)
                 unmatched_columns.discard(key)
-    
+
     return column_matches, unmatched_columns
 
 ##---------------------------------------------------------------------------------------------------------
@@ -412,15 +402,15 @@ else:
                             bar.progress(30)
 
                             # Validate columns across sheets
-                            #column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
+                            column_matches, unmatched_columns = validate_columns_across_sheets(all_sheets)
                             bar.progress(60)
-                            st.success(f"✅ {translations['all_mandatory_columns_found']}") 
-                            #if unmatched_columns:
-                                #st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
-                                #for col in unmatched_columns:
-                                    #st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
-                            #else:
-                                #st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+                            #st.success(f"✅ {translations['all_mandatory_columns_found']}") 
+                            if unmatched_columns:
+                                st.error(f"### ⚠️ **{translations['missing_mandatory_columns']}**")  
+                                for col in unmatched_columns:
+                                    st.write(f"- **{col}** {translations['not_found_in_sheet']}") 
+                            else:
+                                st.success(f"✅ {translations['all_mandatory_columns_found']}") 
                             bar.progress(100)
                         except Exception as e:
                             st.error(f"Failed to process the uploaded file: {e}")
