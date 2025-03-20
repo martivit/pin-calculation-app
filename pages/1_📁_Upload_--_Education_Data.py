@@ -308,7 +308,6 @@ st.markdown(
 user_selection = ""
 # Store user selections
 selections = {}
-selections = 'mmmm'
 #for label, dimension in pin_dimensions:
 #    # Restrict options for "Individual protected circumstances" to exclude EMIS
 #    options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
@@ -329,6 +328,7 @@ selections = 'mmmm'
 #    "n" if selections[dim] == "no-data" else "o"
 #    for _, dim in pin_dimensions
 #])
+user_selection = 'mmmm'
 st.session_state['data_combination'] = user_selection 
 
 
