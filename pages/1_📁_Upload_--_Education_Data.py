@@ -308,21 +308,20 @@ st.markdown(
 user_selection = ""
 # Store user selections
 selections = {}
-
-for label, dimension in pin_dimensions:
-    # Restrict options for "Individual protected circumstances" to exclude EMIS
-    options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
-    
-    selected_source = st.pills(
-        label=f"{label} - {translations['dimension_selection']}",
-        options=options,
-        selection_mode="single",
-        key=f"{dimension}_source"
-    )
-    selections[dimension] = selected_source if selected_source else "o"
+selections = 'mmmm'
+#for label, dimension in pin_dimensions:
+#    # Restrict options for "Individual protected circumstances" to exclude EMIS
+#    options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
+#    
+#    selected_source = st.pills(
+#        label=f"{label} - {translations['dimension_selection']}",
+#        options=options,
+#        selection_mode="single",
+#       key=f"{dimension}_source"
+#    )
+#    selections[dimension] = selected_source if selected_source else "o"
 
 # Convert selections to a string in the correct order
-user_selection = 'mmmm'
 #user_selection = "".join([
 #    "m" if selections[dim] == "MSNA" else
 #    "e" if selections[dim] == "EMIS" else
