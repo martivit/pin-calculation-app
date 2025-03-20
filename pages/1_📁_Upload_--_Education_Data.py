@@ -322,13 +322,14 @@ for label, dimension in pin_dimensions:
     selections[dimension] = selected_source if selected_source else "o"
 
 # Convert selections to a string in the correct order
-user_selection = "".join([
-    "m" if selections[dim] == "MSNA" else
-    "e" if selections[dim] == "EMIS" else
-    "j" if selections[dim] == "JENA" else
-    "n" if selections[dim] == "no-data" else "o"
-    for _, dim in pin_dimensions
-])
+user_selection = 'mmmm'
+#user_selection = "".join([
+#    "m" if selections[dim] == "MSNA" else
+#    "e" if selections[dim] == "EMIS" else
+#    "j" if selections[dim] == "JENA" else
+#    "n" if selections[dim] == "no-data" else "o"
+#    for _, dim in pin_dimensions
+#])
 st.session_state['data_combination'] = user_selection 
 
 
