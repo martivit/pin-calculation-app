@@ -293,15 +293,17 @@ else:
 
 
 #----- Step 3: Select Available Data Sources
-st.subheader(translations["select_data_section"])
+st.subheader(translations["select_data_section_2"])
+#st.subheader(translations["select_data_section"])
 
-st.markdown(
-    f"""
-    <span style="font-size: 18px; font-weight: bold;">
-        {translations['explaination_data_dimension']}
-    </span>
-    """, unsafe_allow_html=True
-)
+#st.markdown(
+#    f"""
+#    <span style="font-size: 18px; font-weight: bold;">
+#        {translations['explaination_data_dimension']}
+#
+#    </span>
+#    """, unsafe_allow_html=True
+#)
 
 #----- Step 3.a: Select combinantion according to dimension
 
