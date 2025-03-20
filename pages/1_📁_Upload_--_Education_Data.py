@@ -359,6 +359,7 @@ else:
         with st.container(border=True):
 
             explanation_message = translations['explaination_mmmm'] if user_selection == "mmmm" else translations['explaination_emmm']
+            explanation_message = ''
             st.markdown(
                 f"""
                 <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
