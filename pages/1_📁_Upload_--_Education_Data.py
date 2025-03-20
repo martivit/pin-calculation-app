@@ -359,16 +359,15 @@ else:
         with st.container(border=True):
 
             explanation_message = translations['explaination_mmmm'] if user_selection == "mmmm" else translations['explaination_emmm']
-            explanation_message = ' '
-            st.markdown(
-                f"""
-                <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
-                    <p style="color: #00529B; font-weight: bold; font-size: 16px;">
-                        {explanation_message}
-                    </p>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            #st.markdown(
+            #    f"""
+            #    <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
+            #        <p style="color: #00529B; font-weight: bold; font-size: 16px;">
+            #            {explanation_message}
+            #        </p>
+            #    </div>
+            #    """, unsafe_allow_html=True
+            #)
             if user_selection != "mmmm":
                 template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
                 with open(f"input/{template_file}", "rb") as file:
