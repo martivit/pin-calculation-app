@@ -94,7 +94,8 @@ admin_levels_per_country = {
     'Syria -- SYR': ['Admin_1: Governorates', 'Admin_2: Districts (mintaqah)', 'Admin_3: Subdistricts (nawaḥi)'],
     'Ukraine -- UKR': ['Admin_1: Oblasts', 'Admin_2: Raions', 'Admin_3: Hromadas'],
     'Somalia -- SOM': ['Admin_1: States', 'Admin_2: Districts', 'Admin_3: sub-Districts'],
-    'South Sudan -- SSD':['Admin_1', 'Admin_2', 'Admin_3']
+    'South Sudan -- SSD':['Admin_1', 'Admin_2', 'Admin_3'], 
+    'Sparkea -- SPR' :['Admin_1: Region', 'Admin_2: District', 'Admin_3: Commune']
 }
 
 
