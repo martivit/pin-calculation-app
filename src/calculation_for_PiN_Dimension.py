@@ -2378,6 +2378,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         tot_5_17_label: 'TOTAL (5-17 ans)',
         girl_5_17_label: 'Filles (5-17 ans)',
         boy_5_17_label: 'Garcons (5-17 ans)',
+        'TOTAL (5-17 y.o.)' : 'TOTAL (5-17 ans)',
         ece_5yo_label: 'Éducation préscolaire (5 ans)',
         'All population groups': 'Tous les groupes de population',
         'Population group': 'Groupe de population',
@@ -2402,6 +2403,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         }
 
     
+    print(final_overview_df['Strata'].unique())
 
 
     if selected_language == 'French':
