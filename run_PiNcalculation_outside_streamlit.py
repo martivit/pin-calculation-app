@@ -153,8 +153,8 @@ if ocha_data is not None:
     #if selected_language == 'English':
         #doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
-    #if selected_language == 'French':
-        #doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
+    if selected_language == 'French':
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
     ##   ***********************************    save for intermediate check:
     file_path_pin_test1 = 'output_validation/01_pin_sev4.xlsx'
