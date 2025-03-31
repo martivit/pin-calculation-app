@@ -328,8 +328,8 @@ if ocha_data is not None:
 
     # Save the Word document to a file
     file_path = "output_validation/pin_snapshot_with_charts_and_text2.docx"
-    #with open(file_path, "wb") as f:
-        #f.write(doc_output.getvalue())
+    with open(file_path, "wb") as f:
+        f.write(doc_output.getvalue())
 
 
 
