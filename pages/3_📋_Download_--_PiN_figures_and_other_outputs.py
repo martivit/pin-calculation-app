@@ -286,7 +286,8 @@ if ocha_data is not None:
 
 
     if selected_language == "French":
-        zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
+        #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
+        zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
 
 
 
