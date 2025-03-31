@@ -404,6 +404,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     label_tot= '# Tot PiN (niveaux de sévérité 3-5)'
     label_admin_severity= 'Sévérité de la zone'
     label_tot_population= 'Population totale'
+
     color_mapping = {
         label_perc2: colors["light_beige"],
         label_tot2: colors["light_beige"],
@@ -438,7 +439,8 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     # Retrieve data for the total row
 
     row_tot = final_overview_df.loc[final_overview_df['Strata'] == tot_5_17_label]
-    print(row_tot.columns)
+    print("Available strata:", final_overview_df['Strata'].unique())
+    print("Expected label:", tot_5_17_label)
 
     total_population = row_tot[label_tot_population].values[0]
     tot_perc_in_need = row_tot[label_perc_tot].values[0]
