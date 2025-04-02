@@ -444,10 +444,10 @@ label_text = st.session_state.translations["proceed_to_calculation_label"]
 
 scope_test = st.session_state.get('scope_fix')
 
-#if scope_test:
-    #st.write("Scope-Fix sheet contains data!")
-#else:
-    #st.write("Scope-Fix sheet is empty!")
+if scope_test:
+    st.write("Scope-Fix sheet contains data!")
+else:
+    st.write("Scope-Fix sheet is empty!")
 
 with col2: 
     st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
