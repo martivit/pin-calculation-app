@@ -271,11 +271,14 @@ else:
                     st.dataframe(df_copy)
                     # Check the first three columns of the first row
                     first_row_check = df_copy.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
+                    st.dataframe(first_row_check)
 
                     if first_row_check == 0:  # Only modify the copy for the check
                         df_copy.iloc[0, :] = 1  # Modify the copy, not the original
                     else:
                         df_copy.iloc[0, :] = np.nan  # Modify the copy, not the original
+
+                    st.dataframe(df_copy)
 
                     # Check if scope_fix should be True
                     scope_fix = first_row_check >= 2
