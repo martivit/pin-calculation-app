@@ -281,7 +281,7 @@ else:
                     scope_fix = first_row_check >= 2
                     if scope_fix:
                         st.session_state['scope_fix'] = True
-
+                        st.write (scope_fix)
                     st.success(translations["ok_upload"])
                 else:
                     st.error(check_message_ocha)  # Display the error message for 'ocha' sheet if checks fail
