@@ -275,9 +275,9 @@ else:
 
                     # Work on a copy to avoid modifying the original dataset
                     df_copy = ocha_mismatch_data.copy()
-                    st.write(ocha_mismatch_data.shape)
-                    st.write(ocha_mismatch_data.head(5))
-                    st.dataframe(df_copy)
+                    #st.write(ocha_mismatch_data.shape)
+                    #st.write(ocha_mismatch_data.head(5))
+                    #st.dataframe(df_copy)
                     # Check the first three columns of the first row
                     first_row_check = (
                         df_copy.iloc[0, :3]
@@ -288,13 +288,13 @@ else:
                         .notna()
                         .sum()
                     )   
-                    st.write(first_row_check)
+                    #st.write(first_row_check)
                     if first_row_check == 0:  # Only modify the copy for the check
                         df_copy.iloc[1, :] = 1  # Modify the copy, not the original
                     else:
                         df_copy.iloc[1, :] = np.nan  # Modify the copy, not the original
 
-                    st.dataframe(df_copy)
+                    #st.dataframe(df_copy)
 
                     # Check if scope_fix should be True
                     scope_fix = first_row_check >= 2
