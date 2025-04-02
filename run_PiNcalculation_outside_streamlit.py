@@ -39,21 +39,21 @@ from docx.shared import Inches
 
 
 ## Lemuria
-status_var = 'pop_group'
+status_var = 'population_group'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
 armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
 natural_hazard_var = 'no_indicator'
-barrier_var = 'edu_barrier'
+barrier_var = 'resn_no_access'
 selected_severity_4_barriers = ['Cannot afford education-related costs (e.g. tuition, supplies, transportation)', 'There is a lack of interest/Education is not a priority either for the child or the household']#"L'école a été fermée en raison de dommages, d'une catastrophe naturelle ou d'un conflit.",, "Discrimination ou stigmatisation de l'enfant pour quelque raison que ce soit"
 selected_severity_5_barriers = ['School has been closed due to natural disaster', 'School has been closed due to conflict', 'Lack of or poor quality of teachers', 'Protection/safety risks while commuting to school', 'Protection/safety risks while at school', 'Child marriage, engagement or pregnancies']
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'ind_age'
-gender_var = 'ind_gender'
+gender_var = 'edu_ind_gender'
 start_school = 'September'
-country= 'Lemuria -- LMR'
+country= 'Sparkea -- SPR'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
@@ -67,8 +67,8 @@ secondary_end = 17
 label = 'label::English'
 
 # Path to your Excel file
-excel_path = 'input/Lemuria_MSNA_2022.xlsx'
-excel_path_ocha = 'input/OCHA_pop_LMR.xlsx'
+excel_path = 'input/2025_MSNA_SPR.xlsx'
+excel_path_ocha = 'input/OCHA_SPR.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -82,16 +82,16 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['01_clean_data_main']
-edu_data = dfs['02_clean_data_indiv']
+household_data = dfs['main_clean_data']
+edu_data = dfs['edu_clean_data']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
-no_ocha_data = True
+no_ocha_data = False
 # Read specific sheets into separate dataframes
-ocha_data = None
-#ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+#ocha_data = None
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
 

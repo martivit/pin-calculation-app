@@ -1174,11 +1174,11 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     IDP_suggestion = ['host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'New IDPs','pdi', 'idp', 'site','idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
     returnee_suggestion = ['displaced_previously' ,'cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees','REF', 'refugee','refugie', 'refugie','prl', 'refugiee', '3']
-    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp', 'idp_camp','idp_site','pdi_site', "In-camp"]
+    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
     template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']  
     suggestions_mapping = {
-        'Host/Hôte': host_suggestion,        'Host/Hôte': host_suggestion,
+        'Host/Hôte': host_suggestion,        
         'IDP/PDI': IDP_suggestion,
         'Returnees/Retournés': returnee_suggestion,
         'Refugees/Refugiees': refugee_suggestion,
@@ -1607,15 +1607,15 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 pop_group_df[tot_col] = computed_totals
 
                 # ✅ Debugging: Print each calculation for verification
-                print(f"\n🔍 Debugging Calculation for {perc_col} --> {tot_col}")
-                debug_df = pd.DataFrame({
-                    'Admin': pop_group_df[admin_var],
-                    'Population Group': pop_group_df['Population group'],
-                    'Total Population': populations,
-                    'Percentage': percentages,
-                    'Computed Total': computed_totals
-                })
-                print(debug_df.head(20))  # Show first 10 rows for verification
+                #print(f"\n🔍 Debugging Calculation for {perc_col} --> {tot_col}")
+                #debug_df = pd.DataFrame({
+                    #'Admin': pop_group_df[admin_var],
+                    #'Population Group': pop_group_df['Population group'],
+                    #'Total Population': populations,
+                    #'Percentage': percentages,
+                    #'Computed Total': computed_totals
+                #})
+                #print(debug_df.head(20))  # Show first 10 rows for verification
 
             ## ✅ Column Reordering
             all_columns = list(pop_group_df.columns)
