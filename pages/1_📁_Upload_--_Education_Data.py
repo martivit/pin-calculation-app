@@ -268,7 +268,7 @@ else:
 
                     # Work on a copy to avoid modifying the original dataset
                     df_copy = ocha_mismatch_data.copy()
-
+                    st.dataframe(df_copy)
                     # Check the first three columns of the first row
                     first_row_check = df_copy.iloc[0, :3].astype(str).str.strip().replace("", pd.NA).notna().sum()
 
