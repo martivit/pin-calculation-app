@@ -1177,6 +1177,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
     template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']  
+    
     suggestions_mapping = {
         'Host/Hôte': host_suggestion,        
         'IDP/PDI': IDP_suggestion,
