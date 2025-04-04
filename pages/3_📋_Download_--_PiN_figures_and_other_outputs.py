@@ -58,61 +58,61 @@ github_token = st.secrets["github"]["token"]
 
 ###########################################################################################################
 ##--------------------------------------------------------------------------------------------------------------------
-def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
-    """
-    Uploads a file to a GitHub repository using the GitHub REST API.
+# def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
+#     """
+#     Uploads a file to a GitHub repository using the GitHub REST API.
 
-    :param file_content: The binary content of the file to be uploaded.
-    :param file_name: The path in the repository where the file should be uploaded.
-    :param repo_name: The full name of the repository (e.g., "username/repo").
-    :param branch_name: The branch to push changes to.
-    :param commit_message: The commit message for the file upload.
-    :param token: GitHub Personal Access Token.
-    """
-    # GitHub API base URL
-    api_url = f"https://api.github.com/repos/{repo_name}/contents/{file_name}"
+#     :param file_content: The binary content of the file to be uploaded.
+#     :param file_name: The path in the repository where the file should be uploaded.
+#     :param repo_name: The full name of the repository (e.g., "username/repo").
+#     :param branch_name: The branch to push changes to.
+#     :param commit_message: The commit message for the file upload.
+#     :param token: GitHub Personal Access Token.
+#     """
+#     # GitHub API base URL
+#     api_url = f"https://api.github.com/repos/{repo_name}/contents/{file_name}"
 
-    # Encode the file content to Base64
-    encoded_content = base64.b64encode(file_content).decode('utf-8')
+#     # Encode the file content to Base64
+#     encoded_content = base64.b64encode(file_content).decode('utf-8')
 
-    # Headers with the GitHub token
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
+#     # Headers with the GitHub token
+#     headers = {
+#         "Authorization": f"Bearer {token}",
+#         "Accept": "application/vnd.github.v3+json"
+#     }
 
-    # Check if the file already exists
-    response = requests.get(api_url, headers=headers)
-    if response.status_code == 200:
-        # File exists, update it
-        sha = response.json()["sha"]
-        data = {
-            "message": commit_message,
-            "content": encoded_content,
-            "sha": sha,
-            "branch": branch_name
-        }
-        response = requests.put(api_url, headers=headers, json=data)
-    elif response.status_code == 404:
-        # File does not exist, create it
-        data = {
-            "message": commit_message,
-            "content": encoded_content,
-            "branch": branch_name
-        }
-        response = requests.put(api_url, headers=headers, json=data)
-    else:
-        # Some other error
-        raise Exception(f"Failed to check file existence: {response.status_code} {response.text}")
+#     # Check if the file already exists
+#     response = requests.get(api_url, headers=headers)
+#     if response.status_code == 200:
+#         # File exists, update it
+#         sha = response.json()["sha"]
+#         data = {
+#             "message": commit_message,
+#             "content": encoded_content,
+#             "sha": sha,
+#             "branch": branch_name
+#         }
+#         response = requests.put(api_url, headers=headers, json=data)
+#     elif response.status_code == 404:
+#         # File does not exist, create it
+#         data = {
+#             "message": commit_message,
+#             "content": encoded_content,
+#             "branch": branch_name
+#         }
+#         response = requests.put(api_url, headers=headers, json=data)
+#     else:
+#         # Some other error
+#         raise Exception(f"Failed to check file existence: {response.status_code} {response.text}")
 
-    # Handle response
-    #if response.status_code in [200, 201]:
-        # Successful creation or update
-        #st.write("✅ Upload successful!")
-        #return response.json()["html_url"]
-    #else:
-        #st.error(f"⚠️ Upload failed: {response.status_code} - {response.text}")
-        #return None
+#     # Handle response
+#     #if response.status_code in [200, 201]:
+#         # Successful creation or update
+#         #st.write("✅ Upload successful!")
+#         #return response.json()["html_url"]
+#     #else:
+#         #st.error(f"⚠️ Upload failed: {response.status_code} - {response.text}")
+#         #return None
 
 ##--------------------------------------------------------------------------------------------------------------------
 def create_zip_file(country_label, excel_file,indicator_output,word_snapshot, word_parameters):
@@ -298,68 +298,68 @@ if ocha_data is not None:
         label=translations["download_all"],
         data=zip_file,
         file_name=zip_file_name,
-        mime="application/zip"
-    ):
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        mime="application/zip")
+    # ):
+    #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        #if "github" in st.secrets and "token" in st.secrets["github"]:
-            #st.write("✅ GitHub token found in secrets.")
-        #else:
-            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
+    #     #if "github" in st.secrets and "token" in st.secrets["github"]:
+    #         #st.write("✅ GitHub token found in secrets.")
+    #     #else:
+    #         #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
 
-        try:
-            repo_name = "martivit/pin-calculation-app"
-            branch_name = "develop_2025"
+    #     try:
+    #         repo_name = "martivit/pin-calculation-app"
+    #         branch_name = "develop_2025"
 
-            # File paths in the repository
-            file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_results_{country}_{timestamp}.xlsx"
-            if selected_language == "English":
-                file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
-            if selected_language == "French":
-                file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameter_{country}_{timestamp}.docx"
+    #         # File paths in the repository
+    #         file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_results_{country}_{timestamp}.xlsx"
+    #         if selected_language == "English":
+    #             file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
+    #         if selected_language == "French":
+    #             file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameter_{country}_{timestamp}.docx"
 
-            github_token = st.secrets["github"]["token"]
+    #         github_token = st.secrets["github"]["token"]
 
-            # Initialize success messages for both uploads
-            pr_url_excel = None
-            pr_url_doc = None
+    #         # Initialize success messages for both uploads
+    #         pr_url_excel = None
+    #         pr_url_doc = None
 
-            # Try uploading both files
-            try:
-                pr_url_excel = upload_to_github(
-                    file_content=ocha_excel.getvalue(),
-                    file_name=file_path_in_repo_excel,
-                    repo_name=repo_name,
-                    branch_name=branch_name,
-                    commit_message=f"Add PiN results (Excel) for {country_label}",
-                    token=github_token
-                )
-            except Exception :
-                pass
-                #st.error(f"Failed to upload Excel file to GitHub: {e}")
+    #         # Try uploading both files
+    #         try:
+    #             pr_url_excel = upload_to_github(
+    #                 file_content=ocha_excel.getvalue(),
+    #                 file_name=file_path_in_repo_excel,
+    #                 repo_name=repo_name,
+    #                 branch_name=branch_name,
+    #                 commit_message=f"Add PiN results (Excel) for {country_label}",
+    #                 token=github_token
+    #             )
+    #         except Exception :
+    #             pass
+    #             #st.error(f"Failed to upload Excel file to GitHub: {e}")
 
-            try:
-                pr_url_doc = upload_to_github(
-                    file_content=doc_output.getvalue(),
-                    file_name=file_path_in_repo_doc,
-                    repo_name=repo_name,
-                    branch_name=branch_name,
-                    commit_message=f"Add PiN snapshot (Word) for {country_label}",
-                    token=github_token
-                )
-            except Exception :
-                pass
-                #st.error(f"Failed to upload Word document to GitHub: {e}")
+    #         try:
+    #             pr_url_doc = upload_to_github(
+    #                 file_content=doc_output.getvalue(),
+    #                 file_name=file_path_in_repo_doc,
+    #                 repo_name=repo_name,
+    #                 branch_name=branch_name,
+    #                 commit_message=f"Add PiN snapshot (Word) for {country_label}",
+    #                 token=github_token
+    #             )
+    #         except Exception :
+    #             pass
+    #             #st.error(f"Failed to upload Word document to GitHub: {e}")
 
-            # Display success messages only if files were successfully uploaded
-            if pr_url_excel:
-                st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
-            if pr_url_doc:
-                st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
+    #         # Display success messages only if files were successfully uploaded
+    #         if pr_url_excel:
+    #             st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+    #         if pr_url_doc:
+    #             st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
 
-        except Exception :
-            #st.error(f"Unexpected error during GitHub upload: {e}")
-            pass
+    #     except Exception :
+    #         #st.error(f"Unexpected error during GitHub upload: {e}")
+    #         pass
  
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
