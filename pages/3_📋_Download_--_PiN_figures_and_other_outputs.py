@@ -290,15 +290,19 @@ if ocha_data is not None:
         zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
 
 
-
-    
-
-    # Create a single download button for the ZIP file
-    if st.download_button(
+    st.download_button(
         label=translations["download_all"],
         data=zip_file,
         file_name=zip_file_name,
         mime="application/zip")
+    
+
+    # Create a single download button for the ZIP file
+    # if st.download_button(
+    #     label=translations["download_all"],
+    #     data=zip_file,
+    #     file_name=zip_file_name,
+    #     mime="application/zip"
     # ):
     #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
