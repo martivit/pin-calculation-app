@@ -325,38 +325,71 @@ hybrid_scenario_countries = [
 SCENARIO_1_LABEL = translations["SCENARIO_1"]
 SCENARIO_2_LABEL = translations["SCENARIO_2"]
 
-st.markdown("---")  # Markdown horizontal rule
 
 if selected_country in hybrid_scenario_countries:
-    with st.container(border=True, ):
-        st.markdown('<div class="workflow-box">', unsafe_allow_html=True)
-        st.markdown(f'<div class="workflow-title">{translations["step_hpc"]}</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        # Inline styling scoped to this section
+        st.markdown("""
+        <style>
+        /* Tighten title/description spacing */
+        .workflow-inner { padding-top:4px; }
+        .workflow-title { font-size:24px; font-weight:700; margin:0; line-height:1.1; }
+        .workflow-desc { font-size:14px; margin:4px 0 12px 0; color:#2f4f6f; }
 
+        /* Button container spacing */
+        .btn-row { display:flex; gap:12px; margin-top:16px; }
+
+        /* Base look for the choice buttons (we target by data-key to keep it local) */
+        .stButton button {
+            font-size:16px !important;
+            font-weight:600;
+            padding:12px 18px;
+            border-radius:8px;
+        }
+        /* Selected state override - using a custom class applied via JS fallback is hard, so we fake via inline display below */
+        .selected-pill {
+            background: linear-gradient(135deg, #00529B, #1E90FF);
+            color: white;
+            padding:12px 18px;
+            border-radius:8px;
+            font-size:16px;
+            font-weight:600;
+            display:inline-block;
+            flex:1;
+            text-align:center;
+        }
+        .pill-wrapper { flex:1; }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # Title + description
+        st.markdown('<div class="workflow-inner">', unsafe_allow_html=True)
+        st.markdown(f'<div class="workflow-title">{translations["step_hpc"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="workflow-desc">{translations.get("scenario_help", "")}</div>', unsafe_allow_html=True)
 
         # initialize session state if missing
         if 'workflow_scenario_choice' not in st.session_state:
             st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
 
+        # Buttons with extra gap
         col1, col2 = st.columns([1, 1])
         with col1:
-            btn1 = st.button(SCENARIO_1_LABEL, key="btn_scenario_1")
+            if st.session_state['workflow_scenario_choice'] == SCENARIO_1_LABEL:
+                st.markdown(f'<div class="selected-pill">{SCENARIO_1_LABEL}</div>', unsafe_allow_html=True)
+            else:
+                if st.button(SCENARIO_1_LABEL, key="btn_scenario_1"):
+                    st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
         with col2:
-            btn2 = st.button(SCENARIO_2_LABEL, key="btn_scenario_2")
-
-        # Update choice
-        if btn1:
-            st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
-        if btn2:
-            st.session_state['workflow_scenario_choice'] = SCENARIO_2_LABEL
+            if st.session_state['workflow_scenario_choice'] == SCENARIO_2_LABEL:
+                st.markdown(f'<div class="selected-pill">{SCENARIO_2_LABEL}</div>', unsafe_allow_html=True)
+            else:
+                if st.button(SCENARIO_2_LABEL, key="btn_scenario_2"):
+                    st.session_state['workflow_scenario_choice'] = SCENARIO_2_LABEL
 
         scenario_choice = st.session_state['workflow_scenario_choice']
 
-        # Visual feedback (you can adjust appearance further if desired)
-        if scenario_choice == SCENARIO_1_LABEL:
-            st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {SCENARIO_1_LABEL}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {SCENARIO_2_LABEL}</div>", unsafe_allow_html=True)
-
+        # Feedback line
+        st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {scenario_choice}</div>", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 else:
     scenario_choice = SCENARIO_1_LABEL  # default for non-hybrid
