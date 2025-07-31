@@ -321,20 +321,42 @@ hybrid_scenario_countries = [
 SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
 SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
 
-# Determine scenario for this country
+# Styling for emphasis (light background + border)
+st.markdown(
+    """
+    <div style="
+        background: #f5f9fe;
+        border: 2px solid #00529B;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 12px;
+    ">
+      <div style="font-size:22px; font-weight:700; margin-bottom:4px;">
+        """ + translations.get("scenario_select_label", "Choose workflow") + """
+      </div>
+      <div style="font-size:14px; margin-bottom:12px; color:#33475b;">
+        """ + translations.get(
+            "scenario_help",
+            "Select whether this is the first-time MSNA-based PiN calculation or you are uploading an extrapolated PiN with expert input."
+        ) + """
+      </div>
+    """
+    , unsafe_allow_html=True
+)
+
 if selected_country in hybrid_scenario_countries:
     scenario_choice = st.radio(
-        translations.get("scenario_select_label", "Choose workflow"),
+        "",  # label already above
         options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
-        help=translations.get(
-            "scenario_help",
-            "Scenario 1: full MSNA-based calculation on covered areas. "
-            "Scenario 2: you already have initial PiN + extrapolation inputs; upload that instead."
-        )
+        key="workflow_scenario_choice",
+        label_visibility="hidden"
     )
 else:
-    # everyone else defaults to scenario 1
     scenario_choice = SCENARIO_1_LABEL
+
+
+st.markdown("</div>", unsafe_allow_html=True)
+
 
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 
@@ -398,11 +420,11 @@ elif  use_full_selection:
 
     #Convert selections to a string in the correct order
     user_selection = "".join([
-    "m" if selections[dim] == "MSNA" else
-    "e" if selections[dim] == "EMIS" else
-    "j" if selections[dim] == "JENA" else
-    "n" if selections[dim] == "no-data" else "o"
-    for _, dim in pin_dimensions
+        "m" if selections[dim] == "MSNA" else
+        "e" if selections[dim] == "EMIS" else
+        "j" if selections[dim] == "JENA" else
+        "n" if selections[dim] == "no-data" else "o"
+        for _, dim in pin_dimensions
     ])
 
 else:
@@ -415,7 +437,6 @@ st.session_state['data_combination'] = user_selection
 # Ensure all selections are made
 if "o" in user_selection:
     st.warning(translations["warning_upload_data"])
-
 else:
     # Define template mapping
     template_mapping = {
@@ -432,7 +453,6 @@ else:
         st.error(translations["error_combination"])
     else:
         template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
-
 
         with st.container(border=True):
             
@@ -505,8 +525,6 @@ else:
 
                 if uploaded_template_file is not None:
                     st.success("Processed template uploaded successfully!")
-
-
 
 
 
