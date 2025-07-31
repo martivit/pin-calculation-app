@@ -332,8 +332,8 @@ if selected_country in hybrid_scenario_countries:
         st.markdown("""
         <style>
         /* Tighten title/description spacing */
-        .workflow-inner { padding-top:4px; }
-        .workflow-title { font-size:24px; font-weight:700; margin:0; line-height:1.1; }
+        .workflow-inner { padding-top:1px; }
+        .workflow-title { font-size:14px; font-weight:700; margin:0; line-height:1.1; }
         .workflow-desc { font-size:14px; margin:4px 0 12px 0; color:#2f4f6f; }
 
         /* Button container spacing */
