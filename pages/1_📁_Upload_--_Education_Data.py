@@ -321,58 +321,61 @@ hybrid_scenario_countries = [
 SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
 SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
 # Inject styling
+# Inline styling to enlarge radio labels and box
 st.markdown(
     """
     <style>
-    .workflow-box {
-        background: #eef7fd;
+    .workflow-container {
+        background: #f0f8ff;
         border: 2px solid #00529B;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 16px;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 20px;
     }
     .workflow-title {
         font-size: 24px;
         font-weight: 700;
-        margin-bottom: 4px;
+        margin: 0;
+        margin-bottom: 6px;
     }
     .workflow-help {
         font-size: 14px;
-        color: #33475b;
-        margin-bottom: 12px;
+        color: #2f4f6f;
+        margin: 0;
+        margin-bottom: 14px;
     }
-    /* Enlarge the radio option text */
-    [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] > p {
+    /* enlarge radio option text */
+    .workflow-radio label > div {
         font-size: 18px;
-        margin: 4px 0;
+        line-height: 1.2;
+        padding: 6px 0;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-
-# Render box
 with st.container():
-    st.markdown('<div class="workflow-box">', unsafe_allow_html=True)
-    st.markdown(f'<div class="workflow-title">{translations.get("scenario_select_label","Choose workflow")}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="workflow-container">', unsafe_allow_html=True)
+    st.markdown(f'<div class="workflow-title">{translations.get("scenario_select_label", "Choose workflow")}</div>', unsafe_allow_html=True)
     st.markdown(
         f'<div class="workflow-help">{translations.get("scenario_help","Select whether this is the first-time MSNA-based PiN calculation or you are uploading an extrapolated PiN with expert input.")}</div>',
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
     if selected_country in hybrid_scenario_countries:
+        # wrap radio in a div for the CSS selector
         scenario_choice = st.radio(
-            "",  # label is above
+            "",
             options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
             key="workflow_scenario_choice",
-            label_visibility="hidden"
+            label_visibility="hidden",
+            help=None,
         )
     else:
         scenario_choice = SCENARIO_1_LABEL
 
     st.markdown('</div>', unsafe_allow_html=True)  # close box
-
 
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 
