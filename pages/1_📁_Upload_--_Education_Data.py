@@ -320,60 +320,10 @@ hybrid_scenario_countries = [
 # Define the two scenario labels clearly
 SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
 SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
-if selected_country in hybrid_scenario_countries:
-    st.markdown(
-        """
-        <style>
-        .workflow-box {
-            background: #f0f8ff;
-            border: 2px solid #00529B;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-        .workflow-title {
-            font-size: 22px;
-            font-weight: 600;
-            margin: 0 0 6px 0;
-        }
-        .workflow-desc {
-            font-size: 14px;
-            margin: 0 0 16px 0;
-            color: #2f4f6f;
-        }
-        .scenario-button {
-            border: 2px solid #00529B;
-            border-radius: 8px;
-            padding: 14px 20px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 500;
-            flex: 1;
-            margin-right: 10px;
-            background: white;
-            transition: background 0.2s, box-shadow 0.2s;
-        }
-        .scenario-button.selected {
-            background: #00529B;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0,82,155,0.3);
-        }
-        .scenario-sub {
-            font-size: 14px;
-            margin-top: 4px;
-            color: #444;
-        }
-        .scenario-wrapper {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
-    with st.container():
+
+if selected_country in hybrid_scenario_countries:
+    with st.container(border=True, ):
         st.markdown('<div class="workflow-box">', unsafe_allow_html=True)
         st.markdown(f'<div class="workflow-title">{translations.get("scenario_select_label", "Choose workflow")}</div>', unsafe_allow_html=True)
         st.markdown(
