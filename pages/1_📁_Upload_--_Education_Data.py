@@ -312,44 +312,44 @@ else:
 
 
 #----- Step 3: Select Available Data Sources
-st.subheader(translations["select_data_section_2"])
-#st.subheader(translations["select_data_section"])
+#st.subheader(translations["select_data_section_2"])
+st.subheader(translations["select_data_section"])
 
-#st.markdown(
-#    f"""
-#    <span style="font-size: 18px; font-weight: bold;">
-#        {translations['explaination_data_dimension']}
-#
-#    </span>
-#    """, unsafe_allow_html=True
-#)
+st.markdown(
+   f"""
+   <span style="font-size: 18px; font-weight: bold;">
+       {translations['explaination_data_dimension']}
+
+   </span>
+   """, unsafe_allow_html=True
+)
 
 #----- Step 3.a: Select combinantion according to dimension
 
 user_selection = ""
 # Store user selections
 selections = {}
-#for label, dimension in pin_dimensions:
-#    # Restrict options for "Individual protected circumstances" to exclude EMIS
-#    options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
-#    
-#    selected_source = st.pills(
-#        label=f"{label} - {translations['dimension_selection']}",
-#        options=options,
-#        selection_mode="single",
-#       key=f"{dimension}_source"
-#    )
-#    selections[dimension] = selected_source if selected_source else "o"
+for label, dimension in pin_dimensions:
+   # Restrict options for "Individual protected circumstances" to exclude EMIS
+   options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
+   
+   selected_source = st.pills(
+       label=f"{label} - {translations['dimension_selection']}",
+       options=options,
+       selection_mode="single",
+      key=f"{dimension}_source"
+   )
+   selections[dimension] = selected_source if selected_source else "o"
 
-# Convert selections to a string in the correct order
-#user_selection = "".join([
-#    "m" if selections[dim] == "MSNA" else
-#    "e" if selections[dim] == "EMIS" else
-#    "j" if selections[dim] == "JENA" else
-#    "n" if selections[dim] == "no-data" else "o"
-#    for _, dim in pin_dimensions
-#])
-user_selection = 'mmmm'
+#Convert selections to a string in the correct order
+user_selection = "".join([
+   "m" if selections[dim] == "MSNA" else
+   "e" if selections[dim] == "EMIS" else
+   "j" if selections[dim] == "JENA" else
+   "n" if selections[dim] == "no-data" else "o"
+   for _, dim in pin_dimensions
+])
+#user_selection = 'mmmm'
 st.session_state['data_combination'] = user_selection 
 
 
@@ -378,15 +378,15 @@ else:
         with st.container(border=True):
 
             explanation_message = translations['explaination_mmmm'] if user_selection == "mmmm" else translations['explaination_emmm']
-            #st.markdown(
-            #    f"""
-            #    <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
-            #        <p style="color: #00529B; font-weight: bold; font-size: 16px;">
-            #            {explanation_message}
-            #        </p>
-            #    </div>
-            #    """, unsafe_allow_html=True
-            #)
+            st.markdown(
+               f"""
+               <div style="background-color: #e6f7ff; padding: 1px; border-radius: 5px; border-left: 5px solid #00529B;">
+                   <p style="color: #00529B; font-weight: bold; font-size: 16px;">
+                       {explanation_message}
+                   </p>
+               </div>
+               """, unsafe_allow_html=True
+            )
             if user_selection != "mmmm":
                 template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
                 with open(f"input/{template_file}", "rb") as file:

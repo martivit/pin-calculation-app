@@ -2206,7 +2206,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     percentage_round = 1
     figures_round = 0
 
-    # Process Tot_PiN_JIAF DataFrames
+    # Process Tot_PiN_JIAF rounding_dataframe
     for category, df in Tot_PiN_JIAF.items():
         rounding_dataframe(df, figures_round, percentage_round)
         df[label_tot_population] = pd.to_numeric(df[label_tot_population], errors='coerce').round(figures_round)
