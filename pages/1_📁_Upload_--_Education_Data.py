@@ -320,19 +320,51 @@ hybrid_scenario_countries = [
 # Define the two scenario labels clearly
 SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
 SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
-
+st.markdown(
+    """
+    <style>
+    .workflow-box {
+        background: #f0f8ff;
+        border: 2px solid #00529B;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    .workflow-title {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+    }
+    .workflow-desc {
+        font-size: 14px;
+        margin: 0 0 12px 0;
+        color: #2f4f6f;
+    }
+    /* Enlarge radio option text */
+    .stRadio > div > label > div {
+        font-size: 18px;
+        padding: 6px 0;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 # Determine scenario for this country
 if selected_country in hybrid_scenario_countries:
     with st.container(border=True):
-        scenario_choice = st.radio(
-            translations.get("scenario_select_label", "Choose workflow"),
-            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
-            help=translations.get(
-                "scenario_help",
-                "Scenario 1: full MSNA-based calculation on covered areas. "
-                "Scenario 2: you already have initial PiN + extrapolation inputs; upload that instead."
-            )
+        st.markdown('<div class="workflow-box">', unsafe_allow_html=True)
+        st.markdown(f'<div class="workflow-title">{translations.get("scenario_select_label", "Choose workflow")}</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="workflow-desc">{translations.get("scenario_help", "Select whether this is the first-time MSNA-based PiN calculation or you are uploading an extrapolated PiN with expert input.")}</div>',
+            unsafe_allow_html=True
         )
+        scenario_choice = st.radio(
+            "",  # label suppressed because we rendered it above
+            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
+            key="workflow_scenario_choice",
+            label_visibility="hidden"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 else:
     # everyone else defaults to scenario 1
     scenario_choice = SCENARIO_1_LABEL
