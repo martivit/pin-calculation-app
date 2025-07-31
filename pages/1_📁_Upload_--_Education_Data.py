@@ -362,7 +362,7 @@ if is_scenario_2:
     else:
         st.warning(translations.get("extrapolation_required", "Upload the extrapolation input to proceed."))
 
-    #user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
+    user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
 
 
 
@@ -428,7 +428,7 @@ else:
 
     }
 
-    if user_selection not in template_mapping and user_selection != "mmmm":
+    if user_selection not in template_mapping and user_selection != "mmmm"and not is_scenario_2:
         st.error(translations["error_combination"])
     else:
         template_file = template_mapping.get(user_selection, "Default_Template.xlsx")
