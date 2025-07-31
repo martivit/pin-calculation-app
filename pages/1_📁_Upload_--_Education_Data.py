@@ -194,10 +194,6 @@ selected_country = st.selectbox(
 if selected_country != st.session_state.get('country'):
     st.session_state['country'] = selected_country
 
-
-
-
-st.markdown("---")  
 #------ Step 2: OCHA Data Upload
 st.subheader(translations["ocha_data_section"])
 no_ocha_data_checkbox = st.checkbox(f"**{translations['no_ocha_data']}**")
@@ -325,59 +321,25 @@ hybrid_scenario_countries = [
 SCENARIO_1_LABEL = translations["SCENARIO_1"]
 SCENARIO_2_LABEL = translations["SCENARIO_2"]
 
+
+
+# Determine scenario for this country
 if selected_country in hybrid_scenario_countries:
-    # Ensure default
-    if 'workflow_scenario_choice' not in st.session_state:
-        st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
-
-    with st.container():
-        # Tight title/description
-        st.markdown(f"""
-            <div style="margin-bottom:6px;">
-                <div style="font-size:22px; font-weight:700; margin:0;">{translations["step_hpc"]}</div>
-                <div style="font-size:14px; margin-top:4px; color:#2f4f6f;">{translations.get("scenario_help", "")}</div>
-            </div>
-        """, unsafe_allow_html=True)
-
-        # Scoped CSS to enlarge radio labels and style selected
-        st.markdown("""
-            <style>
-            .custom-radio label div[data-testid="stMarkdownContainer"] {
-                font-size: 18px;
-                font-weight: 600;
-            }
-            .custom-radio .stRadio > div > label > div {
-                padding: 8px 12px;
-            }
-            .custom-radio input:checked + label > div {
-                border: 2px solid red;
-                border-radius: 8px;
-                background: #d9edf7;
-                color: #000;
-            }
-            </style>
-        """, unsafe_allow_html=True)
-
-        # Radio inside a wrapper to apply the class
+    with st.container(border=True):
         scenario_choice = st.radio(
-            "",
+            translations["step_hpc"],
             options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
-            index=0 if st.session_state['workflow_scenario_choice'] == SCENARIO_1_LABEL else 1,
-            key="workflow_scenario_choice",
-            label_visibility="hidden"
+            help=translations.get(
+                "scenario_help",
+                "Scenario 1: full MSNA-based calculation on covered areas. "
+                "Scenario 2: you already have initial PiN + extrapolation inputs; upload that instead."
+            )
         )
-
-        # Sync session state (st.radio already writes to it via key)
-        st.session_state['workflow_scenario_choice'] = scenario_choice
-
-        # Show selected feedback
-        st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {scenario_choice}</div>", unsafe_allow_html=True)
 else:
+    # everyone else defaults to scenario 1
     scenario_choice = SCENARIO_1_LABEL
-    st.session_state['workflow_scenario_choice'] = scenario_choice
 
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
-
 
 #----- Step 3: Select Available Data Sources
 special_countries = ['Niger -- NER', 'Nigeria -- NRA']
