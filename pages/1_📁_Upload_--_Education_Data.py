@@ -308,16 +308,66 @@ else:
             except Exception as e:
                 st.error(f"Error loading sheets: {str(e)}")  # Handle any errors, like missing sheets
 
+hybrid_scenario_countries = [
+    'Central African Republic -- CAR',
+    'Burkina Faso -- BFA',
+    'Ethiopia -- ETH',
+    'Democratic Republic of the Congo -- DRC',
+    'Mali -- MLI',
+    'Lebanon -- LBN',
+    'Somalia -- SOM'
+]
+# Define the two scenario labels clearly
+SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
+SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
 
+# Determine scenario for this country
+if selected_country in hybrid_scenario_countries:
+    scenario_choice = st.radio(
+        translations.get("scenario_select_label", "Choose workflow"),
+        options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
+        help=translations.get(
+            "scenario_help",
+            "Scenario 1: full MSNA-based calculation on covered areas. "
+            "Scenario 2: you already have initial PiN + extrapolation inputs; upload that instead."
+        )
+    )
+else:
+    # everyone else defaults to scenario 1
+    scenario_choice = SCENARIO_1_LABEL
 
+is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 
 #----- Step 3: Select Available Data Sources
 special_countries = ['Niger -- NER', 'Nigeria -- NRA']
-use_full_selection = selected_country in special_countries
+use_full_selection = (selected_country in special_countries) and not is_scenario_2
 #st.subheader(translations["select_data_section_2"])
 user_selection = ""
 
-if use_full_selection:
+if is_scenario_2:
+    # Scenario 2: skip MSNA/dimension pills; require extrapolation input file instead
+    st.subheader(translations.get("scenario2_section_title", "Extrapolation & PiN Input"))
+    st.markdown(translations.get(
+        "scenario2_instructions",
+        "Please upload the file containing the calculated PiN for covered areas and any secondary/expert extrapolation inputs."
+    ), unsafe_allow_html=True)
+
+    # Example: expect a structured Excel/CSV input with the extrapolation results
+    uploaded_extrapolation_file = st.file_uploader(translations.get("upload_extrapolation", "Upload extrapolation PiN file"), type=["xlsx", "csv"], key="extrapolation_input")
+
+    if uploaded_extrapolation_file is not None:
+        st.session_state['uploaded_extrapolation_input'] = uploaded_extrapolation_file
+        st.success(translations.get("extrapolation_uploaded", "Extrapolation input uploaded successfully!"))
+        # You can add any parsing/validation here if needed
+    else:
+        st.warning(translations.get("extrapolation_required", "Upload the extrapolation input to proceed."))
+
+    user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
+
+
+
+
+elif  use_full_selection:
 
     st.subheader(translations["select_data_section"])
 
