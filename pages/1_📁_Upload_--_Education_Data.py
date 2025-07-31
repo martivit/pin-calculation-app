@@ -409,11 +409,11 @@ else:
 
 
 
-            if user_selection == "mmmm":
-                st.subheader(translations["msna_only"])
-            
-            else:
-                st.subheader(translations["msna_other"] if "m" in user_selection else translations["other_only"])
+                if user_selection == "mmmm":
+                    st.subheader(translations["msna_only"])
+                
+                else:
+                    st.subheader(translations["msna_other"] if "m" in user_selection else translations["other_only"])
 
 
             if "m" in user_selection:
