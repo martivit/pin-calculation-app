@@ -328,12 +328,7 @@ if selected_country in hybrid_scenario_countries:
     with st.container(border=True):
         scenario_choice = st.radio(
             translations["step_hpc"],
-            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
-            help=translations.get(
-                "scenario_help",
-                "Scenario 1: full MSNA-based calculation on covered areas. "
-                "Scenario 2: you already have initial PiN + extrapolation inputs; upload that instead."
-            )
+            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL]
         )
 else:
     # everyone else defaults to scenario 1
