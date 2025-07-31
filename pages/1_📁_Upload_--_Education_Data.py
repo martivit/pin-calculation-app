@@ -335,10 +335,6 @@ if selected_country in hybrid_scenario_countries:
             <div style="margin-bottom:4px;">
                 <div style="font-size:22px; font-weight:700; margin:0;">
                     {translations["step_hpc"]}
-                </div>
-                <div style="font-size:14px; margin-top:4px; color:#2f4f6f;">
-                    {translations.get("scenario_help", "")}
-                </div>
             </div>
         """, unsafe_allow_html=True)
 
