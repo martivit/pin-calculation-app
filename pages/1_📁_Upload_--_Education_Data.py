@@ -320,54 +320,94 @@ hybrid_scenario_countries = [
 # Define the two scenario labels clearly
 SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
 SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
-st.markdown(
-    """
-    <style>
-    .workflow-box {
-        background: #f0f8ff;
-        border: 2px solid #00529B;
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 16px;
-    }
-    .workflow-title {
-        font-size: 22px;
-        font-weight: 600;
-        margin: 0 0 4px 0;
-    }
-    .workflow-desc {
-        font-size: 14px;
-        margin: 0 0 12px 0;
-        color: #2f4f6f;
-    }
-    /* Enlarge radio option text */
-    .stRadio > div > label > div {
-        font-size: 18px;
-        padding: 6px 0;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-# Determine scenario for this country
 if selected_country in hybrid_scenario_countries:
-    with st.container(border=True):
+    st.markdown(
+        """
+        <style>
+        .workflow-box {
+            background: #f0f8ff;
+            border: 2px solid #00529B;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .workflow-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 6px 0;
+        }
+        .workflow-desc {
+            font-size: 14px;
+            margin: 0 0 16px 0;
+            color: #2f4f6f;
+        }
+        .scenario-button {
+            border: 2px solid #00529B;
+            border-radius: 8px;
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            flex: 1;
+            margin-right: 10px;
+            background: white;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .scenario-button.selected {
+            background: #00529B;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,82,155,0.3);
+        }
+        .scenario-sub {
+            font-size: 14px;
+            margin-top: 4px;
+            color: #444;
+        }
+        .scenario-wrapper {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    with st.container():
         st.markdown('<div class="workflow-box">', unsafe_allow_html=True)
         st.markdown(f'<div class="workflow-title">{translations.get("scenario_select_label", "Choose workflow")}</div>', unsafe_allow_html=True)
         st.markdown(
             f'<div class="workflow-desc">{translations.get("scenario_help", "Select whether this is the first-time MSNA-based PiN calculation or you are uploading an extrapolated PiN with expert input.")}</div>',
             unsafe_allow_html=True
         )
-        scenario_choice = st.radio(
-            "",  # label suppressed because we rendered it above
-            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
-            key="workflow_scenario_choice",
-            label_visibility="hidden"
-        )
+
+        # initialize session state if missing
+        if 'workflow_scenario_choice' not in st.session_state:
+            st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
+
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            btn1 = st.button(SCENARIO_1_LABEL, key="btn_scenario_1")
+        with col2:
+            btn2 = st.button(SCENARIO_2_LABEL, key="btn_scenario_2")
+
+        # Update choice
+        if btn1:
+            st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
+        if btn2:
+            st.session_state['workflow_scenario_choice'] = SCENARIO_2_LABEL
+
+        scenario_choice = st.session_state['workflow_scenario_choice']
+
+        # Visual feedback (you can adjust appearance further if desired)
+        if scenario_choice == SCENARIO_1_LABEL:
+            st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {SCENARIO_1_LABEL}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {SCENARIO_2_LABEL}</div>", unsafe_allow_html=True)
+
         st.markdown('</div>', unsafe_allow_html=True)
 else:
-    # everyone else defaults to scenario 1
-    scenario_choice = SCENARIO_1_LABEL
+    scenario_choice = SCENARIO_1_LABEL  # default for non-hybrid
 
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 
