@@ -466,7 +466,7 @@ else:
                     st.subheader(translations["msna_other"] if "m" in user_selection else translations["other_only"])
 
 
-            if "m" in user_selection:
+            if "m" in user_selection and  not is_scenario_2:
                 if 'uploaded_data' in st.session_state:
                     data = st.session_state['uploaded_data']
                     st.write(translations["refresh_msna"])#MSNA Data already uploaded. If you want to change the data, just refresh 🔄 the page
