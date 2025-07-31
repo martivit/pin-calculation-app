@@ -328,7 +328,10 @@ if selected_country in hybrid_scenario_countries:
     with st.container(border=True):
         scenario_choice = st.radio(
             translations["step_hpc"],
-            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL]
+            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
+            horizontal=True,
+            width = 'stretch',
+            
         )
 else:
     # everyone else defaults to scenario 1

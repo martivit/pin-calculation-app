@@ -147,8 +147,8 @@
     "error_combination":"⚠️ The selected combination of data sources is not supported. Please review your choices.",
     "upload_scope_fix": "Upload Scope-Fix Sheet",
     "step_hpc": "Choose whether you are performing the first-time MSNA-based PiN calculation, or uploading an already-calculated PiN to complete extrapolation in areas lacking updated data",
-    "SCENARIO_1" : "***First-time PiN calculation using MSNA 2025 (covered areas only)***",
-    "SCENARIO_2" : "Upload calculated PiN + secondary/expert knowledge for missing areas"
+    "SCENARIO_1" : "**First-time PiN calculation using MSNA 2025 (covered areas only)**",
+    "SCENARIO_2" : "**Upload calculated PiN + secondary/expert knowledge for missing areas**"
 
   
   
