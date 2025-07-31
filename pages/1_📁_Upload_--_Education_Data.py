@@ -24,7 +24,7 @@ countries = ['no selection',
     'Afghanistan -- AFG', 'Burkina Faso -- BFA', 'Cameroon -- CMR', 'Central African Republic -- CAR', 
     'Democratic Republic of the Congo -- DRC', 'Ethiopia -- ETH', 'Haiti -- HTI', 'Iraq -- IRQ', 'Lemuria -- LMR','Kenya -- KEN', 
     'Bangladesh -- BGD', 'Lebanon -- LBN', 'Moldova -- MDA', 'Mali -- MLI', 'Mozambique -- MOZ', 
-    'Myanmar -- MMR', 'Niger -- NER', 'Syria -- SYR', 'Ukraine -- UKR', 'Somalia -- SOM', 'South Sudan -- SSD','Sparkea -- SPR'
+    'Myanmar -- MMR', 'Niger -- NER','Nigeria -- NRA', 'Syria -- SYR', 'Ukraine -- UKR', 'Somalia -- SOM', 'South Sudan -- SSD','Sparkea -- SPR'
 ]
 REQUIRED_COLUMNS = {
     'uuid': {'uuid', '_uuid', 'uuid_X'},
@@ -312,44 +312,53 @@ else:
 
 
 #----- Step 3: Select Available Data Sources
+special_countries = ['Niger -- NER', 'Nigeria -- NRA']
+use_full_selection = selected_country in special_countries
 #st.subheader(translations["select_data_section_2"])
-st.subheader(translations["select_data_section"])
+user_selection = ""
 
-st.markdown(
-   f"""
-   <span style="font-size: 18px; font-weight: bold;">
-       {translations['explaination_data_dimension']}
+if use_full_selection:
 
-   </span>
-   """, unsafe_allow_html=True
-)
+    st.subheader(translations["select_data_section"])
+
+    st.markdown(
+    f"""
+    <span style="font-size: 18px; font-weight: bold;">
+        {translations['explaination_data_dimension']}
+
+    </span>
+    """, unsafe_allow_html=True
+    )
 
 #----- Step 3.a: Select combinantion according to dimension
 
-user_selection = ""
 # Store user selections
-selections = {}
-for label, dimension in pin_dimensions:
-   # Restrict options for "Individual protected circumstances" to exclude EMIS
-   options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
-   
-   selected_source = st.pills(
-       label=f"{label} - {translations['dimension_selection']}",
-       options=options,
-       selection_mode="single",
-      key=f"{dimension}_source"
-   )
-   selections[dimension] = selected_source if selected_source else "o"
+    selections = {}
+    for label, dimension in pin_dimensions:
+        # Restrict options for "Individual protected circumstances" to exclude EMIS
+        options = data_sources if dimension != "Individual protected circumstances" else data_sources_individual_circumstances
+        
+        selected_source = st.pills(
+            label=f"{label} - {translations['dimension_selection']}",
+            options=options,
+            selection_mode="single",
+            key=f"{dimension}_source"
+        )
+        selections[dimension] = selected_source if selected_source else "o"
 
-#Convert selections to a string in the correct order
-user_selection = "".join([
-   "m" if selections[dim] == "MSNA" else
-   "e" if selections[dim] == "EMIS" else
-   "j" if selections[dim] == "JENA" else
-   "n" if selections[dim] == "no-data" else "o"
-   for _, dim in pin_dimensions
-])
-#user_selection = 'mmmm'
+    #Convert selections to a string in the correct order
+    user_selection = "".join([
+    "m" if selections[dim] == "MSNA" else
+    "e" if selections[dim] == "EMIS" else
+    "j" if selections[dim] == "JENA" else
+    "n" if selections[dim] == "no-data" else "o"
+    for _, dim in pin_dimensions
+    ])
+
+else:
+    st.subheader(translations["select_data_section_2"])
+    user_selection = 'mmmm'
+
 st.session_state['data_combination'] = user_selection 
 
 
