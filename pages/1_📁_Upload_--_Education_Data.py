@@ -325,59 +325,59 @@ hybrid_scenario_countries = [
 SCENARIO_1_LABEL = translations["SCENARIO_1"]
 SCENARIO_2_LABEL = translations["SCENARIO_2"]
 
-
 if selected_country in hybrid_scenario_countries:
+    # Ensure default
     if 'workflow_scenario_choice' not in st.session_state:
         st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
-    with st.container(border=True):
-        # Title / description (tight spacing)
+
+    with st.container():
+        # Tight title/description
         st.markdown(f"""
-            <div style="margin-bottom:4px;">
-                <div style="font-size:22px; font-weight:700; margin:0;">
-                    {translations["step_hpc"]}
+            <div style="margin-bottom:6px;">
+                <div style="font-size:22px; font-weight:700; margin:0;">{translations["step_hpc"]}</div>
+                <div style="font-size:14px; margin-top:4px; color:#2f4f6f;">{translations.get("scenario_help", "")}</div>
             </div>
         """, unsafe_allow_html=True)
 
-        # Buttons row
-        col1, col2 = st.columns(2)
-        # Shared styling for buttons via inline html
-        def render_button(label, is_selected, key):
-            if is_selected:
-                return st.markdown(f"""
-                    <div style="
-                        background: #d9edf7;
-                        border: 2px solid red;
-                        border-radius:8px;
-                        padding:12px 16px;
-                        font-size:16px;
-                        font-weight:700;
-                        text-align:center;
-                        cursor:pointer;
-                        ">
-                        {label}
-                    </div>
-                """, unsafe_allow_html=True)
-            else:
-                if st.button(label, key=key):
-                    st.session_state['workflow_scenario_choice'] = label
-                # render unselected-looking pill behind so spacing matches a bit
-                st.markdown(f"""
-                    <style>
-                    .dummy-{key} {{ display:none; }}
-                    </style>
-                """, unsafe_allow_html=True)
+        # Scoped CSS to enlarge radio labels and style selected
+        st.markdown("""
+            <style>
+            .custom-radio label div[data-testid="stMarkdownContainer"] {
+                font-size: 18px;
+                font-weight: 600;
+            }
+            .custom-radio .stRadio > div > label > div {
+                padding: 8px 12px;
+            }
+            .custom-radio input:checked + label > div {
+                border: 2px solid red;
+                border-radius: 8px;
+                background: #d9edf7;
+                color: #000;
+            }
+            </style>
+        """, unsafe_allow_html=True)
 
-        with col1:
-            render_button(SCENARIO_1_LABEL, st.session_state['workflow_scenario_choice'] == SCENARIO_1_LABEL, "btn_scenario_1")
-        with col2:
-            render_button(SCENARIO_2_LABEL, st.session_state['workflow_scenario_choice'] == SCENARIO_2_LABEL, "btn_scenario_2")
+        # Radio inside a wrapper to apply the class
+        scenario_choice = st.radio(
+            "",
+            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
+            index=0 if st.session_state['workflow_scenario_choice'] == SCENARIO_1_LABEL else 1,
+            key="workflow_scenario_choice",
+            label_visibility="hidden"
+        )
 
-        scenario_choice = st.session_state['workflow_scenario_choice']
+        # Sync session state (st.radio already writes to it via key)
+        st.session_state['workflow_scenario_choice'] = scenario_choice
+
+        # Show selected feedback
         st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {scenario_choice}</div>", unsafe_allow_html=True)
 else:
-    scenario_choice = SCENARIO_1_LABEL  # default for non-hybrid
+    scenario_choice = SCENARIO_1_LABEL
+    st.session_state['workflow_scenario_choice'] = scenario_choice
 
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
+
 
 #----- Step 3: Select Available Data Sources
 special_countries = ['Niger -- NER', 'Nigeria -- NRA']
