@@ -194,6 +194,10 @@ selected_country = st.selectbox(
 if selected_country != st.session_state.get('country'):
     st.session_state['country'] = selected_country
 
+
+
+
+st.markdown("---")  
 #------ Step 2: OCHA Data Upload
 st.subheader(translations["ocha_data_section"])
 no_ocha_data_checkbox = st.checkbox(f"**{translations['no_ocha_data']}**")
@@ -318,18 +322,16 @@ hybrid_scenario_countries = [
     'Somalia -- SOM'
 ]
 # Define the two scenario labels clearly
-SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
-SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
+SCENARIO_1_LABEL = translations["SCENARIO_1"]
+SCENARIO_2_LABEL = translations["SCENARIO_2"]
 
+st.markdown("---")  # Markdown horizontal rule
 
 if selected_country in hybrid_scenario_countries:
     with st.container(border=True, ):
         st.markdown('<div class="workflow-box">', unsafe_allow_html=True)
-        st.markdown(f'<div class="workflow-title">{translations.get("scenario_select_label", "Choose workflow")}</div>', unsafe_allow_html=True)
-        st.markdown(
-            f'<div class="workflow-desc">{translations.get("scenario_help", "Select whether this is the first-time MSNA-based PiN calculation or you are uploading an extrapolated PiN with expert input.")}</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f'<div class="workflow-title">{translations["step_hpc"]}</div>', unsafe_allow_html=True)
+
 
         # initialize session state if missing
         if 'workflow_scenario_choice' not in st.session_state:

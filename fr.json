@@ -145,9 +145,15 @@
    "warning_upload_data":"⚠️ Veuillez sélectionner une source de données pour toutes les dimensions PiN avant de continuer. ",
    "error_combination": "⚠️ La combinaison de sources de données sélectionnée n'est pas prise en charge. Veuillez revoir vos choix.",
    "upload_scope_fix": "Upload Scope-Fix Sheet",
-   "select_data_section_2": "3) Télécharger les données MSNA"
+   "select_data_section_2": "3) Télécharger les données MSNA",
+ "step_hpc": "Choisissez si vous effectuez le premier calcul PiN basé sur MSNA ou si vous téléchargez un PiN déjà calculé pour compléter l'extrapolation dans les zones où les données ne sont pas à jour.",
+     "SCENARIO_1" : "Premier calcul PiN à l'aide de MSNA 2025 (zones couvertes uniquement) ",
+    "SCENARIO_2" : "Télécharger le PiN calculé + connaissances secondaires/d'experts pour les zones manquantes"
+  
 
-  }
+
+
+}
 
 
 
