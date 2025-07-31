@@ -328,69 +328,54 @@ SCENARIO_2_LABEL = translations["SCENARIO_2"]
 
 if selected_country in hybrid_scenario_countries:
     with st.container(border=True):
-        # Inline styling scoped to this section
-        st.markdown("""
-        <style>
-        /* Tighten title/description spacing */
-        .workflow-inner { padding-top:-2px; }
-        .workflow-title { font-size:20px; font-weight:700; margin:0; line-height:1.1; }
-        .workflow-desc { font-size:14px; margin:4px 0 12px 0; color:#2f4f6f; }
-
-        /* Button container spacing */
-        .btn-row { display:flex; gap:12px; margin-top:16px; }
-
-        /* Base look for the choice buttons (we target by data-key to keep it local) */
-        .stButton button {
-            font-size:16px !important;
-            font-weight:600;
-            padding:12px 18px;
-            border-radius:8px;
-        }
-        /* Selected state override - using a custom class applied via JS fallback is hard, so we fake via inline display below */
-        .selected-pill {
-            background: linear-gradient(135deg, #00529B, #1E90FF);
-            color: white;
-            padding:12px 18px;
-            border-radius:8px;
-            font-size:16px;
-            font-weight:600;
-            display:inline-block;
-            flex:1;
-            text-align:center;
-        }
-        .pill-wrapper { flex:1; }
-        </style>
+        # Title / description (tight spacing)
+        st.markdown(f"""
+            <div style="margin-bottom:4px;">
+                <div style="font-size:22px; font-weight:700; margin:0;">
+                    {translations["step_hpc"]}
+                </div>
+                <div style="font-size:14px; margin-top:4px; color:#2f4f6f;">
+                    {translations.get("scenario_help", "")}
+                </div>
+            </div>
         """, unsafe_allow_html=True)
 
-        # Title + description
-        st.markdown('<div class="workflow-inner">', unsafe_allow_html=True)
-        st.markdown(f'<div class="workflow-title">{translations["step_hpc"]}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="workflow-desc">{translations.get("scenario_help", "")}</div>', unsafe_allow_html=True)
+        # Buttons row
+        col1, col2 = st.columns(2)
+        # Shared styling for buttons via inline html
+        def render_button(label, is_selected, key):
+            if is_selected:
+                return st.markdown(f"""
+                    <div style="
+                        background: #d9edf7;
+                        border: 2px solid red;
+                        border-radius:8px;
+                        padding:12px 16px;
+                        font-size:16px;
+                        font-weight:700;
+                        text-align:center;
+                        cursor:pointer;
+                        ">
+                        {label}
+                    </div>
+                """, unsafe_allow_html=True)
+            else:
+                if st.button(label, key=key):
+                    st.session_state['workflow_scenario_choice'] = label
+                # render unselected-looking pill behind so spacing matches a bit
+                st.markdown(f"""
+                    <style>
+                    .dummy-{key} {{ display:none; }}
+                    </style>
+                """, unsafe_allow_html=True)
 
-        # initialize session state if missing
-        if 'workflow_scenario_choice' not in st.session_state:
-            st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
-
-        # Buttons with extra gap
-        col1, col2 = st.columns([1, 1])
         with col1:
-            if st.session_state['workflow_scenario_choice'] == SCENARIO_1_LABEL:
-                st.markdown(f'<div class="selected-pill">{SCENARIO_1_LABEL}</div>', unsafe_allow_html=True)
-            else:
-                if st.button(SCENARIO_1_LABEL, key="btn_scenario_1"):
-                    st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
+            render_button(SCENARIO_1_LABEL, st.session_state['workflow_scenario_choice'] == SCENARIO_1_LABEL, "btn_scenario_1")
         with col2:
-            if st.session_state['workflow_scenario_choice'] == SCENARIO_2_LABEL:
-                st.markdown(f'<div class="selected-pill">{SCENARIO_2_LABEL}</div>', unsafe_allow_html=True)
-            else:
-                if st.button(SCENARIO_2_LABEL, key="btn_scenario_2"):
-                    st.session_state['workflow_scenario_choice'] = SCENARIO_2_LABEL
+            render_button(SCENARIO_2_LABEL, st.session_state['workflow_scenario_choice'] == SCENARIO_2_LABEL, "btn_scenario_2")
 
         scenario_choice = st.session_state['workflow_scenario_choice']
-
-        # Feedback line
         st.markdown(f"<div style='margin-top:8px; font-size:16px;'><strong>Selected:</strong> {scenario_choice}</div>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 else:
     scenario_choice = SCENARIO_1_LABEL  # default for non-hybrid
 
