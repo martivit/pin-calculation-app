@@ -320,42 +320,58 @@ hybrid_scenario_countries = [
 # Define the two scenario labels clearly
 SCENARIO_1_LABEL = "First-time PiN calculation using MSNA 2025 (covered areas only)"
 SCENARIO_2_LABEL = "Upload calculated PiN + secondary/expert knowledge for missing areas"
-
-# Styling for emphasis (light background + border)
+# Inject styling
 st.markdown(
     """
-    <div style="
-        background: #f5f9fe;
+    <style>
+    .workflow-box {
+        background: #eef7fd;
         border: 2px solid #00529B;
         border-radius: 10px;
-        padding: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    .workflow-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .workflow-help {
+        font-size: 14px;
+        color: #33475b;
         margin-bottom: 12px;
-    ">
-      <div style="font-size:22px; font-weight:700; margin-bottom:4px;">
-        """ + translations.get("scenario_select_label", "Choose workflow") + """
-      </div>
-      <div style="font-size:14px; margin-bottom:12px; color:#33475b;">
-        """ + translations.get(
-            "scenario_help",
-            "Select whether this is the first-time MSNA-based PiN calculation or you are uploading an extrapolated PiN with expert input."
-        ) + """
-      </div>
-    """
-    , unsafe_allow_html=True
+    }
+    /* Enlarge the radio option text */
+    [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] > p {
+        font-size: 18px;
+        margin: 4px 0;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
-if selected_country in hybrid_scenario_countries:
-    scenario_choice = st.radio(
-        "",  # label already above
-        options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
-        key="workflow_scenario_choice",
-        label_visibility="hidden"
+
+# Render box
+with st.container():
+    st.markdown('<div class="workflow-box">', unsafe_allow_html=True)
+    st.markdown(f'<div class="workflow-title">{translations.get("scenario_select_label","Choose workflow")}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="workflow-help">{translations.get("scenario_help","Select whether this is the first-time MSNA-based PiN calculation or you are uploading an extrapolated PiN with expert input.")}</div>',
+        unsafe_allow_html=True,
     )
-else:
-    scenario_choice = SCENARIO_1_LABEL
 
+    if selected_country in hybrid_scenario_countries:
+        scenario_choice = st.radio(
+            "",  # label is above
+            options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
+            key="workflow_scenario_choice",
+            label_visibility="hidden"
+        )
+    else:
+        scenario_choice = SCENARIO_1_LABEL
 
-st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)  # close box
 
 
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
