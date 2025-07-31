@@ -327,6 +327,8 @@ SCENARIO_2_LABEL = translations["SCENARIO_2"]
 
 
 if selected_country in hybrid_scenario_countries:
+    if 'workflow_scenario_choice' not in st.session_state:
+        st.session_state['workflow_scenario_choice'] = SCENARIO_1_LABEL
     with st.container(border=True):
         # Title / description (tight spacing)
         st.markdown(f"""
