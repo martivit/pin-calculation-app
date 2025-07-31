@@ -362,7 +362,7 @@ if is_scenario_2:
     else:
         st.warning(translations.get("extrapolation_required", "Upload the extrapolation input to proceed."))
 
-    #user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
+    user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
 
 
 
@@ -512,10 +512,22 @@ else:
 
 
 # Check conditions to allow proceeding
-if user_selection == 'mmmm':
-    check_conditions_and_proceed_onlymsna()
+if is_scenario_2:
+    # Scenario 2 requires: OCHA (or explicit no-OCHA) + extrapolation input
+    if (('no_upload_ocha_data' in st.session_state) or ('uploaded_ocha_data' in st.session_state)) and ('uploaded_extrapolation_input' in st.session_state):
+        st.session_state.ready_to_proceed = True
+        st.success("You have completed all necessary steps for Scenario 2!")
+    else:
+        st.session_state.ready_to_proceed = False
+        if not (('no_upload_ocha_data' in st.session_state) or ('uploaded_ocha_data' in st.session_state)):
+            st.warning(translations["warning_ocha"])
+        if 'uploaded_extrapolation_input' not in st.session_state:
+            st.warning(translations.get("extrapolation_required", "Upload the extrapolation input to proceed."))
 else:
-    check_conditions_and_proceed()
+    if user_selection == 'mmmm':
+        check_conditions_and_proceed_onlymsna()
+    else:
+        check_conditions_and_proceed()
 
 
 col1, col2 = st.columns([0.60, 0.40])
