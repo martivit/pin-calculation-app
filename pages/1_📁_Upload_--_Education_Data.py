@@ -402,8 +402,9 @@ if is_scenario_2:
         st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
         try:
             df_updated = st.session_state['updated_2025_pin_file']
+            df_body = df_updated.iloc[1:].reset_index(drop=True)
 
-            st.dataframe(df_updated)
+            st.dataframe(df_body)
 
             valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
             if valid:
