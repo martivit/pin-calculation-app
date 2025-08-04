@@ -399,10 +399,10 @@ else:
     # everyone else defaults to scenario 1
     scenario_choice = SCENARIO_1_LABEL
 
+is_scenario_2 = False
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 st.session_state['step_2_hpc'] = False 
 if is_scenario_2: st.session_state['step_2_hpc'] = True 
-st.write (is_scenario_2)
 
 #----- Step 3: Select Available Data Sources
 special_countries = ['Niger -- NER', 'Nigeria -- NRA']
@@ -617,11 +617,10 @@ scope_test = st.session_state.get('scope_fix')
     #st.write("Scope-Fix sheet contains data!")
 #else:
     #st.write("Scope-Fix sheet is empty!")
+with col2: 
+    st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
 
-if not is_scenario_2:
-    with col2: 
-        st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
-if is_scenario_2:
-    with col2: 
-        st.page_link("pages/3_🧮_Update_and_Download_--_PiN_figures_and_other_outputs.py",  label=translations['to_page3_2'], icon='🧮')
+#if is_scenario_2:
+    #with col2: 
+        #st.page_link("pages/3_🧮_Update_and_Download_--_PiN_figures_and_other_outputs.py",  label=translations['to_page3_2'], icon='🧮')
 
