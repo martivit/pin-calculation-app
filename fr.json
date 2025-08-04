@@ -156,8 +156,8 @@
     "extrapolation_uploaded" : "Fichier PiN mis à jour téléchargé avec succès et validé!",
     "extrapolation_required": " Téléchargez le fichier PiN mis à jour pour continuer",
       "success_scenario2":"Les chiffres de population de l'OCHA et le fichier PiN mis à jour ont été téléchargés avec succès!",
-    "missing_pin_columns": "Colonnes obligatoires manquantes: ",
-    "empty_pin_column" : "Colonnes obligatoires vides: "
+    "missing_pin_columns": "Colonnes obligatoires manquantes:  {cols}",
+    "empty_pin_column" : "Colonnes obligatoires vides:  {cols}"
 
 
 

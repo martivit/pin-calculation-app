@@ -142,33 +142,47 @@ def validate_updated_pin_simple(df, required_columns):
       2. Checks that none of those required columns are entirely empty (after dropping row 0).
     Returns: (is_valid: bool, message: str)
     """
-    # 1. Presence check on header (original columns)
+    # Body without the header row
     df_body = df.iloc[1:].reset_index(drop=True)
-    print(df_body.columns)
+
+    # 1. Presence check
     missing_cols = [col for col in required_columns if col not in df_body.columns]
     if missing_cols:
-        missing_msg = translations["missing_pin_columns"]
-        msg = missing_msg.format(cols=", ".join(missing_cols))
-
+        template = translations.get(
+            "missing_pin_columns",
+            "Missing required columns: {cols}"
+        )
+        try:
+            msg = template.format(cols=", ".join(missing_cols))
+        except Exception:  # in case template is malformed
+            msg = f"Missing required columns: {', '.join(missing_cols)}"
         return False, msg
 
-    # 2. Drop the first row for content checks
-
-    # 3. Check that each required column has at least one non-empty/non-NaN value
+    # 2. Content check: ensure required columns are not entirely empty
     empty_cols = []
     for col in required_columns:
-        # Treat empty string or strings like "nan" as missing
-        series = df_body[col].astype(str).str.strip().replace({"": np.nan, "nan": np.nan, "NaN": np.nan})
+        series = (
+            df_body[col]
+            .astype(str)
+            .str.strip()
+            .replace({"": np.nan, "nan": np.nan, "NaN": np.nan})
+        )
         if series.isna().all():
             empty_cols.append(col)
 
     if empty_cols:
-        empty_msg= translations["empty_pin_column"]
-        msg2 = empty_msg.format(cols=", ".join(empty_cols))
-
-        return False, msg2
+        template = translations.get(
+            "empty_pin_column",
+            "The following required filled columns are entirely empty: {cols}"
+        )
+        try:
+            msg = template.format(cols=", ".join(empty_cols))
+        except Exception:
+            msg = f"The following required filled columns are entirely empty: {', '.join(empty_cols)}"
+        return False, msg
 
     return True, ""
+
 ##---------------------------------------------------------------------------------------------------------
 # Function to load the existing template from the file system
 def load_template():

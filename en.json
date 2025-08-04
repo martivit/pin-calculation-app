@@ -155,6 +155,6 @@
     "extrapolation_uploaded" : "Updated PiN file uploaded successfully and validated!",
     "extrapolation_required": "Upload the updated PiN file to proceed",
     "success_scenario2":"OCHA population figures and updated PiN file uploaded successfully!",
-    "missing_pin_columns": "Missing required columns: ",
-    "empty_pin_column" : "Empty required columns: "
+    "missing_pin_columns": "Missing required columns: {cols}",
+    "empty_pin_column" : "Empty required columns: {cols}"
   }
