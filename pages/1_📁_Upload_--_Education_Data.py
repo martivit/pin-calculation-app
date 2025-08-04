@@ -334,14 +334,14 @@ if selected_country in hybrid_scenario_countries:
         scenario_choice = st.radio(
             "",
             options=[SCENARIO_1_LABEL, SCENARIO_2_LABEL],
-            horizontal=False,
-            width = 'stretch',
+            key = 'scenario_choice'
 
         )
 else:
     # everyone else defaults to scenario 1
     scenario_choice = SCENARIO_1_LABEL
 
+st.write(scenario_choice)
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 
 #----- Step 3: Select Available Data Sources
