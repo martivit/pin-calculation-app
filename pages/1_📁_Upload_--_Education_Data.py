@@ -402,7 +402,7 @@ else:
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 st.session_state['step_2_hpc'] = False 
 if is_scenario_2: st.session_state['step_2_hpc'] = True 
-
+st.write (is_scenario_2)
 
 #----- Step 3: Select Available Data Sources
 special_countries = ['Niger -- NER', 'Nigeria -- NRA']
