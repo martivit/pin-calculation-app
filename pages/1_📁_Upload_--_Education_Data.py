@@ -144,7 +144,7 @@ def validate_updated_pin_simple(df, required_columns):
     """
     # 1. Presence check on header (original columns)
     df_body = df.iloc[1:].reset_index(drop=True)
-
+    print(df_body.columns)
     missing_cols = [col for col in required_columns if col not in df_body.columns]
     if missing_cols:
         return False, f"Missing required columns: {', '.join(missing_cols)}"
