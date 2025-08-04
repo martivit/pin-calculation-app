@@ -366,7 +366,7 @@ if is_scenario_2:
     else:
         st.warning(translations["extrapolation_required"])
 
-    user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
+    #user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
 
 
 
