@@ -133,70 +133,29 @@ def validate_columns_across_sheets(all_sheets):
                 unmatched_columns.discard(key)
 
     return column_matches, unmatched_columns
-
 ##---------------------------------------------------------------------------------------------------------
-def normalize_col(name: str) -> str:
-    if not isinstance(name, str):
-        name = str(name)
-    # Unicode normalization, strip, collapse internal whitespace, lowercase
-    name = unicodedata.normalize("NFKC", name)
-    name = " ".join(name.strip().split())
-    return name.lower()
-##---------------------------------------------------------------------------------------------------------
-def build_column_map(df_columns, required_columns, threshold=90):
+def validate_updated_pin_simple(df, required_columns):
     """
-    Returns mapping from normalized required -> actual df column (original casing),
-    and list of unmatched required columns.
-    """
-    # Build lookup of normalized existing columns
-    normalized_to_actual = {normalize_col(c): c for c in df_columns}
-    existing_norms = list(normalized_to_actual.keys())
-
-    mapping = {}
-    unmatched = []
-    for req in required_columns:
-        req_norm = normalize_col(req)
-        # exact normalized match
-        if req_norm in normalized_to_actual:
-            mapping[req] = normalized_to_actual[req_norm]
-        else:
-            # fuzzy match against existing normalized names
-            best_match, score = process.extractOne(req_norm, existing_norms, scorer=fuzz.partial_ratio)
-            if best_match and score >= threshold:
-                mapping[req] = normalized_to_actual[best_match]
-            else:
-                unmatched.append(req)
-    return mapping, unmatched
-##---------------------------------------------------------------------------------------------------------
-def validate_updated_pin(df):
-    """
-    Drop first row, normalize headers, check required columns exist (with fuzzy fallback),
-    and ensure required filled columns contain some non-empty values.
+    Assumes `df` is the uploaded updated PiN DataFrame.
+    Drops the first row, then:
+      1. Checks that all required_columns are present in df.columns (exact match).
+      2. Checks that none of those required columns are entirely empty (after dropping row 0).
     Returns: (is_valid: bool, message: str)
     """
-    # Drop first row then reset
-    df_proc = df.iloc[1:].reset_index(drop=True)
+    # 1. Presence check on header (original columns)
+    df_body = df.iloc[1:].reset_index(drop=True)
 
-    # Build mapping for required columns (both sets are same here)
-    mapping, missing = build_column_map(df_proc.columns, REQUIRED_COLUMN_UPDATED_PIN, threshold=90)
-    if missing:
-        return False, f"Missing required columns (could not match): {', '.join(missing)}"
+    missing_cols = [col for col in required_columns if col not in df_body.columns]
+    if missing_cols:
+        return False, f"Missing required columns: {', '.join(missing_cols)}"
 
-    # For downstream simplicity, rename the dataframe to canonical required names
-    df_renamed = df_proc.rename(columns={v: k for k, v in mapping.items()})
+    # 2. Drop the first row for content checks
 
-    # Now check that each required-filled column is not entirely empty/"nan"
+    # 3. Check that each required column has at least one non-empty/non-NaN value
     empty_cols = []
-    for col in REQUIRED_FILLED_COLUMN:
-        if col not in df_renamed.columns:
-            empty_cols.append(col)  # should not happen if mapping succeeded
-            continue
-        series = (
-            df_renamed[col]
-            .astype(str)
-            .str.strip()
-            .replace({"": np.nan, "nan": np.nan, "NaN": np.nan})
-        )
+    for col in required_columns:
+        # Treat empty string or strings like "nan" as missing
+        series = df_body[col].astype(str).str.strip().replace({"": np.nan, "nan": np.nan, "NaN": np.nan})
         if series.isna().all():
             empty_cols.append(col)
 
@@ -204,7 +163,6 @@ def validate_updated_pin(df):
         return False, f"The following required filled columns are entirely empty: {', '.join(empty_cols)}"
 
     return True, "Updated PiN file passes validation"
-
 ##---------------------------------------------------------------------------------------------------------
 # Function to load the existing template from the file system
 def load_template():
@@ -446,10 +404,10 @@ if is_scenario_2:
             else:
                 df_updated = pd.read_csv(updated_2025_pin_file)
 
-            valid, msg = validate_updated_pin(df_updated)
+            valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
             if valid:
                 st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
-                st.success("Updated PiN file uploaded and validated successfully!")  # or use translations
+                st.success("Updated PiN file uploaded and validated successfully!")
             else:
                 st.error(msg)
         except Exception as e:
