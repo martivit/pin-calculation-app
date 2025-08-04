@@ -400,7 +400,7 @@ if is_scenario_2:
     if updated_2025_pin_file is not None:
         st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
         try:
-            df_updated = st.session_state.get('updated_2025_pin_file')
+            df_updated = st.session_state['updated_2025_pin_file']
             st.dataframe(df_updated)
 
             valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
