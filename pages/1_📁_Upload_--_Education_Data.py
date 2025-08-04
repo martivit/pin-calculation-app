@@ -328,7 +328,7 @@ if selected_country in hybrid_scenario_countries:
     with st.container(border=True):
         st.markdown(f"""
             <div style="margin-bottom:6px;">
-                <div style="font-size:22px; font-weight:700; margin:0;">{translations["step_hpc"]}</div>
+                <div style="font-size:18px; font-weight:500; margin:0;">{translations["step_hpc"]}</div>
             </div>
         """, unsafe_allow_html=True)
         scenario_choice = st.radio(
