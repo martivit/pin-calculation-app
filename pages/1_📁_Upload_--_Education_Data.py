@@ -416,12 +416,17 @@ if is_scenario_2:
     with st.container(border=True):
         # Example: expect a structured Excel/CSV input with the extrapolation results
         uploaded_updated_2025_pin_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx"])
+        uploaded_covered_2025_pin_file = st.file_uploader(translations["istruction_upload_pin_covered"], type=["xlsx"])
 
-    if uploaded_updated_2025_pin_file is not None:
+
+    if uploaded_updated_2025_pin_file is not None and uploaded_covered_2025_pin_file is not None :
         updated_2025_pin_file_checks = pd.read_excel(uploaded_updated_2025_pin_file, engine='openpyxl',skiprows=1)
-        updated_2025_pin_file = pd.read_excel(uploaded_updated_2025_pin_file, engine='openpyxl')
+        updated_2025_pin_file = pd.read_excel(uploaded_updated_2025_pin_file, engine='openpyxl',skiprows=1)
+        uploaded_covered_2025_pin = pd.read_excel(uploaded_covered_2025_pin_file, engine='openpyxl',sheet_name=None)
 
         st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
+        st.session_state['uploaded_covered_2025_pin'] = uploaded_covered_2025_pin
+
         try:
             df_updated = updated_2025_pin_file_checks
 
@@ -435,6 +440,8 @@ if is_scenario_2:
             st.error(f"Failed to read/validate updated PiN file: {e}")
     else:
         st.warning(translations["extrapolation_required"])
+
+
 
     user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
 

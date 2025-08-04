@@ -158,7 +158,11 @@
       "success_scenario2":"Les chiffres de population de l'OCHA et le fichier PiN mis à jour ont été téléchargés avec succès!",
     "missing_pin_columns": "Colonnes obligatoires manquantes:  {cols}",
     "empty_pin_column" : "Colonnes obligatoires vides:  {cols}",
-    "to_page3_2": "Passez à la page de mise à jour et de téléchargement du PiN"
+    "to_page3_2": "Passez à la page de mise à jour et de téléchargement du PiN",
+      "download_output1": "Télécharger le fichier PiN temporaire, pour mettre à jour ",
+    "extrapolation_summary" : "En nous appuyant sur les résultats PiN des zones couvertes par le MSNA 2025 et en intégrant les contributions de la CE et d'experts, nous calculons les PiN actualisés et extrapolons les distributions de gravité pour les zones pour lesquelles nous ne disposons pas de nouvelles données pour 2025.",
+    "istruction_upload_pin_covered": "Veuillez télécharger le fichier contenant le PiN calculé pour les zones couvertes uniquement, le nom du fichier est _targeted_MSNA_2025.xlsx"
+
 
 
 

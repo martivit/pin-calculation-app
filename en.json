@@ -118,7 +118,9 @@
     "scope_fix_warning": "Ticking this box indicates there is a mismatch between the level of representativeness of the assessment and the unit of analysis for the HNO. Please verify your data and selections carefully to avoid errors in the calculation.",
     "mismatch_admin_message": "There may be a mismatch between the HNO unit of analysis and the administrative level at which the MSNA is representative.",
     "mismatch_admin_example": "For example, the MSNA data might be representative at Admin 2, while the HNO unit of analysis is Admin 3.<br>If you click this box, you are confirming that such a mismatch exists. In this case, ensure that the 'scope-fix' sheet in the OCHA file lists the mismatched administrative units and their corresponding levels. Refer to the provided template for guidance on how to correctly fill the 'scope-fix' sheet.",
-    "download_all": "Download All PiN Documents",
+    "download_all": "Download All PiN Documents",  
+   "download_output1": "Download Temporary PiN file, to update",
+
     "show_kobo":"Use the kobo questionaire to identify the correct MSNA indicators:",
     "expand_kobo":"Inspect MSNA indicators",
     "school_cycle_question": {
@@ -158,5 +160,8 @@
     "extrapolation_required": "Upload the updated PiN file to proceed",
     "success_scenario2":"OCHA population figures and updated PiN file uploaded successfully!",
     "missing_pin_columns": "Missing required columns: {cols}",
-    "empty_pin_column" : "Empty required columns: {cols}"
+    "empty_pin_column" : "Empty required columns: {cols}",
+    "extrapolation_summary" : "Building on PiN results from MSNA 2025-covered areas and incorporating EC and expert input, we calculate updated PiN and extrapolate severity distributions for areas with no new 2025 data.",
+    "istruction_upload_pin_covered": "Please upload the file containing the calculated PiN for covered areas only, the file-name is _targeted_MSNA_2025.xlsx"
+
   }

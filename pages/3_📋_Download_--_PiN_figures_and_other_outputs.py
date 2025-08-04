@@ -19,6 +19,11 @@ from src.save_parameter import generate_word_document
 from src.save_parameter import generate_parameters
 from src.save_parameter_FR import generate_word_document_FR
 from src.save_parameter_FR import generate_parameters_FR
+from src.make_output1_platform import merge_2025_contextDB
+from src.create_output1_excel import create_output1_user
+from src.extrapolation import extrapolate_df_2025_updated
+from src.update_re_calculation_for_PiN import UPDATE_calculatePIN
+
 from shared_utils import language_selector
 #from github import Github
 import requests
@@ -26,7 +31,8 @@ import base64
 from datetime import datetime
 import zipfile
 
-
+import os
+import glob
 
 
 
@@ -195,6 +201,8 @@ admin_var =  st.session_state.get('admin_var')
 # Access the OCHA data if it was uploaded
 ocha_data = st.session_state.get('uploaded_ocha_data')
 mismatch_ocha_data = st.session_state.get('ocha_mismatch_data')
+updated_2025_pin_file = st.session_state.get('updated_2025_pin_file') 
+uploaded_covered_2025_pin = st.session_state.get('uploaded_covered_2025_pin')
 
 
 # Check if the user indicated that they do not have OCHA data
@@ -205,99 +213,115 @@ mismatch_admin = st.session_state.get('mismatch_admin', False)
 parameters = generate_parameters(st.session_state)
 parameters_FR = generate_parameters_FR(st.session_state)
 
+step_2_hpc = st.session_state.get('step_2_hpc') 
 
 
-## add indicator ---> severity
-edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 
-                                                                                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
-                                                                                barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
-                                                                                age_var, gender_var,
-                                                                                label, 
-                                                                                admin_var, vector_cycle, start_school, status_var,
-                                                                                selected_language)
 
-#st.dataframe(mismatch_ocha_data)
+# 0.                                                          Scenario/step flags
+###################################################################################################################################################
+hybrid_scenario_countries = [
+    'Central African Republic -- CAR',
+    'Burkina Faso -- BFA',
+    'Ethiopia -- ETH',
+    'Democratic Republic of the Congo -- DRC',
+    'Mali -- MLI',
+    'Lebanon -- LBN',
+    'Somalia -- SOM'
+]
 
-## calculate PiN
-if ocha_data is not None:
-    (indicator_barrier4_list,indicator_barrier_list,severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,
-    female_pin_per_admin_status, male_pin_per_admin_status, 
-    pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary, 
-    Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
-    final_overview_dimension_df,final_overview_dimension_df_in_need,
-    Tot_PiN_by_admin,
-    country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
+hybrid_country= False
+if country in hybrid_scenario_countries: hybrid_country= True
+step_2_hpc = st.session_state.get('step_2_hpc') 
+
+jena_countries = ['Niger -- NER', 'Nigeria -- NRA']
+jena_country = False
+if country in jena_countries: jena_country = True
+
+DATA_DIR_CONTEXT_DB = "context_DB"
+DATA_DIR_PIN2024 = "pin2024_cat"
+
+
+###################################################################################################################################################
+###################################################################################################################################################
+# 1.                                                   PiN calculation first time using MSNA
+###################################################################################################################################################
+if not step_2_hpc and not jena_country:
+
+    ## add indicator ---> severity
+    edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
                                                                                     admin_var, vector_cycle, start_school, status_var,
-                                                                                    mismatch_admin,
-                                                                                    selected_language= selected_language)
-    
-    
+                                                                                    selected_language)
+
+
+    ## calculate PiN
+    if ocha_data is not None:
+        (indicator_barrier4_list,indicator_barrier_list,severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category,  pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,
+        female_pin_per_admin_status, male_pin_per_admin_status, 
+        pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary, 
+        Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA, 
+        final_overview_dimension_df,final_overview_dimension_df_in_need,
+        Tot_PiN_by_admin,
+        country_label) = calculatePIN (country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,
+                                                                                        access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                                                                                        barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                        age_var, gender_var,
+                                                                                        label, 
+                                                                                        admin_var, vector_cycle, start_school, status_var,
+                                                                                        mismatch_admin,
+                                                                                        selected_language= selected_language)
+        
+        
+
+
+
+
+
+###################################################################################################################################################
+###################################################################################################################################################
+# 2.                                                   Creation of output for FULL MSNA countries and donwnload
+###################################################################################################################################################
+if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_country:
 
     label_total_pin_sheet = "PiN TOTAL"
 
-    #ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language, parameters=parameters)
+    # ------------------------ A. create excel PiN classic file
     if selected_language == "French":
-        ocha_excel = create_output(
-            country_label,
-            Tot_PiN_JIAF,
-            final_overview_df,
-            final_overview_df_OCHA,
-            label_total_pin_sheet,
-            admin_var,
-            ocha=True,
-            tot_severity=Tot_PiN_by_admin,
-            selected_language=selected_language,
-            parameters=parameters_FR  
-        )
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language,parameters=parameters_FR  )
     else:
-        ocha_excel = create_output(
-            country_label,
-            Tot_PiN_JIAF,
-            final_overview_df,
-            final_overview_df_OCHA,
-            label_total_pin_sheet,
-            admin_var,
-            ocha=True,
-            tot_severity=Tot_PiN_by_admin,
-            selected_language=selected_language,
-            parameters=parameters  
-        )
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language,parameters=parameters  )
 
+    # ------------------------ B. create excel PiN by indicator file
     indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
 
+    # ------------------------ C. create word PiN snapshot
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
         doc_parameter_output = generate_word_document(parameters)
-
     if selected_language == "French":
-        #doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
         doc_parameter_output = generate_word_document_FR(parameters_FR)
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
+    # ------------------------ D. create Zip file with all important documents
     zip_file_name = f"PiN_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
-    #zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
 
     if selected_language == "English":
         zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
-
-
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
         zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
 
-
+    # ------------------------ E. download zip file
     st.download_button(
         label=translations["download_all"],
         data=zip_file,
         file_name=zip_file_name,
         mime="application/zip")
-    
 
-    # Create a single download button for the ZIP file
+    # ------------------------ F. save in github --> gitpush
     if st.download_button(
         label=translations["download_all"],
         data=zip_file,
@@ -310,7 +334,6 @@ if ocha_data is not None:
             #st.write("✅ GitHub token found in secrets.")
         #else:
             #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
-
         try:
             repo_name = "martivit/pin-calculation-app"
             branch_name = "develop_2025"
@@ -364,9 +387,73 @@ if ocha_data is not None:
         except Exception :
             #st.error(f"Unexpected error during GitHub upload: {e}")
             pass
- 
+
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
+
+
+###################################################################################################################################################
+###################################################################################################################################################
+# 3.                                                  First step of temporary PiN file for HYBRID MSNA countries and donwnload
+###################################################################################################################################################
+if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_country:
+
+    ## merge the PiN 2025 calculated for targeted areas with the secondary data (II, ACLED, clustering, additional empy columns)
+    output_1_2025 = merge_2025_contextDB (country,  ocha_data, Tot_PiN_by_admin, DATA_DIR_CONTEXT_DB)   
+    ## format with color and headers the output_1_2025
+    formatted_output_1_2025 = create_output1_user(output_1_2025)
+    output1_file_name = f"PiN_temporary_to_fill_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+
+    ## donwload
+    st.download_button(
+        label=translations["download_output1"],
+        data=formatted_output_1_2025,
+        file_name=   output1_file_name)
+
+
+
+
+
+
+
+###################################################################################################################################################
+###################################################################################################################################################
+# 4.                  HYBRID countries, second and final download with updated PiN and extrapolation  + output and download
+###################################################################################################################################################
+
+if step_2_hpc and hybrid_country:
+
+    # --------- Locate and load the correct 2024 file from pin2024_cat ----------
+    country_code = country.split("--")[-1].strip()
+    pattern_2024 = os.path.join(DATA_DIR_PIN2024, f"{country_code}_PIN2024.xlsx")
+    matching_files = glob.glob(pattern_2024)
+    if not matching_files:
+        raise FileNotFoundError(f"No 2024 PiN file found matching: {pattern_2024}")
+    else:
+        pin2024_file = matching_files[0]
+        pin2024_cat = pd.read_excel(pin2024_file, sheet_name=None)
+
+
+    st.subheader(translations["extrapolation_summary"])
+
+
+    ## extrapolate using the delta method
+    (merged_df_delta_all,pin_2025_updated) = extrapolate_df_2025_updated(updated_2025_pin_file, uploaded_covered_2025_pin, pin2024_cat)
+
+    ## put together
+    (Tot_PiN_JIAF,Tot_PiN_by_admin,final_overview_df_OCHA,final_overview_df, pin_per_admin_status) = UPDATE_calculatePIN (country , pin_2025_updated, ocha_data ,label,vector_cycle, selected_language )
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
