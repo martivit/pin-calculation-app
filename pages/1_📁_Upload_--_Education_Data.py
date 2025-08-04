@@ -398,11 +398,10 @@ if is_scenario_2:
         updated_2025_pin_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
 
     if updated_2025_pin_file is not None:
+        st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
         try:
-            if str(updated_2025_pin_file.name).lower().endswith(('.xlsx', '.xls')):
-                df_updated = pd.read_excel(updated_2025_pin_file, engine='openpyxl')
-            else:
-                df_updated = pd.read_csv(updated_2025_pin_file)
+            df_updated = st.session_state.get('updated_2025_pin_file')
+            st.dataframe(df_updated)
 
             valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
             if valid:
