@@ -518,13 +518,16 @@ if is_scenario_2:
     # Scenario 2 requires: OCHA uploaded + updated 2025 PiN file
     has_ocha = 'uploaded_ocha_data' in st.session_state
     has_updated_pin = 'updated_2025_pin_file' in st.session_state
+    tick_no_ocha = 'no_upload_ocha_data'  in st.session_state
     # Scenario 2 requires: OCHA (or explicit no-OCHA) + extrapolation input
     if has_ocha and has_updated_pin:
         st.session_state.ready_to_proceed = True
         st.success(translations["success_scenario2"])
     else:
         # Only show warnings for what's missing
-        if not has_ocha:
+        if not has_ocha and tick_no_ocha:
+            st.error(translations["warning_ocha2"])
+        if not has_ocha and not tick_no_ocha:
             st.warning(translations["warning_ocha"])
         if not has_updated_pin:
             st.warning(translations["extrapolation_required"])
