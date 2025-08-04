@@ -148,8 +148,9 @@
    "select_data_section_2": "3) Télécharger les données MSNA",
  "step_hpc": "Choisissez si vous effectuez le premier calcul PiN basé sur MSNA ou si vous téléchargez un PiN déjà calculé pour compléter l'extrapolation dans les zones où les données ne sont pas à jour",
      "SCENARIO_1" : "**Premier calcul PiN à l'aide de MSNA 2025 (zones couvertes uniquement) **",
-    "SCENARIO_2" : "**Télécharger le PiN calculé + connaissances secondaires/d'experts pour les zones manquantes**"
-  
+    "SCENARIO_2" : "**Télécharger le PiN calculé + connaissances secondaires/d'experts pour les zones manquantes**",
+    "title_pin_upload" : "3) Télécharger le fichier PiN mis à jour",
+    "istruction_upload_pin" : "Veuillez télécharger le fichier contenant le PiN calculé pour les zones couvertes et toutes les données d'extrapolation secondaires/d'experts."
 
 
 

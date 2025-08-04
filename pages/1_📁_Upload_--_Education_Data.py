@@ -341,11 +341,11 @@ else:
     # everyone else defaults to scenario 1
     scenario_choice = SCENARIO_1_LABEL
 
-st.write(scenario_choice)
 is_scenario_2 = scenario_choice == SCENARIO_2_LABEL
 st.session_state['step_2_hpc'] = False 
 if is_scenario_2: st.session_state['step_2_hpc'] = True 
-st.write(st.session_state.get('step_2_hpc'))
+
+
 #----- Step 3: Select Available Data Sources
 special_countries = ['Niger -- NER', 'Nigeria -- NRA']
 use_full_selection = (selected_country in special_countries) and not is_scenario_2
@@ -354,14 +354,10 @@ user_selection = ""
 
 if is_scenario_2:
     # Scenario 2: skip MSNA/dimension pills; require extrapolation input file instead
-    st.subheader(translations.get("scenario2_section_title", "Extrapolation & PiN Input"))
-    st.markdown(translations.get(
-        "scenario2_instructions",
-        "Please upload the file containing the calculated PiN for covered areas and any secondary/expert extrapolation inputs."
-    ), unsafe_allow_html=True)
+    st.subheader(translations["title_pin_upload"])
 
     # Example: expect a structured Excel/CSV input with the extrapolation results
-    uploaded_extrapolation_file = st.file_uploader(translations.get("upload_extrapolation", "Upload extrapolation PiN file"), type=["xlsx", "csv"], key="extrapolation_input")
+    uploaded_extrapolation_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
 
     if uploaded_extrapolation_file is not None:
         st.session_state['uploaded_extrapolation_input'] = uploaded_extrapolation_file
