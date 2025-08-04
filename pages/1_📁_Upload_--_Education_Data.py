@@ -398,10 +398,12 @@ if is_scenario_2:
         uploaded_updated_2025_pin_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx"])
 
     if uploaded_updated_2025_pin_file is not None:
+        updated_2025_pin_file_checks = pd.read_excel(uploaded_updated_2025_pin_file, engine='openpyxl',skiprows=1)
         updated_2025_pin_file = pd.read_excel(uploaded_updated_2025_pin_file, engine='openpyxl')
+
         st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
         try:
-            df_updated = st.session_state['updated_2025_pin_file']
+            df_updated = updated_2025_pin_file_checks
             df_body = df_updated.iloc[1:].reset_index(drop=True)
 
             st.dataframe(df_body)
