@@ -424,9 +424,6 @@ if is_scenario_2:
         st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
         try:
             df_updated = updated_2025_pin_file_checks
-            df_body = df_updated.iloc[1:].reset_index(drop=True)
-
-            st.dataframe(df_body)
 
             valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
             if valid:
@@ -621,5 +618,10 @@ scope_test = st.session_state.get('scope_fix')
 #else:
     #st.write("Scope-Fix sheet is empty!")
 
-with col2: 
-    st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
+if not is_scenario_2:
+    with col2: 
+        st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
+if is_scenario_2:
+    with col2: 
+        st.page_link("pages/3_📋_Update_and_Download_--_PiN_figures_and_other_outputs.py",  label=translations['to_page3_2'], icon='📋')
+
