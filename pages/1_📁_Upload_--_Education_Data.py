@@ -355,9 +355,9 @@ user_selection = ""
 if is_scenario_2:
     # Scenario 2: skip MSNA/dimension pills; require extrapolation input file instead
     st.subheader(translations["title_pin_upload"])
-
-    # Example: expect a structured Excel/CSV input with the extrapolation results
-    uploaded_extrapolation_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
+    with st.container(border=True):
+        # Example: expect a structured Excel/CSV input with the extrapolation results
+        uploaded_extrapolation_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
 
     if uploaded_extrapolation_file is not None:
         st.session_state['uploaded_extrapolation_input'] = uploaded_extrapolation_file
