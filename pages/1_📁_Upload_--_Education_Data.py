@@ -38,6 +38,14 @@ REQUIRED_COLUMNS = {
     'edu barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel'},
     'survey start': {'start', 'date', 'start_time', 'Start_datetime', 'survey_start_date', 'today'}
 }
+REQUIRED_FILLED_COLUMN = [
+    "Education needs stable (tick 'X' if no change from last year)",
+    "Education needs decreased (tick 'X' if improved from last year)",
+    "Education needs worsened (tick 'X' if worsened from last year)",
+    "Reference area Admin Pcode (for extrapolation)"
+]
+REQUIRED_COLUMN_UPDATED_PIN = REQUIRED_FILLED_COLUMN  # as you said
+
 FUZZY_THRESHOLD = 90  # Match similarity percentage (higher = stricter)
 pin_dimensions = [
     ("a) **Access to education**", "Access to education"),
@@ -124,6 +132,38 @@ def validate_columns_across_sheets(all_sheets):
                 unmatched_columns.discard(key)
 
     return column_matches, unmatched_columns
+
+##---------------------------------------------------------------------------------------------------------
+def validate_updated_pin(df):
+    """
+    Drop first row, then ensure required columns are present and that
+    REQUIRED_FILLED_COLUMN are not all empty/NaN.
+    Returns: (is_valid: bool, message: str)
+    """
+    # Drop first row (assumed header-shift or metadata)
+    df_proc = df.iloc[1:].reset_index(drop=True)
+
+    # Normalize column names to exact matches (could consider stripping whitespace)
+    missing = [col for col in REQUIRED_COLUMN_UPDATED_PIN if col not in df_proc.columns]
+    if missing:
+        return False, f"Missing required columns: {', '.join(missing)}"
+
+    # Check that each required filled column has at least one non-empty value
+    empty_cols = []
+    for col in REQUIRED_FILLED_COLUMN:
+        series = (
+            df_proc[col]
+            .astype(str)                     # cast to string so we can strip
+            .str.strip()                     # remove whitespace
+            .replace({"": np.nan, "nan": np.nan, "NaN": np.nan})  # treat these as empty
+        )
+        if series.isna().all():
+            empty_cols.append(col)
+
+    if empty_cols:
+        return False, f"The following required filled columns are entirely empty: {', '.join(empty_cols)}"
+
+    return True, "Updated PiN file passes validation"
 
 ##---------------------------------------------------------------------------------------------------------
 # Function to load the existing template from the file system
@@ -360,9 +400,20 @@ if is_scenario_2:
         updated_2025_pin_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
 
     if updated_2025_pin_file is not None:
-        st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
-        st.success(translations["extrapolation_uploaded"])
-        # You can add any parsing/validation here if needed
+        try:
+            if str(updated_2025_pin_file.name).lower().endswith(('.xlsx', '.xls')):
+                df_updated = pd.read_excel(updated_2025_pin_file, engine='openpyxl')
+            else:
+                df_updated = pd.read_csv(updated_2025_pin_file)
+
+            valid, msg = validate_updated_pin(df_updated)
+            if valid:
+                st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
+                st.success("Updated PiN file uploaded and validated successfully!")  # or use translations
+            else:
+                st.error(msg)
+        except Exception as e:
+            st.error(f"Failed to read/validate updated PiN file: {e}")
     else:
         st.warning(translations["extrapolation_required"])
 
