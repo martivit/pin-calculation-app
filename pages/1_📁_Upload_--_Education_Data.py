@@ -405,12 +405,12 @@ if is_scenario_2:
 
             st.dataframe(df_updated)
 
-            #valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
-            #if valid:
-                #st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
-                #st.success("Updated PiN file uploaded and validated successfully!")
-            #else:
-                #st.error(msg)
+            valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
+            if valid:
+                st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
+                st.success("Updated PiN file uploaded and validated successfully!")
+            else:
+                st.error(msg)
         except Exception as e:
             st.error(f"Failed to read/validate updated PiN file: {e}")
     else:
