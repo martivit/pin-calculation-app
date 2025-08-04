@@ -357,14 +357,14 @@ if is_scenario_2:
     st.subheader(translations["title_pin_upload"])
     with st.container(border=True):
         # Example: expect a structured Excel/CSV input with the extrapolation results
-        uploaded_extrapolation_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
+        updated_2025_pin_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
 
-    if uploaded_extrapolation_file is not None:
-        st.session_state['uploaded_extrapolation_input'] = uploaded_extrapolation_file
-        st.success(translations.get("extrapolation_uploaded", "Extrapolation input uploaded successfully!"))
+    if updated_2025_pin_file is not None:
+        st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
+        st.success(translations["extrapolation_uploaded"])
         # You can add any parsing/validation here if needed
     else:
-        st.warning(translations.get("extrapolation_required", "Upload the extrapolation input to proceed."))
+        st.warning(translations["extrapolation_required"])
 
     user_selection = 'mmmm'  # keeps downstream logic consistent: treat as MSNA-only combination
 
@@ -514,15 +514,15 @@ else:
 # Check conditions to allow proceeding
 if is_scenario_2:
     # Scenario 2 requires: OCHA (or explicit no-OCHA) + extrapolation input
-    if (('no_upload_ocha_data' in st.session_state) or ('uploaded_ocha_data' in st.session_state)) and ('uploaded_extrapolation_input' in st.session_state):
+    if  ('uploaded_ocha_data' in st.session_state) and ('updated_2025_pin_file' in st.session_state):
         st.session_state.ready_to_proceed = True
-        st.success("You have completed all necessary steps for Scenario 2!")
+        st.success(translations["success_scenario2"])
     else:
         st.session_state.ready_to_proceed = False
-        if not (('no_upload_ocha_data' in st.session_state) or ('uploaded_ocha_data' in st.session_state)):
+        if not ('uploaded_ocha_data' in st.session_state):
             st.warning(translations["warning_ocha"])
-        if 'uploaded_extrapolation_input' not in st.session_state:
-            st.warning(translations.get("extrapolation_required", "Upload the extrapolation input to proceed."))
+        if 'updated_2025_pin_file' not in st.session_state:
+            st.warning(translations["extrapolation_required"])
 else:
     if user_selection == 'mmmm':
         check_conditions_and_proceed_onlymsna()
