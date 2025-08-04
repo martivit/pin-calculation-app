@@ -147,7 +147,10 @@ def validate_updated_pin_simple(df, required_columns):
     print(df_body.columns)
     missing_cols = [col for col in required_columns if col not in df_body.columns]
     if missing_cols:
-        return False, f"Missing required columns: {', '.join(missing_cols)}"
+        missing_msg = translations["missing_pin_columns"]
+        msg = missing_msg.format(cols=", ".join(missing_cols))
+
+        return False, msg
 
     # 2. Drop the first row for content checks
 
@@ -160,9 +163,12 @@ def validate_updated_pin_simple(df, required_columns):
             empty_cols.append(col)
 
     if empty_cols:
-        return False, f"The following required filled columns are entirely empty: {', '.join(empty_cols)}"
+        empty_msg= translations["empty_pin_column"]
+        msg2 = empty_msg.format(cols=", ".join(empty_cols))
 
-    return True, "Updated PiN file passes validation"
+        return False, msg2
+
+    return True, ""
 ##---------------------------------------------------------------------------------------------------------
 # Function to load the existing template from the file system
 def load_template():
@@ -411,7 +417,7 @@ if is_scenario_2:
             valid, msg = validate_updated_pin_simple(df_updated, REQUIRED_COLUMN_UPDATED_PIN)
             if valid:
                 st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
-                st.success("Updated PiN file uploaded and validated successfully!")
+                st.success(translations["extrapolation_uploaded"])
             else:
                 st.error(msg)
         except Exception as e:

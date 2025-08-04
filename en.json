@@ -152,8 +152,9 @@
     "SCENARIO_2" : "**Upload calculated PiN + secondary/expert knowledge for missing areas**",
     "title_pin_upload" : "3) Upload updated PiN file",
     "istruction_upload_pin" : "Please upload the file containing the calculated PiN for covered areas and any secondary/expert extrapolation inputs.",
-    "extrapolation_uploaded" : "Updated PiN file uploaded successfully!",
+    "extrapolation_uploaded" : "Updated PiN file uploaded successfully and validated!",
     "extrapolation_required": "Upload the updated PiN file to proceed",
-    "success_scenario2":"OCHA population figures and updated PiN file uploaded successfully!"
-  
+    "success_scenario2":"OCHA population figures and updated PiN file uploaded successfully!",
+    "missing_pin_columns": "Missing required columns: ",
+    "empty_pin_column" : "Empty required columns: "
   }
