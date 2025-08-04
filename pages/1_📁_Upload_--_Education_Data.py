@@ -395,10 +395,10 @@ if is_scenario_2:
     st.subheader(translations["title_pin_upload"])
     with st.container(border=True):
         # Example: expect a structured Excel/CSV input with the extrapolation results
-        uploaded_updated_2025_pin_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx", "csv"])
+        uploaded_updated_2025_pin_file = st.file_uploader(translations["istruction_upload_pin"], type=["xlsx"])
 
     if uploaded_updated_2025_pin_file is not None:
-        updated_2025_pin_file = pd.read_excel(uploaded_updated_2025_pin_file, engine='openpyxl', sheet_name=None)
+        updated_2025_pin_file = pd.read_excel(uploaded_updated_2025_pin_file, engine='openpyxl')
         st.session_state['updated_2025_pin_file'] = updated_2025_pin_file
         try:
             df_updated = st.session_state['updated_2025_pin_file']
