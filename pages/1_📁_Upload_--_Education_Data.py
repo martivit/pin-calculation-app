@@ -4,6 +4,7 @@ import time
 from shared_utils import language_selector
 from fuzzywuzzy import process, fuzz
 import numpy as np
+import unicodedata
 
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
@@ -134,28 +135,67 @@ def validate_columns_across_sheets(all_sheets):
     return column_matches, unmatched_columns
 
 ##---------------------------------------------------------------------------------------------------------
+def normalize_col(name: str) -> str:
+    if not isinstance(name, str):
+        name = str(name)
+    # Unicode normalization, strip, collapse internal whitespace, lowercase
+    name = unicodedata.normalize("NFKC", name)
+    name = " ".join(name.strip().split())
+    return name.lower()
+##---------------------------------------------------------------------------------------------------------
+def build_column_map(df_columns, required_columns, threshold=90):
+    """
+    Returns mapping from normalized required -> actual df column (original casing),
+    and list of unmatched required columns.
+    """
+    # Build lookup of normalized existing columns
+    normalized_to_actual = {normalize_col(c): c for c in df_columns}
+    existing_norms = list(normalized_to_actual.keys())
+
+    mapping = {}
+    unmatched = []
+    for req in required_columns:
+        req_norm = normalize_col(req)
+        # exact normalized match
+        if req_norm in normalized_to_actual:
+            mapping[req] = normalized_to_actual[req_norm]
+        else:
+            # fuzzy match against existing normalized names
+            best_match, score = process.extractOne(req_norm, existing_norms, scorer=fuzz.partial_ratio)
+            if best_match and score >= threshold:
+                mapping[req] = normalized_to_actual[best_match]
+            else:
+                unmatched.append(req)
+    return mapping, unmatched
+##---------------------------------------------------------------------------------------------------------
 def validate_updated_pin(df):
     """
-    Drop first row, then ensure required columns are present and that
-    REQUIRED_FILLED_COLUMN are not all empty/NaN.
+    Drop first row, normalize headers, check required columns exist (with fuzzy fallback),
+    and ensure required filled columns contain some non-empty values.
     Returns: (is_valid: bool, message: str)
     """
-    # Drop first row (assumed header-shift or metadata)
+    # Drop first row then reset
     df_proc = df.iloc[1:].reset_index(drop=True)
 
-    # Normalize column names to exact matches (could consider stripping whitespace)
-    missing = [col for col in REQUIRED_COLUMN_UPDATED_PIN if col not in df_proc.columns]
+    # Build mapping for required columns (both sets are same here)
+    mapping, missing = build_column_map(df_proc.columns, REQUIRED_COLUMN_UPDATED_PIN, threshold=90)
     if missing:
-        return False, f"Missing required columns: {', '.join(missing)}"
+        return False, f"Missing required columns (could not match): {', '.join(missing)}"
 
-    # Check that each required filled column has at least one non-empty value
+    # For downstream simplicity, rename the dataframe to canonical required names
+    df_renamed = df_proc.rename(columns={v: k for k, v in mapping.items()})
+
+    # Now check that each required-filled column is not entirely empty/"nan"
     empty_cols = []
     for col in REQUIRED_FILLED_COLUMN:
+        if col not in df_renamed.columns:
+            empty_cols.append(col)  # should not happen if mapping succeeded
+            continue
         series = (
-            df_proc[col]
-            .astype(str)                     # cast to string so we can strip
-            .str.strip()                     # remove whitespace
-            .replace({"": np.nan, "nan": np.nan, "NaN": np.nan})  # treat these as empty
+            df_renamed[col]
+            .astype(str)
+            .str.strip()
+            .replace({"": np.nan, "nan": np.nan, "NaN": np.nan})
         )
         if series.isna().all():
             empty_cols.append(col)
