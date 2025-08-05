@@ -155,7 +155,7 @@
     "SCENARIO_1" : "**First-time PiN calculation using MSNA 2025 (covered areas only)**",
     "SCENARIO_2" : "**Upload calculated PiN + secondary/expert knowledge for missing areas**",
     "title_pin_upload" : "3) Upload updated PiN file",
-    "istruction_upload_pin" : "A) Please upload the file containing the calculated PiN for covered areas AND the secondary/expert extrapolation inputs, the file is ***PiN_temporary_to_fill_yourcountry.xlsx***",
+    "istruction_upload_pin" : "A) Please upload the file containing the calculated PiN for covered areas AND the secondary/expert extrapolation inputs, the file is *PiN_temporary_to_fill_yourcountry.xlsx*",
     "extrapolation_uploaded" : "Updated PiN file uploaded successfully and validated!",
     "extrapolation_required": "Upload the updated PiN file to proceed",
     "success_scenario2":"OCHA population figures and updated PiN file uploaded successfully!",
