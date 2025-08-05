@@ -120,6 +120,7 @@
     "mismatch_admin_example": "For example, the MSNA data might be representative at Admin 2, while the HNO unit of analysis is Admin 3.<br>If you click this box, you are confirming that such a mismatch exists. In this case, ensure that the 'scope-fix' sheet in the OCHA file lists the mismatched administrative units and their corresponding levels. Refer to the provided template for guidance on how to correctly fill the 'scope-fix' sheet.",
     "download_all": "Download All PiN Documents",  
    "download_output1": "Download Temporary PiN file, to update",
+   "download_covered_area": "Download calculated PiN figures for covered areas only",
 
     "show_kobo":"Use the kobo questionaire to identify the correct MSNA indicators:",
     "expand_kobo":"Inspect MSNA indicators",
@@ -162,6 +163,6 @@
     "missing_pin_columns": "Missing required columns: {cols}",
     "empty_pin_column" : "Empty required columns: {cols}",
     "extrapolation_summary" : "Building on PiN results from MSNA 2025-covered areas and incorporating EC and expert input, we calculate updated PiN and extrapolate severity distributions for areas with no new 2025 data.",
-    "istruction_upload_pin_covered": "B) Please upload the file containing the calculated PiN for covered areas only, the file-name is ***yourCountry_PiN_targeted_MSNA_2025.xlsx***"
+    "istruction_upload_pin_covered": "B) Please upload the file containing the calculated PiN for covered areas only, the file-name is *yourCountry_PiN_targeted_MSNA_2025.xlsx*"
 
   }

@@ -276,6 +276,7 @@ if not step_2_hpc and not jena_country:
         
         
 
+timestamp = datetime.now().strftime("%m%d_%I%p")
 
 
 
@@ -306,7 +307,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
     # ------------------------ D. create Zip file with all important documents
-    zip_file_name = f"PiN_Documents_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.zip"
+    zip_file_name = f"PiN_Documents_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
         zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
@@ -328,7 +329,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
         file_name=zip_file_name,
         mime="application/zip"
     ):
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
 
         #if "github" in st.secrets and "token" in st.secrets["github"]:
             #st.write("✅ GitHub token found in secrets.")
@@ -402,25 +403,22 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
     output_1_2025 = merge_2025_contextDB (country,  ocha_data, Tot_PiN_by_admin, DATA_DIR_CONTEXT_DB)   
     ## format with color and headers the output_1_2025
     formatted_output_1_2025 = create_output1_user(output_1_2025)
-    output1_file_name = f"PiN_temporary_to_fill_{country_label}_{datetime.now().strftime('%m%d_%H')}.xlsx"
-    pin_by_status_file_name = f"{country_label}_PiN_targeted_MSNA_2025_{datetime.now().strftime('%m%d_%H')}.xlsx"
-
+    output1_file_name = f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx"
+    pin_by_status_file_name = f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx"
 
     ## donwload
     st.download_button(
         label=translations["download_output1"],
         data=formatted_output_1_2025,
         file_name=   output1_file_name)
-
-
-
-
-
-
+    st.download_button(
+        label=translations["download_covered_area"],
+        data=Tot_PiN_JIAF,
+        file_name=   pin_by_status_file_name)
 
 ###################################################################################################################################################
 ###################################################################################################################################################
-# 4.                  HYBRID countries, second and final download with updated PiN and extrapolation 
+# 4.      step_2_hpc = TRUE         HYBRID countries, second and final download with updated PiN and extrapolation
 ###################################################################################################################################################
 
 if step_2_hpc and hybrid_country:
@@ -447,7 +445,7 @@ if step_2_hpc and hybrid_country:
 
 ###################################################################################################################################################
 ###################################################################################################################################################
-# 5.                                                   Creation of output for HYBRID MSNA countries and donwnload
+# 5.                                          Creation of output for HYBRID MSNA countries and donwnload
 ###################################################################################################################################################
 
     label_total_pin_sheet = "PiN TOTAL"
@@ -456,14 +454,18 @@ if step_2_hpc and hybrid_country:
 
     # ------------------------ A. create excel PiN classic file
     if selected_language == "French":
-        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language,parameters=parameters_FR  )
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language  )
     else:
-        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language,parameters=parameters  )
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language )
 
 
 
+    file_path_updated_pin = f"PiN_results_{country}_{timestamp}.xlsx"
 
-
+    st.download_button(
+        label=translations["download_pin"],
+        data=ocha_excel,
+        file_name=   file_path_updated_pin)
 
 
 
