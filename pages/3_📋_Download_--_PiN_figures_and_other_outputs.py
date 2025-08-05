@@ -443,6 +443,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
 ###################################################################################################################################################
 
 if step_2_hpc and hybrid_country:
+    country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
 
     # --------- Locate and load the correct 2024 file from pin2024_cat ----------
     country_code = country.split("--")[-1].strip()
