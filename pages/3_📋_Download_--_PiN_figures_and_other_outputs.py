@@ -161,8 +161,21 @@ def create_zip_file_no_ocha(country_label, pin_percentage, indicator_output,word
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
 
-
-
+##--------------------------------------------------------------------------------------------------------------------
+def dict_of_dfs_to_bytesio_excel(dfs: dict[str, pd.DataFrame]) -> BytesIO:
+    """
+    Write each DataFrame in `dfs` to its own sheet in an in-memory Excel file.
+    Sheet names are the dict keys, truncated to 31 chars.
+    Returns a BytesIO you can feed directly to st.download_button.
+    """
+    output = BytesIO()
+    # use openpyxl engine so you get a true .xlsx
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        for sheet_name, df in dfs.items():
+            safe_name = str(sheet_name)[:31]
+            df.to_excel(writer, sheet_name=safe_name, index=False)
+    output.seek(0)
+    return output
 
 
 
@@ -406,6 +419,9 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
     output1_file_name = f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx"
     pin_by_status_file_name = f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx"
 
+    raw_excel = dict_of_dfs_to_bytesio_excel(Tot_PiN_JIAF)
+
+
     ## donwload
     st.download_button(
         label=translations["download_output1"],
@@ -416,8 +432,10 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
     
     st.download_button(
         label=translations["download_covered_area"],
-        data=Tot_PiN_JIAF,
-        file_name=   pin_by_status_file_name)
+        data=raw_excel,
+        file_name=   pin_by_status_file_name,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 
 ###################################################################################################################################################
 ###################################################################################################################################################
