@@ -97,6 +97,7 @@ ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
+no_ocha_data = False
 
 selected_language = "English"
 
@@ -147,14 +148,42 @@ if ocha_data is not None:
     label_total_pin_sheet = "PiN TOTAL"
 
 
-    ocha_excel = create_output(country_label,Tot_PiN_JIAF, final_overview_df, final_overview_df_OCHA, label_total_pin_sheet,  admin_var,  ocha= True, tot_severity=Tot_PiN_by_admin, selected_language=selected_language)
-
+    if selected_language == "French":
+        ocha_excel = create_output(
+            country_label,
+            Tot_PiN_JIAF,
+            final_overview_df,
+            final_overview_df_OCHA,
+            label_total_pin_sheet,
+            admin_var,
+            ocha=True,
+            tot_severity=Tot_PiN_by_admin,
+            selected_language=selected_language 
+        )
+    else:
+        ocha_excel = create_output(
+            country_label,
+            Tot_PiN_JIAF,
+            final_overview_df,
+            final_overview_df_OCHA,
+            label_total_pin_sheet,
+            admin_var,
+            ocha=True,
+            tot_severity=Tot_PiN_by_admin,
+            selected_language=selected_language 
+        )
     indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
 
     #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
     #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
+    print('============================================================================================================================================')
+    print('============================================================================================================================================')
+    print('============================================================================================================================================')
+    print('============================================================================================================================================')
+    print(final_overview_df)
+
     if selected_language == 'English':
-        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
 
     if selected_language == 'French':
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)

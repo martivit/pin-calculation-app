@@ -1174,7 +1174,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     IDP_suggestion = ['host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'pdi_famille','New IDPs','pdi', 'idp', 'idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
     returnee_suggestion = ['displaced_previously' ,'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees','REF', 'refugee','refugie', 'refugie','prl', 'refugiee', '3']
-    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp','idp_site','pdi_site' ,"In-camp"]
+    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
     template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']  
     
@@ -2120,9 +2120,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     # Add the single-row entries from collapsed_results_pop
     for category, df in collapsed_results_dimension_pop.items():
-        if df.empty:
-            print(f"Warning: dimension DataFrame for category {category} is empty, skipping.")
-            continue
         single_dimension_row = df.iloc[0].copy()
         if country != 'Afghanistan -- AFG':
             single_dimension_row['Category'] = f"{category} (5-17 y.o.)"
@@ -2178,9 +2175,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     dfs_overview_dimension_ToT_in_need.append(overview_dimension_ToT_in_need)
     # Add the single-row entries from collapsed_results_pop
     for category, df in collapsed_results_dimension_pop_in_need.items():
-        if df.empty:
-            print(f"Warning: in-need dimension DataFrame for category {category} is empty, skipping.")
-            continue
         single_dimension_row = df.iloc[0].copy()
         if country != 'Afghanistan -- AFG':
             single_dimension_row['Category'] = f"{category} (5-17 y.o.)"
@@ -2212,7 +2206,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     percentage_round = 1
     figures_round = 0
 
-    # Process Tot_PiN_JIAF rounding_dataframe
+    # Process Tot_PiN_JIAF DataFrames
     for category, df in Tot_PiN_JIAF.items():
         rounding_dataframe(df, figures_round, percentage_round)
         df[label_tot_population] = pd.to_numeric(df[label_tot_population], errors='coerce').round(figures_round)
