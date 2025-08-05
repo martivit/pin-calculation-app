@@ -337,7 +337,15 @@ def translate_labels(data, translation_dict):
 
 
 
-
+COUNTRY_CYCLE_MAP = [
+    'Central African Republic -- CAR':    [8, 12],
+    'Burkina Faso -- BFA':    [12, 0],
+    'Ethiopia -- ETH':    [12, 0],
+    'Democratic Republic of the Congo -- DRC':    [12, 0],
+    'Mali -- MLI':    [12, 0],
+    'Lebanon -- LBN':    [12, 0],
+    'Somalia -- SOM':    [15, 0],
+]
 
 ########################################################################################################################################
 ########################################################################################################################################
@@ -345,7 +353,7 @@ def translate_labels(data, translation_dict):
 ########################################################################################################################################
 ########################################################################################################################################
 def UPDATE_calculatePIN (country , pin_2025_updated_perc, ocha_data,
-                label ,  vector_cycle ,
+                label ,  
                 selected_language ):
     
     pin_2025_updated_perc = {
@@ -390,6 +398,10 @@ def UPDATE_calculatePIN (country , pin_2025_updated_perc, ocha_data,
 
     ocha_by_category = build_ocha_by_category(ocha_data, mapped_statuses)
     ####### ** 5 **       ------------------------------ creating tables with factors for the gender and school-cycle categories ------------------------------------------     #######
+    try:
+        vector_cycle = COUNTRY_CYCLE_MAP[country]
+    except KeyError:
+        raise ValueError(f"No entry for '{country}' in COUNTRY_CYCLE_MAP")
     single_cycle = (vector_cycle[1] == 0)
     primary_start = 6
     if country == 'Afghanistan -- AFG': 

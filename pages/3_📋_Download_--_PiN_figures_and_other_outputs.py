@@ -462,7 +462,7 @@ if step_2_hpc and hybrid_country:
     (merged_df_delta_all,pin_2025_updated) = extrapolate_df_2025_updated(updated_2025_pin_file, uploaded_covered_2025_pin, pin2024_cat)
 
     ## put together and recalculate the pin BY SEVERITY ONLY
-    (Tot_PiN_JIAF,Tot_PiN_by_admin,final_overview_df_OCHA,final_overview_df, pin_per_admin_status) = UPDATE_calculatePIN (country , pin_2025_updated, ocha_data ,label,vector_cycle, selected_language )
+    (Tot_PiN_JIAF,Tot_PiN_by_admin,final_overview_df_OCHA,final_overview_df, pin_per_admin_status) = UPDATE_calculatePIN (country , pin_2025_updated, ocha_data ,label, selected_language )
 
 ###################################################################################################################################################
 ###################################################################################################################################################
