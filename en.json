@@ -155,13 +155,13 @@
     "SCENARIO_1" : "**First-time PiN calculation using MSNA 2025 (covered areas only)**",
     "SCENARIO_2" : "**Upload calculated PiN + secondary/expert knowledge for missing areas**",
     "title_pin_upload" : "3) Upload updated PiN file",
-    "istruction_upload_pin" : "Please upload the file containing the calculated PiN for covered areas AND the secondary/expert extrapolation inputs.",
+    "istruction_upload_pin" : "A) Please upload the file containing the calculated PiN for covered areas AND the secondary/expert extrapolation inputs.",
     "extrapolation_uploaded" : "Updated PiN file uploaded successfully and validated!",
     "extrapolation_required": "Upload the updated PiN file to proceed",
     "success_scenario2":"OCHA population figures and updated PiN file uploaded successfully!",
     "missing_pin_columns": "Missing required columns: {cols}",
     "empty_pin_column" : "Empty required columns: {cols}",
     "extrapolation_summary" : "Building on PiN results from MSNA 2025-covered areas and incorporating EC and expert input, we calculate updated PiN and extrapolate severity distributions for areas with no new 2025 data.",
-    "istruction_upload_pin_covered": "Please upload the file containing the calculated PiN for covered areas only, the file-name is _targeted_MSNA_2025.xlsx"
+    "istruction_upload_pin_covered": "B) Please upload the file containing the calculated PiN for covered areas only, the file-name is yourCountry_PiN_targeted_MSNA_2025.xlsx"
 
   }
