@@ -31,13 +31,15 @@ steps = [translations["step1"],translations["step2"],translations["step3"],trans
 steps_nomsna = [translations["step4"]]
 
 current_step = st.session_state['current_step']
-new_step = stx.stepper_bar(steps=steps)
-
 if 'm' in data_combination:
-    new_step = stx.stepper_bar(steps=steps)
+    steps_to_show = steps
 else:
-    new_step = stx.stepper_bar(steps=steps_nomsna)
+    steps_to_show = steps_nomsna
 
+# call stepper_bar exactly once
+new_step = stx.stepper_bar(steps=steps_to_show)
+
+# update your session state
 if new_step is not None and new_step != st.session_state['current_step']:
     st.session_state['current_step'] = new_step
 
