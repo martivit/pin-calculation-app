@@ -10,6 +10,7 @@ import os
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Font, Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
+import datetime  
 
 
 int_2 = '2.0'
@@ -79,6 +80,18 @@ color_mapping = {
 }
 
 
+
+indicator_patterns = [
+    "severity (HPC2025) level 3 -- OoS children",
+    "severity (HPC2025) level 3 -- in-school children",
+    "severity (HPC2025) level 4 -- in-school children",
+    "severity (HPC2025) level 4 -- OoS children",
+    "severity (HPC2025) level 5 -- OoS children",
+    "severity (HPC2025) level 5 -- in-school children",
+]
+
+
+
 def write_with_block_headers(df,  blocks):
     wb = Workbook()
     ws = wb.active
@@ -95,9 +108,17 @@ def write_with_block_headers(df,  blocks):
 
 
     ws.append([])
-    
-    for row in dataframe_to_rows(df, index=False, header=True):
-        ws.append(row)
+
+    for raw_row in dataframe_to_rows(df, index=False, header=True):
+        clean_row = []
+        for cell in raw_row:
+            # leave None, str, int, float, bool, date/datetime alone...
+            if cell is None or isinstance(cell, (str, int, float, bool, datetime.date, datetime.datetime)):
+                clean_row.append(cell)
+            else:
+                # everything else gets coerced to its string repr
+                clean_row.append(str(cell))
+        ws.append(clean_row)
 
     max_row = ws.max_row
     max_col = ws.max_column
@@ -190,18 +211,6 @@ def write_with_block_headers(df,  blocks):
     return ws
 
 
-
-
-
-
-indicator_patterns = [
-    "severity (HPC2025) level 3 -- OoS children",
-    "severity (HPC2025) level 3 -- in-school children",
-    "severity (HPC2025) level 4 -- in-school children",
-    "severity (HPC2025) level 4 -- OoS children",
-    "severity (HPC2025) level 5 -- OoS children",
-    "severity (HPC2025) level 5 -- in-school children",
-]
 
 
 
