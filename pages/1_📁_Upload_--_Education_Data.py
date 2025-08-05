@@ -624,10 +624,12 @@ scope_test = st.session_state.get('scope_fix')
     #st.write("Scope-Fix sheet contains data!")
 #else:
     #st.write("Scope-Fix sheet is empty!")
-with col2: 
-    st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
+if is not is_scenario_2:
 
-#if is_scenario_2:
-    #with col2: 
-        #st.page_link("pages/3_🧮_Update_and_Download_--_PiN_figures_and_other_outputs.py",  label=translations['to_page3_2'], icon='🧮')
+    with col2: 
+        st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
+
+if is_scenario_2:
+    with col2: 
+        st.page_link("pages/3_📋_Download_--_PiN_figures_and_other_outputs.py", label=translations['to_page3'], icon='📋')
 
