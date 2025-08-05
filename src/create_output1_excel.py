@@ -208,7 +208,7 @@ def write_with_block_headers(df,  blocks):
     ws.row_dimensions[1].height = 25
     ws.row_dimensions[2].height = 60
 
-    return ws
+    return wb
 
 
 
