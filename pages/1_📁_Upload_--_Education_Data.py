@@ -358,7 +358,7 @@ else:
                     scope_fix = first_row_check >= 2
                     if scope_fix:
                         st.session_state['scope_fix'] = True
-                        st.write (scope_fix)
+                        #st.write (scope_fix)
                     st.success(translations["ok_upload"])
                 else:
                     st.error(check_message_ocha)  # Display the error message for 'ocha' sheet if checks fail
@@ -624,8 +624,7 @@ scope_test = st.session_state.get('scope_fix')
     #st.write("Scope-Fix sheet contains data!")
 #else:
     #st.write("Scope-Fix sheet is empty!")
-if is not is_scenario_2:
-
+if  not is_scenario_2:
     with col2: 
         st.page_link("pages/2_📊_Calculation_--_PiN.py", label=translations["proceed_to_calculation_label"], icon='📊')
 
