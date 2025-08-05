@@ -218,92 +218,86 @@ def write_with_block_headers(df,  blocks):
 
 def create_output1_user(output1_platform):
     
-    output = BytesIO()
-    with pd.ExcelWriter(output) as writer:
-        # dynamically pick up any df column that contains one of those patterns
-        indicator_cols = [
-            col for col in output1_platform.columns
-            if any(pat in col for pat in indicator_patterns)
-        ]
+   
+    indicator_cols = [
+        col for col in output1_platform.columns
+        if any(pat in col for pat in indicator_patterns)
+    ]
 
-        
-        blocks = [
-            { 'columns': ['Admin', 'Admin Pcode'],
-            'title': '2026 HPC scope',
-            'color': colors['white'] },
-            { 'columns': ['TotN',
-                '% severity levels 1-2', '# severity levels 1-2',
-                '% severity level 3',     '# severity level 3',
-                '% severity level 4',     '# severity level 4',
-                '% severity level 5',     '# severity level 5',
-                '% Tot PiN (severity levels 3-5)',
-                '# Tot PiN (severity levels 3-5)', 'Area severity'
-            ],
-            'title': 'PiN by severity, output platform with available 2025 data',
-            'color': colors['light_beige'] },
-            { 'columns': [
-                "Education needs stable (tick 'X' if no change from last year)",
-                "Education needs decreased (tick 'X' if improved from last year)",
-                "Education needs worsened (tick 'X' if worsened from last year)"
-            ],
-            'title': 'Evolution (2024 --> 2025) of the education needs',
-            'color': colors['light_yellow'] },
-            { 'columns': [
-                'Reference area Admin Pcode (for extrapolation)',
-                'Suggested reference area for extrapolation',
-                'Suggested reference area for extrapolation, LABEL',
-                'Alternative reference areas',
-                "Alternative reference areas, LABELS"
-            ],
-            'title': 'Identification of the proxy area',
-            'color': colors['light_pink'] },
-            { 'columns': [
-                '% severity (HPC2025) levels 1-2',
-                '% severity (HPC2025) level 3',
-                '% severity (HPC2025) level 4',
-                '% severity (HPC2025) level 5',
-                '% Tot PiN (severity (HPC2025) levels 3-5)'
-            ],
-            'title': 'PiN by severity, HPC 2025',
-            'color': colors['gray'] },
-            {  "columns": indicator_cols,
-            'title': 'PiN by indicator, HPC 2025',
-            'color': colors['stratagray'] },
-            { 'columns': [
-                'Attacks on Schools','Attacks on Universities','Military Occupation of Education facility',
-                'Arson attack on education facility','Forced Entry into education facility',
-                'Damage/Destruction To Ed facility Event','Educators Killed','Educators Injured',
-                'Educators Kidnapped','Educators Arrested','Students Attacked in School',
-                'Students Killed','Students Injured','Students Kidnapped','Students Arrested',
-                'Sexual Violence Affecting School Age Children','event_count','Date',
-                'Event Description','Location of event','Reported Perpetrator',
-                'Reported Perpetrator Name','Weapon Carried/Used','Type of education facility',
-                'Known Educators Kidnap Or Arrest Outcome','Known Student Kidnap Or Arrest Outcome','ADM3_PCODE'
-            ],
-            'title': 'Insecurity insight',
-            'color': colors['light_blue'] },
-            { 'columns': [
-                'admin1','admin2','fatalities','event_count_evt2','ADM3_PCODE_evt2',
-                'event_type','sub_event_type','actor1','assoc_actor_1','actor2',
-                'assoc_actor_2','notes','event_date'
-            ],
-            'title': 'ACLED',
-            'color': colors['dark_orange'] },
-            { 'columns': [
-                'ratio IDP/ToTN - HPC2025','ratio IDP/ToTN - HPC2026'
-            ],
-            'title': 'IDP ratios',
-            'color': colors['light_orange'] }
-        ]
-
-    output.seek(0)
-    workbook = load_workbook(output)
-
-    # Apply the final formatting to the workbook
-    workbook = write_with_block_headers(output1_platform, blocks)
     
-    formatted_output = BytesIO()
-    workbook.save(formatted_output)
-    formatted_output.seek(0)
+    blocks = [
+        { 'columns': ['Admin', 'Admin Pcode'],
+        'title': '2026 HPC scope',
+        'color': colors['white'] },
+        { 'columns': ['TotN',
+            '% severity levels 1-2', '# severity levels 1-2',
+            '% severity level 3',     '# severity level 3',
+            '% severity level 4',     '# severity level 4',
+            '% severity level 5',     '# severity level 5',
+            '% Tot PiN (severity levels 3-5)',
+            '# Tot PiN (severity levels 3-5)', 'Area severity'
+        ],
+        'title': 'PiN by severity, output platform with available 2025 data',
+        'color': colors['light_beige'] },
+        { 'columns': [
+            "Education needs stable (tick 'X' if no change from last year)",
+            "Education needs decreased (tick 'X' if improved from last year)",
+            "Education needs worsened (tick 'X' if worsened from last year)"
+        ],
+        'title': 'Evolution (2024 --> 2025) of the education needs',
+        'color': colors['light_yellow'] },
+        { 'columns': [
+            'Reference area Admin Pcode (for extrapolation)',
+            'Suggested reference area for extrapolation',
+            'Suggested reference area for extrapolation, LABEL',
+            'Alternative reference areas',
+            "Alternative reference areas, LABELS"
+        ],
+        'title': 'Identification of the proxy area',
+        'color': colors['light_pink'] },
+        { 'columns': [
+            '% severity (HPC2025) levels 1-2',
+            '% severity (HPC2025) level 3',
+            '% severity (HPC2025) level 4',
+            '% severity (HPC2025) level 5',
+            '% Tot PiN (severity (HPC2025) levels 3-5)'
+        ],
+        'title': 'PiN by severity, HPC 2025',
+        'color': colors['gray'] },
+        {  "columns": indicator_cols,
+        'title': 'PiN by indicator, HPC 2025',
+        'color': colors['stratagray'] },
+        { 'columns': [
+            'Attacks on Schools','Attacks on Universities','Military Occupation of Education facility',
+            'Arson attack on education facility','Forced Entry into education facility',
+            'Damage/Destruction To Ed facility Event','Educators Killed','Educators Injured',
+            'Educators Kidnapped','Educators Arrested','Students Attacked in School',
+            'Students Killed','Students Injured','Students Kidnapped','Students Arrested',
+            'Sexual Violence Affecting School Age Children','event_count','Date',
+            'Event Description','Location of event','Reported Perpetrator',
+            'Reported Perpetrator Name','Weapon Carried/Used','Type of education facility',
+            'Known Educators Kidnap Or Arrest Outcome','Known Student Kidnap Or Arrest Outcome','ADM3_PCODE'
+        ],
+        'title': 'Insecurity insight',
+        'color': colors['light_blue'] },
+        { 'columns': [
+            'admin1','admin2','fatalities','event_count_evt2','ADM3_PCODE_evt2',
+            'event_type','sub_event_type','actor1','assoc_actor_1','actor2',
+            'assoc_actor_2','notes','event_date'
+        ],
+        'title': 'ACLED',
+        'color': colors['dark_orange'] },
+        { 'columns': [
+            'ratio IDP/ToTN - HPC2025','ratio IDP/ToTN - HPC2026'
+        ],
+        'title': 'IDP ratios',
+        'color': colors['light_orange'] }
+    ]
+    # 3) generate a styled Workbook
+    wb = write_with_block_headers(output1_platform, blocks)
 
-    return formatted_output
+    # 4) save it into a BytesIO and return that
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output

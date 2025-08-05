@@ -410,7 +410,9 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
     st.download_button(
         label=translations["download_output1"],
         data=formatted_output_1_2025,
-        file_name=   output1_file_name)
+        file_name=   output1_file_name,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
     
     st.download_button(
         label=translations["download_covered_area"],
