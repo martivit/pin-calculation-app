@@ -62,6 +62,17 @@ label_tot_sev5_indicator_occupation = 'severity level 5 -- in-school children --
 label_tot_sev4_aggravating_circumstances = 'severity level 4, indicator: individual aggravating circumstances (cumulative of all Level 4 aggravating circumstances) -- % of children'
 label_tot_sev5_aggravating_circumstances = 'severity level 5, indicator: individual aggravating circumstances (cumulative of all Level 5 aggravating circumstances) -- % of children'
 
+
+COUNTRY_CYCLE_MAP = {
+    'Central African Republic -- CAR':    [8, 12],
+    'Burkina Faso -- BFA':    [12, 0],
+    'Ethiopia -- ETH':    [12, 0],
+    'Democratic Republic of the Congo -- DRC':    [12, 0],
+    'Mali -- MLI':    [12, 0],
+    'Lebanon -- LBN':    [12, 0],
+    'Somalia -- SOM':    [15, 0]
+}
+
 ##--------------------------------------------------------------------------------------------        
 def map_template_to_status(template_values, suggestions_mapping, status_values):
     results = {}
@@ -336,17 +347,6 @@ def translate_labels(data, translation_dict):
 ##--------------------------------------------------------------------------------------------        
 
 
-
-COUNTRY_CYCLE_MAP = [
-    'Central African Republic -- CAR':    [8, 12],
-    'Burkina Faso -- BFA':    [12, 0],
-    'Ethiopia -- ETH':    [12, 0],
-    'Democratic Republic of the Congo -- DRC':    [12, 0],
-    'Mali -- MLI':    [12, 0],
-    'Lebanon -- LBN':    [12, 0],
-    'Somalia -- SOM':    [15, 0]
-]
-
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
@@ -369,7 +369,7 @@ def UPDATE_calculatePIN (country , pin_2025_updated_perc, ocha_data,
     IDP_suggestion = ['host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'pdi_famille','New IDPs','pdi', 'idp', 'idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
     returnee_suggestion = ['displaced_previously' ,'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees','REF', 'refugee','refugie', 'refugie','prl', 'refugiee', '3']
-    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp','idp_site','pdi_site' "In-camp"]
+    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
     template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']  
     suggestions_mapping = {
