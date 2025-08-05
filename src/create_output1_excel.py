@@ -194,13 +194,27 @@ def write_with_block_headers(df,  blocks):
 
 
 
+indicator_patterns = [
+    "severity (HPC2025) level 3 -- OoS children",
+    "severity (HPC2025) level 3 -- in-school children",
+    "severity (HPC2025) level 4 -- in-school children",
+    "severity (HPC2025) level 4 -- OoS children",
+    "severity (HPC2025) level 5 -- OoS children",
+    "severity (HPC2025) level 5 -- in-school children",
+]
 
 
 
 
 
+def create_output1_user(output1_platform):
+    
+    # dynamically pick up any df column that contains one of those patterns
+    indicator_cols = [
+        col for col in output1_platform.columns
+        if any(pat in col for pat in indicator_patterns)
+    ]
 
-def create_output1_user(output1_platform, out_path):
     
     blocks = [
         { 'columns': ['Admin', 'Admin Pcode'],
@@ -241,13 +255,7 @@ def create_output1_user(output1_platform, out_path):
         ],
         'title': 'PiN by severity, HPC 2025',
         'color': colors['gray'] },
-        { 'columns': [
-            # all your long “indicator” columns…
-            'severity (HPC2025) level 3 -- OoS children -- % of children not accessing education who do not face any aggravating circumstances',
-            'severity (HPC2025) level 4 -- in-school children -- % of children whose education was disrupted by the school being used as shelter',
-            # …etc (list them all exactly as in df.columns) …
-            'severity (HPC2025) level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance: Child is associated with armed forces or armed groups '
-        ],
+        {  "columns": indicator_cols,
         'title': 'PiN by indicator, HPC 2025',
         'color': colors['stratagray'] },
         { 'columns': [
