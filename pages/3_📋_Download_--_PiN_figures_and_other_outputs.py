@@ -402,7 +402,9 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
     output_1_2025 = merge_2025_contextDB (country,  ocha_data, Tot_PiN_by_admin, DATA_DIR_CONTEXT_DB)   
     ## format with color and headers the output_1_2025
     formatted_output_1_2025 = create_output1_user(output_1_2025)
-    output1_file_name = f"PiN_temporary_to_fill_{country_label}_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    output1_file_name = f"PiN_temporary_to_fill_{country_label}_{datetime.now().strftime('%m%d_%H')}.xlsx"
+    pin_by_status_file_name = f"{country_label}_PiN_targeted_MSNA_2025_{datetime.now().strftime('%m%d_%H')}.xlsx"
+
 
     ## donwload
     st.download_button(
