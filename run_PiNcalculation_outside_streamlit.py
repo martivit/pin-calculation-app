@@ -38,37 +38,41 @@ from docx.shared import Inches
 
 
 
-## Lemuria
+## SOM
 status_var = 'population_group'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
 armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'no_indicator'
-barrier_var = 'resn_no_access'
-selected_severity_4_barriers = ['Cannot afford education-related costs (e.g. tuition, supplies, transportation)', 'There is a lack of interest/Education is not a priority either for the child or the household']#"L'école a été fermée en raison de dommages, d'une catastrophe naturelle ou d'un conflit.",, "Discrimination ou stigmatisation de l'enfant pour quelque raison que ce soit"
-selected_severity_5_barriers = ['School has been closed due to natural disaster', 'School has been closed due to conflict', 'Lack of or poor quality of teachers', 'Protection/safety risks while commuting to school', 'Protection/safety risks while at school', 'Child marriage, engagement or pregnancies']
+natural_hazard_var = 'edu_disrupted_hazards'
+barrier_var = 'edu_barrier'
+selected_severity_4_barriers = [
+"Protection risks whilst at the school " ,
+"Protection risks whilst travelling to the school "
+
+]
+selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'ind_age'
+age_var = 'edu_ind_age'
 gender_var = 'edu_ind_gender'
 start_school = 'September'
-country= 'Sparkea -- SPR'
+country= 'Somalia -- SOM'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_2: District'#'Admin_2: Regions' 
+admin_var = 'Admin_2: Districts'#'Admin_2: Regions' 
 
 vector_cycle = [12,16]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
-label = 'label::English'
+label = 'label::english'
 
 # Path to your Excel file
-excel_path = 'input/2025_MSNA_SPR.xlsx'
-excel_path_ocha = 'input/OCHA_SPR.xlsx'
+excel_path = 'input/REACH_MSNA_2024_FINAL_Cleaned_Weights.xlsx'
+excel_path_ocha = 'input/ocha_final.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -82,21 +86,21 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['main_clean_data']
-edu_data = dfs['edu_clean_data']
+household_data = dfs['main']
+edu_data = dfs['edu_ind']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
-no_ocha_data = False
+
 # Read specific sheets into separate dataframes
-#ocha_data = None
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
 mismatch_admin = False
 
-
 selected_language = "English"
+
+
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################
 #############################################################################        CALCULATION PIN              ################################################################################################
@@ -149,8 +153,8 @@ if ocha_data is not None:
 
     #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
     #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
-    #if selected_language == 'English':
-        #doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
+    if selected_language == 'English':
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
     if selected_language == 'French':
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
