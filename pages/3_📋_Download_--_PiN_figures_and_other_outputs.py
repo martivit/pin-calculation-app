@@ -411,6 +411,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
         label=translations["download_output1"],
         data=formatted_output_1_2025,
         file_name=   output1_file_name)
+    
     st.download_button(
         label=translations["download_covered_area"],
         data=Tot_PiN_JIAF,

@@ -295,6 +295,10 @@ def create_output1_user(output1_platform):
     ]
 
     # Finally run it:
-    formatted_file = write_with_block_headers(output1_platform, blocks)
-    return formatted_file
+    wb = write_with_block_headers(output1_platform, blocks)
+    # now serialize to BytesIO and return that
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
 
