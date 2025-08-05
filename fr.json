@@ -152,7 +152,7 @@
      "SCENARIO_1" : "**Premier calcul PiN à l'aide de MSNA 2025 (zones couvertes uniquement) **",
     "SCENARIO_2" : "**Télécharger le PiN calculé + connaissances secondaires/d'experts pour les zones manquantes**",
     "title_pin_upload" : "3) Télécharger le fichier PiN mis à jour",
-    "istruction_upload_pin" : "Veuillez télécharger le fichier contenant le PiN calculé pour les zones couvertes et toutes les données d'extrapolation secondaires/d'experts.",
+    "istruction_upload_pin" : "Veuillez télécharger le fichier contenant le PiN calculé pour les zones couvertes ET toutes les données d'extrapolation secondaires/d'experts.",
     "extrapolation_uploaded" : "Fichier PiN mis à jour téléchargé avec succès et validé!",
     "extrapolation_required": " Téléchargez le fichier PiN mis à jour pour continuer",
       "success_scenario2":"Les chiffres de population de l'OCHA et le fichier PiN mis à jour ont été téléchargés avec succès!",

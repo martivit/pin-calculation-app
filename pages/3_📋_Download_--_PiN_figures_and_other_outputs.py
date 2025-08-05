@@ -394,7 +394,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
 
 ###################################################################################################################################################
 ###################################################################################################################################################
-# 3.                                                  First step of temporary PiN file for HYBRID MSNA countries and donwnload
+# 3.                                   First step of temporary PiN file for HYBRID MSNA countries and donwnload
 ###################################################################################################################################################
 if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_country:
 
@@ -418,7 +418,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
 
 ###################################################################################################################################################
 ###################################################################################################################################################
-# 4.                  HYBRID countries, second and final download with updated PiN and extrapolation  + output and download
+# 4.                  HYBRID countries, second and final download with updated PiN and extrapolation 
 ###################################################################################################################################################
 
 if step_2_hpc and hybrid_country:
@@ -440,11 +440,23 @@ if step_2_hpc and hybrid_country:
     ## extrapolate using the delta method
     (merged_df_delta_all,pin_2025_updated) = extrapolate_df_2025_updated(updated_2025_pin_file, uploaded_covered_2025_pin, pin2024_cat)
 
-    ## put together
+    ## put together and recalculate the pin BY SEVERITY ONLY
     (Tot_PiN_JIAF,Tot_PiN_by_admin,final_overview_df_OCHA,final_overview_df, pin_per_admin_status) = UPDATE_calculatePIN (country , pin_2025_updated, ocha_data ,label,vector_cycle, selected_language )
 
+###################################################################################################################################################
+###################################################################################################################################################
+# 5.                                                   Creation of output for HYBRID MSNA countries and donwnload
+###################################################################################################################################################
 
+    label_total_pin_sheet = "PiN TOTAL"
 
+    ## here --> fix creation output to not have parameters
+
+    # ------------------------ A. create excel PiN classic file
+    if selected_language == "French":
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language,parameters=parameters_FR  )
+    else:
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language,parameters=parameters  )
 
 
 
