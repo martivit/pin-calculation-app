@@ -83,7 +83,14 @@ colors = {
 color_mapping = {'light_beige', 'light_orange', 'dark_orange', 'darker_orange'}
 
 
-
+def find_shapefile(shp_folder: str, country_code: str) -> str:
+    """Return the first .shp in shp_folder whose basename (lowercased)
+    starts with country_code.lower()."""
+    code = country_code.lower()
+    for path in glob.glob(os.path.join(shp_folder, "*.shp")):
+        if os.path.basename(path).lower().startswith(code):
+            return path
+    raise FileNotFoundError(f"No .shp for '{country_code}' in {shp_folder}")
 
 def make_map_severity(
     country: str,
@@ -104,15 +111,7 @@ def make_map_severity(
     Missing areas are light gray, legends/colorbars sit to the right.
     """
     country_code = country.split('--')[-1].strip()
-
-    # 1) locate the shapefile
-    pattern = os.path.join(shp_folder, f"{country_code}*")
-    shps = [p for p in glob.glob(pattern) if p.lower().endswith(".shp")]
-    if not shps:
-        raise FileNotFoundError(f"No .shp for '{country_code}' in {shp_folder}")
-    shp_path = shps[0]
-
-    # 2) load & normalize
+    shp_path = find_shapefile(shp_folder, country_code)
     gdf = gpd.read_file(shp_path)
     gdf = normalize_fn(gdf, shp_path)
 
