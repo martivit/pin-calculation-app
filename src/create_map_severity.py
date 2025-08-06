@@ -164,7 +164,7 @@ def make_map_severity(
             continue
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        gdf.boundary.plot(ax=ax, edgecolor="#36454F", linewidth=0.2)
+        gdf.boundary.plot(ax=ax, edgecolor="#36454F", linewidth=0.1)
 
 
         if is_cat:
