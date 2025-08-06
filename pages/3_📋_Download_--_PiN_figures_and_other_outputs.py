@@ -503,7 +503,9 @@ if step_2_hpc and hybrid_country:
         pin2024_cat = pd.read_excel(pin2024_file, sheet_name=None)
 
 
-    st.markdown(translations["extrapolation_summary"])
+    with st.container(border=True):
+
+        st.markdown(translations["extrapolation_summary"])
 
 
     ## extrapolate using the delta method
