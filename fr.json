@@ -162,7 +162,8 @@
       "download_output1": "Télécharger le fichier PiN temporaire, pour mettre à jour ",
     "extrapolation_summary" : "En nous appuyant sur les résultats PiN des zones couvertes par le MSNA 2025 et en intégrant les contributions de la CE et d'experts, nous calculons les PiN actualisés et extrapolons les distributions de gravité pour les zones pour lesquelles nous ne disposons pas de nouvelles données pour 2025.",
     "istruction_upload_pin_covered": "B)  Veuillez télécharger le fichier contenant le PiN calculé pour les zones couvertes uniquement, le nom du fichier est *votrepays_PiN_targeted_MSNA_2025.xlsx*",
-    "download_covered_area": "Télécharger les chiffres PiN calculés pour les zones couvertes uniquement"
+    "download_covered_area": "Télécharger les chiffres PiN calculés pour les zones couvertes uniquement",
+    "download_all_temporary": "Télécharger les documents PiN temporaires"
 
 
 

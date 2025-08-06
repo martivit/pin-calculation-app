@@ -400,7 +400,7 @@ def plot_snapshot(ax, df, title, color_dim, fixed_height):
     return p_no_need, p_acc, p_lc, p_env, p_agg
 ####################################################################################################################################################################
 ####################################################################################################################################################################
-def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language= 'English'):
+def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df = None, final_overview_dimension_df_in_need = None, selected_language= 'English'):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
 
     print(country_name)
@@ -431,6 +431,9 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     school_cycle_dimension_strata_wo_ece = ["Primary school", "Intermediate school-level", "Secondary school"]
     ece_strata = [ece_5yo_label]
 
+
+    ## ------------------------------------------------------------------------- w/o dimension
+
     ## reading values for different sessions
     # Retrieve data for the total row
     print(final_overview_df)
@@ -459,20 +462,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     tot_in_need_ece = row_ece[label_tot].values[0]
     tot_in_need_disability = row_disability[label_tot].values[0]
 
-    row_dimension_in_need = final_overview_dimension_df_in_need.loc[final_overview_dimension_df_in_need['Strata'] == tot_5_17_label]
-    tot_dimension_in_need = row_dimension_in_need[label_tot_population].values[0]
-    perc_acc_in_need = row_dimension_in_need[label_perc_acc].values[0]
-    num_acc_in_need = row_dimension_in_need[label_tot_acc].values[0]
-    perc_agg_in_need = row_dimension_in_need[label_perc_agg].values[0]
-    num_agg_in_need = row_dimension_in_need[label_tot_agg].values[0]
-    perc_env_in_need = row_dimension_in_need[label_perc_penv].values[0]
-    num_env_in_need = row_dimension_in_need[label_tot_penv].values[0]
-    perc_lc_in_need = row_dimension_in_need[label_perc_lc].values[0]
-    num_lc_in_need = row_dimension_in_need[label_tot_lc].values[0]
-
-    ###################### plot pop_group
-
-    # Data collection for the bar chart
+ # Data collection for the bar chart
     groups = []
     severity_3_groups = []
     severity_4_groups = []
@@ -500,6 +490,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
             text_line = f'{population_group}: {percentage_3_pop:.1f}% (severity 3), {percentage_4_pop:.1f}% (severity 4), {percentage_5_pop:.1f}% (severity 5)'
             text_data.append(text_line)  # Append the formatted string to the list
     text_str = '\n'.join(text_data)  # Join the strings with newlines
+
 
 
     ind = np.arange(len(groups))
@@ -555,254 +546,245 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     plt.close(fig)
 
 
-
-######################
-
-    # Plotting three sections in one figure
-# Calculate the number of bars in each subplot
-
-    # Filter the data for each section
-    df_gender = filter_data(final_overview_dimension_df, dimension_gender_strata)
-    df_ece = filter_data(final_overview_dimension_df, ece_strata)
-    df_school_cycles = filter_data(final_overview_dimension_df, school_cycle_dimension_strata_wo_ece)
-
-    num_bars_gender = len(df_gender)
-    num_bars_ece = len(df_ece)
-    num_bars_school_cycles = len(df_school_cycles)
-
-    # Proportionally allocate heights based on the number of bars in each subplot
-    total_bars = num_bars_gender + num_bars_ece + num_bars_school_cycles
-    height_ratio_gender = num_bars_gender / total_bars
-    height_ratio_ece = num_bars_ece / total_bars
-    height_ratio_school_cycles = num_bars_school_cycles / total_bars
-
-    # Plotting three sections in one figure with proportional heights for subplots
-    fig_subsection, axs_subsection = plt.subplots(
-        3, 1, figsize=(15, 18), 
-        gridspec_kw={'height_ratios': [height_ratio_gender, height_ratio_ece, height_ratio_school_cycles]}
-    )
-
-    fixed_bar_height = 0.8  # You can adjust this value as needed
-    label_snapshot_5yo = "Snapshot of ECE (5 y.o.)"
-    if country_name == 'Afghanistan':
-        label_snapshot_5yo = "Snapshot of ECE (6 y.o.)"
-
-    # Plot each section
-    p_no_need, p_acc, p_lc, p_env, p_agg = plot_snapshot(axs_subsection[0], df_gender, "Snapshot of gender", color_dim, fixed_bar_height)
-    plot_snapshot(axs_subsection[1], df_ece, label_snapshot_5yo, color_dim, fixed_bar_height)
-    plot_snapshot(axs_subsection[2], df_school_cycles, "Snapshot of school cycles", color_dim, fixed_bar_height)
+    ## ------------------------------------------------------------------------------------------------- <
 
 
-    # Add the shared legend at the bottom
-    legend_labels = [
-        'Not in need of education (severity 1-2)',
-        'OoS, lacking access to education',
-        'In-school children, studying in unacceptable basic learning conditions',
-        'In-school children, evolving in a non-protective education environment',
-        "OoS, facing individual aggravating circumstances"
-    ]
+    ## --------------------------------------------------------------------------------- with  dimension
 
-    fig_subsection.legend([p_no_need, p_acc, p_lc, p_env, p_agg], labels=legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.05),
-            fontsize=14, ncol=2, prop={'size': 14}, handlelength=3, handleheight=4)
-    
-    plt.text(0.5, -0.1, "* if the percentage of the need is <1%, the value is not reported in the graph",
-         ha='center', va='center', fontsize=14, transform=axs_subsection[2].transAxes)
-    # Adjust the layout
-    plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.15)  # Adjust margins for space
+    if final_overview_dimension_df is not None and final_overview_dimension_df_in_need is not None:
 
-    # Save or display the plot
-    bar_chart_path_subsection = "snapshot_grouped_horizontal_bar_chart.jpeg"
-    plt.savefig(bar_chart_path_subsection, format='jpeg', bbox_inches='tight', dpi=300)
-    plt.close(fig_subsection)
+        row_dimension_in_need = final_overview_dimension_df_in_need.loc[final_overview_dimension_df_in_need['Strata'] == tot_5_17_label]
+        tot_dimension_in_need = row_dimension_in_need[label_tot_population].values[0]
+        perc_acc_in_need = row_dimension_in_need[label_perc_acc].values[0]
+        num_acc_in_need = row_dimension_in_need[label_tot_acc].values[0]
+        perc_agg_in_need = row_dimension_in_need[label_perc_agg].values[0]
+        num_agg_in_need = row_dimension_in_need[label_tot_agg].values[0]
+        perc_env_in_need = row_dimension_in_need[label_perc_penv].values[0]
+        num_env_in_need = row_dimension_in_need[label_tot_penv].values[0]
+        perc_lc_in_need = row_dimension_in_need[label_perc_lc].values[0]
+        num_lc_in_need = row_dimension_in_need[label_tot_lc].values[0]
+
+        
+        # Filter the data for each section
+        df_gender = filter_data(final_overview_dimension_df, dimension_gender_strata)
+        df_ece = filter_data(final_overview_dimension_df, ece_strata)
+        df_school_cycles = filter_data(final_overview_dimension_df, school_cycle_dimension_strata_wo_ece)
+
+        num_bars_gender = len(df_gender)
+        num_bars_ece = len(df_ece)
+        num_bars_school_cycles = len(df_school_cycles)
+
+        # Proportionally allocate heights based on the number of bars in each subplot
+        total_bars = num_bars_gender + num_bars_ece + num_bars_school_cycles
+        height_ratio_gender = num_bars_gender / total_bars
+        height_ratio_ece = num_bars_ece / total_bars
+        height_ratio_school_cycles = num_bars_school_cycles / total_bars
+
+        # Plotting three sections in one figure with proportional heights for subplots
+        fig_subsection, axs_subsection = plt.subplots(
+            3, 1, figsize=(15, 18), 
+            gridspec_kw={'height_ratios': [height_ratio_gender, height_ratio_ece, height_ratio_school_cycles]}
+        )
+
+        fixed_bar_height = 0.8  # You can adjust this value as needed
+        label_snapshot_5yo = "Snapshot of ECE (5 y.o.)"
+        if country_name == 'Afghanistan':
+            label_snapshot_5yo = "Snapshot of ECE (6 y.o.)"
+
+        # Plot each section
+        p_no_need, p_acc, p_lc, p_env, p_agg = plot_snapshot(axs_subsection[0], df_gender, "Snapshot of gender", color_dim, fixed_bar_height)
+        plot_snapshot(axs_subsection[1], df_ece, label_snapshot_5yo, color_dim, fixed_bar_height)
+        plot_snapshot(axs_subsection[2], df_school_cycles, "Snapshot of school cycles", color_dim, fixed_bar_height)
 
 
+        # Add the shared legend at the bottom
+        legend_labels = [
+            'Not in need of education (severity 1-2)',
+            'OoS, lacking access to education',
+            'In-school children, studying in unacceptable basic learning conditions',
+            'In-school children, evolving in a non-protective education environment',
+            "OoS, facing individual aggravating circumstances"
+        ]
 
-    markertaile = 17
+        fig_subsection.legend([p_no_need, p_acc, p_lc, p_env, p_agg], labels=legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.05),
+                fontsize=14, ncol=2, prop={'size': 14}, handlelength=3, handleheight=4)
+        
+        plt.text(0.5, -0.1, "* if the percentage of the need is <1%, the value is not reported in the graph",
+            ha='center', va='center', fontsize=14, transform=axs_subsection[2].transAxes)
+        # Adjust the layout
+        plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.15)  # Adjust margins for space
 
-    # Assuming `dimension_gender_strata` and `group_gender` are defined somewhere in your code
-    # Lists to store data
-    groups_dimension_gender = []
-    no_need_groups_gender = []
-    acc_groups_gender = []
-    lc_groups_gender = []
-    env_groups_gender = []
-    agg_groups_gender = []
-
-    # Iterate over the DataFrame rows to collect the content
-    for _, row_pop_dim_gender in final_overview_dimension_df.iterrows():
-        strata_gender = row_pop_dim_gender['Strata']
-        perc_no_need_gender = row_pop_dim_gender[label_perc_out]
-        perc_acc_gender = row_pop_dim_gender[label_perc_acc]
-        perc_agg_gender = row_pop_dim_gender[label_perc_agg]
-        perc_env_gender = row_pop_dim_gender[label_perc_penv]
-        perc_lc_gender = row_pop_dim_gender[label_perc_lc]
-
-        # Ensure that we're only adding strata that are relevant
-        if strata_gender in dimension_gender_strata:     
-            groups_dimension_gender.append(strata_gender)
-            no_need_groups_gender.append(perc_no_need_gender)
-            acc_groups_gender.append(perc_acc_gender)
-            lc_groups_gender.append(perc_lc_gender)
-            env_groups_gender.append(perc_env_gender)
-            agg_groups_gender.append(perc_agg_gender)
-
-    # Reverse the lists to maintain the correct order
-    #groups_dimension_gender.reverse()
-    #no_need_groups_gender.reverse()
-    #acc_groups_gender.reverse()
-    #lc_groups_gender.reverse()
-    #env_groups_gender.reverse()
-    #agg_groups_gender.reverse()
-
-    # Define need labels and group colors
-    need_labels = [
-        'Not in need of education \n(severity 1-2)',
-        'OoS, lacking access to education',
-        'In-school children, \nstudying in unacceptable \nbasic learning conditions',
-        'In-school children, \nevolving in a non-protective \neducation environment',
-        "OoS, facing individual \naggravating circumstances"
-    ]
-    # Create the plot
-    fig_dim_gender, ax_dim_gender = plt.subplots(figsize=(14, 10))  # Adjust size as needed
-
-    # Plot each group's data for all needs
-    if country_name != 'Afghanistan':
-        for i, group in enumerate(groups_dimension_gender):
-            ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender[group], markersize=markertaile, label=group)
-            ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender[group], markersize=markertaile)
-            ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender[group], markersize=markertaile)
-            ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender[group], markersize=markertaile)
-            ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender[group], markersize=markertaile)
-    else:
-        for i, group in enumerate(groups_dimension_gender):
-            ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender_afg[group], markersize=markertaile, label=group)
-            ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender_afg[group], markersize=markertaile)
-            ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender_afg[group], markersize=markertaile)
-            ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender_afg[group], markersize=markertaile)
-            ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender_afg[group], markersize=markertaile)
+        # Save or display the plot
+        bar_chart_path_subsection = "snapshot_grouped_horizontal_bar_chart.jpeg"
+        plt.savefig(bar_chart_path_subsection, format='jpeg', bbox_inches='tight', dpi=300)
+        plt.close(fig_subsection)
 
 
 
-    # Customize the plot
-    ax_dim_gender.set_xlabel('Percentage of children affected by:', fontsize=18)
-    ax_dim_gender.set_ylabel('')
-    ax_dim_gender.set_title('')
-    ax_dim_gender.set_xlim(0, max(no_need_groups_gender + acc_groups_gender + lc_groups_gender + env_groups_gender + agg_groups_gender) + 5)
-    ax_dim_gender.set_yticks(np.arange(len(need_labels)))
-    ax_dim_gender.set_yticklabels(need_labels, fontsize=20)
-    ax_dim_gender.tick_params(axis='x', labelsize=16)
+        markertaile = 17
 
-    # Add a grid for better readability
-    ax_dim_gender.xaxis.grid(True, linestyle='--', which='major', color='gray', alpha=0.7)
+        # Assuming `dimension_gender_strata` and `group_gender` are defined somewhere in your code
+        # Lists to store data
+        groups_dimension_gender = []
+        no_need_groups_gender = []
+        acc_groups_gender = []
+        lc_groups_gender = []
+        env_groups_gender = []
+        agg_groups_gender = []
 
-    # Add a legend for groups
-    ax_dim_gender.legend(
-        title="Gender", 
-        title_fontsize=18, 
-        loc='upper right', 
-        bbox_to_anchor=(1, 1), 
-        fontsize=18,
-        borderaxespad=0.
-    )
+        # Iterate over the DataFrame rows to collect the content
+        for _, row_pop_dim_gender in final_overview_dimension_df.iterrows():
+            strata_gender = row_pop_dim_gender['Strata']
+            perc_no_need_gender = row_pop_dim_gender[label_perc_out]
+            perc_acc_gender = row_pop_dim_gender[label_perc_acc]
+            perc_agg_gender = row_pop_dim_gender[label_perc_agg]
+            perc_env_gender = row_pop_dim_gender[label_perc_penv]
+            perc_lc_gender = row_pop_dim_gender[label_perc_lc]
 
-    # Adjust plot layout for compactness
-    plt.subplots_adjust(left=0.15, right=0.85, top=0.9, bottom=0.1)
-
-    # Save the plot
-    bar_chart_path_dim_gender = "gender_need.jpeg"
-    plt.savefig(bar_chart_path_dim_gender, format='jpeg', bbox_inches='tight', dpi=300)  # Save with high quality
-    plt.close(fig_dim_gender)
-
+            # Ensure that we're only adding strata that are relevant
+            if strata_gender in dimension_gender_strata:     
+                groups_dimension_gender.append(strata_gender)
+                no_need_groups_gender.append(perc_no_need_gender)
+                acc_groups_gender.append(perc_acc_gender)
+                lc_groups_gender.append(perc_lc_gender)
+                env_groups_gender.append(perc_env_gender)
+                agg_groups_gender.append(perc_agg_gender)
 
 
 
+        # Define need labels and group colors
+        need_labels = [
+            'Not in need of education \n(severity 1-2)',
+            'OoS, lacking access to education',
+            'In-school children, \nstudying in unacceptable \nbasic learning conditions',
+            'In-school children, \nevolving in a non-protective \neducation environment',
+            "OoS, facing individual \naggravating circumstances"
+        ]
+        # Create the plot
+        fig_dim_gender, ax_dim_gender = plt.subplots(figsize=(14, 10))  # Adjust size as needed
+
+        # Plot each group's data for all needs
+        if country_name != 'Afghanistan':
+            for i, group in enumerate(groups_dimension_gender):
+                ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender[group], markersize=markertaile, label=group)
+                ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender[group], markersize=markertaile)
+                ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender[group], markersize=markertaile)
+                ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender[group], markersize=markertaile)
+                ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender[group], markersize=markertaile)
+        else:
+            for i, group in enumerate(groups_dimension_gender):
+                ax_dim_gender.plot([no_need_groups_gender[i]], [need_labels[0]], 'o', color=group_gender_afg[group], markersize=markertaile, label=group)
+                ax_dim_gender.plot([acc_groups_gender[i]], [need_labels[1]], 'o', color=group_gender_afg[group], markersize=markertaile)
+                ax_dim_gender.plot([lc_groups_gender[i]], [need_labels[2]], 'o', color=group_gender_afg[group], markersize=markertaile)
+                ax_dim_gender.plot([env_groups_gender[i]], [need_labels[3]], 'o', color=group_gender_afg[group], markersize=markertaile)
+                ax_dim_gender.plot([agg_groups_gender[i]], [need_labels[4]], 'o', color=group_gender_afg[group], markersize=markertaile)
 
 
 
+        # Customize the plot
+        ax_dim_gender.set_xlabel('Percentage of children affected by:', fontsize=18)
+        ax_dim_gender.set_ylabel('')
+        ax_dim_gender.set_title('')
+        ax_dim_gender.set_xlim(0, max(no_need_groups_gender + acc_groups_gender + lc_groups_gender + env_groups_gender + agg_groups_gender) + 5)
+        ax_dim_gender.set_yticks(np.arange(len(need_labels)))
+        ax_dim_gender.set_yticklabels(need_labels, fontsize=20)
+        ax_dim_gender.tick_params(axis='x', labelsize=16)
+
+        # Add a grid for better readability
+        ax_dim_gender.xaxis.grid(True, linestyle='--', which='major', color='gray', alpha=0.7)
+
+        # Add a legend for groups
+        ax_dim_gender.legend(
+            title="Gender", 
+            title_fontsize=18, 
+            loc='upper right', 
+            bbox_to_anchor=(1, 1), 
+            fontsize=18,
+            borderaxespad=0.
+        )
+
+        # Adjust plot layout for compactness
+        plt.subplots_adjust(left=0.15, right=0.85, top=0.9, bottom=0.1)
+
+        # Save the plot
+        bar_chart_path_dim_gender = "gender_need.jpeg"
+        plt.savefig(bar_chart_path_dim_gender, format='jpeg', bbox_inches='tight', dpi=300)  # Save with high quality
+        plt.close(fig_dim_gender)
+
+
+        # Lists to store data
+        groups_dimension_school = []
+        no_need_groups_school = []
+        acc_groups_school = []
+        lc_groups_school = []
+        env_groups_school = []
+        agg_groups_school = []
+
+        # Iterate over the DataFrame rows to collect the content
+        for _, row_pop_dim_school in final_overview_dimension_df.iterrows():
+            strata_school = row_pop_dim_school['Strata']
+            perc_no_need_school = row_pop_dim_school[label_perc_out]
+            perc_acc_school = row_pop_dim_school[label_perc_acc]
+            perc_agg_school = row_pop_dim_school[label_perc_agg]
+            perc_env_school = row_pop_dim_school[label_perc_penv]
+            perc_lc_school = row_pop_dim_school[label_perc_lc]
+
+            # Ensure that we're only adding strata that are relevant
+            if strata_school in school_cycle_dimension_strata:     
+                groups_dimension_school.append(strata_school)
+                no_need_groups_school.append(perc_no_need_school)
+                acc_groups_school.append(perc_acc_school)
+                lc_groups_school.append(perc_lc_school)
+                env_groups_school.append(perc_env_school)
+                agg_groups_school.append(perc_agg_school)
+
+        # Create the plot
+        fig_dim_school, ax_dim_school = plt.subplots(figsize=(14, 10))  # Adjust size as needed
+
+        # Plot each group's data for all needs
+        
+        for i, group in enumerate(groups_dimension_school):
+            ax_dim_school.plot([no_need_groups_school[i]], [need_labels[0]], 'o', color=color_school[i], markersize=markertaile, label=group)
+            ax_dim_school.plot([acc_groups_school[i]], [need_labels[1]], 'o', color=color_school[i], markersize=markertaile)
+            ax_dim_school.plot([lc_groups_school[i]], [need_labels[2]], 'o', color=color_school[i], markersize=markertaile)
+            ax_dim_school.plot([env_groups_school[i]], [need_labels[3]], 'o', color=color_school[i], markersize=markertaile)
+            ax_dim_school.plot([agg_groups_school[i]], [need_labels[4]], 'o', color=color_school[i], markersize=markertaile)
+
+
+        # Customize the plot
+        ax_dim_school.set_xlabel('Percentage of children affected by:', fontsize=18)
+        ax_dim_school.set_ylabel('')
+        ax_dim_school.set_title('')
+        ax_dim_school.set_xlim(0, max(no_need_groups_school + acc_groups_school + lc_groups_school + env_groups_school + agg_groups_school) + 5)
+        ax_dim_school.set_yticks(np.arange(len(need_labels)))
+        ax_dim_school.set_yticklabels(need_labels, fontsize=20)
+        ax_dim_school.tick_params(axis='x', labelsize=16)
+
+        # Add a grid for better readability
+        ax_dim_school.xaxis.grid(True, linestyle='--', which='major', color='gray', alpha=0.7)
+
+        # Add a legend for groups
+        ax_dim_school.legend(
+            title="School-aged", 
+            title_fontsize=18, 
+            loc='upper right', 
+            bbox_to_anchor=(1, 1), 
+            fontsize=18,
+            borderaxespad=0.
+        )
+
+
+        # Adjust plot layout for compactness
+        plt.subplots_adjust(left=0.15, right=0.85, top=0.9, bottom=0.1)
+
+        # Save the plot
+        bar_chart_path_dim_school = "school_need.jpeg"
+        plt.savefig(bar_chart_path_dim_school, format='jpeg', bbox_inches='tight', dpi=300)  # Save with high quality
+        plt.close(fig_dim_school)
 
 
 
-
-    # Lists to store data
-    groups_dimension_school = []
-    no_need_groups_school = []
-    acc_groups_school = []
-    lc_groups_school = []
-    env_groups_school = []
-    agg_groups_school = []
-
-    # Iterate over the DataFrame rows to collect the content
-    for _, row_pop_dim_school in final_overview_dimension_df.iterrows():
-        strata_school = row_pop_dim_school['Strata']
-        perc_no_need_school = row_pop_dim_school[label_perc_out]
-        perc_acc_school = row_pop_dim_school[label_perc_acc]
-        perc_agg_school = row_pop_dim_school[label_perc_agg]
-        perc_env_school = row_pop_dim_school[label_perc_penv]
-        perc_lc_school = row_pop_dim_school[label_perc_lc]
-
-        # Ensure that we're only adding strata that are relevant
-        if strata_school in school_cycle_dimension_strata:     
-            groups_dimension_school.append(strata_school)
-            no_need_groups_school.append(perc_no_need_school)
-            acc_groups_school.append(perc_acc_school)
-            lc_groups_school.append(perc_lc_school)
-            env_groups_school.append(perc_env_school)
-            agg_groups_school.append(perc_agg_school)
-
-    # Reverse the lists to maintain the correct order
-    #groups_dimension_school.reverse()
-    #no_need_groups_school.reverse()
-    #acc_groups_school.reverse()
-    #lc_groups_school.reverse()
-    #env_groups_school.reverse()
-    #agg_groups_school.reverse()
-
-    # Define need labels and group colors
-
-    # Create the plot
-    fig_dim_school, ax_dim_school = plt.subplots(figsize=(14, 10))  # Adjust size as needed
-
-    # Plot each group's data for all needs
-    
-    for i, group in enumerate(groups_dimension_school):
-        ax_dim_school.plot([no_need_groups_school[i]], [need_labels[0]], 'o', color=color_school[i], markersize=markertaile, label=group)
-        ax_dim_school.plot([acc_groups_school[i]], [need_labels[1]], 'o', color=color_school[i], markersize=markertaile)
-        ax_dim_school.plot([lc_groups_school[i]], [need_labels[2]], 'o', color=color_school[i], markersize=markertaile)
-        ax_dim_school.plot([env_groups_school[i]], [need_labels[3]], 'o', color=color_school[i], markersize=markertaile)
-        ax_dim_school.plot([agg_groups_school[i]], [need_labels[4]], 'o', color=color_school[i], markersize=markertaile)
-
-
-    # Customize the plot
-    ax_dim_school.set_xlabel('Percentage of children affected by:', fontsize=18)
-    ax_dim_school.set_ylabel('')
-    ax_dim_school.set_title('')
-    ax_dim_school.set_xlim(0, max(no_need_groups_school + acc_groups_school + lc_groups_school + env_groups_school + agg_groups_school) + 5)
-    ax_dim_school.set_yticks(np.arange(len(need_labels)))
-    ax_dim_school.set_yticklabels(need_labels, fontsize=20)
-    ax_dim_school.tick_params(axis='x', labelsize=16)
-
-    # Add a grid for better readability
-    ax_dim_school.xaxis.grid(True, linestyle='--', which='major', color='gray', alpha=0.7)
-
-    # Add a legend for groups
-    ax_dim_school.legend(
-        title="School-aged", 
-        title_fontsize=18, 
-        loc='upper right', 
-        bbox_to_anchor=(1, 1), 
-        fontsize=18,
-        borderaxespad=0.
-    )
-
-
-    # Adjust plot layout for compactness
-    plt.subplots_adjust(left=0.15, right=0.85, top=0.9, bottom=0.1)
-
-    # Save the plot
-    bar_chart_path_dim_school = "school_need.jpeg"
-    plt.savefig(bar_chart_path_dim_school, format='jpeg', bbox_inches='tight', dpi=300)  # Save with high quality
-    plt.close(fig_dim_school)
-
+    ## ------------------------------------------------------------------------------------------------- <
 
 
 
@@ -1178,114 +1160,106 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     # Insert the bar chart after the corresponding section
     doc.add_picture(bar_chart_path, width=Inches(6))  # Adjust the width as needed
 
+    if final_overview_dimension_df is not None and final_overview_dimension_df_in_need is not None:
 
-    ##############################################################
-    section_needs_in_need = doc.add_heading('Unpacking children needs', level=3)
-    section_needs_in_need = section_needs_in_need.runs[0]
-    section_needs_in_need.font.size = Pt(18)  # Customize the section header size
-    section_needs_in_need.font.name = 'Calibri'
-    section_needs_in_need.alignment = 0  # Left align
+        ##############################################################
+        section_needs_in_need = doc.add_heading('Unpacking children needs', level=3)
+        section_needs_in_need = section_needs_in_need.runs[0]
+        section_needs_in_need.font.size = Pt(18)  # Customize the section header size
+        section_needs_in_need.font.name = 'Calibri'
+        section_needs_in_need.alignment = 0  # Left align
 
-    intro_need = doc.add_paragraph("What is driving the severity of children in needs?")
-    intro_need_format = intro_need.runs[0]
-    intro_need_format.font.name = 'Calibri'
-    intro_need_format.font.size = Pt(16)
-    # Add the new text with bullet points
-    bullet_point_text = (
-        "Children in need are categorized based on four key dimensions of the Education People in Need (PiN) framework: "
-        "Access to education, Learning conditions, Protection level in or on the way to school, and Aggravating circumstances. "
-        "These dimensions determine their severity level:"
-    )
-    # Add the paragraph for the introductory sentence
-    intro_paragraph = doc.add_paragraph(bullet_point_text)
-    intro_paragraph_format = intro_paragraph.runs[0]
-    intro_paragraph_format.font.name = 'Calibri'
-    intro_paragraph_format.font.size = Pt(12)
+        intro_need = doc.add_paragraph("What is driving the severity of children in needs?")
+        intro_need_format = intro_need.runs[0]
+        intro_need_format.font.name = 'Calibri'
+        intro_need_format.font.size = Pt(16)
+        # Add the new text with bullet points
+        bullet_point_text = (
+            "Children in need are categorized based on four key dimensions of the Education People in Need (PiN) framework: "
+            "Access to education, Learning conditions, Protection level in or on the way to school, and Aggravating circumstances. "
+            "These dimensions determine their severity level:"
+        )
+        # Add the paragraph for the introductory sentence
+        intro_paragraph = doc.add_paragraph(bullet_point_text)
+        intro_paragraph_format = intro_paragraph.runs[0]
+        intro_paragraph_format.font.name = 'Calibri'
+        intro_paragraph_format.font.size = Pt(12)
 
-    # Create bullet points
-    bullet_points = [
-        "Lack of access to school: This applies to children who fall into severity 3 and are not accessing school at all.",
-        "Studying in unacceptable basic learning conditions: These children are assigned to severity 3, but they do have access to school. However, the quality of their learning environment is extremely poor and inadequate.",
-        "Evolve in a non-protective education environment: Children assigned to severity 4 or 5 who are attending school but in an environment that does not ensure their safety or protection.",
-        "Face aggravating circumstances preventing their access to education: Children assigned to either severity 4 or 5, where external factors significantly affect their ability to attend school, leading to a lack of access to education."
-    ]
+        # Create bullet points
+        bullet_points = [
+            "Lack of access to school: This applies to children who fall into severity 3 and are not accessing school at all.",
+            "Studying in unacceptable basic learning conditions: These children are assigned to severity 3, but they do have access to school. However, the quality of their learning environment is extremely poor and inadequate.",
+            "Evolve in a non-protective education environment: Children assigned to severity 4 or 5 who are attending school but in an environment that does not ensure their safety or protection.",
+            "Face aggravating circumstances preventing their access to education: Children assigned to either severity 4 or 5, where external factors significantly affect their ability to attend school, leading to a lack of access to education."
+        ]
 
-    # Add each bullet point with formatting
-    for point in bullet_points:
-        bullet_paragraph = doc.add_paragraph(style='List Bullet')
-        bullet_run = bullet_paragraph.add_run(point)
-        bullet_run.font.name = 'Calibri'
-        bullet_run.font.size = Pt(12)
+        # Add each bullet point with formatting
+        for point in bullet_points:
+            bullet_paragraph = doc.add_paragraph(style='List Bullet')
+            bullet_run = bullet_paragraph.add_run(point)
+            bullet_run.font.name = 'Calibri'
+            bullet_run.font.size = Pt(12)
 
-    ## table need
-    create_dimension_table(
-        doc=doc,
-        label="all",
-        perc_acc=perc_acc_in_need, num_acc=num_acc_in_need,
-        perc_lc= perc_lc_in_need, num_lc=num_lc_in_need,
-        perc_env= perc_env_in_need, num_env=num_env_in_need,
-        perc_agg=perc_agg_in_need, num_agg=num_agg_in_need,
-        total_in_need=tot_dimension_in_need,
-        font = 11
-    )
-    doc.add_paragraph("")
-    ## table need by pop_group
-    for _, row_pop in final_overview_dimension_df_in_need.iterrows():
-        population_group = row_pop['Population group'].upper()  # Convert to uppercase
-        strata = row_pop['Strata']
-        perc_acc = row_pop[label_perc_acc]
-        num_acc = row_pop[label_tot_acc]
-        perc_agg = row_pop[label_perc_agg]
-        num_agg = row_pop[label_tot_agg]
-        perc_env = row_pop[label_perc_penv]
-        num_env = row_pop[label_tot_penv]
-        perc_lc = row_pop[label_perc_lc]
-        num_lc = row_pop[label_tot_lc]
-        tot_dimension_in_need = row_pop[label_tot_population]
-        if strata not in not_pop_group_columns_overview:     
-            create_dimension_table(
-                doc=doc,
-                label=population_group,
-                perc_acc=perc_acc, num_acc=num_acc,
-                perc_lc= perc_lc, num_lc=num_lc,
-                perc_env= perc_env, num_env=num_env,
-                perc_agg=perc_agg, num_agg=num_agg,
-                total_in_need=tot_dimension_in_need,
-                font = 9
-            )
-            doc.add_paragraph("")
+        ## table need
+        create_dimension_table(
+            doc=doc,
+            label="all",
+            perc_acc=perc_acc_in_need, num_acc=num_acc_in_need,
+            perc_lc= perc_lc_in_need, num_lc=num_lc_in_need,
+            perc_env= perc_env_in_need, num_env=num_env_in_need,
+            perc_agg=perc_agg_in_need, num_agg=num_agg_in_need,
+            total_in_need=tot_dimension_in_need,
+            font = 11
+        )
+        doc.add_paragraph("")
+        ## table need by pop_group
+        for _, row_pop in final_overview_dimension_df_in_need.iterrows():
+            population_group = row_pop['Population group'].upper()  # Convert to uppercase
+            strata = row_pop['Strata']
+            perc_acc = row_pop[label_perc_acc]
+            num_acc = row_pop[label_tot_acc]
+            perc_agg = row_pop[label_perc_agg]
+            num_agg = row_pop[label_tot_agg]
+            perc_env = row_pop[label_perc_penv]
+            num_env = row_pop[label_tot_penv]
+            perc_lc = row_pop[label_perc_lc]
+            num_lc = row_pop[label_tot_lc]
+            tot_dimension_in_need = row_pop[label_tot_population]
+            if strata not in not_pop_group_columns_overview:     
+                create_dimension_table(
+                    doc=doc,
+                    label=population_group,
+                    perc_acc=perc_acc, num_acc=num_acc,
+                    perc_lc= perc_lc, num_lc=num_lc,
+                    perc_env= perc_env, num_env=num_env,
+                    perc_agg=perc_agg, num_agg=num_agg,
+                    total_in_need=tot_dimension_in_need,
+                    font = 9
+                )
+                doc.add_paragraph("")
 
-    ##############################################################
-
-
-    section_needs_msna = doc.add_heading("Children's profiles (from MSNA, HH survey)", level=3)
-    section_needs_msna = section_needs_msna.runs[0]
-    section_needs_msna.font.size = Pt(18)  # Customize the section header size
-    section_needs_msna.font.name = 'Calibri'
-    section_needs_msna.alignment = 0  # Left align
-
-    intro_dimension = doc.add_paragraph("The graphics below show school-aged children profiles, relying on the 4 dimensions of the education PiN (ALPA, Access to education, Learning conditions, Protection level in or on the way to school and Aggravating circumstances).")
-    intro_dimension_format = intro_dimension.runs[0]
-    intro_dimension_format.font.name = 'Calibri'
-    intro_dimension_format.font.size = Pt(12)
-    
+        ##############################################################
 
 
+        section_needs_msna = doc.add_heading("Children's profiles (from MSNA, HH survey)", level=3)
+        section_needs_msna = section_needs_msna.runs[0]
+        section_needs_msna.font.size = Pt(18)  # Customize the section header size
+        section_needs_msna.font.name = 'Calibri'
+        section_needs_msna.alignment = 0  # Left align
 
-    # Insert the bar chart after the corresponding section
-    #doc.add_picture(bar_chart_path_dim, width=Inches(6))  # Adjust the width as needed
-    doc.add_picture(bar_chart_path_subsection, width=Inches(5))
-    doc.add_picture(bar_chart_path_dim_gender, width=Inches(5))  # Adjust the width as needed
-    doc.add_picture(bar_chart_path_dim_school, width=Inches(5))  # Adjust the width as needed
+        intro_dimension = doc.add_paragraph("The graphics below show school-aged children profiles, relying on the 4 dimensions of the education PiN (ALPA, Access to education, Learning conditions, Protection level in or on the way to school and Aggravating circumstances).")
+        intro_dimension_format = intro_dimension.runs[0]
+        intro_dimension_format.font.name = 'Calibri'
+        intro_dimension_format.font.size = Pt(12)
+        
 
 
 
-
-
-
-
-
-
+        # Insert the bar chart after the corresponding section
+        #doc.add_picture(bar_chart_path_dim, width=Inches(6))  # Adjust the width as needed
+        doc.add_picture(bar_chart_path_subsection, width=Inches(5))
+        doc.add_picture(bar_chart_path_dim_gender, width=Inches(5))  # Adjust the width as needed
+        doc.add_picture(bar_chart_path_dim_school, width=Inches(5))  # Adjust the width as needed
 
 
 

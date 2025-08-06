@@ -23,6 +23,7 @@ from src.make_output1_platform import merge_2025_contextDB
 from src.create_output1_excel import create_output1_user
 from src.extrapolation import extrapolate_df_2025_updated
 from src.update_re_calculation_for_PiN import UPDATE_calculatePIN
+from src.create_map_severity import make_map_severity
 
 from shared_utils import language_selector
 #from github import Github
@@ -60,6 +61,7 @@ if 'uploaded_data' not in st.session_state and 'uploaded_other_data' not in st.s
 
 
 github_token = st.secrets["github"]["token"]
+timestamp = datetime.now().strftime("%m%d_%I%p")
 
 
 ###########################################################################################################
@@ -121,8 +123,7 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
         #return None
 
 ##--------------------------------------------------------------------------------------------------------------------
-def create_zip_file(country_label, excel_file,indicator_output,word_snapshot, word_parameters):
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
+def create_zip_file(country_label, excel_file,indicator_output,word_snapshot, word_parameters, maps):
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
@@ -132,11 +133,14 @@ def create_zip_file(country_label, excel_file,indicator_output,word_snapshot, wo
         zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
         # Add the Parameters Word Document with timestamp
         zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", word_parameters.getvalue())
+        for field, buf in maps.items():
+            filename = f"{country_label}_{field.replace(' ', '_')}.png"
+            zip_file.writestr(filename, buf.getvalue())
+
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
 
-def create_zip_file_FR(country_label, excel_file,indicator_output, word_parameters):
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
+def create_zip_file_FR(country_label, excel_file,indicator_output, word_parameters, maps):
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
@@ -146,11 +150,43 @@ def create_zip_file_FR(country_label, excel_file,indicator_output, word_paramete
         #zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
         # Add the Parameters Word Document with timestamp
         zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", word_parameters.getvalue())
+        for field, buf in maps.items():
+            filename = f"{country_label}_{field.replace(' ', '_')}.png"
+            zip_file.writestr(filename, buf.getvalue())
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
+
+def create_zip_file_step1_hybrid(ccountry_label,formatted_output_1_2025, raw_excel,  doc_parameter_output):
+    zip_buffer = BytesIO()  # Create an in-memory ZIP file
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        # Add the Excel file with timestamp
+        zip_file.writestr(f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx", formatted_output_1_2025.getvalue())
+        # Add the Word Snapshot with timestamp
+        zip_file.writestr(f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx", raw_excel.getvalue())
+        # Add the Parameters Word Document with timestamp
+        zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", doc_parameter_output.getvalue())
+      
+
+    zip_buffer.seek(0)  # Reset the buffer to the beginning
+    return zip_buffer
+
+def create_zip_file_step2_hybrid(country_label, excel_file, word_snapshot, maps):
+    zip_buffer = BytesIO()  # Create an in-memory ZIP file
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        # Add the Excel file with timestamp
+        zip_file.writestr(f"PiN_results_{country_label}_{timestamp}.xlsx", excel_file.getvalue())
+        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
+        # Add the Word Snapshot with timestamp
+        zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
+        for field, buf in maps.items():
+            filename = f"{country_label}_{field.replace(' ', '_')}.png"
+            zip_file.writestr(filename, buf.getvalue())
+
+    zip_buffer.seek(0)  # Reset the buffer to the beginning
+    return zip_buffer
+
 ##--------------------------------------------------------------------------------------------------------------------
 def create_zip_file_no_ocha(country_label, pin_percentage, indicator_output,word_parameters):
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")  # Current timestamp
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         zip_file.writestr(f"PiN_percentage_{country_label}_{timestamp}.xlsx", pin_percentage.getvalue())
@@ -289,7 +325,6 @@ if not step_2_hpc and not jena_country:
         
         
 
-timestamp = datetime.now().strftime("%m%d_%I%p")
 
 
 
@@ -319,14 +354,18 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
         doc_parameter_output = generate_word_document_FR(parameters_FR)
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
+    maps = make_map_severity(country, Tot_PiN_by_admin)
+
+
+
     # ------------------------ D. create Zip file with all important documents
     zip_file_name = f"PiN_Documents_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
-        zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
+        zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output, maps)
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
-        zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output)
+        zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output, maps)
 
     # ------------------------ E. download zip file
     st.download_button(
@@ -421,21 +460,30 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
 
     raw_excel = dict_of_dfs_to_bytesio_excel(Tot_PiN_JIAF)
 
+    if selected_language == "English":
+        doc_parameter_output = generate_word_document(parameters)
+    if selected_language == "French":
+        doc_parameter_output = generate_word_document_FR(parameters_FR)
 
-    ## donwload
+
+
+
+    # ------------------------ D. create Zip file with all important documents
+    zip_file_name = f"PiN_Temporary_{country_label}_{timestamp}.zip"
+
+    if selected_language == "English":
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output )
+    if selected_language == "French":
+        #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output )
+
+    # ------------------------ E. download zip file
     st.download_button(
-        label=translations["download_output1"],
-        data=formatted_output_1_2025,
-        file_name=   output1_file_name,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    
-    st.download_button(
-        label=translations["download_covered_area"],
-        data=raw_excel,
-        file_name=   pin_by_status_file_name,
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+        label=translations["download_all_temporary"],
+        data=zip_file,
+        file_name=zip_file_name,
+        mime="application/zip")
+
 
 ###################################################################################################################################################
 ###################################################################################################################################################
@@ -480,17 +528,33 @@ if step_2_hpc and hybrid_country:
     else:
         ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language )
 
+    if selected_language == "English":
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA, selected_language=selected_language)
+    if selected_language == "French":
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language)
 
 
-    file_path_updated_pin = f"PiN_results_{country}_{timestamp}.xlsx"
 
+
+    maps = make_map_severity(country, Tot_PiN_by_admin)
+
+
+
+    # ------------------------ D. create Zip file with all important documents
+    zip_file_name = f"PiN_Documents_{country_label}_{timestamp}.zip"
+
+    if selected_language == "English":
+        zip_file = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps)
+    if selected_language == "French":
+        #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
+        zip_file = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps)
+
+    # ------------------------ E. download zip file
     st.download_button(
-        label=translations["download_pin"],
-        data=ocha_excel,
-        file_name=   file_path_updated_pin)
-
-
-
+        label=translations["download_all"],
+        data=zip_file,
+        file_name=zip_file_name,
+        mime="application/zip")
 
 
 

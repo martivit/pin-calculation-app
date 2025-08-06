@@ -21,10 +21,13 @@ from src.save_parameter import generate_word_document
 from src.save_parameter import generate_parameters
 from src.save_parameter_FR import generate_word_document_FR
 from src.save_parameter_FR import generate_parameters_FR
+from src.create_map_severity import make_map_severity
+
 from docx import Document
 from docx.shared import Pt, RGBColor
 import matplotlib.pyplot as plt
 from docx.shared import Inches
+import os, glob
 
 
 
@@ -187,6 +190,19 @@ if ocha_data is not None:
 
     if selected_language == 'French':
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
+
+
+
+
+        # This returns a dict of BytesIOs keyed by the column name
+    maps = make_map_severity(country, Tot_PiN_by_admin)
+
+        # Now write each out to disk (or do whatever you want with the in‐memory PNGs)
+    for layer, buf in maps.items():
+        fname = f"output_validation/{layer.replace(' ', '_')}.png"
+        with open(fname, "wb") as f:
+            f.write(buf.getvalue())
+
 
     ##   ***********************************    save for intermediate check:
     file_path_pin_test1 = 'output_validation/01_pin_sev4.xlsx'
