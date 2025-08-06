@@ -366,12 +366,6 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
         zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output, maps)
 
-    # ------------------------ E. download zip file
-    st.download_button(
-        label=translations["download_all"],
-        data=zip_file,
-        file_name=zip_file_name,
-        mime="application/zip")
 
     # ------------------------ F. save in github --> gitpush
     if st.download_button(
@@ -481,7 +475,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
         label=translations["download_all_temporary"],
         data=zip_file,
         file_name=zip_file_name,
-        mime="application/zip")
+        mime="application/zip", key = 'second')
 
 
 ###################################################################################################################################################
@@ -555,7 +549,7 @@ if step_2_hpc and hybrid_country:
         label=translations["download_all"],
         data=zip_file,
         file_name=zip_file_name,
-        mime="application/zip")
+        mime="application/zip", key = 'third')
 
 
 
