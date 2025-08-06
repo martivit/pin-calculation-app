@@ -175,7 +175,6 @@ def create_zip_file_step2_hybrid(country_label, excel_file, word_snapshot, maps)
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
         zip_file.writestr(f"PiN_results_{country_label}_{timestamp}.xlsx", excel_file.getvalue())
-        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
         # Add the Word Snapshot with timestamp
         zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
         for field, buf in maps.items():
