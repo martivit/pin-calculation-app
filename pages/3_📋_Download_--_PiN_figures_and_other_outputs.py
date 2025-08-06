@@ -553,6 +553,8 @@ if step_2_hpc and hybrid_country:
 
 
 
+    st.subheader(translations["hno_guidelines_subheader"])
+    st.markdown(translations["hno_guidelines_message"])
 
 
 ######################################################################### no ocha data
