@@ -164,7 +164,7 @@ def make_map_severity(
             continue
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        gdf.boundary.plot(ax=ax, edgecolor="#71797E", linewidth=0.3)
+        gdf.boundary.plot(ax=ax, edgecolor="#36454F", linewidth=0.2)
 
 
         if is_cat:
@@ -221,7 +221,7 @@ def make_map_severity(
             )
             cbar.set_label(title, rotation=270, labelpad=15)
 
-        admin_level_gdf.boundary.plot( ax=ax, edgecolor="black", linewidth=0.7 )
+        admin_level_gdf.boundary.plot( ax=ax, edgecolor="black", linewidth=0.5 )
 
         ax.set_axis_off()
         ax.set_title(f"{country}: {title}", fontsize=14)
