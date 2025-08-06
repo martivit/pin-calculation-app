@@ -160,57 +160,61 @@ def make_map_severity(
         fig, ax = plt.subplots(figsize=(8, 6))
 
         if is_cat:
-            # 2a) fill categories (no edges)
-            for sev, color in CAT_COLORS.items():
-                if sev == "nodata":
-                    continue
-                subset = merged[merged[field].astype(str)==sev]
-                if not subset.empty:
-                    subset.plot(
-                        facecolor=color,
-                        linewidth=0,
+            #  — draw all areas grey first
+            merged.plot(
+                facecolor=MISSING_COLOR,
+                edgecolor="black", linewidth=0.3,
+                ax=ax
+            )
+            #  — then overlay each severity class
+            handles = [mpatches.Patch(color=MISSING_COLOR, label="No data")]
+            for sev in ("1-2", "3", "4", "5"):
+                sel = merged[merged[field].astype(str) == sev]
+                if not sel.empty:
+                    sel.plot(
+                        facecolor=CAT_COLORS[sev],
+                        edgecolor="black", linewidth=0.3,
                         ax=ax
                     )
-            # also fill nodata
-            merged[merged[field].isna()].plot(
-                facecolor=MISSING_COLOR, linewidth=0, ax=ax
+                    handles.append(mpatches.Patch(
+                        color=CAT_COLORS[sev], label=f"Severity {sev}"
+                    ))
+            ax.legend(
+                handles=handles,
+                title=title,
+                loc="center left",
+                bbox_to_anchor=(1.02, 0.5)
             )
 
-            # build a legend
-            handles = [
-                mpatches.Patch(facecolor=MISSING_COLOR, edgecolor="none", label="No data")
-            ] + [
-                mpatches.Patch(facecolor=CAT_COLORS[sev], edgecolor="none", label=f"Severity {sev}")
-                for sev in ("1-2","3","4","5")
-            ]
-            ax.legend(handles=handles, title=title, loc="center left", bbox_to_anchor=(1.02,0.5))
-
         else:
-            # 2b) fill continuous choropleth (no edges)
-            merged.plot(
-                column=field,
+            # continuous: first fill missing
+            merged.assign(_val=merged[field]).plot(
+                column="_val",
                 cmap=continuous_cmap,
                 vmin=merged[field].min(),
                 vmax=merged[field].max(),
-                linewidth=0,
-                missing_kwds={"color":MISSING_COLOR},
+                edgecolor="black", linewidth=0.3,
+                missing_kwds={"color": MISSING_COLOR},
                 legend=False,
                 ax=ax
             )
-            # colourbar
+            # then add a true gradient colorbar on the right
             sm = plt.cm.ScalarMappable(
                 cmap=continuous_cmap,
-                norm=plt.Normalize(vmin=merged[field].min(), vmax=merged[field].max())
+                norm=plt.Normalize(
+                    vmin=merged[field].min(),
+                    vmax=merged[field].max()
+                )
             )
-            sm._A = []
-            cbar = fig.colorbar(sm, ax=ax, fraction=0.035, pad=0.04)
+            sm._A = []  # empty array for the mappable
+            cbar = fig.colorbar(
+                sm, ax=ax,
+                fraction=0.035, pad=0.04
+            )
             cbar.set_label(title, rotation=270, labelpad=15)
 
-        # 3) draw the default‐ADM outlines in thick black
-        outline.boundary.plot(ax=ax, edgecolor="black", linewidth=1.0)
-
         ax.set_axis_off()
-        ax.set_title(f"{country_code}: {title}", fontsize=14)
+        ax.set_title(f"{country}: {title}", fontsize=14)
 
         buf = BytesIO()
         fig.savefig(buf, format="png", bbox_inches="tight", dpi=150)
