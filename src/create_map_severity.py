@@ -124,7 +124,13 @@ def make_map_severity(
 
     # 4) merge
     merged = gdf.merge(pin_data, left_on=best_adm, right_on=pin_col, how="left")
-
+    admin_level_gdf = (
+        gdf
+        .dissolve(by=best_adm, as_index=False)
+        .set_index(best_adm)
+    )
+    # ensure index type matches your pin_data key type
+    admin_level_gdf.index = admin_level_gdf.index.astype(str)
     # 5) colors for categorical map
     CAT_COLORS = {
         "1-2": "#FFF2CC",
@@ -158,6 +164,8 @@ def make_map_severity(
             continue
 
         fig, ax = plt.subplots(figsize=(8, 6))
+        gdf.boundary.plot(ax=ax, edgecolor="#CCCCCC", linewidth=0.3)
+
 
         if is_cat:
             #  — draw all areas grey first
@@ -212,9 +220,12 @@ def make_map_severity(
                 fraction=0.035, pad=0.04
             )
             cbar.set_label(title, rotation=270, labelpad=15)
+            
+        admin_level_gdf.boundary.plot( ax=ax, edgecolor="black", linewidth=1.0 )
 
         ax.set_axis_off()
         ax.set_title(f"{country}: {title}", fontsize=14)
+
 
         buf = BytesIO()
         fig.savefig(buf, format="png", bbox_inches="tight", dpi=150)
