@@ -213,7 +213,10 @@ def make_map_severity(
                 handles=handles,
                 title=title,
                 loc="center left",
-                bbox_to_anchor=(1.02, 0.5)
+                bbox_to_anchor=(1.02, 0.5),
+                fontsize=8,             
+                title_fontsize=10,      
+                labelspacing=0.3       
             )
 
         else:
