@@ -171,6 +171,8 @@ def make_map_severity(
             continue
 
         fig, ax = plt.subplots(figsize=(8, 6))
+        ax.set_aspect('equal')    # <— add this
+
         gdf.boundary.plot(ax=ax, edgecolor="#36454F", linewidth=0.1)
 
         # build masks
