@@ -130,6 +130,8 @@ def make_map_severity(
         .dissolve(by=best_adm, as_index=False)
         .set_index(best_adm)
     )
+    plot_gdf = merged.copy()
+    plot_gdf.crs = None
         # HPC scope set
     hpc_set = set()
     if hpc_df is not None:
@@ -166,7 +168,7 @@ def make_map_severity(
 
     for title, candidates, is_cat in specs:
         # pick the actual column
-        field = next((c for c in candidates if c in merged.columns), None)
+        field = next((c for c in candidates if c in plot_gdf.columns), None)
         if not field:
             continue
 
@@ -176,26 +178,26 @@ def make_map_severity(
         gdf.boundary.plot(ax=ax, edgecolor="#36454F", linewidth=0.1)
 
         # build masks
-        missing = merged[field].isna()
-        in_hpc  = merged[best_adm].astype(str).isin(hpc_set)
+        missing = plot_gdf[field].isna()
+        in_hpc  = plot_gdf[best_adm].astype(str).isin(hpc_set)
 
         if is_cat:
             #  — draw all areas grey first
             # 1) plot non-HPC missing
             mask1 = missing & ~in_hpc
             if mask1.any():
-                merged[mask1].plot(facecolor=MISSING_COLOR, ax=ax, linewidth=0)
+                plot_gdf[mask1].plot(facecolor=MISSING_COLOR, ax=ax, linewidth=0)
             # 2) plot HPC missing
             mask2 = missing & in_hpc
             if mask2.any():
-                merged[mask2].plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
+                plot_gdf[mask2].plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
             #  — then overlay each severity class
             handles = [
                 mpatches.Patch(color=MISSING_COLOR, label="No data"),
                 mpatches.Patch(color=MISSING_HPC,  label="HPC scope (no data)")
             ]    
             for sev in ("1-2", "3", "4", "5"):
-                sel = merged[merged[field].astype(str) == sev]
+                sel = plot_gdf[plot_gdf[field].astype(str) == sev]
                 if not sel.empty:
                     sel.plot(
                         facecolor=CAT_COLORS[sev],
@@ -214,7 +216,7 @@ def make_map_severity(
 
         else:
             # continuous: first fill missing
-            merged.plot(
+            plot_gdf.plot(
                 column=field, cmap=continuous_cmap,
                 edgecolor="none", linewidth=0,
                 missing_kwds={"color":MISSING_COLOR},
@@ -223,12 +225,12 @@ def make_map_severity(
             # overplot HPC missing in blue
             mask2 = missing & in_hpc
             if mask2.any():
-                merged[mask2].plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
+                plot_gdf[mask2].plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
             # colorbar
             sm = plt.cm.ScalarMappable(
                 cmap=continuous_cmap,
-                norm=plt.Normalize(vmin=merged[field].min(),
-                                   vmax=merged[field].max())
+                norm=plt.Normalize(vmin=plot_gdf[field].min(),
+                                   vmax=plot_gdf[field].max())
             )
             sm._A = []
             cbar = fig.colorbar(sm, ax=ax, fraction=0.035, pad=0.04)
