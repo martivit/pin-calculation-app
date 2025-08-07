@@ -353,7 +353,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
         doc_parameter_output = generate_word_document_FR(parameters_FR)
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
-    maps = make_map_severity(country, Tot_PiN_by_admin,hpc_df=ocha_data)
+    maps = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
 
 
 
@@ -459,7 +459,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
         doc_parameter_output = generate_word_document_FR(parameters_FR)
 
 
-    maps_1step = make_map_severity(country, Tot_PiN_by_admin,hpc_df=ocha_data)
+    maps_1step = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
 
 
     # ------------------------ D. create Zip file with all important documents
@@ -532,7 +532,7 @@ if step_2_hpc and hybrid_country:
 
 
 
-    maps_2step = make_map_severity(country, Tot_PiN_by_admin, hpc_df=ocha_data)
+    maps_2step = make_map_severity(country, pin_data=Tot_PiN_by_admin, hpc_df=ocha_data)
 
 
 
