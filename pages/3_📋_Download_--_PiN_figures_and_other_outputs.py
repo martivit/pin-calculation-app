@@ -165,7 +165,9 @@ def create_zip_file_step1_hybrid(ccountry_label,formatted_output_1_2025, raw_exc
         zip_file.writestr(f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx", raw_excel.getvalue())
         # Add the Parameters Word Document with timestamp
         zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", doc_parameter_output.getvalue())
-      
+        for field, buf in maps.items():
+            filename = f"{country_label}_{field.replace(' ', '_')}.png"
+            zip_file.writestr(filename, buf.getvalue())
 
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
