@@ -212,7 +212,7 @@ def make_map_severity(
             ax.legend(
                 handles=handles,
                 title=title,
-                loc="center left",
+                loc="upper center", # "upper center"center left
                 bbox_to_anchor=(1.02, 0.5),
                 fontsize=8,             
                 title_fontsize=10,      
