@@ -237,6 +237,20 @@ def make_map_severity(
             sm._A = []
             cbar = fig.colorbar(sm, ax=ax, fraction=0.035, pad=0.04)
             cbar.set_label(title, rotation=270, labelpad=15)
+            nos = [
+                mpatches.Patch(color=MISSING_COLOR,
+                               label="No data, outside HPC scope"),
+                mpatches.Patch(color=MISSING_HPC,
+                               label="No data, in HPC scope"),
+            ]
+            # place it below the axes
+            ax.legend(
+                handles=nos,
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.10),
+                ncol=2,
+                frameon=False
+            )
 
         admin_level_gdf.boundary.plot( ax=ax, edgecolor="black", linewidth=0.5 )
 
