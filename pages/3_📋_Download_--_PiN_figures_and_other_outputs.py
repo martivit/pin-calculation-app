@@ -156,7 +156,7 @@ def create_zip_file_FR(country_label, excel_file,indicator_output, word_paramete
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
 
-def create_zip_file_step1_hybrid(ccountry_label,formatted_output_1_2025, raw_excel,  doc_parameter_output):
+def create_zip_file_step1_hybrid(ccountry_label,formatted_output_1_2025, raw_excel,  doc_parameter_output, maps):
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
