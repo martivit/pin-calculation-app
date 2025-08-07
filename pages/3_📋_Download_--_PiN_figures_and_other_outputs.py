@@ -353,7 +353,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
         doc_parameter_output = generate_word_document_FR(parameters_FR)
         doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
-    maps = make_map_severity(country, Tot_PiN_by_admin)
+    maps = make_map_severity(country, Tot_PiN_by_admin,hpc_df=ocha_data)
 
 
 
@@ -459,16 +459,17 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
         doc_parameter_output = generate_word_document_FR(parameters_FR)
 
 
+    maps_1step = make_map_severity(country, Tot_PiN_by_admin,hpc_df=ocha_data)
 
 
     # ------------------------ D. create Zip file with all important documents
     zip_file_name = f"PiN_Temporary_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output )
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output, maps_1step )
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output )
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output,maps_1step )
 
     # ------------------------ E. download zip file
     st.download_button(
@@ -531,7 +532,7 @@ if step_2_hpc and hybrid_country:
 
 
 
-    maps = make_map_severity(country, Tot_PiN_by_admin)
+    maps_2step = make_map_severity(country, Tot_PiN_by_admin, hpc_df=ocha_data)
 
 
 
@@ -539,10 +540,10 @@ if step_2_hpc and hybrid_country:
     zip_file_name = f"PiN_Documents_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
-        zip_file = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps)
+        zip_file = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps_2step)
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
-        zip_file = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps)
+        zip_file = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps_2step)
 
     # ------------------------ E. download zip file
     st.download_button(

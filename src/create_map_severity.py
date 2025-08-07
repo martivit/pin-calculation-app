@@ -97,6 +97,7 @@ def make_map_severity(
     pin_data,               # pd.DataFrame
     shp_folder: str = "input_map",
     continuous_cmap: str = "Oranges",
+    hpc_df: pd.DataFrame | None = None,      # NEW: DataFrame with HPC scope P-codes
     normalize_fn=normalize_admin_columns
 ) -> Dict[str, BytesIO]:
     """
@@ -129,6 +130,11 @@ def make_map_severity(
         .dissolve(by=best_adm, as_index=False)
         .set_index(best_adm)
     )
+        # HPC scope set
+    hpc_set = set()
+    if hpc_df is not None:
+        # assume second column holds the P-codes
+        hpc_set = set(hpc_df.iloc[:,1].astype(str))
     # ensure index type matches your pin_data key type
     admin_level_gdf.index = admin_level_gdf.index.astype(str)
     # 5) colors for categorical map
@@ -139,6 +145,7 @@ def make_map_severity(
         "5":   "#C65911",
     }
     MISSING_COLOR = "#E0E0E0"
+    MISSING_HPC  = "#DDEBF7"
 
     # 6) which continuous fields we expect
     CONT_FIELDS = {
@@ -166,16 +173,23 @@ def make_map_severity(
         fig, ax = plt.subplots(figsize=(8, 6))
         gdf.boundary.plot(ax=ax, edgecolor="#36454F", linewidth=0.1)
 
+        # build masks
+        missing = merged[field].isna()
+        in_hpc  = merged[pin_col].astype(str).isin(hpc_set)
 
         if is_cat:
             #  — draw all areas grey first
-            merged.plot(
-                facecolor=MISSING_COLOR,
-                edgecolor="black", linewidth=0.3,
-                ax=ax
-            )
+            # 1) plot non-HPC missing
+            merged[missing & ~in_hpc]\
+                .plot(facecolor=MISSING_COLOR, ax=ax, linewidth=0)
+            # 2) plot HPC missing
+            merged[missing & in_hpc]\
+                .plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
             #  — then overlay each severity class
-            handles = [mpatches.Patch(color=MISSING_COLOR, label="No data")]
+            handles = [
+                mpatches.Patch(color=MISSING_COLOR, label="No data"),
+                mpatches.Patch(color=MISSING_HPC,  label="HPC scope (no data)")
+            ]    
             for sev in ("1-2", "3", "4", "5"):
                 sel = merged[merged[field].astype(str) == sev]
                 if not sel.empty:
@@ -196,29 +210,24 @@ def make_map_severity(
 
         else:
             # continuous: first fill missing
-            merged.assign(_val=merged[field]).plot(
-                column="_val",
-                cmap=continuous_cmap,
-                vmin=merged[field].min(),
-                vmax=merged[field].max(),
-                edgecolor="black", linewidth=0.3,
-                missing_kwds={"color": MISSING_COLOR},
-                legend=False,
-                ax=ax
+            merged.plot(
+                column=field, cmap=continuous_cmap,
+                edgecolor="none", linewidth=0,
+                missing_kwds={"color":MISSING_COLOR},
+                legend=False, ax=ax
             )
-            # then add a true gradient colorbar on the right
+            # overplot HPC missing in blue
+            merged[missing & in_hpc]\
+                .plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
+
+            # colorbar
             sm = plt.cm.ScalarMappable(
                 cmap=continuous_cmap,
-                norm=plt.Normalize(
-                    vmin=merged[field].min(),
-                    vmax=merged[field].max()
-                )
+                norm=plt.Normalize(vmin=merged[field].min(),
+                                   vmax=merged[field].max())
             )
-            sm._A = []  # empty array for the mappable
-            cbar = fig.colorbar(
-                sm, ax=ax,
-                fraction=0.035, pad=0.04
-            )
+            sm._A = []
+            cbar = fig.colorbar(sm, ax=ax, fraction=0.035, pad=0.04)
             cbar.set_label(title, rotation=270, labelpad=15)
 
         admin_level_gdf.boundary.plot( ax=ax, edgecolor="black", linewidth=0.5 )
