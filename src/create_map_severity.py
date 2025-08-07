@@ -144,8 +144,8 @@ def make_map_severity(
         "4":   "#ED7D31",
         "5":   "#C65911",
     }
-    MISSING_COLOR = "#E0E0E0"
-    MISSING_HPC  = "#DDEBF7"
+    MISSING_COLOR = "#E5E4E2"
+    MISSING_HPC  = "#ADD8E6"
 
     # 6) which continuous fields we expect
     CONT_FIELDS = {
@@ -175,16 +175,18 @@ def make_map_severity(
 
         # build masks
         missing = merged[field].isna()
-        in_hpc  = merged[pin_col].astype(str).isin(hpc_set)
+        in_hpc  = merged[best_adm].astype(str).isin(hpc_set)
 
         if is_cat:
             #  — draw all areas grey first
             # 1) plot non-HPC missing
-            merged[missing & ~in_hpc]\
-                .plot(facecolor=MISSING_COLOR, ax=ax, linewidth=0)
+            mask1 = missing & ~in_hpc
+            if mask1.any():
+                merged[mask1].plot(facecolor=MISSING_COLOR, ax=ax, linewidth=0)
             # 2) plot HPC missing
-            merged[missing & in_hpc]\
-                .plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
+            mask2 = missing & in_hpc
+            if mask2.any():
+                merged[mask2].plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
             #  — then overlay each severity class
             handles = [
                 mpatches.Patch(color=MISSING_COLOR, label="No data"),
@@ -217,9 +219,9 @@ def make_map_severity(
                 legend=False, ax=ax
             )
             # overplot HPC missing in blue
-            merged[missing & in_hpc]\
-                .plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
-
+            mask2 = missing & in_hpc
+            if mask2.any():
+                merged[mask2].plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
             # colorbar
             sm = plt.cm.ScalarMappable(
                 cmap=continuous_cmap,

@@ -195,7 +195,7 @@ if ocha_data is not None:
 
 
         # This returns a dict of BytesIOs keyed by the column name
-    maps = make_map_severity(country, Tot_PiN_by_admin)
+    maps = make_map_severity(country, Tot_PiN_by_admin, hpc_df=ocha_data)
 
         # Now write each out to disk (or do whatever you want with the in‐memory PNGs)
     for layer, buf in maps.items():
