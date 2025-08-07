@@ -132,12 +132,14 @@ def make_map_severity(
     )
     plot_gdf = merged.copy()
     plot_gdf.crs = None
-        # HPC scope set
+    # HPC scope set
     hpc_set = set()
-    if hpc_df is not None:
+    #if hpc_df is not None:
         # assume second column holds the P-codes
-        hpc_set = set(hpc_df.iloc[:,1].astype(str))
+        #hpc_set = set(hpc_df.iloc[:,1].astype(str))
     # ensure index type matches your pin_data key type
+    hpc_df = hpc_df.rename(columns={ hpc_df.columns[1]: best_adm })
+    hpc_set = set(hpc_df[best_adm].astype(str))
     admin_level_gdf.index = admin_level_gdf.index.astype(str)
     # 5) colors for categorical map
     CAT_COLORS = {
