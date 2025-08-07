@@ -195,8 +195,8 @@ def make_map_severity(
                 plot_gdf[mask2].plot(facecolor=MISSING_HPC, ax=ax, linewidth=0)
             #  — then overlay each severity class
             handles = [
-                mpatches.Patch(color=MISSING_COLOR, label="No data, outside HPC scope"),
-                mpatches.Patch(color=MISSING_HPC,  label="No data, included in HPC scope")
+                mpatches.Patch(color=MISSING_COLOR, label="Outside of HPC scope"),
+                mpatches.Patch(color=MISSING_HPC,  label="No data in HPC scope")
             ]    
             for sev in ("1-2", "3", "4", "5"):
                 sel = plot_gdf[plot_gdf[field].astype(str) == sev]
