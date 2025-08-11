@@ -504,7 +504,11 @@ else:
         "eeen": "Template_EMIS_All.xlsx",
         "mmem": "Template_EMIS_Access_protection.xlsx",
         "eeem": "Template_EMIS_Access_PTR_protection.xlsx",
-        "meem": "Template_EMIS_PTR_protection.xlsx"
+        "meem": "Template_EMIS_PTR_protection.xlsx",
+        "mjjm": "Template_EMIS_PTR_protection.xlsx",
+        "mjjn": "Template_EMIS_PTR_protection.xlsx",
+        "ejjn": "Template_EMIS_Access_PTR_protection.xlsx",
+        "memm": "Template_EMIS_PTR_protection.xlsx"
 
     }
 
