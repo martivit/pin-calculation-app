@@ -908,17 +908,16 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
 
     # Get the available columns from the `edu_data` and `household_data` dataframes
     edu_columns = edu_data.columns
-    household_columns = household_data.columns
 
-    # Find the best match for `admin_var` in `household_data`
-    best_match_for_admin_var = find_similar_columns(admin_var, household_columns)
-    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var[0]}")
+    # Use the new best-match finder that checks P-codes etc.
+    best_match_for_admin_var = find_best_match(admin_var, household_data)
+    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var}")
 
     # Iterate through each column in the edu_data dataframe
     for col in edu_columns:
         # Convert the column to strings to ensure type consistency
         column_data = edu_data[col].astype(str)
-        
+
         # For each length group in the `length_dict`, check for matches
         for length, codes in length_dict.items():
             matching_values = column_data.isin(codes)
@@ -930,28 +929,23 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
                 admin_columns_representative[length].append(col)
                 print(f"Matching column found: {col} for length {length}")
 
-    # Prioritize columns based on the number of non-empty values
+    # Helper to pick the column with the most non-empty values
     def prioritize_non_empty_columns(columns):
         non_empty_counts = {col: edu_data[col].notna().sum() for col in columns}
         sorted_columns = sorted(non_empty_counts, key=non_empty_counts.get, reverse=True)
         return sorted_columns[0] if sorted_columns else None
 
-    # Handle the case where multiple levels (lengths) are detected
+    # Handle multiple or single admin levels
     if len(length_dict) > 1:
         print("Multiple levels detected:")
         for length, codes in length_dict.items():
             print(f"Level {length}: {codes}")
 
-        # Match columns based on length and prioritize based on the number of non-empty values
         best_columns = {}
         for length, columns in admin_columns_representative.items():
-            # Prioritize based on the number of non-empty values
-            best_columns_for_level = prioritize_non_empty_columns(columns)
-            best_columns[length] = best_columns_for_level
-
+            best_columns[length] = prioritize_non_empty_columns(columns)
         admin_columns_representative = best_columns
     else:
-        # For single level case, directly prioritize the column with non-empty values
         if length_dict:
             single_level = next(iter(length_dict.keys()))
             columns_for_single_level = admin_columns_representative.get(single_level, [])
@@ -961,6 +955,7 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
                 admin_columns_representative = {}
 
     return admin_columns_representative
+
 
 
 ##--------------------------------------------------------------------------------------------
