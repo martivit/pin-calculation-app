@@ -505,8 +505,7 @@ else:
         "mmem": "Template_EMIS_Access_protection.xlsx",
         "eeem": "Template_EMIS_Access_PTR_protection.xlsx",
         "meem": "Template_EMIS_PTR_protection.xlsx",
-        "mjjm": "Template_EMIS_PTR_protection.xlsx", # niger
-        "mjjn": "Template_EMIS_PTR_protection.xlsx", # niger
+        "mjjm": "Template_JENA_PTR_protection.xlsx", # niger
         "ejjn": "Template_EMIS_Access_PTR_protection.xlsx", # nigeria?
         "memm": "Template_EMIS_PTR_protection.xlsx" # moz
     }
