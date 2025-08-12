@@ -500,16 +500,15 @@ else:
     # Define template mapping
     template_mapping = {
         "emmm": "Template_EMIS_Access.xlsx",
-        "eemm": "Template_EMIS_Access_PTR.xlsx",
+        "eemm": "Template_EMIS_Access_PTR.xlsx", # moz
         "eeen": "Template_EMIS_All.xlsx",
         "mmem": "Template_EMIS_Access_protection.xlsx",
         "eeem": "Template_EMIS_Access_PTR_protection.xlsx",
         "meem": "Template_EMIS_PTR_protection.xlsx",
-        "mjjm": "Template_EMIS_PTR_protection.xlsx",
-        "mjjn": "Template_EMIS_PTR_protection.xlsx",
-        "ejjn": "Template_EMIS_Access_PTR_protection.xlsx",
-        "memm": "Template_EMIS_PTR_protection.xlsx"
-
+        "mjjm": "Template_EMIS_PTR_protection.xlsx", # niger
+        "mjjn": "Template_EMIS_PTR_protection.xlsx", # niger
+        "ejjn": "Template_EMIS_Access_PTR_protection.xlsx", # nigeria?
+        "memm": "Template_EMIS_PTR_protection.xlsx" # moz
     }
 
     if not is_scenario_2:
