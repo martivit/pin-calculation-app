@@ -265,7 +265,7 @@ def add_indicator_columns_for_EMIS(data, access_var, teacher_disruption_var, nat
         return ""  # Default to empty string if input is not a string or number
 
     # Define the conditions for yes and no answers
-    yes_answers = ['yes', 'oui', '1', 1]
+    yes_answers = ['yes', 'oui', '1', 1, ]
     no_answers = ['no', 'non', '0', 0]
 
     no_indicator = 'no_indicator'
