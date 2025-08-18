@@ -268,7 +268,7 @@ step_2_hpc = st.session_state.get('step_2_hpc')
 
 #jena
 data_combination = st.session_state.get('data_combination') 
-ohter_data = st.session_state.get['uploaded_other_data'] 
+ohter_data = st.session_state.get('uploaded_other_data')
 
 
 # 0.                                                          Scenario/step flags
