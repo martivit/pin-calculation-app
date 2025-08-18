@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import os, glob
 from typing import Dict
 import matplotlib.patches as mpatches
+import re
 
 
 
@@ -48,7 +49,14 @@ def normalize_admin_columns(gdf, shapefile_path):
     gdf.rename(columns=colmap, inplace=True)
     return gdf
 
-
+def _strip_ner_prefix(series: pd.Series) -> pd.Series:
+    """Convert 'NER...' → 'NE...' only if it appears as a prefix."""
+    return (
+        series.astype(str)
+              .str.replace(r'^\s*NER', 'NE', regex=True)
+              .str.strip()
+              .replace({'nan': np.nan, 'None': np.nan})
+    )
 
 
 
@@ -115,6 +123,24 @@ def make_map_severity(
     shp_path = find_shapefile(shp_folder, country_code)
     gdf = gpd.read_file(shp_path)
     gdf = normalize_fn(gdf, shp_path)
+
+    # ---------- NIGER PCODE NORMALIZATION (NER → NE) ----------
+    if country_code.upper() == 'NER':
+        # fix all ADM*PCODE columns in the shapefile
+        adm_pcode_cols = [c for c in gdf.columns if c.upper().startswith('ADM') and 'PCODE' in c.upper()]
+        for c in adm_pcode_cols:
+            gdf[c] = _strip_ner_prefix(gdf[c])
+
+        # fix the first (key) column in the pin_data
+        pin_data = pin_data.copy()
+        pin_key_col = pin_data.columns[0]
+        pin_data[pin_key_col] = _strip_ner_prefix(pin_data[pin_key_col])
+
+        # fix HPC-scope DF if provided (assumes 2nd column holds the Pcodes, as per your comment)
+        if hpc_df is not None and not hpc_df.empty:
+            hpc_df = hpc_df.copy()
+            if hpc_df.shape[1] >= 2:
+                hpc_df.iloc[:, 1] = _strip_ner_prefix(hpc_df.iloc[:, 1])
 
     # 3) pick PIN‐code column & best ADM by string‐length
     pin_col = pin_data.columns[0]
