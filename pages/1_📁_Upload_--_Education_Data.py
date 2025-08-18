@@ -584,7 +584,7 @@ else:
                 
                     uploaded_other_data_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
                     if uploaded_other_data_file is not None:
-                        other_data = pd.read_excel(uploaded_other_data_file, engine='openpyxl',sheet_name=None)
+                        other_data = pd.read_excel(uploaded_other_data_file, engine='openpyxl',sheet_name='indicator')
                         st.session_state['uploaded_other_data'] = other_data
                         st.success("Processed template uploaded successfully!")
 
