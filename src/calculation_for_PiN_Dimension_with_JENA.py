@@ -1838,4 +1838,4 @@ def calculatePIN_with_JENA (data_combination, country, edu_data, household_data,
 
 
 
-    return jena_severity, merged_ocha_jena, merged_ocha_jena_msna,pin_jena_msna, Tot_PiN_JIAF,Tot_Dimension_JIAF, final_overview_df_OCHA, final_overview_df
+    return jena_severity, merged_ocha_jena, merged_ocha_jena_msna,pin_jena_msna, Tot_PiN_JIAF,Tot_Dimension_JIAF, final_overview_df_OCHA, final_overview_df, Tot_PiN_by_admin

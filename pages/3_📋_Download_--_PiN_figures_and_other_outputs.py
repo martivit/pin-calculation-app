@@ -24,6 +24,7 @@ from src.create_output1_excel import create_output1_user
 from src.extrapolation import extrapolate_df_2025_updated
 from src.update_re_calculation_for_PiN import UPDATE_calculatePIN
 from src.create_map_severity import make_map_severity
+from src.calculation_for_PiN_Dimension_with_JENA import calculatePIN_with_JENA
 
 from shared_utils import language_selector
 #from github import Github
@@ -265,6 +266,9 @@ parameters_FR = generate_parameters_FR(st.session_state)
 
 step_2_hpc = st.session_state.get('step_2_hpc') 
 
+#jena
+data_combination = st.session_state.get('data_combination') 
+ohter_data = st.session_state.get['uploaded_other_data'] 
 
 
 # 0.                                                          Scenario/step flags
@@ -558,6 +562,75 @@ if step_2_hpc and hybrid_country:
 
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
+
+
+###################################################################################################################################################
+###################################################################################################################################################
+# 6.                                                   PiN calculation with JENA countries
+###################################################################################################################################################
+if jena_country and ocha_data is not None:
+    country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
+
+    if 'm' in data_combination:  
+        edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
+                                                                                        access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                                                                                        barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                        age_var, gender_var,
+                                                                                        label, 
+                                                                                        admin_var, vector_cycle, start_school, status_var,
+                                                                                        selected_language= selected_language)
+
+
+        (jena_df, merged_ocha_jena, merged_ocha_jena_msna,pin_jena_msna, Tot_PiN_JIAF,Tot_Dimension_JIAF, final_overview_df_OCHA, final_overview_df, Tot_PiN_by_admin)=  calculatePIN_with_JENA (data_combination, country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,ohter_data,
+                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                    barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                    age_var, gender_var,
+                    label, 
+                    admin_var, vector_cycle, start_school, status_var,
+                    mismatch_admin,
+                    selected_language)
+
+
+    label_total_pin_sheet = "PiN TOTAL"
+
+    ## here --> fix creation output to not have parameters
+
+    # ------------------------ A. create excel PiN classic file
+    if selected_language == "French":
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language  )
+    else:
+        ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language )
+
+    if selected_language == "English":
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA, selected_language=selected_language)
+    if selected_language == "French":
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language)
+
+    
+    maps_jena = make_map_severity(country, pin_data=Tot_PiN_by_admin, hpc_df=ocha_data)
+
+
+
+    # ------------------------ D. create Zip file with all important documents
+    zip_file_name_jena = f"PiN_Documents_{country_label}_{timestamp}.zip"
+
+    if selected_language == "English":
+        zip_file_jena = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps_jena)
+    if selected_language == "French":
+        #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
+        zip_file_jena = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps_jena)
+
+    # ------------------------ E. download zip file
+    st.download_button(
+        label=translations["download_all"],
+        data=zip_file_jena,
+        file_name=zip_file_name_jena,
+        mime="application/zip", key = 'third')
+
+
+
+
+
 
 
 ######################################################################### no ocha data
