@@ -582,10 +582,10 @@ else:
                 
                 if user_selection != "mmmm" and not is_scenario_2 :
                 
-                    uploaded_template_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
-                    st.session_state['uploaded_other_data'] = uploaded_template_file
-
-                    if uploaded_template_file is not None:
+                    uploaded_other_data_file = st.file_uploader(translations["upload_other"], type=["xlsx"])
+                    if uploaded_other_data_file is not None:
+                        other_data = pd.read_excel(uploaded_other_data_file, engine='openpyxl',sheet_name=None)
+                        st.session_state['uploaded_other_data'] = other_data
                         st.success("Processed template uploaded successfully!")
 
 
