@@ -605,6 +605,9 @@ if jena_country and ocha_data is not None:
     else:
         ocha_excel = create_output(country_label,Tot_PiN_JIAF,final_overview_df,final_overview_df_OCHA,label_total_pin_sheet,admin_var,ocha=True,tot_severity=Tot_PiN_by_admin,selected_language=selected_language )
 
+
+    st.dataframe(final_overview_df)
+
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA, selected_language=selected_language)
     if selected_language == "French":

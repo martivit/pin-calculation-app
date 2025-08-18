@@ -124,10 +124,11 @@ edu_data_severity = add_severity (country, edu_data, household_data, choice_data
 file_path = 'output_validation/00_edu_data_with_severity.xlsx'
 # Save the DataFrame to an Excel file
 edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
+country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
 
 
 if ocha_data is not None:
-    (jena_df, merged_ocha_jena, merged_ocha_jena_msna,pin_jena_msna, Tot_PiN_JIAF,Tot_Dimension_JIAF, final_overview_df_OCHA, final_overview_df)=  calculatePIN_with_JENA (data_combination, country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,jena_data,
+    (jena_df, merged_ocha_jena, merged_ocha_jena_msna,pin_jena_msna, Tot_PiN_JIAF,Tot_Dimension_JIAF, final_overview_df_OCHA, final_overview_df, Tot_PiN_by_admin)=  calculatePIN_with_JENA (data_combination, country, edu_data_severity, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,jena_data,
                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
@@ -149,6 +150,8 @@ if ocha_data is not None:
 
 
     jena_df.to_excel(file_path_E_3, index=False, engine='openpyxl')
+    final_overview_df.to_excel('output_validation/J_test.xlsx', index=False, engine='openpyxl')
+
 
     # Create an Excel writer object
     with pd.ExcelWriter(file_path_E_1) as writer:
@@ -181,3 +184,13 @@ if ocha_data is not None:
         for category, df in Tot_Dimension_JIAF.items():
             # Write the DataFrame to a sheet named after the category
             df.to_excel(writer, sheet_name=category, index=False)
+
+    print(' jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj') 
+    print(final_overview_df)
+    print(' jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj') 
+
+    if selected_language == "English":
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA, selected_language=selected_language)
+    if selected_language == "French":
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language)
+        

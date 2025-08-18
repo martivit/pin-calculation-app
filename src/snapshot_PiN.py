@@ -414,6 +414,9 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         girl_5_17_label = 'Girls (6-17 y.o.)'
         boy_5_17_label = 'Boys (6-17 y.o.)'
         ece_5yo_label = 'ECE (6 y.o.)'
+    if  selected_language == 'French' :
+        tot_5_17_label = 'TOTAL (5-17 ans)'
+     
 
     not_pop_group_columns_overview = [tot_5_17_label]
     not_pop_group_columns = [tot_5_17_label,
@@ -436,6 +439,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
     ## reading values for different sessions
     # Retrieve data for the total row
+    print(' hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh   final overview inside') 
     print(final_overview_df)
     row_tot = final_overview_df.loc[final_overview_df['Strata'] == tot_5_17_label]
     print(tot_5_17_label)
