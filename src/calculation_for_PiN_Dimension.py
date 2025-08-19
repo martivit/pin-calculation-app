@@ -1138,7 +1138,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 label, 
                 admin_var, vector_cycle, start_school, status_var,
                 mismatch_admin,
-                selected_language):
+                selected_language,hybrid_country):
 
     admin_target = admin_var
     pop_group_var = status_var
@@ -2432,7 +2432,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     print(final_overview_df['Strata'].unique())
 
 
-    if selected_language == 'French':
+    if selected_language == 'French' and not hybrid_country :
         final_overview_df = translate_labels(final_overview_df, translation_dict)
         final_overview_df_OCHA = translate_labels(final_overview_df_OCHA, translation_dict)
         final_overview_dimension_df = translate_labels(final_overview_dimension_df, translation_dict)
