@@ -380,11 +380,11 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
                 commit_message=f"Add PiN results (Excel) for {country_label}",
                 token=github_token
             )
-            st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+            #st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
 
         except Exception :
-            st.error(f"Unexpected error during GitHub upload: {e}")
-            #pass
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
 
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
@@ -425,11 +425,43 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
         zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output,maps_1step )
 
     # ------------------------ E. download zip file
-    st.download_button(
+    if st.download_button(
         label=translations["download_all_temporary"],
         data=zip_file,
         file_name=zip_file_name,
-        mime="application/zip", key = 'second')
+        mime="application/zip", key = 'second'):
+
+        #if "github" in st.secrets and "token" in st.secrets["github"]:
+            #st.write("✅ GitHub token found in secrets.")
+        #else:
+            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
+        country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
+        file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_step1_{country_slug}_{timestamp}.xlsx"
+
+
+        try:
+            repo_name = "Global-Education-Cluster-PiN/pin-calculation-app"
+            branch_name = "develop_2025"
+
+            github_token = st.secrets["github"]["token"]
+
+            # Initialize success messages for both uploads
+            pr_url_excel = None
+            pr_url_doc = None
+
+            pr_url_excel = upload_to_github(
+                file_content=formatted_output_1_2025.getvalue(),
+                file_name=file_path_in_repo_excel,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=f"Add PiN results (Excel) for {country_label}",
+                token=github_token
+            )
+            #st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+
+        except Exception :
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
 
 
 ###################################################################################################################################################
