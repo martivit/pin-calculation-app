@@ -398,7 +398,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
 
     ## merge the PiN 2025 calculated for targeted areas with the secondary data (II, ACLED, clustering, additional empy columns)
     output_1_2025 = merge_2025_contextDB (country,  ocha_data, Tot_PiN_by_admin, DATA_DIR_CONTEXT_DB)  
-    st.dataframe(output_1_2025) 
+    #st.dataframe(output_1_2025) 
     ## format with color and headers the output_1_2025
     formatted_output_1_2025 = create_output1_user(output_1_2025)
     output1_file_name = f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx"
@@ -437,6 +437,8 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
             #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
         country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
         file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_step1_{country_slug}_{timestamp}.xlsx"
+        file_path_in_repo_doc = f"platform_PiN_output/{country_slug}/Param_step1_{country_slug}_{timestamp}.docx"
+        file_path_in_repo_pop = f"platform_PiN_output/{country_slug}/PiN_pop_step1_{country_slug}_{timestamp}.docx"
 
 
         try:
@@ -449,15 +451,42 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
             pr_url_excel = None
             pr_url_doc = None
 
-            pr_url_excel = upload_to_github(
-                file_content=formatted_output_1_2025.getvalue(),
-                file_name=file_path_in_repo_excel,
-                repo_name=repo_name,
-                branch_name=branch_name,
-                commit_message=f"Add PiN results (Excel) for {country_label}",
-                token=github_token
-            )
-            #st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+            try:
+                pr_url_excel = upload_to_github(
+                    file_content=formatted_output_1_2025.getvalue(),
+                    file_name=file_path_in_repo_excel,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN results (Excel) for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+
+            try: 
+                pr_url_doc = upload_to_github(
+                    file_content=doc_parameter_output.getvalue(),
+                    file_name=file_path_in_repo_doc,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN parameters (Word) for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")    
+            try: 
+                pr_url_doc = upload_to_github(
+                    file_content=raw_excel.getvalue(),
+                    file_name=file_path_in_repo_pop,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN by pop  for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")       
 
         except Exception :
             #st.error(f"Unexpected error during GitHub upload: {e}")
