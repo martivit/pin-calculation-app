@@ -52,7 +52,6 @@ def find_valid_ref(row, valid_list):
 
 def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
     
-    df_host_2025 = pin2025_by_status["host"]
     print(base_2025.columns)
 
     # 1. ---- create lists: list_remove, list_2025, list_delta, list_same,
