@@ -68,60 +68,33 @@ timestamp = datetime.now().strftime("%m%d_%I%p")
 ###########################################################################################################
 ##--------------------------------------------------------------------------------------------------------------------
 def upload_to_github(file_content, file_name, repo_name, branch_name, commit_message, token):
-    """
-    Uploads a file to a GitHub repository using the GitHub REST API.
-
-    :param file_content: The binary content of the file to be uploaded.
-    :param file_name: The path in the repository where the file should be uploaded.
-    :param repo_name: The full name of the repository (e.g., "username/repo").
-    :param branch_name: The branch to push changes to.
-    :param commit_message: The commit message for the file upload.
-    :param token: GitHub Personal Access Token.
-    """
-    # GitHub API base URL
-    api_url = f"https://api.github.com/repos/{repo_name}/contents/{file_name}"
-
-    # Encode the file content to Base64
-    encoded_content = base64.b64encode(file_content).decode('utf-8')
-
-    # Headers with the GitHub token
+    api_url = f"https://api.github.com/repos/{repo_name}/contents/{quote(file_name)}"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
+    encoded_content = base64.b64encode(file_content).decode("utf-8")
 
-    # Check if the file already exists
-    response = requests.get(api_url, headers=headers)
-    if response.status_code == 200:
-        # File exists, update it
-        sha = response.json()["sha"]
-        data = {
-            "message": commit_message,
-            "content": encoded_content,
-            "sha": sha,
-            "branch": branch_name
-        }
-        response = requests.put(api_url, headers=headers, json=data)
-    elif response.status_code == 404:
-        # File does not exist, create it
-        data = {
-            "message": commit_message,
-            "content": encoded_content,
-            "branch": branch_name
-        }
-        response = requests.put(api_url, headers=headers, json=data)
-    else:
-        # Some other error
-        raise Exception(f"Failed to check file existence: {response.status_code} {response.text}")
+    # Check existence ON THE TARGET BRANCH
+    r = requests.get(api_url, headers=headers, params={"ref": branch_name})
+    if r.status_code not in (200, 404):
+        raise Exception(f"Existence check failed: {r.status_code} {r.text}")
 
-    # Handle response
-    #if response.status_code in [200, 201]:
-        # Successful creation or update
-        #st.write("✅ Upload successful!")
-        #return response.json()["html_url"]
-    #else:
-        #st.error(f"⚠️ Upload failed: {response.status_code} - {response.text}")
-        #return None
+    data = {
+        "message": commit_message,
+        "content": encoded_content,
+        "branch": branch_name,
+    }
+    if r.status_code == 200:
+        data["sha"] = r.json().get("sha")
+
+    put = requests.put(api_url, headers=headers, json=data)
+    if put.status_code not in (200, 201):
+        raise Exception(f"Upload failed: {put.status_code} {put.text}")
+
+    j = put.json()
+    # Return a human URL (present in response for 200/201)
+    return (j.get("content") or {}).get("html_url") or f"https://github.com/{repo_name}/blob/{branch_name}/{file_name}"
 
 ##--------------------------------------------------------------------------------------------------------------------
 def create_zip_file(country_label, excel_file,indicator_output,word_snapshot, word_parameters, maps):
@@ -385,16 +358,13 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
             #st.write("✅ GitHub token found in secrets.")
         #else:
             #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
+        country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
+        file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_results_{country_slug}_{timestamp}.xlsx"
+
+
         try:
             repo_name = "Global-Education-Cluster-PiN/pin-calculation-app"
             branch_name = "develop_2025"
-
-            # File paths in the repository
-            file_path_in_repo_excel = f"platform_PiN_output/{country}/PiN_results_{country}_{timestamp}.xlsx"
-            if selected_language == "English":
-                file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_snapshot_{country}_{timestamp}.docx"
-            if selected_language == "French":
-                file_path_in_repo_doc = f"platform_PiN_output/{country}/PiN_parameter_{country}_{timestamp}.docx"
 
             github_token = st.secrets["github"]["token"]
 
@@ -415,19 +385,6 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
             except Exception :
                 pass
                 #st.error(f"Failed to upload Excel file to GitHub: {e}")
-
-            try:
-                pr_url_doc = upload_to_github(
-                    file_content=doc_output.getvalue(),
-                    file_name=file_path_in_repo_doc,
-                    repo_name=repo_name,
-                    branch_name=branch_name,
-                    commit_message=f"Add PiN snapshot (Word) for {country_label}",
-                    token=github_token
-                )
-            except Exception :
-                pass
-                #st.error(f"Failed to upload Word document to GitHub: {e}")
 
             # Display success messages only if files were successfully uploaded
             if pr_url_excel:
