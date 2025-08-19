@@ -438,7 +438,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
         country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
         file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_step1_{country_slug}_{timestamp}.xlsx"
         file_path_in_repo_doc = f"platform_PiN_output/{country_slug}/Param_step1_{country_slug}_{timestamp}.docx"
-        file_path_in_repo_pop = f"platform_PiN_output/{country_slug}/PiN_pop_step1_{country_slug}_{timestamp}.docx"
+        file_path_in_repo_pop = f"platform_PiN_output/{country_slug}/PiN_pop_step1_{country_slug}_{timestamp}.xlsx"
 
 
         try:
@@ -457,7 +457,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
                     file_name=file_path_in_repo_excel,
                     repo_name=repo_name,
                     branch_name=branch_name,
-                    commit_message=f"Add PiN results (Excel) for {country_label}",
+                    commit_message=f"Add PiN step 1 hybrid for {country_label}",
                     token=github_token
                 )
             except Exception :
@@ -469,7 +469,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
                     file_name=file_path_in_repo_doc,
                     repo_name=repo_name,
                     branch_name=branch_name,
-                    commit_message=f"Add PiN parameters (Word) for {country_label}",
+                    commit_message=f"Add PiN parameters step 1 hybrid for {country_label}",
                     token=github_token
                 )
             except Exception :
@@ -481,7 +481,7 @@ if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_coun
                     file_name=file_path_in_repo_pop,
                     repo_name=repo_name,
                     branch_name=branch_name,
-                    commit_message=f"Add PiN by pop  for {country_label}",
+                    commit_message=f"Add PiN by pop, step 1 hybrid  for {country_label}",
                     token=github_token
                 )
             except Exception :
@@ -560,11 +560,43 @@ if step_2_hpc and hybrid_country:
         zip_file = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps_2step)
 
     # ------------------------ E. download zip file
-    st.download_button(
+    if st.download_button(
         label=translations["download_all"],
         data=zip_file,
         file_name=zip_file_name,
-        mime="application/zip", key = 'third')
+        mime="application/zip", key = 'third'):
+
+        #if "github" in st.secrets and "token" in st.secrets["github"]:
+            #st.write("✅ GitHub token found in secrets.")
+        #else:
+            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
+        country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
+        file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_step2_{country_slug}_{timestamp}.xlsx"
+
+
+        try:
+            repo_name = "Global-Education-Cluster-PiN/pin-calculation-app"
+            branch_name = "develop_2025"
+
+            github_token = st.secrets["github"]["token"]
+
+            # Initialize success messages for both uploads
+            pr_url_excel = None
+            pr_url_doc = None
+
+            pr_url_excel = upload_to_github(
+                file_content=ocha_excel.getvalue(),
+                file_name=file_path_in_repo_excel,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=f"Add PiN results step2 hybrid for {country_label}",
+                token=github_token
+            )
+            #st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+
+        except Exception :
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
 
 
 
@@ -636,11 +668,45 @@ if jena_country and ocha_data is not None:
         zip_file_jena = create_zip_file_step2_hybrid(country_label, ocha_excel, doc_output, maps_jena)
 
     # ------------------------ E. download zip file
-    st.download_button(
+    if st.download_button(
         label=translations["download_all"],
         data=zip_file_jena,
         file_name=zip_file_name_jena,
-        mime="application/zip", key = 'third')
+        mime="application/zip", key = 'third'):
+
+        
+        #if "github" in st.secrets and "token" in st.secrets["github"]:
+            #st.write("✅ GitHub token found in secrets.")
+        #else:
+            #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
+        country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
+        file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_results_{country_slug}_{timestamp}.xlsx"
+
+
+        try:
+            repo_name = "Global-Education-Cluster-PiN/pin-calculation-app"
+            branch_name = "develop_2025"
+
+            github_token = st.secrets["github"]["token"]
+
+            # Initialize success messages for both uploads
+            pr_url_excel = None
+            pr_url_doc = None
+
+            pr_url_excel = upload_to_github(
+                file_content=ocha_excel.getvalue(),
+                file_name=file_path_in_repo_excel,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=f"Add PiN results jena for {country_label}",
+                token=github_token
+            )
+            #st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
+
+        except Exception :
+            #st.error(f"Unexpected error during GitHub upload: {e}")
+            pass
+
 
 
 
