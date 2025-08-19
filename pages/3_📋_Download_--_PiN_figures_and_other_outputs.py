@@ -451,7 +451,8 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
 if ocha_data is not None and not step_2_hpc and not jena_country and hybrid_country:
 
     ## merge the PiN 2025 calculated for targeted areas with the secondary data (II, ACLED, clustering, additional empy columns)
-    output_1_2025 = merge_2025_contextDB (country,  ocha_data, Tot_PiN_by_admin, DATA_DIR_CONTEXT_DB)   
+    output_1_2025 = merge_2025_contextDB (country,  ocha_data, Tot_PiN_by_admin, DATA_DIR_CONTEXT_DB)  
+    st.dataframe(output_1_2025) 
     ## format with color and headers the output_1_2025
     formatted_output_1_2025 = create_output1_user(output_1_2025)
     output1_file_name = f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx"
