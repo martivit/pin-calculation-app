@@ -25,6 +25,7 @@ from src.extrapolation import extrapolate_df_2025_updated
 from src.update_re_calculation_for_PiN import UPDATE_calculatePIN
 from src.create_map_severity import make_map_severity
 from src.calculation_for_PiN_Dimension_with_JENA import calculatePIN_with_JENA
+from urllib.parse import quote
 
 from shared_utils import language_selector
 #from github import Github
@@ -93,7 +94,6 @@ def upload_to_github(file_content, file_name, repo_name, branch_name, commit_mes
         raise Exception(f"Upload failed: {put.status_code} {put.text}")
 
     j = put.json()
-    # Return a human URL (present in response for 200/201)
     return (j.get("content") or {}).get("html_url") or f"https://github.com/{repo_name}/blob/{branch_name}/{file_name}"
 
 ##--------------------------------------------------------------------------------------------------------------------
@@ -372,29 +372,19 @@ if ocha_data is not None and not step_2_hpc and not jena_country and not hybrid_
             pr_url_excel = None
             pr_url_doc = None
 
-            # Try uploading both files
-            try:
-                pr_url_excel = upload_to_github(
-                    file_content=ocha_excel.getvalue(),
-                    file_name=file_path_in_repo_excel,
-                    repo_name=repo_name,
-                    branch_name=branch_name,
-                    commit_message=f"Add PiN results (Excel) for {country_label}",
-                    token=github_token
-                )
-            except Exception :
-                pass
-                #st.error(f"Failed to upload Excel file to GitHub: {e}")
-
-            # Display success messages only if files were successfully uploaded
-            if pr_url_excel:
-                st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
-            if pr_url_doc:
-                st.success(f"Word document uploaded to GitHub successfully! [View File]({pr_url_doc})")
+            pr_url_excel = upload_to_github(
+                file_content=ocha_excel.getvalue(),
+                file_name=file_path_in_repo_excel,
+                repo_name=repo_name,
+                branch_name=branch_name,
+                commit_message=f"Add PiN results (Excel) for {country_label}",
+                token=github_token
+            )
+            st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
 
         except Exception :
-            #st.error(f"Unexpected error during GitHub upload: {e}")
-            pass
+            st.error(f"Unexpected error during GitHub upload: {e}")
+            #pass
 
     st.subheader(translations["hno_guidelines_subheader"])
     st.markdown(translations["hno_guidelines_message"])
