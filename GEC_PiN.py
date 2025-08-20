@@ -29,7 +29,8 @@ try:
         "grand": st.secrets["users"]["grand"]["pwd"],
         "impact": st.secrets["users"]["impact"]["pwd"],
         "cluster": st.secrets["users"]["cluster"]["pwd"],
-        "retreat2024": st.secrets["users"]["retreat2024"]["pwd"]
+        "retreat2024": st.secrets["users"]["retreat2024"]["pwd"],
+        "hpc2026": st.secrets["users"]["hpc2026"]["pwd"]
     }
 except KeyError as e:
     st.error(f"Error loading user credentials: {e}")
@@ -78,8 +79,8 @@ def check_password():
     return False
 
 
-#if not check_password():
-#    st.stop()
+if not check_password():
+    st.stop()
 
 spacer1, spacer2 = st.sidebar.empty(), st.sidebar.empty()
 

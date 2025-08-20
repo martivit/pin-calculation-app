@@ -8,14 +8,19 @@ import unicodedata
 
 
 st.set_page_config(page_icon='icon/global_education_cluster_gec_logo.ico',  layout='wide')
-#if 'password_correct' not in st.session_state:
-    #st.error(translations["no_user"])
-    #st.stop()
+
 
 # Call the language selector function
 language_selector()
 # Access the translations
 translations = st.session_state.translations
+
+
+if 'password_correct' not in st.session_state:
+    st.error(translations["no_user"])
+    st.stop()
+
+
 st.title(translations["title_page1"])
 
 
