@@ -808,6 +808,9 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
                 mismatch_admin,
                 selected_language):
 
+    if "m" not in data_combination:
+        raise ValueError("'m' is required in data_combination")
+    
 
     ## essential variables --------------------------------------------------------------------------------------------
     single_cycle = (vector_cycle[1] == 0)
@@ -843,7 +846,7 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
 
     print(ocha_pop_data)
 
-    admin_var = find_best_match(admin_target,  household_data.columns)
+    admin_var = find_best_match(admin_target,  household_data)
 
     admin_column_rapresentative = []
     grouped_dict = {}
@@ -1008,8 +1011,21 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
         else:
             access_rate_df = access_rate_df.merge(rate_pop_df, on=admin_var, how="outer")
 
+    access_rate_list={}
+    for category, rate_pop_df in pin_by_indicator_status_list.items():
+        # Start with the base DataFrame for this category
+        print(category)
+        rate_pop_df = rate_pop_df.copy()
+
+        new_col_name = f"rate_indicator_access"
+        rate_pop_df = rate_pop_df.iloc[:, [0, 2]]  # Keep admin1 and rate_indicator_access
+        rate_pop_df.columns = [admin_var, new_col_name]  # Rename columns  
+
+        access_rate_list [category] = rate_pop_df
+
 
     print(access_rate_df)
+    print(access_rate_list)
 
     ####### ** 2 **       ------------------------------ step 2: group by admin the emis data
     emis_df = emis_data.groupby("Admin Pcode")["Enrolled students -- Children/Enfants (5-17)"].sum().reset_index()
@@ -1143,9 +1159,136 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
             
             # Merge using the admin variable (for example, 'admin1')
             merged_df = pd.merge(df_pop, df_indicators, on=admin_var, how="outer")
+            print(merged_df.columns)
             severity_by_pop_group[pop_group] = merged_df
         else:
             print(f"Warning: No indicator dataframe found for pop group '{pop_group}'.")
+
+    print ('===============================___________________________________________==============================')
+    print(severity_by_pop_group)
+
+    emis_ptr = emis_data
+
+    ## ----------------------------- PTR ----------------------------------------------
+    if data_combination == 'eemm' or data_combination == 'eeem':
+        print(emis_ptr.columns)
+        # 1) Rename first column to admin_var
+        emis_ptr = emis_ptr.rename(columns={emis_ptr.columns[0]: admin_var})
+
+        # 2) Collapse empty strings to NaN and drop all-NaN columns
+        emis_ptr = emis_ptr.replace(r'^\s*$', np.nan, regex=True)
+        emis_ptr = emis_ptr.dropna(axis=1, how='all')
+
+        # 3) Rename only columns that still exist
+        emis_ptr_column_rename = {
+            col: new_name
+            for col, new_name in {
+                'Enrolled students -- Children/Enfants (5-17)': 'school_children',
+                'school PTR': 'sev3_indicator',
+                'threshold PTR (Change it according to the context average PTR)': 'sev3_th_indicator',
+                'sev4 - Protection indicator value -- continuous / discrete numerical variable': 'sev4_indicator_number',
+                'sev4 - threshold for numerical variable --> if above the child is in need': 'sev4_th_indicator_number',
+                'sev5 - Protection indicator value -- continuous / discrete numerical variable': 'sev5_indicator_number',
+                'sev5 - threshold for numerical variable --> if above the child is in need': 'sev5_th_indicator_number',
+                'sev4 - Protection indicator value -- categorical variable': 'sev4_indicator_cat',
+                'sev4 - category for categorical variable --> if selected the child is in need': 'sev4_th_indicator_cat',
+                'sev5 - Protection indicator value -- categorical variable': 'sev5_indicator_cat',
+                'sev5 - category for categorical variable --> if selected the child is in need': 'sev5_th_indicator_cat'
+            }.items()
+            if col in emis_ptr.columns
+        }
+        emis_ptr = emis_ptr.rename(columns=emis_ptr_column_rename)
+
+        print(emis_ptr.columns)
+        print(emis_ptr)
+
+            # 4) Create output columns 
+        emis_ptr['sev3_emis_children'] = 0
+        emis_ptr['sev4_emis_children'] = 0
+        emis_ptr['sev5_emis_children'] = 0
+
+        # 5) Safe numeric coercion (only for cols that exist)
+        num_cols = [c for c in [
+            'sev3_indicator','sev3_th_indicator',
+            'sev4_indicator_number','sev4_th_indicator_number',
+            'sev5_indicator_number','sev5_th_indicator_number',
+            'school_children'
+        ] if c in emis_ptr.columns]
+        if num_cols:
+            emis_ptr[num_cols] = emis_ptr[num_cols].apply(pd.to_numeric, errors='coerce')
+
+        # 6) Normalized categorical series (only if present)
+        def _norm(s):
+            return s.astype(str).str.strip().str.lower()
+
+        sev4_cat = _norm(emis_ptr['sev4_indicator_cat']) if 'sev4_indicator_cat' in emis_ptr else None
+        sev4_th  = _norm(emis_ptr['sev4_th_indicator_cat']) if 'sev4_th_indicator_cat' in emis_ptr else None
+        sev5_cat = _norm(emis_ptr['sev5_indicator_cat']) if 'sev5_indicator_cat' in emis_ptr else None
+        sev5_th  = _norm(emis_ptr['sev5_th_indicator_cat']) if 'sev5_th_indicator_cat' in emis_ptr else None
+
+        # 7) Build masks with strict priority: sev5 → sev4 → sev3
+        # sev5: prefer categorical equality if cat cols exist; else numeric >
+        m5_cat = (sev5_cat is not None) and (sev5_th is not None) and (sev5_cat.notna() & sev5_th.notna() & (sev5_cat == sev5_th))
+        m5_num = all(c in emis_ptr.columns for c in ['sev5_indicator_number','sev5_th_indicator_number']) and \
+                (emis_ptr['sev5_indicator_number'].notna() & emis_ptr['sev5_th_indicator_number'].notna() &
+                (emis_ptr['sev5_indicator_number'] > emis_ptr['sev5_th_indicator_number']))
+        m5 = m5_cat if isinstance(m5_cat, pd.Series) else False
+        m5 = m5 | (m5_num if isinstance(m5_num, pd.Series) else False)
+
+        # sev4: only where not sev5; prefer cat, else numeric >
+        m4_cat = (sev4_cat is not None) and (sev4_th is not None) and (sev4_cat.notna() & sev4_th.notna() & (sev4_cat == sev4_th))
+        m4_num = all(c in emis_ptr.columns for c in ['sev4_indicator_number','sev4_th_indicator_number']) and \
+                (emis_ptr['sev4_indicator_number'].notna() & emis_ptr['sev4_th_indicator_number'].notna() &
+                (emis_ptr['sev4_indicator_number'] > emis_ptr['sev4_th_indicator_number']))
+        m4 = m4_cat if isinstance(m4_cat, pd.Series) else False
+        m4 = m4 | (m4_num if isinstance(m4_num, pd.Series) else False)
+        m4 = (~m5) & (m4 if isinstance(m4, pd.Series) else False)
+
+        # sev3: only where neither sev5 nor sev4, numeric >
+        m3 = all(c in emis_ptr.columns for c in ['sev3_indicator','sev3_th_indicator']) and \
+            (emis_ptr['sev3_indicator'].notna() & emis_ptr['sev3_th_indicator'].notna() &
+            (emis_ptr['sev3_indicator'] > emis_ptr['sev3_th_indicator']))
+        m3 = (~m5) & (~m4) & (m3 if isinstance(m3, pd.Series) else False)
+
+        # 8) Assign children counts (keep zeros otherwise)
+        if 'school_children' in emis_ptr.columns:
+            emis_ptr['sev5_emis_children'] = np.where(m5, emis_ptr['school_children'], 0)
+            emis_ptr['sev4_emis_children'] = np.where(m4, emis_ptr['school_children'], 0)
+            emis_ptr['sev3_emis_children'] = np.where(m3, emis_ptr['school_children'], 0)
+        else:
+            # Optional: warn if school_children is missing
+            print("Warning: 'school_children' column not present; sev*_children remain 0.")
+
+
+        children_cols = ['school_children', 'sev3_emis_children', 'sev4_emis_children', 'sev5_emis_children']
+
+        # Group by and sum
+        emis_ptr_severity = emis_ptr.groupby(admin_var)[children_cols].sum().reset_index()
+
+        # 4) Create % severity columns 
+        emis_ptr_severity['subsetInSchool_sev3_emis'] =  emis_ptr_severity['sev3_emis_children']/emis_ptr_severity['school_children'] 
+        emis_ptr_severity['subsetInSchool_sev4_emis'] =  emis_ptr_severity['sev4_emis_children']/emis_ptr_severity['school_children'] 
+        emis_ptr_severity['subsetInSchool_sev5_emis'] =  emis_ptr_severity['sev5_emis_children']/emis_ptr_severity['school_children'] 
+
+
+        # Keep only the rate columns from JENA
+        emis_ptr_rates = emis_ptr_severity[[admin_var, 'subsetInSchool_sev3_emis', 'subsetInSchool_sev4_emis', 'subsetInSchool_sev5_emis']].copy()
+
+
+        print('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj')
+        print(emis_ptr_severity)
+        print(emis_ptr_rates)
+
+
+
+        for category, ocha_df in severity_by_pop_group.items():
+            severity_by_pop_group[category] = (
+                ocha_df.merge(emis_ptr_rates, on=admin_var, how='left')
+            )
+
+
+
+
 
 
     # ------ step 6.3: calculate the ToT# for each indicator
@@ -1153,6 +1296,14 @@ def calculatePIN_with_EMIS (data_combination, country, edu_data, household_data,
         pop_group: add_figures_columns(df.copy()) 
         for pop_group, df in severity_by_pop_group.items() 
     }
+
+    # i have to remove some columns according to the data_combination
+    #if i have emmm we remove the sev3/sev4/sev5_emis
+    #if i have eemm we remove sev3 teacher and hazard
+    # if i have eeem  we remove sev3 teacher and hazard and sev 4 displaced and sev4 occupation
+    # then we can do add_additional_severity_column which calculated the severity2 for in school as difference between the pin and total kids in school
+
+
     # ------ step 6.4: calculate the severity 2 as difference between tot E and inschool-sev3 and calculate OoS sev3 as difference between OoS and sev4 and sev5
     severity_by_pop_group = {
         pop_group: add_additional_severity_columns(df.copy())

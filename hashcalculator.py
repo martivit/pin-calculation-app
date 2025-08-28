@@ -1,7 +1,7 @@
 import hmac
 
 # Example password and secret key
-password = 'pinsession'
+password = 'hpc2026EC'
 SECRET_KEY = b'supersecretkey'
 
 # Create the HMAC hash using the secret key and the password

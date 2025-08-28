@@ -31,7 +31,7 @@ from docx.shared import Inches
 ##           input from thee user             ##
 ################################################
 
-data_combination = 'emmm'
+data_combination = 'eemm'
 
 
 ## Lemuria
