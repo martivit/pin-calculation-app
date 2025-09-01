@@ -658,6 +658,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
+    print('access_var' + access_var + " gender_var " , gender_var)
+
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
         country = country,
         gender = row[gender_var],
