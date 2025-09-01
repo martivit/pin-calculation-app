@@ -410,8 +410,8 @@ st.session_state['step_2_hpc'] = False
 if is_scenario_2: st.session_state['step_2_hpc'] = True 
 
 #----- Step 3: Select Available Data Sources
-special_countries = ['Niger -- NER', 'Nigeria -- NRA', 'Mozambique -- MOZ']
-use_full_selection = (selected_country in special_countries) and not is_scenario_2
+alternative_countries = ['Niger -- NER', 'Nigeria -- NRA', 'Mozambique -- MOZ']
+use_full_selection = (selected_country in alternative_countries) and not is_scenario_2
 #st.subheader(translations["select_data_section_2"])
 user_selection = ""
 
@@ -506,13 +506,13 @@ else:
     template_mapping = {
         "emmm": "Template_EMIS_Access.xlsx",
         "eemm": "Template_EMIS_Access_PTR.xlsx", # moz
-        "eeen": "Template_EMIS_All.xlsx",
-        "mmem": "Template_EMIS_Access_protection.xlsx",
+        #"eeen": "Template_EMIS_All.xlsx",
+        #"mmem": "Template_EMIS_Access_protection.xlsx",
         "eeem": "Template_EMIS_Access_PTR_protection.xlsx",
-        "meem": "Template_EMIS_PTR_protection.xlsx",
-        "mjjm": "Template_JENA_PTR_protection.xlsx", # niger
-        "ejjn": "Template_EMIS_Access_PTR_protection.xlsx", # nigeria?
-        "memm": "Template_EMIS_PTR_protection.xlsx" # moz
+        #"meem": "Template_EMIS_PTR_protection.xlsx",
+        "mjjm": "Template_JENA_PTR_protection.xlsx" # niger
+        #"ejjn": "Template_EMIS_Access_PTR_protection.xlsx", # nigeria?
+        #"memm": "Template_EMIS_PTR_protection.xlsx" # moz
     }
 
     if not is_scenario_2:
