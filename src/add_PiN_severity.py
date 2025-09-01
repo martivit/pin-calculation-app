@@ -575,15 +575,24 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     weight_column = None
 
-    # Check if 'weights' column exists, if not, find and rename the correct weight column
-    if 'weights' not in household_data.columns:
-        weight_column = [col for col in household_data.columns if col.lower() in ['weight']][0]  
-             
-        if weight_column:
-            household_data = household_data.rename(columns={weight_column: 'weights'})
+    # Ensure there is a 'weights' column, renaming common aliases; else create default = 1
+    aliases = {"weights", "weight", 'weight_final'}  # add more like 'wgt', 'sample_weight' if needed
+
+    cols = list(household_data.columns)
+    norm = {c: c.strip().lower() for c in cols}
+
+    if "weights" not in cols:
+        # try exact alias match first
+        found = next((c for c in cols if norm[c] in aliases), None)
+        if not found:
+            # try contains 'weight' anywhere (e.g., 'household_weight')
+            found = next((c for c in cols if "weight" in norm[c]), None)
+
+        if found:
+            household_data = household_data.rename(columns={found: "weights"})
         else:
             print("--------------------------- No valid 'weight' column found. Creating a default 'weights' column with value 1.")
-            household_data['weights'] = 1
+            household_data["weights"] = 1
     else:
         print("--------------------------- 'Weights' column already exists.")
 
