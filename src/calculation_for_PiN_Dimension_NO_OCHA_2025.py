@@ -629,49 +629,79 @@ def rounding_dataframe(df, figures_round, percentage_round):
             df[col] = pd.to_numeric(df[col], errors='coerce').apply(lambda x: round(x * 100, percentage_round))        
 ##--------------------------------------------------------------------------------------------
 ## finding admin        
-def extract_number(s):
-    match = re.search(r'\d+', s)
-    return int(match.group()) if match else None
-def find_similar_columns(admin_target, columns):
-    # Extract the base target without numbers for string comparison
-    base_target = re.sub(r'\d+', '', admin_target).lower()
+def extract_number(col_name: str) -> int|None:
+    nums = re.findall(r'\d+', col_name or "")
+    return int(nums[-1]) if nums else None
 
-    # Find columns that have high string similarity with the base target
-    similar_columns = []
-    for col in columns:
-        base_col = re.sub(r'\d+', '', col).lower()
-        similarity_score = fuzz.partial_ratio(base_target, base_col)
-        if similarity_score > 70:  # Set a threshold for similarity
-            similar_columns.append(col)
-    
-    return similar_columns
-def find_best_match(admin_target, columns):
-    # Extract the target number
-    target_number = extract_number(admin_target)
+def looks_like_pcode(series, min_fraction=0.8):
+    p = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]+$')
+    vals = series.dropna().astype(str)
+    if len(vals)==0: return False
+    return (vals.str.match(p).sum() / len(vals)) >= min_fraction
 
-    # Step 1: Find columns similar in text content
-    similar_columns = find_similar_columns(admin_target, columns)
+def find_best_match(admin_target: str,
+                    household_df,
+                    similarity_threshold=70,
+                    pcode_fraction=0.8,
+                    fallback_threshold=50) -> str:
+    cols = list(household_df.columns)
+    target_num = extract_number(admin_target)
 
-    if not similar_columns:
-        # Fallback to fuzzy matching across all columns if no similar columns are found
-        return process.extractOne(admin_target, columns)[0]
+    # — Step 0: All columns that *share* that number in their name
+    num_cols = [c for c in cols if extract_number(c)==target_num]
 
-    # Step 2: Among similar columns, prioritize those with matching numbers
-    candidates_with_same_number = [col for col in similar_columns if extract_number(col) == target_number]
-
-    if candidates_with_same_number:
-        # Further prioritize candidates that include the word 'code'
-        candidates_with_code = [col for col in candidates_with_same_number if 'code' in col.lower()]
-
-        if candidates_with_code:
-            # If there are candidates with 'code', return the best match among them
-            return process.extractOne(admin_target, candidates_with_code)[0]
-        else:
-            # If no candidates with 'code', return the best match among all candidates with the same number
-            return process.extractOne(admin_target, candidates_with_same_number)[0]
+    # — Step 1: Among those, pick any with “code”
+    code_cols = [c for c in num_cols if 'code' in c.lower()]
+    if code_cols:
+        candidates = code_cols
+    elif num_cols:
+        candidates = num_cols
     else:
-        # Fallback to fuzzy matching among the similar columns
-        return process.extractOne(admin_target, similar_columns)[0]
+        candidates = []
+
+    # — Step 2: If we still have nothing, use your fuzzy + number + code logic:
+    if not candidates:
+        # fuzzy find “similar” by text
+        base = re.sub(r'\d+','', admin_target).lower()
+        similar = [c for c in cols
+                   if fuzz.partial_ratio(base, re.sub(r'\d+','',c).lower())
+                      >= similarity_threshold]
+
+        # among “similar” pick same-number, then code, then rest
+        same_num = [c for c in similar if extract_number(c)==target_num]
+        code_in_same = [c for c in same_num if 'code' in c.lower()]
+
+        if code_in_same:
+            candidates = code_in_same
+        elif same_num:
+            candidates = same_num
+        else:
+            candidates = similar
+
+    # — Step 3: fallback global fuzzy if we still have nothing
+    if not candidates:
+        matches = process.extract(admin_target, cols,
+                                  scorer=fuzz.partial_ratio,
+                                  limit=len(cols))
+        candidates = [m[0] for m in matches if m[1]>=fallback_threshold]
+
+    # — Step 4: If STILL nothing, just take the single best
+    if not candidates:
+        return process.extractOne(admin_target, cols)[0]
+
+    # Debug print
+    print("→ ordered candidates:", candidates)
+
+    # — Step 5: pick first whose values *look* like P-codes
+    for c in candidates:
+        if looks_like_pcode(household_df[c], min_fraction=pcode_fraction):
+            print(f"→ picking {c} (passed P-code check)")
+            return c
+
+    # — Step 6: fallback to single best fuzzy match
+    print("→ none passed P-code check; falling back")
+    return process.extractOne(admin_target, cols,
+                              scorer=fuzz.partial_ratio)[0]
 ##--------------------------------------------------------------------------------------------
 # Step 1: Categorize codes by length
 def categorize_levels_dynamic(prefix_list):
@@ -685,6 +715,7 @@ def categorize_levels_dynamic(prefix_list):
     
     return length_dict
 ##--------------------------------------------------------------------------------------------
+##--------------------------------------------------------------------------------------------
 # Step 2: Modify the logic to find the appropriate columns in `edu_data`
 # Helper function to find matching columns for each length level
 def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list, admin_var):
@@ -694,17 +725,16 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
 
     # Get the available columns from the `edu_data` and `household_data` dataframes
     edu_columns = edu_data.columns
-    household_columns = household_data.columns
 
-    # Find the best match for `admin_var` in `household_data`
-    best_match_for_admin_var = find_similar_columns(admin_var, household_columns)
-    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var[0]}")
+    # Use the new best-match finder that checks P-codes etc.
+    best_match_for_admin_var = find_best_match(admin_var, household_data)
+    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var}")
 
     # Iterate through each column in the edu_data dataframe
     for col in edu_columns:
         # Convert the column to strings to ensure type consistency
         column_data = edu_data[col].astype(str)
-        
+
         # For each length group in the `length_dict`, check for matches
         for length, codes in length_dict.items():
             matching_values = column_data.isin(codes)
@@ -716,28 +746,23 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
                 admin_columns_representative[length].append(col)
                 print(f"Matching column found: {col} for length {length}")
 
-    # Prioritize columns based on the number of non-empty values
+    # Helper to pick the column with the most non-empty values
     def prioritize_non_empty_columns(columns):
         non_empty_counts = {col: edu_data[col].notna().sum() for col in columns}
         sorted_columns = sorted(non_empty_counts, key=non_empty_counts.get, reverse=True)
         return sorted_columns[0] if sorted_columns else None
 
-    # Handle the case where multiple levels (lengths) are detected
+    # Handle multiple or single admin levels
     if len(length_dict) > 1:
         print("Multiple levels detected:")
         for length, codes in length_dict.items():
             print(f"Level {length}: {codes}")
 
-        # Match columns based on length and prioritize based on the number of non-empty values
         best_columns = {}
         for length, columns in admin_columns_representative.items():
-            # Prioritize based on the number of non-empty values
-            best_columns_for_level = prioritize_non_empty_columns(columns)
-            best_columns[length] = best_columns_for_level
-
+            best_columns[length] = prioritize_non_empty_columns(columns)
         admin_columns_representative = best_columns
     else:
-        # For single level case, directly prioritize the column with non-empty values
         if length_dict:
             single_level = next(iter(length_dict.keys()))
             columns_for_single_level = admin_columns_representative.get(single_level, [])
@@ -747,6 +772,9 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
                 admin_columns_representative = {}
 
     return admin_columns_representative
+
+
+
    
 ##--------------------------------------------------------------------------------------------
 def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_group_var, analysis_variable, 
@@ -1087,7 +1115,7 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
     admin_target = admin_var
     pop_group_var = status_var
 
-    admin_var = find_best_match(admin_target,  household_data.columns)
+    admin_var = find_best_match(admin_target,  household_data)
 
     admin_column_rapresentative = []
     grouped_dict = {}
