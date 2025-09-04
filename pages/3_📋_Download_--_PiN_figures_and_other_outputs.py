@@ -190,6 +190,17 @@ def dict_of_dfs_to_bytesio_excel(dfs: dict[str, pd.DataFrame]) -> BytesIO:
     return output
 
 
+def build_ocha_excel_for_repo(ocha_df: pd.DataFrame,
+                              mismatch_df: pd.DataFrame | None = None,
+                              mismatch_admin: bool = False) -> BytesIO:
+    """
+    Create an in-memory Excel with sheet 'ocha_data' and,
+    if mismatch_admin is True and mismatch_df provided, a sheet 'mismatch_ocha_data'.
+    """
+    dfs = {"ocha_data": ocha_df}
+    if mismatch_admin and mismatch_df is not None and not mismatch_df.empty:
+        dfs["mismatch_ocha_data"] = mismatch_df
+    return dict_of_dfs_to_bytesio_excel(dfs)
 
 
 
@@ -352,6 +363,12 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and not 
         zip_file = create_zip_file(country_label, ocha_excel,indicator_output, doc_output, doc_parameter_output, maps)
 
 
+    ## re-create ocha file to save on github 
+    ocha_excel_for_repo = build_ocha_excel_for_repo(
+        ocha_df=ocha_data,
+        mismatch_df=mismatch_ocha_data,
+        mismatch_admin=mismatch_admin
+    )
     # ------------------------ F. save in github --> gitpush
     if st.download_button(
         label=translations["download_all"],
@@ -366,6 +383,7 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and not 
             #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
         country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
         file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_results_{country_slug}_{timestamp}.xlsx"
+        file_path_in_repo_ocha = f"platform_PiN_output/{country_slug}/ocha_figures_{country_slug}_{timestamp}.xlsx"
 
 
         try:
@@ -376,16 +394,33 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and not 
 
             # Initialize success messages for both uploads
             pr_url_excel = None
-            pr_url_doc = None
-
-            pr_url_excel = upload_to_github(
-                file_content=ocha_excel.getvalue(),
-                file_name=file_path_in_repo_excel,
-                repo_name=repo_name,
-                branch_name=branch_name,
-                commit_message=f"Add PiN results (Excel) for {country_label}",
-                token=github_token
-            )
+            pr_url_ocha = None
+            try: 
+                pr_url_excel = upload_to_github(
+                    file_content=ocha_excel.getvalue(),
+                    file_name=file_path_in_repo_excel,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add PiN results (Excel) for {country_label}",
+                    token=github_token
+                )
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")   
+                # 
+            try: 
+                pr_url_ocha = upload_to_github(
+                    file_content=ocha_excel_for_repo.getvalue(),  # bytes of the Excel file we just built
+                    file_name=file_path_in_repo_ocha,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add uploaded OCHA figures (Excel) for {country_label}",
+                    token=github_token
+                ) 
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")   
+                # 
             #st.success(f"Excel file uploaded to GitHub successfully! [View File]({pr_url_excel})")
 
         except Exception :
@@ -445,7 +480,14 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
         file_path_in_repo_excel = f"platform_PiN_output/{country_slug}/PiN_step1_{country_slug}_{timestamp}.xlsx"
         file_path_in_repo_doc = f"platform_PiN_output/{country_slug}/Param_step1_{country_slug}_{timestamp}.docx"
         file_path_in_repo_pop = f"platform_PiN_output/{country_slug}/PiN_pop_step1_{country_slug}_{timestamp}.xlsx"
+        file_path_in_repo_ocha = f"platform_PiN_output/{country_slug}/ocha_figures_{country_slug}_{timestamp}.xlsx"
 
+            ## re-create ocha file to save on github 
+        ocha_excel_for_repo = build_ocha_excel_for_repo(
+            ocha_df=ocha_data,
+            mismatch_df=mismatch_ocha_data,
+            mismatch_admin=mismatch_admin
+        )
 
         try:
             repo_name = "Global-Education-Cluster-PiN/pin-calculation-app"
@@ -480,7 +522,21 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
                 )
             except Exception :
                 pass
-                #st.error(f"Failed to upload Word document to GitHub: {e}")    
+                #st.error(f"Failed to upload Word document to GitHub: {e}")   
+                # 
+            try: 
+                pr_url_ocha = upload_to_github(
+                    file_content=ocha_excel_for_repo.getvalue(),  # bytes of the Excel file we just built
+                    file_name=file_path_in_repo_ocha,
+                    repo_name=repo_name,
+                    branch_name=branch_name,
+                    commit_message=f"Add uploaded OCHA figures (Excel) for {country_label}",
+                    token=github_token
+                ) 
+            except Exception :
+                pass
+                #st.error(f"Failed to upload Word document to GitHub: {e}")   
+                # 
             try: 
                 pr_url_doc = upload_to_github(
                     file_content=raw_excel.getvalue(),
@@ -697,7 +753,6 @@ if jena_country and ocha_data is not None:
 
             # Initialize success messages for both uploads
             pr_url_excel = None
-            pr_url_doc = None
 
             pr_url_excel = upload_to_github(
                 file_content=ocha_excel.getvalue(),
