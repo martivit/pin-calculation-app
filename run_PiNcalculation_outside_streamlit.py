@@ -40,42 +40,46 @@ import os, glob
 
 
 
+## MMR
 
-## SOM
-status_var = 'population_group'
+status_var = 'pop_group'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
-armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'edu_disrupted_hazards'
+armed_disruption_var = 'edu_disrupted_attack'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'no_indicator'
+
 barrier_var = 'edu_barrier'
 selected_severity_4_barriers = [
-"Protection risks whilst at the school " ,
-"Protection risks whilst travelling to the school "
-
-]
+    "Protection/safety risks while commuting to school",
+    "Protection/safety risks while at school",
+    "Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income)",
+    "Child participating in income generating activities outside of the home",
+    "Child marriage, engagement or pregnancies",
+    "Discrimination or stigmatization of the child for any reason",
+    "Unable to enroll in school due to lack of documentation"]
 selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'edu_ind_age'
-gender_var = 'edu_ind_gender'
-start_school = 'September'
-country= 'Somalia -- SOM'
+age_var = 'ind_age'
+gender_var = 'ind_gender'
+start_school = 'June'
+country= 'Myanmar -- MMR'
 
-#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_2: Districts'#'Admin_2: Regions' 
+#admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
 
-vector_cycle = [12,16]
+vector_cycle = [10,14]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
-label = 'label::english'
+label = 'label::English'
 
 # Path to your Excel file
-excel_path = 'input/REACH_MSNA_2024_FINAL_Cleaned_Weights.xlsx'
-excel_path_ocha = 'input/ocha_final.xlsx'
+excel_path = 'input/REACH_MMR_MMR2503_MSNA_Dataset_V2_1.xlsx'
+excel_path_ocha = 'input/Template_Population_figures - Final.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -89,17 +93,18 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-household_data = dfs['main']
-edu_data = dfs['edu_ind']
+edu_data = dfs['02_clean_data_indiv']
+household_data = dfs['01_clean_data_main']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
+
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 
 # Read specific sheets into separate dataframes
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
-mismatch_admin = False
+mismatch_admin = True
 no_ocha_data = False
 
 selected_language = "English"
@@ -141,7 +146,7 @@ if ocha_data is not None:
                                                                                     label, 
                                                                                     admin_var, vector_cycle, start_school, status_var,
                                                                                     mismatch_admin,
-                                                                                    selected_language= selected_language)
+                                                                                    selected_language= selected_language, hybrid_country=False)
 
 
 

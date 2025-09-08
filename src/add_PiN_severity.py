@@ -620,6 +620,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     ##refining for school age-children
     #edu_data = edu_data[(edu_data[age_var] >= 5) & (edu_data[age_var] <= 18)]
+    if country == 'Myanmar -- MMR': age_var = "edu_ind_age_corrected"
 
     edu_data['edu_age_corrected'] = edu_data.apply(lambda row: row[age_var] - 1 if calculate_age_correction(start_school, row['month']) else row[age_var], axis=1)
 
