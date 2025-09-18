@@ -148,7 +148,13 @@ def write_with_block_headers(df,  blocks):
     # 3) loop your blocks
     for blk in blocks:
         cols, title, color = blk['columns'], blk['title'], blk['color']
-        idxs = [df.columns.get_loc(c) + 1 for c in cols]
+        # skip defensive: no columns
+        if not cols:
+            continue
+        # double-check they exist (should already be true after prune)
+        idxs = [df.columns.get_loc(c) + 1 for c in cols if c in df.columns]
+        if not idxs:
+            continue
         start_col, end_col = min(idxs), max(idxs)
 
         # 3a) style & set the header‑cell before merging
@@ -213,6 +219,20 @@ def write_with_block_headers(df,  blocks):
 
 
 
+def prune_blocks(df: pd.DataFrame, blocks):
+    """Keep only columns that exist in df. Skip blocks with no remaining columns.
+       Returns (pruned_blocks, missing_by_block)."""
+    pruned = []
+    missing = {}
+    for blk in blocks:
+        want = blk.get('columns', [])
+        present = [c for c in want if c in df.columns]
+        if present:
+            pruned.append({**blk, 'columns': present})
+        else:
+            # whole block missing -> record for optional logging
+            missing[blk.get('title', 'Untitled Block')] = [c for c in want if c not in df.columns]
+    return pruned, missing
 
 
 
@@ -293,6 +313,9 @@ def create_output1_user(output1_platform):
         'title': 'IDP ratios',
         'color': colors['light_orange'] }
     ]
+
+    blocks, missing = prune_blocks(output1_platform, blocks)
+
     # 3) generate a styled Workbook
     wb = write_with_block_headers(output1_platform, blocks)
 
