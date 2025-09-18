@@ -315,7 +315,8 @@ def create_output1_user(output1_platform):
     ]
 
     blocks, missing = prune_blocks(output1_platform, blocks)
-
+    if missing:
+        print("⚠️ Missing columns by block:", missing)
     # 3) generate a styled Workbook
     wb = write_with_block_headers(output1_platform, blocks)
 
