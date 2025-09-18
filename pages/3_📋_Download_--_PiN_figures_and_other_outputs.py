@@ -131,18 +131,25 @@ def create_zip_file_FR(country_label, excel_file,indicator_output, word_paramete
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
 
-def create_zip_file_step1_hybrid(ccountry_label,formatted_output_1_2025, raw_excel,  doc_parameter_output, maps):
+def create_zip_file_step1_hybrid(country_label, formatted_output_1_2025, raw_excel, doc_parameter_output, maps=None, timestamp=None):
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
-        zip_file.writestr(f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx", formatted_output_1_2025.getvalue())
-        # Add the Word Snapshot with timestamp
-        zip_file.writestr(f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx", raw_excel.getvalue())
-        # Add the Parameters Word Document with timestamp
-        zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx", doc_parameter_output.getvalue())
-        for field, buf in maps.items():
-            filename = f"{country_label}_{field.replace(' ', '_')}.png"
-            zip_file.writestr(filename, buf.getvalue())
+        zip_file.writestr(f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx",
+                          formatted_output_1_2025.getvalue())
+        # Add the raw Excel file
+        zip_file.writestr(f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx",
+                          raw_excel.getvalue())
+        # Add the Parameters Word Document
+        zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx",
+                          doc_parameter_output.getvalue())
+
+        # Only add maps if provided and not empty
+        if maps:
+            for field, buf in maps.items():
+                if buf:  # Make sure buf is not None
+                    filename = f"{country_label}_{field.replace(' ', '_')}.png"
+                    zip_file.writestr(filename, buf.getvalue())
 
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
@@ -453,17 +460,17 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
         doc_parameter_output = generate_word_document_FR(parameters_FR)
 
 
-    maps_1step = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
+    #maps_1step = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
 
 
     # ------------------------ D. create Zip file with all important documents
     zip_file_name = f"PiN_Temporary_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output, maps_1step )
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output)
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output,maps_1step )
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output )
 
     # ------------------------ E. download zip file
     if st.download_button(
