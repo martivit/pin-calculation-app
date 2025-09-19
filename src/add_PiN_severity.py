@@ -111,8 +111,8 @@ def calculate_severity(country, gender, age, access, barrier, armed_disruption, 
     #normalized_protection_to_school = normalize(protection_to_school) if protection_to_school is not None else None
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', '1', 1]
-    no_answers = ['no', 'non', '0', 0]
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes']
+    no_answers = ['no', 'non', 0, '0','2. No' ]
 
     if country != 'Afghanistan -- AFG':
     # Main severity calculation logic
@@ -195,8 +195,8 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
         return ""  # Default to empty string if input is not a string or number
 
     # Define the conditions for yes and no answers
-    yes_answers = ['yes', 'oui', '1', 1]
-    no_answers = ['no', 'non', '0', 0]
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes']
+    no_answers = ['no', 'non', 0, '0','2. No' ]
 
     no_indicator = 'no_indicator'
 
@@ -265,8 +265,8 @@ def add_indicator_columns_for_EMIS(data, access_var, teacher_disruption_var, nat
         return ""  # Default to empty string if input is not a string or number
 
     # Define the conditions for yes and no answers
-    yes_answers = ['yes', 'oui', '1', 1, ]
-    no_answers = ['no', 'non', '0', 0]
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes']
+    no_answers = ['no', 'non', 0, '0','2. No' ]
 
     no_indicator = 'no_indicator'
 
@@ -325,8 +325,8 @@ def assign_dimension_pin(access, severity):
     normalized_access = normalize(access)
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', 1, '1']
-    no_answers = ['no', 'non', 0, '0']
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes']
+    no_answers = ['no', 'non', 0, '0','2. No' ]
 
     # Mapping severity to dimension labels
     if normalized_access in no_answers:

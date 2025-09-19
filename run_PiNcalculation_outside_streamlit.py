@@ -38,48 +38,44 @@ import os, glob
 
 
 
+hybrid_country= True
+step_2_hpc= False
 
+## DRC
 
-## MMR
-
-status_var = 'pop_group'
+status_var = 'hoh_dis'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
-armed_disruption_var = 'edu_disrupted_attack'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'no_indicator'
-
+armed_disruption_var = 'edu_disrupted_hazards'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'edu_disrupted_hazards'
 barrier_var = 'edu_barrier'
 selected_severity_4_barriers = [
-    "Protection/safety risks while commuting to school",
-    "Protection/safety risks while at school",
-    "Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income)",
-    "Child participating in income generating activities outside of the home",
-    "Child marriage, engagement or pregnancies",
-    "Discrimination or stigmatization of the child for any reason",
-    "Unable to enroll in school due to lack of documentation"]
-selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+    "Risques de protection à l’école (tels que le harcèlement physique et verbal, risque de viol, les attaques contre les écoles ou d’autres incidents de protection)",
+"Risques de protection pendant le trajet vers l’école (tels que les incidents de harcèlement physique et verbal, risque de viol ou d’autres incidents de protection)"
+]
+selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'ind_age'
-gender_var = 'ind_gender'
-start_school = 'June'
-country= 'Myanmar -- MMR'
+age_var = 'edu_ind_age'
+gender_var = 'edu_ind_gender'
+start_school = 'September'
+country= 'Democratic Republic of the Congo -- DRC'
 
-admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-#admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
+admin_var = 'Admin_3: Sectors/chiefdoms/communes'#'Admin_2: Regions' 
 
-vector_cycle = [10,14]
+vector_cycle = [12,16]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
-label = 'label::English'
+label = 'label::french'
 
 # Path to your Excel file
-excel_path = 'input/REACH_MMR_MMR2503_MSNA_Dataset_V2_1.xlsx'
-excel_path_ocha = 'input/Template_Population_figures - Final.xlsx'
+excel_path = 'input/REACH_DRC2404_MSNA2024_Clean-Data.xlsx'
+excel_path_ocha = 'input/DRC_ocha.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -93,21 +89,24 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-edu_data = dfs['02_clean_data_indiv']
-household_data = dfs['01_clean_data_main']
+household_data = dfs['hh_data']
+edu_data = dfs['edu_data']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
-
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 
 # Read specific sheets into separate dataframes
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
-mismatch_admin = True
+mismatch_admin = False
+
+selected_language = "French"
+
+
 no_ocha_data = False
 
-selected_language = "English"
+
 
 
 ##################################################################################################################################################################################################################
