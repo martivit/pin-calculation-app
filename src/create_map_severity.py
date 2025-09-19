@@ -123,7 +123,18 @@ def make_map_severity(
     shp_path = find_shapefile(shp_folder, country_code)
     gdf = gpd.read_file(shp_path)
     gdf = normalize_fn(gdf, shp_path)
+     # --- FIX: repair invalid geometries BEFORE any dissolve/union ---
+    try:
+        # Shapely 2.x
+        from shapely import make_valid
+        gdf["geometry"] = gdf["geometry"].apply(make_valid)
+    except Exception:
+        # Fallback works on Shapely 1.x too
+        gdf["geometry"] = gdf.buffer(0)
 
+    # Drop empty / missing geometries that can still cause dissolve to fail
+    gdf = gdf[gdf.geometry.notna() & ~gdf.geometry.is_empty]
+    # --- END FIX ---
     # ---------- NIGER PCODE NORMALIZATION (NER → NE) ----------
     if country_code.upper() == 'NER':
         # fix all ADM*PCODE columns in the shapefile
@@ -157,7 +168,7 @@ def make_map_severity(
         .set_index(best_adm)
     )
     plot_gdf = merged.copy()
-    plot_gdf.crs = None
+    #plot_gdf.crs = None
     # HPC scope set
     hpc_set = set()
     #if hpc_df is not None:
@@ -165,7 +176,10 @@ def make_map_severity(
         #hpc_set = set(hpc_df.iloc[:,1].astype(str))
     # ensure index type matches your pin_data key type
     hpc_df = hpc_df.rename(columns={ hpc_df.columns[1]: best_adm })
-    hpc_set = set(hpc_df[best_adm].astype(str))
+    hpc_set = set()
+    if hpc_df is not None and not hpc_df.empty and hpc_df.shape[1] >= 2:
+        hpc_df = hpc_df.copy().rename(columns={hpc_df.columns[1]: best_adm})
+        hpc_set = set(hpc_df[best_adm].astype(str))
     admin_level_gdf.index = admin_level_gdf.index.astype(str)
     # 5) colors for categorical map
     CAT_COLORS = {
