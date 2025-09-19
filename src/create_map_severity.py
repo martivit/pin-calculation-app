@@ -125,15 +125,23 @@ def make_map_severity(
     gdf = normalize_fn(gdf, shp_path)
      # --- FIX: repair invalid geometries BEFORE any dissolve/union ---
     try:
-        # Shapely 2.x
-        from shapely import make_valid
-        gdf["geometry"] = gdf["geometry"].apply(make_valid)
+        from shapely import make_valid, set_precision  # Shapely 2.xhpc_df.rename
+        # Make valid, keep polygonal, snap to a precision grid to avoid sliver conflicts
+        gdf["geometry"] = make_valid(gdf.geometry)
+        gdf = gdf[gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].copy()
+        gdf["geometry"] = set_precision(gdf.geometry, grid_size=1e-8)
     except Exception:
-        # Fallback works on Shapely 1.x too
-        gdf["geometry"] = gdf.buffer(0)
+        # Fallback for older Shapely: buffer(0) + keep polygonal only
+        gdf["geometry"] = gdf.geometry.buffer(0)
+        gdf = gdf[gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].copy()
 
-    # Drop empty / missing geometries that can still cause dissolve to fail
-    gdf = gdf[gdf.geometry.notna() & ~gdf.geometry.is_empty]
+    # One more pass: fix any remaining invalids individually
+    bad = ~gdf.geometry.is_valid
+    if bad.any():
+        gdf.loc[bad, "geometry"] = gdf.loc[bad, "geometry"].buffer(0)
+
+    # Final guard: drop empties and non-valids
+    gdf = gdf[gdf.geometry.notna() & ~gdf.geometry.is_empty & gdf.geometry.is_valid].copy()
     # --- END FIX ---
     # ---------- NIGER PCODE NORMALIZATION (NER → NE) ----------
     if country_code.upper() == 'NER':
@@ -175,7 +183,7 @@ def make_map_severity(
         # assume second column holds the P-codes
         #hpc_set = set(hpc_df.iloc[:,1].astype(str))
     # ensure index type matches your pin_data key type
-    hpc_df = hpc_df.rename(columns={ hpc_df.columns[1]: best_adm })
+    #hpc_df = hpc_df.rename(columns={ hpc_df.columns[1]: best_adm })
     hpc_set = set()
     if hpc_df is not None and not hpc_df.empty and hpc_df.shape[1] >= 2:
         hpc_df = hpc_df.copy().rename(columns={hpc_df.columns[1]: best_adm})
