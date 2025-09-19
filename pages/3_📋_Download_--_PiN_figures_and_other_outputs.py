@@ -460,17 +460,17 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
         doc_parameter_output = generate_word_document_FR(parameters_FR)
 
 
-    #maps_1step = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
+    maps_1step = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
 
 
     # ------------------------ D. create Zip file with all important documents
     zip_file_name = f"PiN_Temporary_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output)
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output, maps_1step)
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output )
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output , maps_1step)
 
     # ------------------------ E. download zip file
     if st.download_button(
