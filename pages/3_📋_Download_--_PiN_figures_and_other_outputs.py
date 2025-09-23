@@ -283,7 +283,11 @@ alternative_countries = ['Niger -- NER', 'Nigeria -- NRA','Mozambique -- MOZ' ]
 alternative_country = False
 jena_country= False
 emis_country=False
-if country in alternative_countries: alternative_country = True
+
+dc = (data_combination or "")
+
+alternative_country = (country in alternative_countries) and (dc != "mmmm")
+
 if alternative_country and data_combination == 'mjjm': jena_country = True
 if alternative_country and (data_combination == 'emmm' or data_combination == 'eemm' or data_combination == 'eeem'): emis_country = True
 

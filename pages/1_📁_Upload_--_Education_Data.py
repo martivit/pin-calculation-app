@@ -411,6 +411,7 @@ if is_scenario_2: st.session_state['step_2_hpc'] = True
 
 #----- Step 3: Select Available Data Sources
 alternative_countries = ['Niger -- NER', 'Nigeria -- NRA', 'Mozambique -- MOZ']
+
 use_full_selection = (selected_country in alternative_countries) and not is_scenario_2
 #st.subheader(translations["select_data_section_2"])
 user_selection = ""
