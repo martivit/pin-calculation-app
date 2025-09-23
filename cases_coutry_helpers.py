@@ -656,6 +656,8 @@ mismatch_admin = False
 selected_language = "French"
 
 
+
+
 ## MOZ
 
 status_var = 'pop_group'
@@ -709,8 +711,8 @@ for sheet_name in xls.sheet_names:
 # Access specific dataframes
 edu_data = dfs['edu_ind']
 household_data = dfs['main']
-survey_data = dfs['Kobo Questions']
-choice_data = dfs['Kobo Choices']
+survey_data = dfs['survey']
+choice_data = dfs['choices']
 
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
