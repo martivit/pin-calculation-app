@@ -256,11 +256,10 @@ def find_barrier_details(barrier_variable, survey_data, choices_data, label_colu
     Fetch all barriers for a given type from choices_data.
     """
 
-    if country == "Mozambique -- MOZ":
-        # Just return the label list and skip the survey_data lookup
-        return choices_data[label_column].tolist()
+    column_to_match = label_column if country == "Mozambique -- MOZ" else "name"
 
-    type_info = survey_data[survey_data['name'] == barrier_variable].iloc[0]['type']
+
+    type_info = survey_data[survey_data[column_to_match] == barrier_variable].iloc[0]['type']
     type_barrier = type_info.replace('select_one ', '')
     barrier_details = choices_data[choices_data['list_name'] == type_barrier]
     return barrier_details[label_column].tolist()
