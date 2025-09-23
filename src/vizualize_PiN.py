@@ -104,6 +104,34 @@ color_mapping_dimension = {
     label_dimension_tot: colors_dimension["light_blue"]
 }
 
+
+def sanitize_sheet_name(name, used_names=None):
+    """
+    Make an Excel-safe, unique sheet name:
+    - remove illegal chars []:*?/\\
+    - trim whitespace
+    - truncate to 31 chars
+    - deduplicate by adding _1, _2, ...
+    """
+    if used_names is None:
+        used_names = set()
+
+    illegal = '[]:*?/\\'
+    trans = str.maketrans({c: '-' for c in illegal})
+    cleaned = (name or '').translate(trans).strip() or 'Sheet'
+
+    base = cleaned[:30]
+    candidate = base
+    i = 1
+    while candidate in used_names:
+        suffix = f"_{i}"
+        candidate = base[:30 - len(suffix)] + suffix
+        i += 1
+
+    used_names.add(candidate)
+    return candidate
+
+
 alignment_columns = list(color_mapping.keys())
 def apply_final_formatting(country_name, workbook, overview_df, small_overview_df, admin_var, selected_language= 'English'):
 
@@ -385,18 +413,23 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
         label_overall_severity = 'PiN total par admin'
     output = BytesIO()
     with pd.ExcelWriter(output) as writer:
+        used_names = set()
+
         # Only write the overview sheet if ocha is True
         if ocha:
-            overview_df.to_excel(writer, sheet_name=overview_sheet_name, index=False)
+            sn = sanitize_sheet_name(overview_sheet_name, used_names)
+            overview_df.to_excel(writer, sheet_name=sn, index=False)
 
         # Write the tot_severity sheet if it is provided
         if tot_severity is not None:
-            tot_severity.to_excel(writer, sheet_name=label_overall_severity, index=False)
+            sn = sanitize_sheet_name('Overall PiN and severity' if selected_language=='English' else 'PiN total par admin', used_names)
+            tot_severity.to_excel(writer, sheet_name=sn, index=False)
 
         # Write the category sheets
         for category, df in dataframes.items():
-            sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
+            raw = f"{overview_sheet_name.split()[0]} -- {category}"
+            sn = sanitize_sheet_name(raw, used_names)
+            df.to_excel(writer, sheet_name=sn, index=False)
 
         if parameters:
             if selected_language == "English":

@@ -904,11 +904,14 @@ def categorize_levels_dynamic(prefix_list):
 def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list, admin_var):
     # Categorize codes based on length
     length_dict = categorize_levels_dynamic(prefix_list)
+    print(f"[DEBUG] length_dict: {length_dict}")
+
     admin_columns_representative = {}
 
     # Get the available columns from the `edu_data` and `household_data` dataframes
     edu_columns = edu_data.columns
 
+    print(edu_columns)
     # Use the new best-match finder that checks P-codes etc.
     best_match_for_admin_var = find_best_match(admin_var, household_data)
     print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var}")
@@ -917,11 +920,14 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
     for col in edu_columns:
         # Convert the column to strings to ensure type consistency
         column_data = edu_data[col].astype(str)
+        print(f"[DEBUG] Checking column: {col}, sample values: {column_data.head(5).tolist()}")
 
         # For each length group in the `length_dict`, check for matches
         for length, codes in length_dict.items():
             matching_values = column_data.isin(codes)
-
+            matching_count = matching_values.sum()
+            if matching_count > 0:
+                print(f"[DEBUG] Column {col} has {matching_count} matches with codes of length {length}")
             # If there are any matches, add the column to the admin_columns_representative dictionary for that length
             if matching_values.any():
                 if length not in admin_columns_representative:
@@ -1159,8 +1165,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         prefix_list = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
         admin_low_ok_list = ocha_mismatch_list.iloc[:, 0].dropna().astype(str).tolist()  # Drop NaN and convert to string
 
-        #print(detailed_list)
-        #print(prefix_list)
+        print(detailed_list)
+        print(prefix_list)
 
         grouped_dict = defaultdict(list)
         # Iterate over each prefix in the prefix_list
@@ -1178,9 +1184,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
         
         length_dict = categorize_levels_dynamic(prefix_list)
-        #print("Codes grouped by length:")
-        #for length, codes in length_dict.items():
-            #print(f"Length {length}: {codes}")
+        print("Codes grouped by length:")
+        for length, codes in length_dict.items():
+            print(f"Length {length}: {codes}")
 
 
 
