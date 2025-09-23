@@ -251,10 +251,15 @@ def update_combined_indicator():
 
     display_status(translations["indicator_selection_confirmed"], st.session_state.indicators_confirmed)
 ##---------------------------------------------------------------------------------------------------------
-def find_barrier_details(barrier_variable, survey_data, choices_data, label_column):
+def find_barrier_details(barrier_variable, survey_data, choices_data, label_column, country=None):
     """
     Fetch all barriers for a given type from choices_data.
     """
+
+    if country == "Mozambique -- MOZ":
+        # Just return the label list and skip the survey_data lookup
+        return choices_data[label_column].tolist()
+
     type_info = survey_data[survey_data['name'] == barrier_variable].iloc[0]['type']
     type_barrier = type_info.replace('select_one ', '')
     barrier_details = choices_data[choices_data['list_name'] == type_barrier]
@@ -585,7 +590,7 @@ def select_indicators():
         st.warning(translations["no_data"]) 
 ##-----------------------------
 # Function to define severity of barriers
-def define_severity():
+def define_severity(country):
     if 'survey_data' in st.session_state and 'choice_data' in st.session_state and 'edu_data' in st.session_state and st.session_state.get('indicators_confirmed', False):
         survey_data = st.session_state['survey_data']
         choices_data = st.session_state['choice_data']
@@ -595,7 +600,7 @@ def define_severity():
         selected_label = st.session_state['label'] 
         st.write(selected_label)
 
-        barrier_options = find_barrier_details(barrier_var, survey_data, choices_data, selected_label)
+        barrier_options = find_barrier_details(barrier_var, survey_data, choices_data, selected_label, country=country)
 
         # Encapsulate descriptions within a single box with a light gray background
         st.markdown(translations["severity_circumstances_html"], unsafe_allow_html=True)
@@ -1055,7 +1060,7 @@ def finalize_details_nomsna():
 
 def display_step_content():
     data_combination = st.session_state.get('data_combination', "")
-
+    selected_country = st.session_state['country']
     # Check if 'm' is in the data_combination string
     if 'm' in data_combination:
         if st.session_state['current_step'] == 0:
@@ -1063,7 +1068,7 @@ def display_step_content():
         elif st.session_state['current_step'] == 1:
             select_indicators()
         elif st.session_state['current_step'] == 2:
-            define_severity()
+            define_severity(country=selected_country)
         elif st.session_state['current_step'] == 3:
             finalize_details()
     else:
