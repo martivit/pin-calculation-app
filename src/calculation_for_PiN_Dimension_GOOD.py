@@ -904,11 +904,14 @@ def categorize_levels_dynamic(prefix_list):
 def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list, admin_var):
     # Categorize codes based on length
     length_dict = categorize_levels_dynamic(prefix_list)
+    print(f"[DEBUG] length_dict: {length_dict}")
+
     admin_columns_representative = {}
 
     # Get the available columns from the `edu_data` and `household_data` dataframes
     edu_columns = edu_data.columns
 
+    print(edu_columns)
     # Use the new best-match finder that checks P-codes etc.
     best_match_for_admin_var = find_best_match(admin_var, household_data)
     print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var}")
@@ -917,11 +920,14 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
     for col in edu_columns:
         # Convert the column to strings to ensure type consistency
         column_data = edu_data[col].astype(str)
+        print(f"[DEBUG] Checking column: {col}, sample values: {column_data.head(5).tolist()}")
 
         # For each length group in the `length_dict`, check for matches
         for length, codes in length_dict.items():
             matching_values = column_data.isin(codes)
-
+            matching_count = matching_values.sum()
+            if matching_count > 0:
+                print(f"[DEBUG] Column {col} has {matching_count} matches with codes of length {length}")
             # If there are any matches, add the column to the admin_columns_representative dictionary for that length
             if matching_values.any():
                 if length not in admin_columns_representative:
@@ -1003,71 +1009,15 @@ def translate_labels(data, translation_dict):
         raise TypeError("Input must be a pandas DataFrame or a dictionary of DataFrames.")
 
 ##--------------------------------------------------------------------------------------------
-def calculate_prop(df, admin_var, pop_group_var, target_var, agg_var='weights', country=None):
-    """
-    Weighted proportions of `target_var` by admin and population group.
+def calculate_prop(df, admin_var, pop_group_var, target_var, agg_var='weights'):
 
-    Default: group by population group (current behavior).
-    If `country` is in OVERALL_COUNTRIES, compute per-admin overall
-    (ignoring population groups) and broadcast the same proportions
-    to each (admin, pop_group) pair — while preserving:
-      • row MultiIndex: (admin_var, pop_group_var)
-      • column MultiIndex: ('total_weight', <target category>)
-    """
+    df_results = df.groupby([admin_var, pop_group_var, target_var]).agg(
+            total_weight=(agg_var, 'sum')
+        ).groupby(level=[0, 1]).apply(
+            lambda x: x / x.sum()
+        ).unstack(fill_value=0)
 
-    OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN'}#, 'Myanmar -- MMR'
-
-    # ---- Standard mode (unchanged, and keeps 2-level columns) ----
-    if country not in OVERALL_COUNTRIES:
-        print('i am in the startdard mode')
-        df_results = (
-            df.groupby([admin_var, pop_group_var, target_var])
-              .agg(total_weight=(agg_var, 'sum'))
-              .groupby(level=[0, 1])
-              .apply(lambda x: x / x.sum())
-              .unstack(fill_value=0)     # columns: MultiIndex ('total_weight', target)
-        )
-        return df_results                # do NOT flatten; keep MultiIndex for reduce_index()
-
-    # ---- Overall mode (preserve both MultiIndexes) ----
-    def _ensure_2level_cols(df_):
-        # after unstack, make sure columns are MultiIndex ('total_weight', target)
-        if not isinstance(df_.columns, pd.MultiIndex):
-            df_.columns = pd.MultiIndex.from_product([['total_weight'], df_.columns])
-        else:
-            # also guard odd cases where the top level name isn't 'total_weight'
-            if df_.columns.nlevels == 2 and df_.columns.levels[0].size == 1:
-                df_.columns = pd.MultiIndex.from_product([['total_weight'], df_.columns.get_level_values(-1)])
-        return df_
-
-     # 1) per-admin proportions (ignore pop_group)
-    overall = (
-        df.groupby([admin_var, target_var])
-          .agg(total_weight=(agg_var, 'sum'))
-          .groupby(level=0)
-          .apply(lambda x: x / x.sum())
-          .unstack(fill_value=0)
-    )
-    overall = _ensure_2level_cols(overall)  # columns now guaranteed 2-level
-
-    # 2) all (admin, pop_group) pairs present in the data
-    pairs = (
-        df[[admin_var, pop_group_var]]
-        .dropna()
-        .drop_duplicates()
-        .sort_values([admin_var, pop_group_var])
-    )
-
-    # 3) broadcast per-admin row to each of its pop groups
-    admins_order = pairs[admin_var].to_numpy()
-    bcast = overall.reindex(admins_order).copy()  # duplicate rows per pop group order
-    bcast.index = pd.MultiIndex.from_frame(pairs[[admin_var, pop_group_var]])
-
-    # safety: if an admin had no overall row (shouldn't happen), fill zeros
-    bcast = bcast.fillna(0)
-
-    return bcast
-
+    return df_results
 ##--------------------------------------------------------------------------------------------
 def find_matching_choices(choices_df, barriers_list, label_var):
     # List to hold the results
@@ -1215,8 +1165,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         prefix_list = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
         admin_low_ok_list = ocha_mismatch_list.iloc[:, 0].dropna().astype(str).tolist()  # Drop NaN and convert to string
 
-        #print(detailed_list)
-        #print(prefix_list)
+        print(detailed_list)
+        print(prefix_list)
 
         grouped_dict = defaultdict(list)
         # Iterate over each prefix in the prefix_list
@@ -1234,9 +1184,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
         
         length_dict = categorize_levels_dynamic(prefix_list)
-        #print("Codes grouped by length:")
-        #for length, codes in length_dict.items():
-            #print(f"Length {length}: {codes}")
+        print("Codes grouped by length:")
+        for length, codes in length_dict.items():
+            print(f"Length {length}: {codes}")
 
 
 
@@ -1251,9 +1201,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     secondary_end = 17
 
-    host_suggestion = ["Urban","PND",'host_community',"always_lived","general_pop",'non_deplace','Host Community',"Host community members",'host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ['host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'pdi_famille','New IDPs','pdi', 'idp', 'idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
-    returnee_suggestion = ['displaced_previously' ,'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
+    host_suggestion = ["Non displaced household","Urban","PND",'host_community',"always_lived","general_pop",'non_deplace','Host Community',"Host community members",'host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
+    IDP_suggestion = ["Internally displaced persons (IDP)",'host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'pdi_famille','New IDPs','pdi', 'idp', 'idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
+    returnee_suggestion = ["Returnees (from internal dislpacement)",'displaced_previously' ,'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees','REF', 'refugee','refugie', 'refugie','prl', 'refugiee', '3']
     ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
@@ -1352,16 +1302,12 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 df=source_df,
                 admin_var=admin_var,
                 pop_group_var=pop_group_var,
-                target_var=target_var,
-                country=country
+                target_var=target_var
             )    
        
         # Reduce the index for all results
         for key in results_dict:
-            print(results_dict[key])
             results_dict[key] = reduce_index(results_dict[key], 0, pop_group_var)
-            print("--------------------")
-            print(results_dict[key])
 
 
     # Extract results into individual variables if needed
