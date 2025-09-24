@@ -667,7 +667,7 @@ idp_disruption_var = 'In the past 12 months, was the education child of age: ${e
 armed_disruption_var = 'In the past 12 months, was the education child of age: ${edu_ind_age} and gender: ${edu_ind_gender} disrupted by any of the following events:/Direct attack on education (e.g. school occupied by armed actors, damaged by munitions/fire, looted)'#'edu_disrupted_occupation'no_indicator
 natural_hazard_var = 'no_indicator'
 
-barrier_var = 'During the 2025 school year, what was the main reason child of age: ${edu_ind_age} and gender: ${edu_ind_gender} did not access formal school?'
+barrier_var = 'edu_barrier'
 selected_severity_4_barriers = [
     "Protection risks whilst at the school",
 "Protection risks whilst travelling to the school",
@@ -724,7 +724,6 @@ mismatch_admin = True
 no_ocha_data = False
 
 selected_language = "English"
-
 
 
 

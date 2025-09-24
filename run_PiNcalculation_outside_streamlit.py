@@ -110,7 +110,7 @@ ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 # Read specific sheets into separate dataframes
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
-mismatch_admin = True
+mismatch_admin = False
 no_ocha_data = False
 
 selected_language = "English"
