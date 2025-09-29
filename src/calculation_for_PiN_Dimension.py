@@ -241,7 +241,7 @@ def replicate_for_popgroups(df_flat, pop_group_var, pop_groups):
 ##--------------------------------------------------------------------------------------------
 def reduce_index(df, level, pop_group_var, country, unique_pop_group):
 
-    OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN'}#
+    OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN', 'Democratic Republic of the Congo -- DRC'}
 
     # ---- Standard mode (unchanged, and keeps 2-level columns) ----
     if country not in OVERALL_COUNTRIES:
@@ -1059,7 +1059,7 @@ def calculate_prop(df, admin_var, pop_group_var, target_var, agg_var='weights', 
     """
 
     #OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN'}#, 'Myanmar -- MMR'
-    OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN'}#
+    OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN', 'Democratic Republic of the Congo -- DRC'}
 
     # ---- Standard mode (unchanged, and keeps 2-level columns) ----
     if country not in OVERALL_COUNTRIES:
