@@ -1061,7 +1061,7 @@ def calculate_prop(df, admin_var, pop_group_var, target_var, agg_var='weights', 
 
     # ---- Standard mode (unchanged, and keeps 2-level columns) ----
     if country not in OVERALL_COUNTRIES:
-        print(' ----------------> i am in the startdard mode')
+        print(' -------> i am in the startdard mode')
         df_results = (
             df.groupby([admin_var, pop_group_var, target_var])
               .agg(total_weight=(agg_var, 'sum'))
