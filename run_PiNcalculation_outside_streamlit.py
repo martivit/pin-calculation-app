@@ -46,29 +46,25 @@ step_2_hpc= False
 
 
 
-## MMR
+## AFG
 
-status_var = 'pop_group'
+status_var = 'Urbanity'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
-armed_disruption_var = 'edu_disrupted_attack'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'no_indicator'
+armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'edu_disrupted_hazards'
 
 barrier_var = 'edu_barrier'
 selected_severity_4_barriers = [
-    "Protection/safety risks while commuting to school",
-    "Protection/safety risks while at school",
-    "Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income)",
-    "Child participating in income generating activities outside of the home",
-    "Child marriage, engagement or pregnancies",
-    "Discrimination or stigmatization of the child for any reason",
-    "Unable to enroll in school due to lack of documentation"]
+    "Well-being during travel or at school",
+    "Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income) ",
+    "Child participating in income generating activities outside of the home"]
 selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'ind_age'
-gender_var = 'ind_gender'
+gender_var = 'edu_ind_gender'
 start_school = 'June'
 country= 'Myanmar -- MMR'
 
