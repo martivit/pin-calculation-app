@@ -1378,12 +1378,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
        
         # Reduce the index for all results
         for key in results_dict:
-            print("before ---> ", key)
-            print( results_dict[key])
-            print( results_dict[key].columns)
+
             results_dict[key] = reduce_index(results_dict[key], 0, pop_group_var, country, unique_pop_group)
-            print("after ====================== ---> ")
-            print( results_dict[key])
+
 
     # Extract results into individual variables if needed
     severity_admin_status_list = results_dict.get('severity_category')
