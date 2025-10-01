@@ -628,7 +628,6 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     if country != 'Afghanistan -- AFG': primary_start = 6
     else: primary_start = 7
 
-    primary_start=7
     edu_data['school_cycle'] = edu_data['edu_age_corrected'].apply(
         lambda x: assign_school_cycle(
             x, 
