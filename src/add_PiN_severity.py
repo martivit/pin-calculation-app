@@ -627,6 +627,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     single_cycle = (vector_cycle[1] == 0)
     if country != 'Afghanistan -- AFG': primary_start = 6
     else: primary_start = 7
+
+    primary_start=7
     edu_data['school_cycle'] = edu_data['edu_age_corrected'].apply(
         lambda x: assign_school_cycle(
             x, 
@@ -659,7 +661,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
-    print('access_var' + access_var + " gender_var " , gender_var)
+    print('access_var ' + access_var + " gender_var " , gender_var)
 
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
         country = country,

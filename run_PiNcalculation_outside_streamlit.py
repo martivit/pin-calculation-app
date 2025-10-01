@@ -46,42 +46,42 @@ step_2_hpc= False
 
 
 
-## AFG
+## DRC
 
-status_var = 'Urbanity'
+status_var = 'pop_group'
 access_var = 'edu_access'
-teacher_disruption_var = 'edu_disrupted_teacher'
-idp_disruption_var = 'edu_disrupted_displaced'
+teacher_disruption_var = 'edu_disruption_teacher'
+idp_disruption_var = 'edu_disruption_displaced'
 armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'edu_disrupted_hazards'
+natural_hazard_var = 'no_indicator'
 
 barrier_var = 'edu_barrier'
-selected_severity_4_barriers = [
-    "Well-being during travel or at school",
-    "Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income) ",
-    "Child participating in income generating activities outside of the home"]
-selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+selected_severity_4_barriers = ["Risques de protection pendant le trajet vers l'école",
+"Risques de protection à l'école",
+"Enfant aidant à la maison / à la ferme", "Impossibilité d'enregistrer ou d'inscrire l'enfant à l'école" ,  "Mariage et/ou grossesse"                                                            
+]
+selected_severity_5_barriers = ["Les enfants rejoignent ou sont recrutés par des groupes armés"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'ind_age'
-gender_var = 'edu_ind_gender'
-start_school = 'June'
-country= 'Myanmar -- MMR'
+age_var = 'age_years'
+gender_var = 'ind_gender'
+start_school = 'September'
+country= 'Democratic Republic of the Congo -- DRC'
 
-admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+admin_var = 'Admin_3'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
 #admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
 
-vector_cycle = [10,14]
+vector_cycle = [11,0]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
-label = 'label::English'
+label = 'label'
 
 # Path to your Excel file
-excel_path = 'input/REACH_MMR_MMR2503_MSNA_Dataset_V2_1.xlsx'
-excel_path_ocha = 'input/Template_Population_figures - Final.xlsx'
+excel_path = 'input/REACH_MSNA_2023_DRC_clean dataset_v2.xlsx'
+excel_path_ocha = 'input/DRC_ocha_2025.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -95,10 +95,10 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-edu_data = dfs['02_clean_data_indiv']
-household_data = dfs['01_clean_data_main']
-survey_data = dfs['survey']
-choice_data = dfs['choices']
+edu_data = dfs['HH roster']
+household_data = dfs['BDD nettoyée']
+survey_data = dfs['Questionnaire']
+choice_data = dfs['Options']
 
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
@@ -109,7 +109,7 @@ mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-f
 mismatch_admin = False
 no_ocha_data = False
 
-selected_language = "English"
+selected_language = "French"
 
 
 
