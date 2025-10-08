@@ -213,57 +213,67 @@ def select_dimension_and_severity(key_prefix: str):
         st.success(translations.get("dimension_severity_saved", "Saved."))
 
 ##-----------------------------
+##-----------------------------
 def handle_natural_hazard_disruption_selection(current_country, suggestions):
-    # Checkbox: was this indicator collected?
+    """
+    Same logic as before, but when the indicator is collected and the column
+    is confirmed, we also ask the user to choose the severity (3 or 4) and save it to
+    st.session_state['natural_hazard_disruption_severity'].
+    """
     translated_text = translations["yes_natural_hazard_disruption_indicator"]
     indicator_collected = st.checkbox(f"{translated_text}", key="natural_hazard_collected")
     column_type = 'disruption_natural_hazard'
-    
+
     if indicator_collected:
-        # Let the user pick the column
+        # 1) Select the column (unchanged)
         natural_hazard_disruption_var = handle_full_selection(
-            current_country, 
-            suggestions, 
-            column_type, 
+            current_country,
+            suggestions,
+            column_type,
             translations["natural_hazard_disruption_var_prompt"],
             translations["natural_hazard_disruption_var_prompt_2"]
         )
 
-        # If a real column is selected, ask for dimension & severity
+        # 2) If the column is confirmed, ask for SEVERITY (only 3 or 4)
         selected_col = st.session_state.get(f"selected_{column_type}_column")
         confirmed = st.session_state.get(f"{column_type}_column_confirmed", False)
 
         if confirmed and selected_col and selected_col != "no_indicator":
-            with st.container(border=True):
-                st.markdown(
-                    translations.get(
-                        "dimsev_box_title_nhaz",
-                        "<b>Assign natural hazard disruption to a dimension & severity</b>"
-                    ),
-                    unsafe_allow_html=True
-                )
-                select_dimension_and_severity(key_prefix=column_type)
+            # Labels with safe fallbacks
+            q_text = translations.get(
+                "natural_hazard_severity_question",
+                "Which severity does this indicator fall under?"
+            )
+            opt_s3 = translations.get(
+                "natural_hazard_severity3_opt",
+                "Severity 3 (Learning conditions)"
+            )
+            opt_s4 = translations.get(
+                "natural_hazard_severity4_opt",
+                "Severity 4 (Protected environment)"
+            )
+            confirm_lbl = translations.get("confirm_natural_hazard_severity", "Confirm severity")
 
-                # Optional: keep a central mapping dict for later use/exports
-                if st.session_state.get(f"{column_type}_dimension_confirmed", False):
-                    mapping = st.session_state.get("custom_indicator_mappings", {})
-                    mapping[selected_col] = {
-                        "dimension": st.session_state[f"{column_type}_dimension"],
-                        "severity": st.session_state[f"{column_type}_severity"],
-                        "column_type": column_type
-                    }
-                    st.session_state["custom_indicator_mappings"] = mapping
+            choice = st.radio(
+                q_text,
+                [opt_s3, opt_s4],
+                key=f"{column_type}_severity_radio"
+            )
+
+            if st.button(confirm_lbl, key=f"{column_type}_severity_confirm"):
+                st.session_state['natural_hazard_disruption_severity'] = 3 if choice == opt_s3 else 4
+                st.success(translations.get("natural_hazard_severity_saved", "Severity saved."))
 
     else:
-        # Mark as no_indicator
+        # If checkbox is not checked, mark natural hazard disruption as 'no_indicator'
         natural_hazard_disruption_var = "no_indicator"
-        st.session_state['selected_natural_hazard_disruption_column'] = "no_indicator"
-        st.session_state['natural_hazard_disruption_column_confirmed'] = True
-        # Also clear any prior dimension/severity if present
+        st.session_state[f'selected_{column_type}_column'] = "no_indicator"
+        st.session_state[f'{column_type}_column_confirmed'] = True
+        # Clear severity if previously set
         st.session_state['natural_hazard_disruption_severity'] = None
-        st.session_state['natural_hazard_disruption_dimension'] = None
 
     return natural_hazard_disruption_var
+
 ##---------------------------------------------------------------------------------------------------------
 def handle_additional_selection(current_country, suggestions):
     """
@@ -735,27 +745,10 @@ def select_indicators():
             # Display the HTML content
             st.markdown(translations["proceed_to_next_step3"], unsafe_allow_html=True)
             with st.expander("🔎 Debug – Natural hazard indicator"):
-                nh_var = st.session_state.get('natural_hazard_disruption_var')
-                nh_selected = st.session_state.get('selected_natural_hazard_disruption_column')
-                nh_confirmed = st.session_state.get('natural_hazard_disruption_column_confirmed')
-                nh_dim = st.session_state.get('natural_hazard_disruption_dimension')
-                nh_sev = st.session_state.get('natural_hazard_disruption_severity')
-                mapping = st.session_state.get('custom_indicator_mappings', {})
-                nh_map = mapping.get(nh_var) if isinstance(mapping, dict) else None
-
-                st.write("natural_hazard_disruption_var:", nh_var)
-                st.write("selected_natural_hazard_disruption_column:", nh_selected)
-                st.write("natural_hazard_disruption_column_confirmed:", nh_confirmed)
-                st.write("natural_hazard_disruption_dimension:", nh_dim)
-                st.write("natural_hazard_disruption_severity:", nh_sev)
-                st.write("custom_indicator_mappings[natural_hazard_disruption_var]:", nh_map)
-
-                # Optional quick consistency check
-                if nh_var and nh_selected and nh_var != nh_selected:
-                    st.warning(
-                        f"Note: returned var ({nh_var}) != selected_* key ({nh_selected}). "
-                        "This can happen if selection changed but confirm wasn’t clicked."
-                    )
+                st.write("natural_hazard_disruption_var:", st.session_state.get('natural_hazard_disruption_var'))
+                st.write("selected_natural_hazard_disruption_column:", st.session_state.get('selected_disruption_natural_hazard_column'))
+                st.write("natural_hazard_disruption_column_confirmed:", st.session_state.get('disruption_natural_hazard_column_confirmed'))
+                st.write("natural_hazard_disruption_severity:", st.session_state.get('natural_hazard_disruption_severity'))
 
 
     else:
