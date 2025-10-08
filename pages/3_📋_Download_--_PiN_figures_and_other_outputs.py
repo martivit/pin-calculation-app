@@ -238,6 +238,7 @@ idp_disruption_var =  st.session_state.get('idp_disruption_var')
 armed_disruption_var =  st.session_state.get('armed_disruption_var')
 #natural_hazard_var =  st.session_state.get('natural_hazard_disruption_var')
 natural_hazard_var = st.session_state.get('selected_disruption_natural_hazard_column')  
+natural_hazard_var_sev = st.session_state.get('natural_hazard_disruption_severity')
 # NOTE: this is the *column name*. For convenience you may also read:
 natural_hazard_return_var = st.session_state.get('natural_hazard_disruption_var')  # same value if user confirmed
 additional_indicators = st.session_state.get('additional_indicators', [])
@@ -245,6 +246,7 @@ custom_map = st.session_state.get('custom_indicator_mappings', {})
 additional_last_var = st.session_state.get('additional_indicator_last_var')
 additional_last_sev = st.session_state.get('additional_indicator_last_severity')
 additional_last_dim = st.session_state.get('additional_indicator_last_dimension')
+
 
 barrier_var =  st.session_state.get('barrier_var')
 selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
@@ -256,36 +258,12 @@ mismatch_ocha_data = st.session_state.get('ocha_mismatch_data')
 updated_2025_pin_file = st.session_state.get('updated_2025_pin_file') 
 uploaded_covered_2025_pin = st.session_state.get('uploaded_covered_2025_pin')
 
-with st.expander("🔎 Debug – Indicator selections", expanded=False):
-    # --- Natural hazard ---
-    st.markdown("**Natural hazard**")
-    st.write("selected_disruption_natural_hazard_column:", st.session_state.get('selected_disruption_natural_hazard_column'))
-    st.write("natural_hazard_disruption_var (return value):", st.session_state.get('natural_hazard_disruption_var'))
-    st.write("natural_hazard_disruption_column_confirmed:", st.session_state.get('disruption_natural_hazard_column_confirmed'))
-    st.write("natural_hazard_disruption_severity:", st.session_state.get('natural_hazard_disruption_severity'))
 
-    # --- Additional indicators (list) ---
-    st.markdown("---")
-    st.markdown("**Additional indicators (list)**")
-    additional_indicators = st.session_state.get('additional_indicators', [])
-    if additional_indicators:
-        st.dataframe(pd.DataFrame(additional_indicators))
-    else:
-        st.info("No additional indicators saved yet.")
+print(additional_last_var)
+print(additional_last_sev)
 
-    # --- Mapping by column name ---
-    st.markdown("**Custom indicator mapping (by column)**")
-    custom_map = st.session_state.get('custom_indicator_mappings', {})
-    if custom_map:
-        st.json(custom_map)
-    else:
-        st.info("custom_indicator_mappings is empty.")
-
-    # --- Convenience 'last picked' keys ---
-    st.markdown("**Last picked additional indicator (convenience keys)**")
-    st.write("additional_indicator_last_var:", st.session_state.get('additional_indicator_last_var'))
-    st.write("additional_indicator_last_severity:", st.session_state.get('additional_indicator_last_severity'))
-    st.write("additional_indicator_last_dimension:", st.session_state.get('additional_indicator_last_dimension'))
+print(natural_hazard_var)
+print(natural_hazard_var_sev)
 
 
 # Check if the user indicated that they do not have OCHA data
