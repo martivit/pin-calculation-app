@@ -241,8 +241,9 @@ natural_hazard_var = st.session_state.get('selected_disruption_natural_hazard_co
 natural_hazard_var_sev = st.session_state.get('natural_hazard_disruption_severity')
 # NOTE: this is the *column name*. For convenience you may also read:
 natural_hazard_return_var = st.session_state.get('natural_hazard_disruption_var')  # same value if user confirmed
-additional_indicators = st.session_state.get('additional_indicators', [])
-custom_map = st.session_state.get('custom_indicator_mappings', {})
+additional_indicators = st.session_state.get("additional_indicators", [])
+if not st.session_state.get("additional_indicator_enable", False):
+    additional_indicators = []  # force empty if toggle is OFFcustom_map = st.session_state.get('custom_indicator_mappings', {})
 additional_last_var = st.session_state.get('additional_indicator_last_var')
 additional_last_sev = st.session_state.get('additional_indicator_last_severity')
 additional_last_dim = st.session_state.get('additional_indicator_last_dimension')
