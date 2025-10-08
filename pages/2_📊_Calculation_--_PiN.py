@@ -296,9 +296,9 @@ def handle_additional_selection(current_country, suggestions):
     )
 
     if not enable:
-        # Clear anything previously stored so Page 3 sees "None"/empty
-        st.session_state["additional_indicators"] = []
-        st.session_state["additional_indicator_last_var"] = None
+        # ✅ Set explicit "no_indicator" instead of None
+        st.session_state["additional_indicators"] = [{"column": "no_indicator", "severity": None}]
+        st.session_state["additional_indicator_last_var"] = "no_indicator"
         st.session_state["additional_indicator_last_severity"] = None
         st.session_state["additional_indicator_last_dimension"] = None
 
@@ -321,7 +321,7 @@ def handle_additional_selection(current_country, suggestions):
     if pick == 'No selection':
         st.warning(translations.get("additional_indicator_none_selected",
                                     "Select an indicator to continue, or untick the box to skip."))
-        return None
+        return "no_indicator"
 
     with st.container(border=True):
         st.markdown(
