@@ -259,11 +259,11 @@ updated_2025_pin_file = st.session_state.get('updated_2025_pin_file')
 uploaded_covered_2025_pin = st.session_state.get('uploaded_covered_2025_pin')
 
 
-print(additional_last_var)
-print(additional_last_sev)
+st.write(additional_last_var)
+st.write(additional_last_sev)
 
-print(natural_hazard_var)
-print(natural_hazard_var_sev)
+st.write(natural_hazard_var)
+st.write(natural_hazard_var_sev)
 
 
 # Check if the user indicated that they do not have OCHA data
