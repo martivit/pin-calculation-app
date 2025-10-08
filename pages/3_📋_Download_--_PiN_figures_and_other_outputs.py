@@ -239,6 +239,8 @@ armed_disruption_var =  st.session_state.get('armed_disruption_var')
 natural_hazard_var =  st.session_state.get('natural_hazard_disruption_var')
 natural_hazard_severity = st.session_state.get('natural_hazard_disruption_severity')
 natural_hazard_dimension = st.session_state.get('natural_hazard_disruption_dimension')
+print(natural_hazard_var + '  ' + natural_hazard_severity + '  ' +natural_hazard_dimension)
+
 barrier_var =  st.session_state.get('barrier_var')
 selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
 selected_severity_5_barriers =  st.session_state.get('selected_severity_5_barriers', [])
