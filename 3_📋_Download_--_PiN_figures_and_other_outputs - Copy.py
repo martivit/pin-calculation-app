@@ -260,12 +260,12 @@ updated_2025_pin_file = st.session_state.get('updated_2025_pin_file')
 uploaded_covered_2025_pin = st.session_state.get('uploaded_covered_2025_pin')
 
 
-#st.write(additional_last_var)
-#st.write(additional_last_sev)
+st.write(additional_last_var)
+st.write(additional_last_sev)
 
-#st.write(natural_hazard_var)
-#st.write(natural_hazard_var_sev)
-#st.write(natural_hazard_return_var)
+st.write(natural_hazard_var)
+st.write(natural_hazard_var_sev)
+st.write(natural_hazard_return_var)
 
 
 # Check if the user indicated that they do not have OCHA data
@@ -324,9 +324,7 @@ if not step_2_hpc and not alternative_country:
 
     ## add indicator ---> severity
     edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 
-                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
-                                                                                    natural_hazard_var,natural_hazard_var_sev,
-                                                                                    additional_last_var,additional_last_sev,
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
@@ -708,9 +706,7 @@ if jena_country and ocha_data is not None:
 
     if 'm' in data_combination:  
         edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
-                                                                                        access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
-                                                                                        natural_hazard_var,natural_hazard_var_sev,
-                                                                                        additional_last_var,additional_last_sev,
+                                                                                        access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                         barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                         age_var, gender_var,
                                                                                         label, 
@@ -815,9 +811,7 @@ if emis_country and ocha_data is not None:
 
     if 'm' in data_combination:  
         edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
-                                                                                        access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
-                                                                                        natural_hazard_var,natural_hazard_var_sev,
-                                                                                        additional_last_var,additional_last_sev,
+                                                                                        access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                         barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                         age_var, gender_var,
                                                                                         label, 
