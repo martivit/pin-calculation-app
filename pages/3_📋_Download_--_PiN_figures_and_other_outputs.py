@@ -256,6 +256,37 @@ mismatch_ocha_data = st.session_state.get('ocha_mismatch_data')
 updated_2025_pin_file = st.session_state.get('updated_2025_pin_file') 
 uploaded_covered_2025_pin = st.session_state.get('uploaded_covered_2025_pin')
 
+with st.expander("🔎 Debug – Indicator selections", expanded=False):
+    # --- Natural hazard ---
+    st.markdown("**Natural hazard**")
+    st.write("selected_disruption_natural_hazard_column:", st.session_state.get('selected_disruption_natural_hazard_column'))
+    st.write("natural_hazard_disruption_var (return value):", st.session_state.get('natural_hazard_disruption_var'))
+    st.write("natural_hazard_disruption_column_confirmed:", st.session_state.get('disruption_natural_hazard_column_confirmed'))
+    st.write("natural_hazard_disruption_severity:", st.session_state.get('natural_hazard_disruption_severity'))
+
+    # --- Additional indicators (list) ---
+    st.markdown("---")
+    st.markdown("**Additional indicators (list)**")
+    additional_indicators = st.session_state.get('additional_indicators', [])
+    if additional_indicators:
+        st.dataframe(pd.DataFrame(additional_indicators))
+    else:
+        st.info("No additional indicators saved yet.")
+
+    # --- Mapping by column name ---
+    st.markdown("**Custom indicator mapping (by column)**")
+    custom_map = st.session_state.get('custom_indicator_mappings', {})
+    if custom_map:
+        st.json(custom_map)
+    else:
+        st.info("custom_indicator_mappings is empty.")
+
+    # --- Convenience 'last picked' keys ---
+    st.markdown("**Last picked additional indicator (convenience keys)**")
+    st.write("additional_indicator_last_var:", st.session_state.get('additional_indicator_last_var'))
+    st.write("additional_indicator_last_severity:", st.session_state.get('additional_indicator_last_severity'))
+    st.write("additional_indicator_last_dimension:", st.session_state.get('additional_indicator_last_dimension'))
+
 
 # Check if the user indicated that they do not have OCHA data
 no_ocha_data = st.session_state.get('no_upload_ocha_data', False)
