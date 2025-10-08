@@ -734,10 +734,29 @@ def select_indicators():
 
             # Display the HTML content
             st.markdown(translations["proceed_to_next_step3"], unsafe_allow_html=True)
-            with st.expander("🔎 Debug: custom indicator mappings"):
-                st.json(st.session_state.get("custom_indicator_mappings", {}))
-            with st.expander("🔎 Debug: additional indicators"):
-                st.write(st.session_state.get("additional_indicators", []))
+            with st.expander("🔎 Debug – Natural hazard indicator"):
+                nh_var = st.session_state.get('natural_hazard_disruption_var')
+                nh_selected = st.session_state.get('selected_natural_hazard_disruption_column')
+                nh_confirmed = st.session_state.get('natural_hazard_disruption_column_confirmed')
+                nh_dim = st.session_state.get('natural_hazard_disruption_dimension')
+                nh_sev = st.session_state.get('natural_hazard_disruption_severity')
+                mapping = st.session_state.get('custom_indicator_mappings', {})
+                nh_map = mapping.get(nh_var) if isinstance(mapping, dict) else None
+
+                st.write("natural_hazard_disruption_var:", nh_var)
+                st.write("selected_natural_hazard_disruption_column:", nh_selected)
+                st.write("natural_hazard_disruption_column_confirmed:", nh_confirmed)
+                st.write("natural_hazard_disruption_dimension:", nh_dim)
+                st.write("natural_hazard_disruption_severity:", nh_sev)
+                st.write("custom_indicator_mappings[natural_hazard_disruption_var]:", nh_map)
+
+                # Optional quick consistency check
+                if nh_var and nh_selected and nh_var != nh_selected:
+                    st.warning(
+                        f"Note: returned var ({nh_var}) != selected_* key ({nh_selected}). "
+                        "This can happen if selection changed but confirm wasn’t clicked."
+                    )
+
 
     else:
         st.warning(translations["no_data"]) 
