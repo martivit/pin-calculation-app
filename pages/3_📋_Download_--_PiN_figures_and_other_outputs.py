@@ -262,10 +262,10 @@ uploaded_covered_2025_pin = st.session_state.get('uploaded_covered_2025_pin')
 
 st.write(additional_last_var)
 st.write(additional_last_sev)
-st.write(natural_hazard_return_var)
 
 st.write(natural_hazard_var)
 st.write(natural_hazard_var_sev)
+st.write(natural_hazard_return_var)
 
 
 # Check if the user indicated that they do not have OCHA data
