@@ -172,28 +172,94 @@ def handle_armed_disruption_selection(current_country, suggestions):
 
     return armed_disruption_var
 ##-----------------------------
+def select_dimension_and_severity(key_prefix: str):
+    """
+    Renders a dimension/severity selector and stores results in session_state:
+      - f"{key_prefix}_dimension" in {"learning_conditions", "protected_environment"}
+      - f"{key_prefix}_severity" in {3, 4}
+      - f"{key_prefix}_dimension_confirmed" in {True/False}
+    """
+    # Translations (with safe fallbacks)
+    q_text = translations.get(
+        "dimension_severity_question",
+        "Which dimension & severity does this indicator fall under?"
+    )
+    opt1 = translations.get(
+        "dimension_learning_conditions_opt",
+        "Learning conditions (Severity 3)"
+    )
+    opt2 = translations.get(
+        "dimension_protected_env_opt",
+        "Protected environment (Severity 4)"
+    )
+    confirm_lbl = translations.get("confirm_dimension_severity", "Confirm selection")
+
+    choice = st.radio(
+        q_text,
+        [opt1, opt2],
+        key=f"{key_prefix}_dimsev_radio"
+    )
+
+    if st.button(confirm_lbl, key=f"{key_prefix}_dimsev_confirm"):
+        if choice == opt1:
+            st.session_state[f"{key_prefix}_dimension"] = "learning_conditions"
+            st.session_state[f"{key_prefix}_severity"] = 3
+        else:
+            st.session_state[f"{key_prefix}_dimension"] = "protected_environment"
+            st.session_state[f"{key_prefix}_severity"] = 4
+        st.session_state[f"{key_prefix}_dimension_confirmed"] = True
+        st.success(translations.get("dimension_severity_saved", "Saved."))
+
+##-----------------------------
 def handle_natural_hazard_disruption_selection(current_country, suggestions):
-    # Display a checkbox for the natural hazard disruption indicator
+    # Checkbox: was this indicator collected?
     translated_text = translations["yes_natural_hazard_disruption_indicator"]
-    indicator_collected = st.checkbox(f"{translated_text}")
+    indicator_collected = st.checkbox(f"{translated_text}", key="natural_hazard_collected")
     column_type = 'disruption_natural_hazard'
     
-    # If checkbox is checked, proceed with the regular selection
     if indicator_collected:
+        # Let the user pick the column
         natural_hazard_disruption_var = handle_full_selection(
             current_country, 
             suggestions, 
-            'disruption_natural_hazard', 
+            column_type, 
             translations["natural_hazard_disruption_var_prompt"],
             translations["natural_hazard_disruption_var_prompt_2"]
         )
+
+        # If a real column is selected, ask for dimension & severity
+        selected_col = st.session_state.get(f"selected_{column_type}_column")
+        confirmed = st.session_state.get(f"{column_type}_column_confirmed", False)
+
+        if confirmed and selected_col and selected_col != "no_indicator":
+            with st.container(border=True):
+                st.markdown(
+                    translations.get(
+                        "dimsev_box_title_nhaz",
+                        "<b>Assign natural hazard disruption to a dimension & severity</b>"
+                    ),
+                    unsafe_allow_html=True
+                )
+                select_dimension_and_severity(key_prefix=column_type)
+
+                # Optional: keep a central mapping dict for later use/exports
+                if st.session_state.get(f"{column_type}_dimension_confirmed", False):
+                    mapping = st.session_state.get("custom_indicator_mappings", {})
+                    mapping[selected_col] = {
+                        "dimension": st.session_state[f"{column_type}_dimension"],
+                        "severity": st.session_state[f"{column_type}_severity"],
+                        "column_type": column_type
+                    }
+                    st.session_state["custom_indicator_mappings"] = mapping
+
     else:
-        # If checkbox is not checked, mark natural hazard disruption as 'no_indicator'
+        # Mark as no_indicator
         natural_hazard_disruption_var = "no_indicator"
         st.session_state[f'selected_{column_type}_column'] = "no_indicator"
         st.session_state[f'{column_type}_column_confirmed'] = True
 
     return natural_hazard_disruption_var
+
 ##---------------------------------------------------------------------------------------------------------
 def handle_column_selection(suggestions, column_type):
     suggested_column = suggestions[0] if suggestions else 'No selection'
