@@ -197,7 +197,7 @@ def generate_word_document(parameters):
 
                 # Add aggravating circumstances (new formatting)
                 if "aggravating circumstances" in details and details["aggravating circumstances"]:
-                    doc.add_paragraph("or OoS facing the following aggravating circumstances:", style='List Bullet 2')
+                    doc.add_paragraph("or OoS facing the following aggravating circumstances: ", style='List Bullet 2')
                     for example in details["aggravating circumstances"]:
                         example_paragraph = doc.add_paragraph(style='List Bullet 2')
                         example_paragraph.add_run(f"      {example}")
@@ -230,5 +230,7 @@ def generate_word_document(parameters):
         doc_output = BytesIO()
         doc.save(doc_output)
         doc_output.seek(0)
+
+
 
         return doc_output
