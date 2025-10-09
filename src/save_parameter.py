@@ -41,9 +41,8 @@ def generate_parameters(st_session_state):
     hazard_sev = st_session_state.get('natural_hazard_disruption_severity', None)
 
     # Additional indicator: last picked column + severity (only if toggle is ON)
-    additional_enabled = st_session_state.get("additional_indicator_enable", False)
-    additional_col = st_session_state.get('additional_indicator_last_var') if additional_enabled else None
-    additional_sev = st_session_state.get('additional_indicator_last_severity') if additional_enabled else None
+    additional_col = st_session_state.get('additional_indicator_last_var') 
+    additional_sev = st_session_state.get('additional_indicator_last_severity', None) 
     if not additional_col:
         additional_col = 'no_indicator'
 
