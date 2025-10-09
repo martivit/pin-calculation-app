@@ -373,7 +373,6 @@ else:
 
 hybrid_scenario_countries = [
     'Central African Republic -- CAR',
-    'Burkina Faso -- BFA',
     'Ethiopia -- ETH',
     'Democratic Republic of the Congo -- DRC',
     'Mali -- MLI',
