@@ -158,77 +158,77 @@ def generate_word_document(parameters):
             category_run.bold = True
 
 
-    # Add Severity Classification
-    doc.add_heading('Severity Classification used for this calculation', level=2)
-    severity_classification = parameters["severity_classification"]
+        # Add Severity Classification
+        doc.add_heading('Severity Classification used for this calculation', level=2)
+        severity_classification = parameters["severity_classification"]
 
-    color_map = {
-        "severity level 3": RGBColor(255, 165, 0),  # Light orange
-        "severity level 4": RGBColor(255, 140, 0),  # Darker orange
-        "severity level 5": RGBColor(255, 69, 0),   # Red-orange
-    }
+        color_map = {
+            "severity level 3": RGBColor(255, 165, 0),  # Light orange
+            "severity level 4": RGBColor(255, 140, 0),  # Darker orange
+            "severity level 5": RGBColor(255, 69, 0),   # Red-orange
+        }
 
-    def list_inds(details, prefix="ind"):
-        """Return a list of (key, value) for indicator-like keys, skipping 'no_indicator'."""
-        items = []
-        for k, v in details.items():
-            if k.lower().startswith(prefix) and isinstance(v, str) and v != 'no_indicator':
-                items.append((k, v))
-        # stable order: sort by key label
-        items.sort(key=lambda x: x[0])
-        return items
+        def list_inds(details, prefix="ind"):
+            """Return a list of indicator values, skipping 'no_indicator'."""
+            return [v for k, v in details.items() if k.lower().startswith(prefix) and isinstance(v, str) and v != 'no_indicator']
 
-    for level, details in severity_classification.items():
-        # Level heading
-        severity_paragraph = doc.add_paragraph(style='List Bullet')
-        severity_run = severity_paragraph.add_run(f"{level.replace('_', ' ').capitalize()}: ")
-        severity_run.bold = True
-        if level in color_map:
-            severity_run.font.color.rgb = color_map[level]
+        for level, details in severity_classification.items():
+            severity_paragraph = doc.add_paragraph(style='List Bullet')
+            severity_run = severity_paragraph.add_run(f"{level.replace('_', ' ').capitalize()}: ")
+            severity_run.bold = True
+            if level in color_map:
+                severity_run.font.color.rgb = color_map[level]
 
-        # Description
-        description = details.get("description", "")
-        severity_paragraph.add_run(description + " ")
+            # Description
+            description = details.get("description", "")
+            if "In-school children" in description:
+                # Clean and more readable structure
+                severity_paragraph.add_run("In-school children whose education was disrupted due to ")
 
-        # Collect and render all "ind..." fields (teacher/hazard/additional/etc.)
-        inds = list_inds(details, prefix="ind")
-        if inds:
-            # Join with " and " nicely, all bold
-            for i, (_, val) in enumerate(inds):
-                r = severity_paragraph.add_run(val)
-                r.bold = True
-                if i < len(inds) - 1:
-                    severity_paragraph.add_run(" and ")
-            severity_paragraph.add_run(".")
+                # Add in-school indicators
+                inds = list_inds(details, prefix="ind")
+                if inds:
+                    for i, val in enumerate(inds):
+                        r = severity_paragraph.add_run(val)
+                        r.bold = True
+                        if i < len(inds) - 1:
+                            severity_paragraph.add_run(" and ")
+                    severity_paragraph.add_run(".")
 
-        # Aggravating circumstances (if present)
-        if "aggravating circumstances" in details:
-            for example in details["aggravating circumstances"]:
-                example_paragraph = doc.add_paragraph(style='List Bullet 2')
-                example_paragraph.add_run(f"      {example}")
+                # Add aggravating circumstances (new formatting)
+                if "aggravating circumstances" in details and details["aggravating circumstances"]:
+                    doc.add_paragraph("or OoS facing the following aggravating circumstances:", style='List Bullet 2')
+                    for example in details["aggravating circumstances"]:
+                        example_paragraph = doc.add_paragraph(style='List Bullet 2')
+                        example_paragraph.add_run(f"      {example}")
 
+            else:
+                # For severity 3 (same style as before)
+                severity_paragraph.add_run(description + " ")
+                inds = list_inds(details, prefix="ind")
+                if inds:
+                    for i, val in enumerate(inds):
+                        r = severity_paragraph.add_run(val)
+                        r.bold = True
+                        if i < len(inds) - 1:
+                            severity_paragraph.add_run(" and ")
+                    severity_paragraph.add_run(".")
 
+        # Add Admin Unit
+        doc.add_heading('Administrative Unit', level=2)
+        admin_unit = parameters["admin_unit"]
+        for key, value in admin_unit.items():
+            doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}: {value}", style='List Bullet')
 
-                    
+        # Add School Cycles
+        doc.add_heading('School Cycles', level=2)
+        school_cycles = parameters.get("school_cycles", {})
+        age_ranges = school_cycles.get("age_ranges", [])
+        doc.add_paragraph(f"Age Ranges: {age_ranges}", style='List Bullet')
 
+        # Save the Word document to a BytesIO object
+        doc_output = BytesIO()
+        doc.save(doc_output)
+        doc_output.seek(0)
 
-    # Add Admin Unit
-    doc.add_heading('Administrative Unit', level=2)
-    admin_unit = parameters["admin_unit"]
-    for key, value in admin_unit.items():
-        doc.add_paragraph(f"{key.replace('_', ' ').capitalize()}: {value}", style='List Bullet')
-
-    # Add School Cycles
-    doc.add_heading('School Cycles', level=2)
-    school_cycles = parameters.get("school_cycles", {})
-    # Report 'age_ranges' (vector_cycle) as-is
-    age_ranges = school_cycles.get("age_ranges", [])
-    doc.add_paragraph(f"Age Ranges: {age_ranges}", style='List Bullet')
-
-    # Save the Word document to a BytesIO object
-    from io import BytesIO
-    doc_output = BytesIO()
-    doc.save(doc_output)
-    doc_output.seek(0)
-
-    return doc_output
+        return doc_output
