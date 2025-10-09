@@ -20,58 +20,108 @@ from datetime import datetime
 
 
 
+
 def generate_parameters(st_session_state):
     """
     Generate the parameters dictionary for PiN calculation.
-
-    Args:
-        st_session_state: Streamlit session state object containing relevant variables.
-
-    Returns:
-        dict: The generated parameters dictionary.
+    Natural hazard & additional indicators are placed under
+    learning conditions (sev=3) or protected environment (sev=4),
+    and default to 'no_indicator' when not selected.
     """
+
+    # --- read values from session ---
+    country = st_session_state.get('country')
+
+    # Natural hazard: column name + severity
+    hazard_col = (
+        st_session_state.get('selected_disruption_natural_hazard_column')
+        #or st_session_state.get('natural_hazard_disruption_var')
+        or 'no_indicator'
+    )
+    hazard_sev = st_session_state.get('natural_hazard_disruption_severity', None)
+
+    # Additional indicator: last picked column + severity (only if toggle is ON)
+    additional_enabled = st_session_state.get("additional_indicator_enable", False)
+    additional_col = st_session_state.get('additional_indicator_last_var') if additional_enabled else None
+    additional_sev = st_session_state.get('additional_indicator_last_severity') if additional_enabled else None
+    if not additional_col:
+        additional_col = 'no_indicator'
+
+    # Other core indicators
+    access_col   = st_session_state.get('access_var')
+    teacher_col  = st_session_state.get('teacher_disruption_var')
+    idp_col      = st_session_state.get('idp_disruption_var')
+    armed_col    = st_session_state.get('armed_disruption_var')
+    barrier_col  = st_session_state.get('barrier_var')
+
+    # Place hazard/additional into the right buckets (learning vs protected)
+    hazard_in_learning   = hazard_col if (hazard_col != 'no_indicator' and hazard_sev == 3) else 'no_indicator'
+    hazard_in_protected  = hazard_col if (hazard_col != 'no_indicator' and hazard_sev == 4) else 'no_indicator'
+
+    additional_in_learning  = additional_col if (additional_col != 'no_indicator' and additional_sev == 3) else 'no_indicator'
+    additional_in_protected = additional_col if (additional_col != 'no_indicator' and additional_sev == 4) else 'no_indicator'
+
+    # Build the dicts for the two dimensions
+    learning_block = {
+        "Education disrupted due to teacher absences": teacher_col,
+        "Education disrupted due to natural hazard": hazard_in_learning,
+        "Additional indicator (severity 3)": additional_in_learning,
+    }
+
+    protected_block = {
+        "Education disrupted due to school being used as IDP shelter": idp_col,
+        "Education disrupted due to school being occupied by armed groups": armed_col,
+        "Education disrupted due to natural hazard": hazard_in_protected,
+        "Additional indicator (severity 4)": additional_in_protected,
+    }
+
+    # Build severity classification section
+    severity3 = {
+        "description": "OoS children who do NOT endure aggravating circumstances or in-school children whose education was disrupted due to:",
+        "ind1 in-school": teacher_col,
+        "ind2 in-school (hazard, sev3)": hazard_in_learning,
+        "ind3 in-school (additional, sev3)": additional_in_learning,
+    }
+
+    severity4 = {
+        "description": "In-school children whose education disrupted due to (ind in-school) or OoS facing the following aggravating circumstances.",
+        "ind in-school (idp shelter)": idp_col,
+        "ind in-school (hazard, sev4)": hazard_in_protected,
+        "ind in-school (additional, sev4)": additional_in_protected,
+        "aggravating circumstances": st_session_state.get('selected_severity_4_barriers', []),
+    }
+
+    severity5 = {
+        "description": "In-school children whose education disrupted due to (ind in-school) or OoS facing the following aggravating circumstances.",
+        "ind in-school": armed_col,
+        "aggravating circumstances": st_session_state.get('selected_severity_5_barriers', []),
+    }
+
     parameters = {
         "general_info": {
-            "country": st_session_state.get('country'),
-            "date_calculation": datetime.now().strftime("%d/%m/%Y %H:%M")  # Today's date with hour and minute
+            "country": country,
+            "date_calculation": datetime.now().strftime("%d/%m/%Y %H:%M")
         },
         "msna_indicators_per_PiN_dimension": {
-            "access": st_session_state.get('access_var'),
-            "learning condition": {
-                "Education disrupted due to teacher absences": st_session_state.get('teacher_disruption_var'),
-                "Education disrupted due to natural hazard": st_session_state.get('natural_hazard_disruption_var'),
-            },
-            "protected environment": {
-                "Education disrupted due to school being used as IDP shelter": st_session_state.get('idp_disruption_var'),
-                "Education disrupted due to school being occupied by armed groups": st_session_state.get('armed_disruption_var'),
-            },
-            "aggravating_circumstances": st_session_state.get('barrier_var'),
+            "access": access_col,
+            "learning condition": learning_block,
+            "protected environment": protected_block,
+            "aggravating_circumstances": barrier_col,
         },
         "severity_classification": {
-            "severity level 3": {
-                "description": "OoS children who do NOT endure aggravating circumstances or in-school children whose education was disrupted due to:",
-                "ind1 in-school": st_session_state.get('teacher_disruption_var'),
-                "ind2 in-school": st_session_state.get('natural_hazard_disruption_var'),
-            },
-            "severity level 4": {
-                "description": "In-school children whose education disrupted due to (ind in-school) or OoS facing the following aggravating circumstances.",
-                "ind in-school": st_session_state.get('idp_disruption_var'),
-                "aggravating circumstances": st_session_state.get('selected_severity_4_barriers', []),
-            },
-            "severity level 5": {
-                "description": "In-school children whose education disrupted due to (ind in-school) or OoS facing the following aggravating circumstances.",
-                "ind in-school": st_session_state.get('armed_disruption_var'),
-                "aggravating circumstances": st_session_state.get('selected_severity_5_barriers', []),
-            },
+            "severity level 3": severity3,
+            "severity level 4": severity4,
+            "severity level 5": severity5,
         },
         "admin_unit": {
             "HNO unit of analysis": st_session_state.get('admin_var'),
             "mismatch admin": st_session_state.get('mismatch_admin', False),
         },
         "school_cycles": {
-            "age_ranges": st_session_state.get('vector_cycle'),  # Age groups for educational cycles
+            "age_ranges": st_session_state.get('vector_cycle'),
         }
     }
+
     return parameters
 
 
@@ -111,65 +161,53 @@ def generate_word_document(parameters):
 
     # Add Severity Classification
     doc.add_heading('Severity Classification used for this calculation', level=2)
-            # Add Severity Classification
     severity_classification = parameters["severity_classification"]
-    for level, details in severity_classification.items():
-        # Define colors for severity levels
-        color_map = {
-            "severity level 3": RGBColor(255, 165, 0),  # Light orange
-            "severity level 4": RGBColor(255, 140, 0),  # Darker orange
-            "severity level 5": RGBColor(255, 69, 0),   # Red-orange
-        }
 
-        # Add severity level heading
+    color_map = {
+        "severity level 3": RGBColor(255, 165, 0),  # Light orange
+        "severity level 4": RGBColor(255, 140, 0),  # Darker orange
+        "severity level 5": RGBColor(255, 69, 0),   # Red-orange
+    }
+
+    def list_inds(details, prefix="ind"):
+        """Return a list of (key, value) for indicator-like keys, skipping 'no_indicator'."""
+        items = []
+        for k, v in details.items():
+            if k.lower().startswith(prefix) and isinstance(v, str) and v != 'no_indicator':
+                items.append((k, v))
+        # stable order: sort by key label
+        items.sort(key=lambda x: x[0])
+        return items
+
+    for level, details in severity_classification.items():
+        # Level heading
         severity_paragraph = doc.add_paragraph(style='List Bullet')
         severity_run = severity_paragraph.add_run(f"{level.replace('_', ' ').capitalize()}: ")
         severity_run.bold = True
         if level in color_map:
             severity_run.font.color.rgb = color_map[level]
 
-        # Handle Severity Level 3 with two details
-        if level == "severity level 3":
-            description = details["description"]
-            # Add the description first
-            severity_paragraph.add_run(description + " ")
-            
-            if "ind1 in-school" in details and "ind2 in-school" in details:
-                detail_1 = details["ind1 in-school"]
-                detail_2 = details["ind2 in-school"]
-                
-                # Add the first detail in bold
-                detail_run1 = severity_paragraph.add_run(detail_1)
-                detail_run1.bold = True
-                
-                # Add " and " between the details
-                severity_paragraph.add_run(" and ")
-                
-                # Add the second detail in bold
-                detail_run2 = severity_paragraph.add_run(detail_2)
-                detail_run2.bold = True
-                
-                # Add the period at the end
-                severity_paragraph.add_run(".")
+        # Description
+        description = details.get("description", "")
+        severity_paragraph.add_run(description + " ")
 
-        # Handle Severity Levels 4 and 5 with one detail
-        elif level in ["severity level 4", "severity level 5"]:
-            description = details["description"]
-            description = description.replace("due to (ind in-school)", "due to")
-            description_parts = description.split("due to")
-            severity_paragraph.add_run(description_parts[0] + "due to ")
-            if "ind in-school" in details:
-                detail_1 = details["ind in-school"]
-                detail_run = severity_paragraph.add_run(detail_1)
-                detail_run.bold = True
-            if len(description_parts) > 1:
-                severity_paragraph.add_run(description_parts[1])
+        # Collect and render all "ind..." fields (teacher/hazard/additional/etc.)
+        inds = list_inds(details, prefix="ind")
+        if inds:
+            # Join with " and " nicely, all bold
+            for i, (_, val) in enumerate(inds):
+                r = severity_paragraph.add_run(val)
+                r.bold = True
+                if i < len(inds) - 1:
+                    severity_paragraph.add_run(" and ")
+            severity_paragraph.add_run(".")
 
-        # Add examples as sub-bullets
+        # Aggravating circumstances (if present)
         if "aggravating circumstances" in details:
             for example in details["aggravating circumstances"]:
                 example_paragraph = doc.add_paragraph(style='List Bullet 2')
                 example_paragraph.add_run(f"      {example}")
+
 
 
                     
