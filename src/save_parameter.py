@@ -131,7 +131,7 @@ def generate_parameters(st_session_state):
 def generate_word_document(parameters):
     # Initialize the Word document
     doc = docx.Document()
-    doc.add_heading('Parameters Used as Input for the PiN Calculation', level=1)
+    doc.add_heading('Parameters Used as Input for the PiN Calculation ---------------------------------------', level=1)
 
     # Add General Information
     doc.add_heading('General Information', level=2)
