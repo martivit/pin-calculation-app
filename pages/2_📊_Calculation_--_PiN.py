@@ -65,8 +65,11 @@ if 'init' not in st.session_state:
         'school_cycle_confirmed': False,
         'other_parameters_confirmed': False, 
         'custom_indicator_mappings': {},   # central dictionary: {column_name: {dimension, severity, column_type}}
+        'custom_indicator_mappings_2': {},   # central dictionary: {column_name: {dimension, severity, column_type}}
         'additional_indicators': []  ,     # list of {"column", "dimension", "severity", "column_type"}
         'additional_indicator_enable': False,  # NEW: explicit off by default
+        'additional_2_indicators': []  ,     # list of {"column", "dimension", "severity", "column_type"}
+        'additional_2_indicator_enable': False  # NEW: explicit off by default
 
     })
 if 'lower_primary_end' not in st.session_state:
@@ -369,6 +372,100 @@ def handle_additional_selection(current_country, suggestions):
             st.success(translations.get("additional_indicator_saved", "Additional indicator saved."))
             return pick
 
+
+##---------------------------------------------------------------------------------------------------------
+def handle_additional_2_selection(current_country, suggestions):
+    """
+    Optional additional indicator with an explicit on/off toggle.
+    When OFF, we clear any previously saved additional indicator state.
+    When ON, user can pick a column and set severity (3/4).
+    """
+    st.markdown(
+        translations.get(
+            "additional_indicator_title",
+            "<b>Optional: Add an additional indicator</b>"
+        ),
+        unsafe_allow_html=True
+    )
+
+    enable = st.checkbox(
+        translations.get("additional_indicator_enable", "Add an additional indicator"),
+        key="additional_2_indicator_enable"
+    )
+
+    if not enable:
+        # ✅ Set explicit "no_indicator" instead of None
+        st.session_state["additional_2_indicators"] = [{"column": "no_indicator", "severity": None}]
+        st.session_state["additional_2_indicator_last_var"] = "no_indicator"
+        st.session_state["additional_2_indicator_last_severity"] = None
+        st.session_state["additional_2_indicator_last_dimension"] = None
+
+        # Also remove any "additional_2" entries from the central mapping
+        mapping = st.session_state.get("custom_indicator_mappings_2", {})
+        mapping = {k: v for k, v in mapping.items() if v.get("column_type") != "additional_2"}
+        st.session_state["custom_indicator_mappings_2"] = mapping
+
+        st.info(translations.get("additional_2_indicator_disabled_info",
+                                  "No additional indicator will be used."))
+        return None  # nothing selected
+
+    # --- If enabled: allow picking + assigning severity ---
+    pick = st.selectbox(
+        translations.get("additional_indicator_pick", "Pick an indicator to add:"),
+        ['No selection'] + suggestions,
+        key="additional_2_indicator_selectbox"
+    )
+
+    if pick == 'No selection':
+        st.warning(translations.get("additional_2_indicator_none_selected",
+                                    "Select an indicator to continue, or untick the box to skip."))
+        return "no_indicator"
+
+    with st.container(border=True):
+        st.markdown(
+            translations.get(
+                "additional_2_indicator_dimsev",
+                "Assign this indicator to a dimension & severity:"
+            ),
+            unsafe_allow_html=True
+        )
+
+        prefix = f"additional_2_{pick}"
+        select_dimension_and_severity(key_prefix=prefix)
+
+        if st.session_state.get(f"{prefix}_dimension_confirmed", False):
+            record = {
+                "column": pick,
+                "dimension": st.session_state[f"{prefix}_dimension"],
+                "severity": st.session_state[f"{prefix}_severity"],  # 3 or 4
+                "column_type": "additional_2"
+            }
+
+            # Append or update in list (avoid duplicates)
+            add_list = st.session_state.get("additional_2_indicators", [])
+            existing_idx = next((i for i, r in enumerate(add_list) if r.get("column") == pick), None)
+            if existing_idx is not None:
+                add_list[existing_idx] = record
+            else:
+                add_list.append(record)
+            st.session_state["additional_2_indicators"] = add_list
+
+            # Central mapping by column name
+            mapping = st.session_state.get("custom_indicator_mappings_2", {})
+            mapping[pick] = {
+                "dimension": record["dimension"],
+                "severity": record["severity"],
+                "column_type": "additional_2"
+            }
+            st.session_state["custom_indicator_mappings_2"] = mapping
+
+            # Convenience “last picked” keys
+            st.session_state['additional_2_indicator_last_var'] = pick
+            st.session_state['additional_2_indicator_last_severity'] = record["severity"]
+            st.session_state['additional_2_indicator_last_dimension'] = record["dimension"]
+
+            st.success(translations.get("additional_2_indicator_saved", "Additional indicator saved."))
+            return pick
 
 
 ##---------------------------------------------------------------------------------------------------------
@@ -757,6 +854,8 @@ def select_indicators():
                 st.session_state['barrier_var'] = handle_full_selection(current_country, education_indicator_suggestions, 'barriers', translations["barrier_var_prompt"], translations["barrier_var_prompt_2"]) 
             with st.container(border=True):
                 st.session_state['additional_var'] =handle_additional_selection(current_country, education_indicator_suggestions)
+            with st.container(border=True):
+                st.session_state['additional_2_var'] =handle_additional_2_selection(current_country, education_indicator_suggestions)
             
             check_for_duplicate_selections()
         if st.button(translations["confirm_indicators"]):

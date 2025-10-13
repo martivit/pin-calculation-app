@@ -247,7 +247,12 @@ if not st.session_state.get("additional_indicator_enable", False):
 additional_last_var = st.session_state.get('additional_indicator_last_var')
 additional_last_sev = st.session_state.get('additional_indicator_last_severity')
 additional_last_dim = st.session_state.get('additional_indicator_last_dimension')
-
+additional_2_indicators = st.session_state.get("additional_2_indicators", [])
+if not st.session_state.get("additional_2_indicator_enable", False):
+    additional_2_indicators = []  # force empty if toggle is OFFcustom_map = st.session_state.get('custom_indicator_mappings', {})
+additional_2_last_var = st.session_state.get('additional_2_indicator_last_var')
+additional_2_last_sev = st.session_state.get('additional_2_indicator_last_severity')
+additional_2_last_dim = st.session_state.get('additional_2_indicator_last_dimension')
 
 barrier_var =  st.session_state.get('barrier_var')
 selected_severity_4_barriers =  st.session_state.get('selected_severity_4_barriers', [])
@@ -326,6 +331,7 @@ if not step_2_hpc and not alternative_country:
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                     natural_hazard_var,natural_hazard_var_sev,
                                                                                     additional_last_var,additional_last_sev,
+                                                                                    additional_2_last_var,additional_2_last_sev,
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
@@ -710,6 +716,7 @@ if jena_country and ocha_data is not None:
                                                                                         access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                         natural_hazard_var,natural_hazard_var_sev,
                                                                                         additional_last_var,additional_last_sev,
+                                                                                        additional_2_last_var,additional_2_last_sev,
                                                                                         barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                         age_var, gender_var,
                                                                                         label, 
@@ -817,6 +824,7 @@ if emis_country and ocha_data is not None:
                                                                                         access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                         natural_hazard_var,natural_hazard_var_sev,
                                                                                         additional_last_var,additional_last_sev,
+                                                                                        additional_2_last_var,additional_2_last_sev,
                                                                                         barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                         age_var, gender_var,
                                                                                         label, 
