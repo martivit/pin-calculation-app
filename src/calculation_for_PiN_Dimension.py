@@ -1245,7 +1245,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         # Convert defaultdict to a regular dictionary for better readability
         grouped_dict = dict(grouped_dict)
 
-        # Print the resulting dictionary
+        # Print the resulting 
         for key, value in grouped_dict.items():
             print(f"{key}: {value}")
 

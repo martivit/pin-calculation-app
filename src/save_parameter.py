@@ -46,6 +46,12 @@ def generate_parameters(st_session_state):
     if not additional_col:
         additional_col = 'no_indicator'
 
+    # Additional indicator: last picked column + severity (only if toggle is ON)
+    additional_2_col = st_session_state.get('additional_2_indicator_last_var') 
+    additional_2_sev = st_session_state.get('additional_2_indicator_last_severity', None) 
+    if not additional_2_col:
+        additional_2_col = 'no_indicator'    
+
     # Other core indicators
     access_col   = st_session_state.get('access_var')
     teacher_col  = st_session_state.get('teacher_disruption_var')
@@ -59,12 +65,16 @@ def generate_parameters(st_session_state):
 
     additional_in_learning  = additional_col if (additional_col != 'no_indicator' and additional_sev == 3) else 'no_indicator'
     additional_in_protected = additional_col if (additional_col != 'no_indicator' and additional_sev == 4) else 'no_indicator'
+    additional_2_in_learning  = additional_2_col if (additional_2_col != 'no_indicator' and additional_2_sev == 3) else 'no_indicator'
+    additional_2_in_protected = additional_2_col if (additional_2_col != 'no_indicator' and additional_2_sev == 4) else 'no_indicator'
 
     # Build the dicts for the two dimensions
     learning_block = {
         "Education disrupted due to teacher absences": teacher_col,
         "Education disrupted due to natural hazard": hazard_in_learning,
         "Additional indicator (severity 3)": additional_in_learning,
+        "Additional2 indicator (severity 3)": additional_2_in_learning,
+
     }
 
     protected_block = {
@@ -72,6 +82,8 @@ def generate_parameters(st_session_state):
         "Education disrupted due to school being occupied by armed groups": armed_col,
         "Education disrupted due to natural hazard": hazard_in_protected,
         "Additional indicator (severity 4)": additional_in_protected,
+        "Additional2 indicator (severity 4)": additional_2_in_protected,
+
     }
 
     # Build severity classification section
@@ -80,6 +92,8 @@ def generate_parameters(st_session_state):
         "ind1 in-school": teacher_col,
         "ind2 in-school (hazard, sev3)": hazard_in_learning,
         "ind3 in-school (additional, sev3)": additional_in_learning,
+        "ind3 in-school (additional2, sev3)": additional_2_in_learning,
+
     }
 
     severity4 = {
@@ -87,6 +101,7 @@ def generate_parameters(st_session_state):
         "ind in-school (idp shelter)": idp_col,
         "ind in-school (hazard, sev4)": hazard_in_protected,
         "ind in-school (additional, sev4)": additional_in_protected,
+        "ind in-school (additional2, sev4)": additional_2_in_protected,
         "aggravating circumstances": st_session_state.get('selected_severity_4_barriers', []),
     }
 

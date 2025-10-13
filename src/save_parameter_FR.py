@@ -42,6 +42,12 @@ def generate_parameters_FR(st_session_state):
     additional_sev = st_session_state.get('additional_indicator_last_severity') if additional_enabled else None
     if not additional_col:
         additional_col = 'no_indicator'
+    # Indicateur supplémentaire : dernier choisi + sévérité (uniquement si activé)
+    additional_2_enabled = st_session_state.get("additional_2_indicator_enable", False)
+    additional_2_col = st_session_state.get('additional_2_indicator_last_var') if additional_2_enabled else None
+    additional_2_sev = st_session_state.get('additional_2_indicator_last_severity') if additional_2_enabled else None
+    if not additional_2_col:
+        additional_2_col = 'no_indicator'    
 
     # Autres indicateurs clés
     acces_col   = st_session_state.get('access_var')
@@ -56,12 +62,15 @@ def generate_parameters_FR(st_session_state):
 
     add_en_apprent      = additional_col if (additional_col != 'no_indicator' and additional_sev == 3) else 'no_indicator'
     add_env_protege     = additional_col if (additional_col != 'no_indicator' and additional_sev == 4) else 'no_indicator'
-
+    add_2_en_apprent      = additional_2_col if (additional_2_col != 'no_indicator' and additional_2_sev == 3) else 'no_indicator'
+    add_2_env_protege     = additional_2_col if (additional_2_col != 'no_indicator' and additional_2_sev == 4) else 'no_indicator'
     # Blocs par dimension
     bloc_apprentissage = {
         "Éducation perturbée en raison de l'absence des enseignants": prof_col,
         "Éducation perturbée en raison d'un aléa naturel": hazard_en_apprent,
         "Indicateur supplémentaire (sévérité 3)": add_en_apprent,
+        "Indicateur supplémentaire2 (sévérité 3)": add_2_en_apprent,
+
     }
 
     bloc_protege = {
@@ -69,6 +78,8 @@ def generate_parameters_FR(st_session_state):
         "Éducation perturbée en raison de l'occupation de l'école par des groupes armés": arme_col,
         "Éducation perturbée en raison d'un aléa naturel": hazard_env_protege,
         "Indicateur supplémentaire (sévérité 4)": add_env_protege,
+        "Indicateur supplémentaire2 (sévérité 4)": add_2_env_protege,
+
     }
 
     # Classification de sévérité
@@ -77,6 +88,8 @@ def generate_parameters_FR(st_session_state):
         "ind1_scolarisés": prof_col,
         "ind2_scolarisés (aléa, sev3)": hazard_en_apprent,
         "ind3_scolarisés (supplémentaire, sev3)": add_en_apprent,
+        "ind3_scolarisés (supplémentaire2, sev3)": add_2_en_apprent,
+
     }
 
     sev4 = {
@@ -84,6 +97,8 @@ def generate_parameters_FR(st_session_state):
         "indicateur_scolarisé (abri PDI)": idp_col,
         "indicateur_scolarisé (aléa, sev4)": hazard_env_protege,
         "indicateur_scolarisé (supplémentaire, sev4)": add_env_protege,
+        "indicateur_scolarisé (supplémentaire2, sev4)": add_2_env_protege,
+
         "circonstances_aggravantes": st_session_state.get('selected_severity_4_barriers', []),
     }
 

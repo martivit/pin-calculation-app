@@ -90,8 +90,8 @@ def find_matching_choices(choices_df, barriers_list, label_var):
 
 ##--------------------------------------------------------------------------------------------
 def calculate_severity(country, gender, age, access, barrier,
-                       armed_disruption, natural_hazard, additional_ind,
-                       natural_hazard_severity, additional_ind_severity,
+                       armed_disruption, natural_hazard, additional_ind,additional_2_ind,
+                       natural_hazard_severity, additional_ind_severity,additional_2_ind_severity,
                        idp_disruption, teacher_disruption,
                        names_severity_4, names_severity_5):
 
@@ -110,6 +110,8 @@ def calculate_severity(country, gender, age, access, barrier,
     normalized_armed_disruption = normalize(armed_disruption) if armed_disruption is not None else None
     normalized_natural_hazard = normalize(natural_hazard) if natural_hazard is not None else None
     normalized_additional_ind = normalize(additional_ind) if additional_ind is not None else None
+    normalized_additional_2_ind = normalize(additional_2_ind) if additional_2_ind is not None else None
+
     normalized_idp_disruption = normalize(idp_disruption)
     normalized_teacher_disruption = normalize(teacher_disruption)
 
@@ -156,6 +158,12 @@ def calculate_severity(country, gender, age, access, barrier,
                     sev = max(sev, additional_ind_severity)
                 else:
                     sev = max(sev, 3)  # conservative default
+            # Additional indicator → use its configured severity (3 or 4)
+            if (normalized_additional_2_ind is not None) and (normalized_additional_2_ind in yes_answers):
+                if isinstance(additional_2_ind_severity, int):
+                    sev = max(sev, additional_2_ind_severity)
+                else:
+                    sev = max(sev, 3)  # conservative default        
 
             return sev
 
@@ -196,6 +204,12 @@ def calculate_severity(country, gender, age, access, barrier,
                     sev = max(sev, additional_ind_severity)
                 else:
                     sev = max(sev, 3)
+            # Additional indicator → use its configured severity (3 or 4)
+            if (normalized_additional_2_ind is not None) and (normalized_additional_2_ind in yes_answers):
+                if isinstance(additional_2_ind_severity, int):
+                    sev = max(sev, additional_2_ind_severity)
+                else:
+                    sev = max(sev, 3)  # conservative default             
 
             return sev
 
@@ -683,6 +697,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
    
     if country != 'Afghanistan -- AFG':
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
+    elif    country == 'Haiti -- HTI':
+        edu_data = edu_data[(edu_data['edu_age_corrected'] >= 3) & (edu_data['edu_age_corrected'] <= 17)]          
     else:
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 6) & (edu_data['edu_age_corrected'] <= 17)]
 
@@ -714,8 +730,10 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         armed_disruption=row[armed_disruption_var] if armed_disruption_var != 'no_indicator' else None, 
         natural_hazard=row[natural_hazard_var] if natural_hazard_var != 'no_indicator' else None, 
         additional_ind=row[additional_last_var] if additional_last_var != 'no_indicator' else None, 
+        additional_2_ind=row[additional_2_last_var] if additional_2_last_var != 'no_indicator' else None, 
         natural_hazard_severity= natural_hazard_var_sev if natural_hazard_var != 'no_indicator' else None, 
-        additional_ind_severity=additional_last_sev if additional_last_var != 'no_indicator' else None, 
+        additional_ind_severity=additional_last_sev if additional_last_var != 'no_indicator' else None,
+        additional_2_ind_severity=additional_2_last_sev if additional_2_last_var != 'no_indicator' else None, 
         idp_disruption=row[idp_disruption_var], 
         teacher_disruption=row[teacher_disruption_var], 
         #protection_at_school=row['e_incident_ecol'] if country == 'Burkina Faso -- BFA'  else None,
