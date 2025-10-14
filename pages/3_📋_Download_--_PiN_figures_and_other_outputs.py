@@ -517,7 +517,7 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
         mime="application/zip", key = 'second'):
 
         #if "github" in st.secrets and "token" in st.secrets["github"]:
-            #st.write("✅ GitHub token found in secrets.")
+            #st.write("✅ GitHub token found in secrets.    ")
         #else:
             #st.error("❌ GitHub token not found in secrets. Check your Streamlit configuration.")
         country_slug = country.replace(" ", "_").replace("--", "_").replace("/", "_")
