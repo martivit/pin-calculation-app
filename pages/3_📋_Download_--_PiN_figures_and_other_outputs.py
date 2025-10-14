@@ -131,12 +131,14 @@ def create_zip_file_FR(country_label, excel_file,indicator_output, word_paramete
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
 
-def create_zip_file_step1_hybrid(country_label, formatted_output_1_2025, raw_excel, doc_parameter_output, maps=None, timestamp=None):
+def create_zip_file_step1_hybrid(country_label, formatted_output_1_2025, raw_excel, doc_parameter_output,indicator_output, maps=None, timestamp=None):
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
         zip_file.writestr(f"PiN_temporary_to_fill_{country_label}_{timestamp}.xlsx",
                           formatted_output_1_2025.getvalue())
+        zip_file.writestr(f"PiN_by_indicator_{country_label}_{timestamp}.xlsx", indicator_output.getvalue())
+
         # Add the raw Excel file
         zip_file.writestr(f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx",
                           raw_excel.getvalue())
@@ -475,6 +477,8 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and not 
 ###################################################################################################################################################
 if ocha_data is not None and not step_2_hpc and not alternative_country and hybrid_country:
 
+
+
     ## merge the PiN 2025 calculated for targeted areas with the secondary data (II, ACLED, clustering, additional empy columns)
     output_1_2025 = merge_2025_contextDB (country,  ocha_data, Tot_PiN_by_admin, DATA_DIR_CONTEXT_DB)  
     #st.dataframe(output_1_2025) 
@@ -490,6 +494,8 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
     if selected_language == "French":
         doc_parameter_output = generate_word_document_FR(parameters_FR)
 
+    # ------------------------ B. create excel PiN by indicator file
+    indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
 
     maps_1step = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
 
@@ -498,10 +504,10 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
     zip_file_name = f"PiN_Temporary_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output, maps_1step)
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output,indicator_output, maps_1step, timestamp)
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output , maps_1step)
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output , indicator_output, maps_1step, timestamp)
 
     # ------------------------ E. download zip file
     if st.download_button(
