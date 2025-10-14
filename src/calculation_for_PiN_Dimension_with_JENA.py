@@ -1024,7 +1024,12 @@ def aggregate_pin_per_admin_status(pin_per_admin_status, admin_var):
     }).reset_index()
 
     return grouped_df
-
+#--------------------------------------------------------------------------------------------
+def safe_rate(df, colname):
+    """Return a numeric Series in [0,1] for the given column,
+    defaulting to 0.0 if the column is missing."""
+    s = df[colname] if colname in df.columns else pd.Series(0.0, index=df.index)
+    return pd.to_numeric(s, errors='coerce').fillna(0.0).clip(0, 1)
 
 ########################################################################################################################################
 ########################################################################################################################################
@@ -1434,8 +1439,10 @@ def calculatePIN_with_JENA (data_combination, country, edu_data, household_data,
             if c in df.columns:
                 df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.0)
         # keep aggravating rates within [0,1] and compute residual safely
-        df['subsetOoS_sev4_aggravating_circumstances'] = df.get('subsetOoS_sev4_aggravating_circumstances', 0).clip(0,1)
-        df['subsetOoS_sev5_aggravating_circumstances'] = df.get('subsetOoS_sev5_aggravating_circumstances', 0).clip(0,1)
+        #df['subsetOoS_sev4_aggravating_circumstances'] = df.get('subsetOoS_sev4_aggravating_circumstances', 0).clip(0,1)
+        #df['subsetOoS_sev5_aggravating_circumstances'] = df.get('subsetOoS_sev5_aggravating_circumstances', 0).clip(0,1)
+        df['subsetOoS_sev4_aggravating_circumstances'] = safe_rate(df, 'subsetOoS_sev4_aggravating_circumstances')
+        df['subsetOoS_sev5_aggravating_circumstances'] = safe_rate(df, 'subsetOoS_sev5_aggravating_circumstances')
         merged_ocha_jena_msna[category] = df
 
 

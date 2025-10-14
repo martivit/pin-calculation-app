@@ -42,16 +42,16 @@ access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
 idp_disruption_var = 'edu_disrupted_displaced'
 armed_disruption_var = 'edu_disrupted_occupation'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'edu_disrupted_hazards'
+natural_hazard_var = 'no_indicator'
 barrier_var = 'edu_barrier'
-selected_severity_4_barriers = [
+selected_severity_4_barriers = ["L'école a été fermée en raison de dommages, d'une catastrophe naturelle ou d'un conflit.", "Mariage, fiançailles et/ou grossesse",
     "Risques de protection à l'école",
 "Risques de protection pendant le trajet vers l'école",
 "L'enfant doit travailler à la maison ou dans la ferme du ménage (c'est-à-dire qu'il ne gagne pas de revenu pour ces activités, mais peut permettre à d'autres membres de la famille de gagner un revenu)",
 "L'enfant participe à des activités génératrices de revenus en dehors du foyer"
 
 ]
-selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés","Impossibilité de payer les coûts directs de l'éducation (par exemple, les frais de scolarité, les fournitures, le transport)" ]
+selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés" ]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'ind_age'
@@ -103,7 +103,11 @@ excel_path_jena = 'input/Niger_JENA_PTR_protection.xlsx'
 jena_exls = pd.ExcelFile(excel_path_jena, engine='openpyxl')
 jena_data = pd.read_excel(jena_exls)  # 'ocha' sheet
 
-
+natural_hazard_var_sev = None
+additional_last_var = 'no_indicator'
+additional_last_sev = None
+additional_2_last_var = 'no_indicator'
+additional_2_last_sev = None
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################
 #############################################################################        CALCULATION PIN              ################################################################################################
@@ -112,7 +116,10 @@ jena_data = pd.read_excel(jena_exls)  # 'ocha' sheet
 ##################################################################################################################################################################################################################
 
 edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
-                                                                                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                                                                                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                                                                                natural_hazard_var,natural_hazard_var_sev,
+                                                                                additional_last_var,additional_last_sev,
+                                                                                additional_2_last_var,additional_2_last_sev,
                                                                                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                 age_var, gender_var,
                                                                                 label, 
