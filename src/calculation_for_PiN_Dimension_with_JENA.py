@@ -1618,7 +1618,7 @@ def calculatePIN_with_JENA (data_combination, country, edu_data, household_data,
     Tot_PiN_by_admin[label_perc4] = Tot_PiN_by_admin[label_tot4]/Tot_PiN_by_admin[label_tot_population]
     Tot_PiN_by_admin[label_perc5] = Tot_PiN_by_admin[label_tot5]/Tot_PiN_by_admin[label_tot_population]
 
-    # Reorder columns to place new columns at desired positions
+    # Reorder columns to place new columns at desired positions ---
     cols = list(Tot_PiN_by_admin.columns)
     cols.insert(cols.index(label_tot5) + 1, cols.pop(cols.index(label_perc_tot)))
     cols.insert(cols.index(label_perc_tot) + 1, cols.pop(cols.index(label_tot)))
