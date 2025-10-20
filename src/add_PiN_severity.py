@@ -700,8 +700,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
    
     if country != 'Afghanistan -- AFG':
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
-    elif    country == 'Haiti -- HTI':
-        edu_data = edu_data[(edu_data['edu_age_corrected'] >= 3) & (edu_data['edu_age_corrected'] <= 17)]          
+    #elif    country == 'Haiti -- HTI':
+        #edu_data = edu_data[(edu_data['edu_age_corrected'] >= 3) & (edu_data['edu_age_corrected'] <= 17)]          
     else:
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 6) & (edu_data['edu_age_corrected'] <= 17)]
 
