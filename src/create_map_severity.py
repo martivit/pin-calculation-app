@@ -43,7 +43,7 @@ def normalize_admin_columns(gdf, shapefile_path):
             'admin2Pcod': 'ADM2_PCODE',
             'admin3Pcod': 'ADM3_PCODE',
         }
-    # … add any other country‐specific cases here …
+   
 
     # Apply the renames
     gdf.rename(columns=colmap, inplace=True)
@@ -68,6 +68,7 @@ def _strip_ner_prefix(series: pd.Series) -> pd.Series:
 desired_admin_level = {
     'MMR': 'ADM1_PCODE',
     'DRC': 'ADM3_PCODE',
+    'SSD': 'ADM2_PCODE'
 }
 DEFAULT_LEVEL = 'ADM2_PCODE'
 shp_folder = "input_map"
