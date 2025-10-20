@@ -169,6 +169,16 @@ def make_map_severity(
     best_adm = min(adm_cols,
                    key=lambda c: abs(gdf[c].astype(str).str.len().median() - pin_len))
 
+
+    print("---- DEBUG SSD ----")
+    print("best_adm =", best_adm)
+    print("pin_col =", pin_col)
+    print("gdf sample:", gdf[best_adm].head(10).tolist())
+    print("pin sample:", pin_data[pin_col].head(10).tolist())
+
+    # Compare overlap
+    print("Shared codes:", len(set(gdf[best_adm]) & set(pin_data[pin_col])))
+    
     # 4) merge
     merged = gdf.merge(pin_data, left_on=best_adm, right_on=pin_col, how="left")
     admin_level_gdf = (
