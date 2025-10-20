@@ -164,7 +164,8 @@ def make_map_severity(
 
     # 3) pick PIN‐code column & best ADM by string‐length
     pin_col = pin_data.columns[0]
-    adm_cols = [c for c in gdf.columns if c.upper().startswith("ADM")]
+    #adm_cols = [c for c in gdf.columns if c.upper().startswith("ADM")]
+    adm_cols = [c for c in gdf.columns if c.upper().startswith("ADM") and "PCODE" in c.upper()]
     pin_len = pin_data[pin_col].astype(str).str.len().median()
     best_adm = min(adm_cols,
                    key=lambda c: abs(gdf[c].astype(str).str.len().median() - pin_len))
@@ -178,7 +179,7 @@ def make_map_severity(
 
     # Compare overlap
     print("Shared codes:", len(set(gdf[best_adm]) & set(pin_data[pin_col])))
-    
+
     # 4) merge
     merged = gdf.merge(pin_data, left_on=best_adm, right_on=pin_col, how="left")
     admin_level_gdf = (
