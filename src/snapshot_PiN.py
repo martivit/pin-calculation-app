@@ -802,7 +802,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     title_run = title.runs[0]
     title_run.font.size = Pt(24)  # Make the title larger
     title_run.bold = True
-    title_run.font.name = 'Calibri'
+    #title_run.font.name = 'Calibri'
     title.alignment = 1  # Center the title
 
     # Define the gray background color (hex code)
@@ -822,7 +822,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     run = paragraph.add_run("Education PiN definition")
     run.bold = True
     run.font.size = Pt(10)  # Smaller font size
-    run.font.name = 'Calibri'
+    #run.font.name = 'Calibri'
 
     # Set paragraph spacing to reduce the extra space
     paragraph.paragraph_format.space_before = Pt(0)  # No space before the paragraph
@@ -834,7 +834,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
                             "Number of school-aged children and youths in the areas affected by crisis who do not have access to "
                             "protective education and acceptable learning conditions, which can negatively impact:\n")
     run.font.size = Pt(10)
-    run.font.name = 'Calibri'
+    #run.font.name = 'Calibri'
 
     # Add bullet points with reduced spacing
     bullet_points = [
@@ -850,7 +850,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         p.paragraph_format.line_spacing = Pt(12) # Adjust line spacing
         run = p.runs[0]
         run.font.size = Pt(10)
-        run.font.name = 'Calibri'
+        ##run.font.name = 'Calibri'
 
     # Add additional text after the bullet points with reduced spacing
     additional_text = (
@@ -871,7 +871,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
 
     for run in additional_paragraph.runs:
         run.font.size = Pt(10)
-        run.font.name = 'Calibri'
+        #run.font.name = 'Calibri'
 
     # Insert the image into the table cell
     paragraph = cell_pin.add_paragraph()
@@ -893,7 +893,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     for paragraph in cell_pin.paragraphs:
         for run in paragraph.runs:
             run.font.size = Pt(10)
-            run.font.name = 'Calibri'
+            #run.font.name = 'Calibri'
 
 
     # Add some spacing after the title
@@ -908,7 +908,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
     section1_run = section1.runs[0]
     section1_run.font.size = Pt(20)  # Customize the section header size
     section1_run.bold = True
-    section1_run.font.name = 'Calibri'
+    #section1_run.font.name = 'Calibri'
     section1.alignment = 0  # Left align
     doc.add_paragraph()
 
@@ -985,7 +985,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         run = cell.paragraphs[0].runs[0]
         #run.font.bold = True
         run.font.size = Pt(12)
-        run.font.name = 'Calibri'
+        #run.font.name = 'Calibri'
 
     for _, row_pop in final_overview_df_OCHA.iterrows():
         total_population_in_need = row_pop[label_tot]
@@ -1008,7 +1008,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
                 cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                 run = cell.paragraphs[0].runs[0]
                 run.font.size = Pt(12)
-                run.font.name = 'Calibri'
+                #run.font.name = 'Calibri'
 
     # Optionally add a total row at the end
     total_row = table_pop_group.add_row().cells
@@ -1020,7 +1020,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = cell.paragraphs[0].runs[0]
         run.font.size = Pt(12)
-        run.font.name = 'Calibri'
+        #run.font.name = 'Calibri'
         #run.bold = True  # Bold the total row
 
     for row in table_pop_group.rows:
@@ -1088,7 +1088,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         tcPr.append(parse_xml(r'<w:vAlign {} w:val="center"/>'.format(nsdecls('w'))))
         run = cell.paragraphs[0].runs[0]
         run.font.size = Pt(11)
-        run.font.name = 'Calibri'
+        #run.font.name = 'Calibri'
         run.font.bold = False  # Remove bold formatting
 
     # Add text to the second row
@@ -1201,7 +1201,7 @@ def create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA
         for point in bullet_points:
             bullet_paragraph = doc.add_paragraph(style='List Bullet')
             bullet_run = bullet_paragraph.add_run(point)
-            bullet_run.font.name = 'Calibri'
+            #bullet_run.font.name = 'Calibri'
             bullet_run.font.size = Pt(12)
 
         ## table need
