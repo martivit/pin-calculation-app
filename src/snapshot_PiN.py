@@ -19,7 +19,7 @@ import matplotlib as mpl
 
 
 # Set the global font to Calibri
-mpl.rcParams['font.family'] = 'Calibri'
+#mpl.rcParams['font.family'] = 'Calibri'
 mpl.rcParams['font.size'] = 12  # Set default font size if needed
 
 
@@ -255,7 +255,7 @@ def create_dimension_table(doc, label, perc_acc, num_acc, perc_lc, num_lc, perc_
     run_title = cell_title.paragraphs[0].runs[0]
     run_title.font.bold = True
     run_title.font.size = Pt(font)
-    run_title.font.name = "Calibri"
+    #run_title.font.name = "Calibri"
 
     # Apply background color to the merged cell
     cell_title._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="{}"/>'.format(nsdecls('w'), colors_dimension["light_blue"])))
@@ -296,7 +296,7 @@ def create_dimension_table(doc, label, perc_acc, num_acc, perc_lc, num_lc, perc_
             for paragraph in cell.paragraphs:
                 run = paragraph.runs[0]
                 run.font.size = Pt(font)
-                run.font.name = "Calibri"
+                #run.font.name = "Calibri"
                 paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     # Specifically set the alignment for the first column (column 0) to the left
