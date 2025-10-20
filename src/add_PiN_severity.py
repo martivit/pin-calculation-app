@@ -596,7 +596,10 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     ####### ** 1 **       ------------------------------ manipulation and join between H and edu data   ------------------------------------------     #######
         
     # Find the UUID columns, assuming they exist and taking only the first match for simplicity
-    edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
+    edu_uuid_column = [
+        col for col in edu_data.columns 
+        if 'uuid' in col.lower() and 'edu_uuid' not in col.lower()
+        ][0] # Take the first item directly
     household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
     print(household_uuid_column)
     print(edu_uuid_column)
