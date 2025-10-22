@@ -131,6 +131,13 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
                         break
 
     base_2025 = base_2025[~base_2025['Admin Pcode'].isin(list_remove)].copy()
+    # Fallback: if NO delta admins at all, treat ALL remaining admins as 'same'
+    if len(list_delta) == 0:
+        remaining_admins = base_2025[admin_var].dropna().unique().tolist()
+        # Make sure not to duplicate entries already tagged same
+        already_same = set(list_same)
+        list_same = list(already_same.union(set(remaining_admins)))
+
 
     pin_2024_missing_2025 = {}
     for category, df_2024 in pin2024_cat.items():
@@ -156,7 +163,12 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
     for category, details in list_2025_category.items():
         valid_refs = details["list_2025"]
 
-        # Filter base_2025 to admins flagged for delta (shared across categories)
+        # 🔧 If no delta admins, create an EMPTY df_delta with expected columns
+        if len(list_delta) == 0:
+            df_delta = pd.DataFrame(columns=[admin_var, 'admin_ref'])
+            df_delta_category[category] = df_delta
+            continue
+
         df_delta = base_2025[base_2025[admin_var].isin(list_delta)][[
             admin_var,
             ref_user_admin,
@@ -164,7 +176,6 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
             ref_suggested_other
         ]].copy()
 
-        # Assign admin_ref using the category-specific list_2025
         df_delta['admin_ref'] = df_delta.apply(lambda row: find_valid_ref(row, valid_refs), axis=1)
 
         # Track non-matched refs to fall back to list_same
@@ -211,16 +222,20 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
 
         # Merge 2025 and 2024 reference data
         matrix_df = df_2025.merge(df_2024, on="Admin Pcode REF", how="left")
-
-        # Merge with df_delta for this category
+        
         df_delta = df_delta_category.get(category)
-        if df_delta is not None and not df_delta.empty:
-            merged_df_delta = df_delta.merge(
-                matrix_df,
-                left_on='admin_ref',
-                right_on='Admin Pcode REF',
-                how='left'
-            )
+        # Merge with df_delta for this category
+        if df_delta is None or df_delta.empty:
+            merged_df_delta_all[category] = pd.DataFrame()
+            continue
+
+       
+        merged_df_delta = df_delta.merge(
+            matrix_df,
+            left_on='admin_ref',
+            right_on='Admin Pcode REF',
+            how='left'
+        )
 
         # Add delta % columns
         for level in ['1-2', '3', '4', '5']:
@@ -253,6 +268,8 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
            
     ## 4. ---- merging the delta and the pin2024 of refernce  
     for category, df in merged_df_delta_all.items():
+        if df is None or df.empty or ('Admin Pcode' not in df.columns):
+            continue
         df_sev24 = pin_2024_missing_2025.get(category)
         if df_sev24 is not None and not df_sev24.empty:
             df_merged = df.merge(
@@ -268,6 +285,9 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
 
     ## 5. ---- calculate new severity after extrapolation    
     for category, df in merged_df_delta_all.items():
+        if df is None or df.empty:
+            pin_2025_delta[category] = pd.DataFrame()
+            continue
         new_cols = []
 
         for level in ['1-2', '3', '4', '5']:
