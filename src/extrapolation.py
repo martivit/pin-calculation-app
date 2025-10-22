@@ -149,50 +149,6 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
     print(list_remove)    
     print('------------------')
     print(list_same)    
-    # ===================== EARLY EXIT: nothing to extrapolate =====================
-    # If there are no delta admins or no category has a usable df_delta, just
-    # merge 2025-covered with 2024 backfill (renamed to final display schema).
-    if not list_delta:
-        pin_2025_updated = {}
-        for category in pin2025_by_status.keys():
-            covered = pin_2025_covered.get(category, pd.DataFrame()).copy()
-            backfill = pin_2024_missing_2025.get(category, pd.DataFrame()).copy()
-
-            if not backfill.empty:
-                # Rename admin column and map 2024 columns to display names
-                if 'Admin_Pcode_2024' in backfill.columns:
-                    backfill = backfill.rename(columns={'Admin_Pcode_2024': 'Admin Pcode'})
-
-                rename_map = {}
-                for col in backfill.columns:
-                    if col.endswith('_2024_extrapolation_base'):
-                        base = col.replace('_2024_extrapolation_base', '')
-                        # convert underscores to spaces for display
-                        disp = base.replace('_', ' ')
-                        if disp in [
-                            '% severity levels 1-2',
-                            '% severity level 3',
-                            '% severity level 4',
-                            '% severity level 5'
-                        ]:
-                            rename_map[col] = disp
-
-                if rename_map:
-                    backfill = backfill[['Admin Pcode'] + list(rename_map.keys())].rename(columns=rename_map)
-                else:
-                    # If nothing to map, just drop it
-                    backfill = pd.DataFrame(columns=['Admin Pcode',
-                                                     '% severity levels 1-2',
-                                                     '% severity level 3',
-                                                     '% severity level 4',
-                                                     '% severity level 5'])
-
-            combined = pd.concat([covered, backfill], axis=0, ignore_index=True)
-            pin_2025_updated[category] = combined
-
-        # No delta matrices to return in this path
-        return {}, pin_2025_updated
-    # =================== END EARLY EXIT ===================
 
     ## 2. ---- making the map between missing amdin and reference admin
     df_delta_category = {}
