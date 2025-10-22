@@ -1274,7 +1274,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     refugee_suggestion = ['refugees','REF', 'prs','refugee','refugie', 'refugie','prl', 'refugiee',"REFUGIE", '3']
     ndsp_suggestion = ['ndsp','migrant',"RAPATRIE",'Protracted IDPs', "hote affected by IDP","PDI_Site",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
-    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']  
+    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other'] 
     
     suggestions_mapping = {
         'Host/Hôte': host_suggestion,        
