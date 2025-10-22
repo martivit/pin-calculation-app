@@ -149,6 +149,72 @@ def extrapolate_df_2025_updated(base_2025, pin2025_by_status, pin2024_cat):
     print(list_remove)    
     print('------------------')
     print(list_same)    
+    # ===================== EARLY EXIT: nothing to extrapolate =====================
+    if not list_delta:
+        def _std(series):
+            # normalize only non-null values & preserve NaN
+            s = series.copy()
+            mask = s.notna()
+            s.loc[mask] = s.loc[mask].astype(str).str.strip().str.upper()
+            return s
+
+        def _clean_unique(df):
+            if df.empty or "Admin Pcode" not in df.columns:
+                return df
+            df = df.copy()
+            # Normalize PCODE but preserve NaN
+            df["Admin Pcode"] = _std(df["Admin Pcode"])
+            # Drop rows with null/blank Admin Pcode
+            df = df[ df["Admin Pcode"].notna() & (df["Admin Pcode"].astype(str).str.len() > 0) ]
+            # De-dupe by Admin
+            df = df.drop_duplicates(subset=["Admin Pcode"], keep="first")
+            return df
+
+        pin_2025_updated = {}
+        all_cats = set(pin2025_by_status.keys()) | set(pin_2025_covered.keys()) | set(pin_2024_missing_2025.keys())
+
+        for category in all_cats:
+            covered = pin_2025_covered.get(category, pd.DataFrame()).copy()
+            backfill = pin_2024_missing_2025.get(category, pd.DataFrame()).copy()
+
+            # --- map/prepare backfill to final display schema ---
+            if not backfill.empty:
+                if "Admin_Pcode_2024" in backfill.columns:
+                    backfill = backfill.rename(columns={"Admin_Pcode_2024": "Admin Pcode"})
+
+                rename_map = {}
+                for col in list(backfill.columns):
+                    if col.endswith("_2024_extrapolation_base"):
+                        base = col.replace("_2024_extrapolation_base", "")
+                        disp = base.replace("_", " ")
+                        if disp in [
+                            "% severity levels 1-2",
+                            "% severity level 3",
+                            "% severity level 4",
+                            "% severity level 5"
+                        ]:
+                            rename_map[col] = disp
+
+                keep_cols = ["Admin Pcode"] + list(rename_map.keys())
+                backfill = backfill.loc[:, [c for c in keep_cols if c in backfill.columns]].rename(columns=rename_map)
+
+            # --- clean + de-dupe each side ---
+            covered = _clean_unique(covered)
+            backfill = _clean_unique(backfill)
+
+            # --- anti-join backfill vs covered ---
+            if not covered.empty and not backfill.empty:
+                backfill = backfill[~backfill["Admin Pcode"].isin(covered["Admin Pcode"])]
+
+            # --- concat and final guard ---
+            combined = pd.concat([covered, backfill], axis=0, ignore_index=True)
+            combined = _clean_unique(combined)
+
+            pin_2025_updated[category] = combined
+
+        return {}, pin_2025_updated
+    # =================== END EARLY EXIT ===================
+
 
     ## 2. ---- making the map between missing amdin and reference admin
     df_delta_category = {}
