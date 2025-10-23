@@ -377,7 +377,8 @@ hybrid_scenario_countries = [
     'Democratic Republic of the Congo -- DRC',
     #'Mali -- MLI',
     'Lebanon -- LBN',
-    'Somalia -- SOM'
+    'Somalia -- SOM',
+    'South Sudan -- SSD'
 ]
 # Define the two scenario labels clearly
 SCENARIO_1_LABEL = translations["SCENARIO_1"]
