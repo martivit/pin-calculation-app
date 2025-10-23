@@ -1085,7 +1085,7 @@ def calculate_prop(df, admin_var, pop_group_var, target_var, agg_var='weights', 
 
     return overall
 
-##--------------------------------------------------------------------------------------------
+##--------------------------------------------------------------------------------------------   -----------------------------------
 def find_matching_choices(choices_df, barriers_list, label_var):
     # List to hold the results
     results = []
