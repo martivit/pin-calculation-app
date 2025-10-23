@@ -2451,7 +2451,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     for category, df in indicator_per_admin_status.items():
-        # Fetch the corresponding DataFrame from the pin_per_admin_status
+        print("Fetch the corresponding DataFrame from the pin_per_admin_status")
         pin_df = pin_per_admin_status.get(category)
 
         if pin_df is not None:
@@ -2507,7 +2507,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         "severity level 5 -- OoS children -- ToT # of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "
         }
 
-    
+    print("final_overview_df['Strata']")
     print(final_overview_df['Strata'].unique())
 
 
@@ -2522,6 +2522,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)
         pin_per_admin_status = translate_labels(pin_per_admin_status, translation_dict)
 
-    
+    print("after transaltion")
 
     return indicator_barrier4_list,indicator_barrier_list,severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,Tot_PiN_by_admin, country_label

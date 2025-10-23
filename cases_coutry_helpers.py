@@ -657,7 +657,6 @@ selected_language = "French"
 
 
 
-
 ## MOZ
 
 status_var = 'pop_group'
@@ -666,6 +665,13 @@ teacher_disruption_var = 'In the past 12 months, was the education child of age:
 idp_disruption_var = 'In the past 12 months, was the education child of age: ${edu_ind_age} and gender: ${edu_ind_gender} disrupted by any of the following events:/School used as a shelter by displaced persons'
 armed_disruption_var = 'In the past 12 months, was the education child of age: ${edu_ind_age} and gender: ${edu_ind_gender} disrupted by any of the following events:/Direct attack on education (e.g. school occupied by armed actors, damaged by munitions/fire, looted)'#'edu_disrupted_occupation'no_indicator
 natural_hazard_var = 'no_indicator'
+
+
+natural_hazard_var_sev =4 
+additional_last_var = 'no_indicator'
+additional_last_sev= None
+additional_2_last_var='no_indicator'
+additional_2_last_sev = None
 
 barrier_var = 'edu_barrier'
 selected_severity_4_barriers = [
@@ -724,7 +730,6 @@ mismatch_admin = True
 no_ocha_data = False
 
 selected_language = "English"
-
 
 
 
@@ -796,3 +801,76 @@ mismatch_admin = True
 no_ocha_data = False
 
 selected_language = "English"
+
+
+
+
+
+## MLI
+
+status_var = 'pop_group'
+access_var = 'edu_access'
+teacher_disruption_var = 'edu_disrupted_teacher'
+idp_disruption_var = 'edu_disrupted_displaced'
+armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'edu_disrupted_hazards'
+barrier_var = 'edu_barrier'
+selected_severity_4_barriers = ["L'enfant doit travailler à la maison ou dans la ferme du ménage (c'est-à-dire qu'il ne gagne pas de revenu pour ces activités, mais peut permettre à d'autres membres de la famille de gagner un revenu)",
+                               "Risques de protection à l'école ",  "Risques de protection pendant le trajet vers l'école "]
+selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés ", 'Grossesse']
+
+natural_hazard_var_sev =4 
+additional_last_var = 'no_indicator'
+additional_last_sev= None
+additional_2_last_var='no_indicator'
+additional_2_last_sev = None
+#"---> None of the listed barriers <---"
+#"Child is associated with armed forces or armed groups "
+age_var = 'edu_ind_age'
+gender_var = 'edu_ind_gender'
+start_school = 'October'
+country= 'Mali -- MLI'
+
+#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
+ 
+# 'Admin_3: Townships'
+admin_var = 'Admin_2: Cercles' 
+
+vector_cycle = [11,0]
+single_cycle = (vector_cycle[1] == 0)
+primary_start = 7
+secondary_end = 17
+label = 'label::french'
+
+# Path to your Excel file
+excel_path = 'input/MSNA_2025_MLI_South_and_North.xlsx'
+excel_path_ocha = 'input/MLI_ocha.xlsx'
+#excel_path_ocha = 'input/test_ocha.xlsx'
+
+# Load the Excel file
+xls = pd.ExcelFile(excel_path, engine='openpyxl')
+# Print all sheet names (optional)
+print(xls.sheet_names)
+# Dictionary to hold your dataframes
+dfs = {}
+# Read each sheet into a dataframe
+for sheet_name in xls.sheet_names:
+    dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
+
+# Access specific dataframes
+household_data = dfs['hh data']
+edu_data = dfs['edu data']
+survey_data = dfs['survey']
+choice_data = dfs['choices']
+
+ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
+
+
+# Read specific sheets into separate dataframes
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
+mismatch_admin = True
+
+no_ocha_data = False
+
+selected_language = "French"

@@ -43,6 +43,12 @@ def normalize_admin_columns(gdf, shapefile_path):
             'admin2Pcod': 'ADM2_PCODE',
             'admin3Pcod': 'ADM3_PCODE',
         }
+    elif fname.startswith('mli_'):
+        colmap = {
+            'admin1Pcod': 'ADM1_PCODE',
+            'admin2Pcod': 'ADM2_PCODE'
+
+        }    
    
 
     # Apply the renames

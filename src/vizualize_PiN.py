@@ -107,7 +107,7 @@ color_mapping_dimension = {
 alignment_columns = list(color_mapping.keys())
 def apply_final_formatting(country_name, workbook, overview_df, small_overview_df, admin_var, selected_language= 'English'):
 
-
+    print("inside apply_final_formatting")
     label_perc2 = '% severity levels 1-2'
     label_perc3 = '% severity level 3'
     label_perc4 = '% severity level 4'
@@ -379,7 +379,7 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
 # Function to create output with final formatting
 def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None, selected_language='English', parameters=None):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
-
+    print("inside create_output")
     label_overall_severity = 'Overall PiN and severity'
     if selected_language == "French":
         label_overall_severity = 'PiN total par admin'
@@ -432,13 +432,15 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
                 )
                 parameters_df.to_excel(writer, sheet_name="Paramètres Utilisés", index=False)
 
+    print("after parameter")
 
     output.seek(0)
     workbook = load_workbook(output)
 
     # Apply the final formatting to the workbook
     workbook = apply_final_formatting(country_name,workbook, overview_df, small_overview_df, admin_var, selected_language=selected_language)
-    
+    print("after apply_final_formatting")
+
     formatted_output = BytesIO()
     workbook.save(formatted_output)
     formatted_output.seek(0)
@@ -460,6 +462,7 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
     - BytesIO: The formatted Excel file as an in-memory object.
     """
     country_name = country_label.split('__')[0]  # Extract country name
+    print("--------> inside create_indicator_output")
 
     # File output buffer
     output = BytesIO()
@@ -478,6 +481,7 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
     # Load the workbook for formatting
     output.seek(0)
     workbook = load_workbook(output)
+    print("--------> after     workbook = load_workbook(output)")
 
     for ws in workbook.worksheets:
         ws.insert_rows(1, 4)  # Add empty rows at the top
@@ -500,7 +504,8 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
 
         # Extract headers from row 5
         headers = [ws.cell(row=5, column=col).value for col in range(1, ws.max_column + 1)]
-        
+        print("--------> before      for col_idx, col_name in enumerate(headers, start=1)")
+
         # **Increase Column Widths Based on Content & Enable Wrap Text**
         for col_idx, col_name in enumerate(headers, start=1):
             max_length = max((len(str(ws.cell(row=row_idx, column=col_idx).value)) for row_idx in range(5, ws.max_row + 1)), default=10)
@@ -511,9 +516,44 @@ def create_indicator_output(country_label, indicator_dataframes, admin_var, sele
             header_cell = ws.cell(row=5, column=col_idx)
             header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             header_cell.font = Font(bold=True, size=10)  # **Reduce font size**
+        print("--------> after      for col_idx, col_name in enumerate(headers, start=1)")
+
+        
+        # 🔍 DEBUGGING BLOCK — Add this before formatting loop
+        print(f"\n--- Debugging worksheet: {ws.title} ---")
+        print(f"ws.max_row: {ws.max_row}, ws.max_column: {ws.max_column}")
+
+        from openpyxl.utils.cell import range_boundaries
+        try:
+            min_cell, max_cell = ws.calculate_dimension().split(':')
+            min_col, min_row, max_col, max_row = range_boundaries(f"{min_cell}:{max_cell}")
+            print(f"calculate_dimension(): min_row={min_row}, max_row={max_row}, "
+                  f"min_col={min_col}, max_col={max_col}")
+        except Exception as e:
+            print(f"calculate_dimension() failed: {e}")
+
+        # Check a few non-empty rows (avoid huge loops)
+        non_empty_rows = []
+        for r in range(1, min(ws.max_row, 200) + 1):  # only scan first 200 rows
+            if any(ws.cell(row=r, column=c).value is not None for c in range(1, ws.max_column + 1)):
+                non_empty_rows.append(r)
+        print(f"First non-empty rows (up to 200): {non_empty_rows[:10]}")
+        if ws.max_row > 100:
+            print(f"... Sheet has {ws.max_row} total rows (showing first 200 only).")
+
+        # Check the corresponding DataFrame info
+        if ws.title in indicator_dataframes:
+            df = indicator_dataframes[ws.title]
+            print(f"DataFrame for {ws.title}: shape={df.shape}")
+            print(df.head(3))
+        else:
+            print(f"No matching DataFrame found for sheet {ws.title}")
+
+        # 🚨 End of debug section
 
         # Apply color to specific columns and make borders visible
         for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+
             for cell in row:
                 col_index = cell.column  # Get column index
                 col_name = headers[col_index - 1] if col_index - 1 < len(headers) else None  # Prevent index error
@@ -617,6 +657,14 @@ def create_indicator_output_no_ocha(country_label, indicator_dataframes, admin_v
                 header_cell.font = Font(bold=True, size=10)
             else:
                 header_cell.font = Font(size=10)  # Reduce font size for readability
+
+
+
+
+        # Apply color to specific columns and make borders visible
+        for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+            print("--------> inside      for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row)")
+
 
         # Apply color to specific columns and make borders visible
         for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):

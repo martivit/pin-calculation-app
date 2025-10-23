@@ -44,46 +44,45 @@ step_2_hpc= False
 
 
 
+## MLI
 
-
-## BFA
-status_var = 'i_type_pop'
-access_var = 'e_enfant_scolarise_formel'
-teacher_disruption_var = 'e_absence_enseignant'
-idp_disruption_var = 'e_ecole_protection'
+status_var = 'pop_group'
+access_var = 'edu_access'
+teacher_disruption_var = 'edu_disrupted_teacher'
+idp_disruption_var = 'edu_disrupted_displaced'
 armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var='no_indicator'
-natural_hazard_var_sev =  None
+natural_hazard_var = 'edu_disrupted_hazards'
+barrier_var = 'edu_barrier'
+selected_severity_4_barriers = ["L'enfant doit travailler à la maison ou dans la ferme du ménage (c'est-à-dire qu'il ne gagne pas de revenu pour ces activités, mais peut permettre à d'autres membres de la famille de gagner un revenu)",
+                               "Risques de protection à l'école ",  "Risques de protection pendant le trajet vers l'école "]
+selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés ", 'Grossesse']
+
+natural_hazard_var_sev =4 
 additional_last_var = 'no_indicator'
-additional_last_sev = None
-barrier_var = 'e_raison_pas_educ_formel'
-selected_severity_4_barriers = [
-    "L'enfant participe à des activités génératrices de revenus en dehors du ménage",
-"L’enfant doit travailler à la maison ou dans la ferme du ménage (c'est-à-dire qu'il ne gagne pas de revenu pour ces activités, mais peut permettre à d'autres membres de la famille de gagner un revenu)",
-"Mariage, fiançailles et/ou grossesse"
-]
-selected_severity_5_barriers = ["L'enfant est associé à des forces armées ou à des groupes armés"]
+additional_last_sev= None
+additional_2_last_var='no_indicator'
+additional_2_last_sev = None
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'sne_enfant_ind_age'
-gender_var = 'sne_enfant_ind_genre'
-start_school = 'September'
-country= 'Burkina Faso -- BFA'
+age_var = 'edu_ind_age'
+gender_var = 'edu_ind_gender'
+start_school = 'October'
+country= 'Mali -- MLI'
 
 #admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-admin_var = 'Admin_3: Department (Département)'#'Admin_2: Regions' 
+admin_var = 'Admin_2: Cercles' 
 
-vector_cycle = [10,14]
+vector_cycle = [11,0]
 single_cycle = (vector_cycle[1] == 0)
-primary_start = 6
+primary_start = 7
 secondary_end = 17
-label = 'label'
+label = 'label::french'
 
 # Path to your Excel file
-excel_path = 'input/BFA_MSNA_new_division_08_10_2025.xlsx'
-excel_path_ocha = 'input/BFA_ocha_2026.xlsx'
+excel_path = 'input/MSNA_2025_MLI_South_and_North.xlsx'
+excel_path_ocha = 'input/MLI_ocha.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -97,12 +96,13 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-edu_data = dfs['loop_sne_cleaned']
-household_data = dfs['main_cleaned']
+household_data = dfs['hh data']
+edu_data = dfs['edu data']
 survey_data = dfs['survey']
 choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
+
 
 # Read specific sheets into separate dataframes
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
@@ -112,7 +112,6 @@ mismatch_admin = True
 no_ocha_data = False
 
 selected_language = "French"
-
 
 
 
@@ -126,7 +125,8 @@ selected_language = "French"
 edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
                                                                                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                 natural_hazard_var,natural_hazard_var_sev,
-                                                                                additional_last_var,additional_last_sev,
+                                                                                    additional_last_var,additional_last_sev,
+                                                                                    additional_2_last_var,additional_2_last_sev,
                                                                                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                 age_var, gender_var,
                                                                                 label, 
@@ -159,6 +159,7 @@ if ocha_data is not None:
 
 
 
+    print("after calculatePIN")
 
     # Create the Excel files
     label_total_pin_sheet = "PiN TOTAL"
@@ -188,7 +189,10 @@ if ocha_data is not None:
             tot_severity=Tot_PiN_by_admin,
             selected_language=selected_language 
         )
-    indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
+
+    print("after create_output")
+    
+   
 
     #dimension_jiaf_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",   admin_var, dimension= True, ocha= False)
     #dimension_ocha_excel = create_output(Tot_Dimension_JIAF, final_overview_dimension_df, "By dimension TOTAL",  admin_var, dimension= True, ocha= True)
@@ -374,6 +378,9 @@ if ocha_data is not None:
     with open("output_validation/final__OCHA__platform_output.xlsx", "wb") as f:
         f.write(ocha_excel.getbuffer())
 
+
+    indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
+    print("after create_indicator_output")
     with open("output_validation/final__indicator__platform_output.xlsx", "wb") as f:
         f.write(indicator_output.getbuffer())    
 
