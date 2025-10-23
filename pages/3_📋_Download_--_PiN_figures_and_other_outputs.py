@@ -296,7 +296,7 @@ hybrid_scenario_countries = [
     'Central African Republic -- CAR',
     'Ethiopia -- ETH',
     'Democratic Republic of the Congo -- DRC',
-    'Mali -- MLI',
+    #'Mali -- MLI',
     'Lebanon -- LBN',
     'Somalia -- SOM'
 ]
