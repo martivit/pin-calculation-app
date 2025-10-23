@@ -170,7 +170,7 @@ def make_map_severity(
 
     # 3) pick PIN‐code column & best ADM by string‐length
     pin_col = pin_data.columns[0]
-    #adm_cols = [c for c in gdf.columns if c.upper().startswith("ADM")]
+    #-->adm_cols = [c for c in gdf.columns if c.upper().startswith("ADM")]
     adm_cols = [c for c in gdf.columns if c.upper().startswith("ADM") and "PCODE" in c.upper()]
     pin_len = pin_data[pin_col].astype(str).str.len().median()
     best_adm = min(adm_cols,
