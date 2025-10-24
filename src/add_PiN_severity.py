@@ -555,13 +555,14 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     ## essential variables --------------------------------------------------------------------------------------------
 
-    host_suggestion = ["Urban","always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ["Rural","displaced", 'New IDPs','pdi', 'idp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_famille', 'pdi_fam', '2', '1' ]
-    returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
-    refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
-    ndsp_suggestion = ['ndsp','Protracted IDPs', 'pdi_site', 'idp_camp']
+
+    host_suggestion = ["Non displaced household","Non-déplacé", "affected_pop",'lebanese',"Hote","Urban","PND",'host_community',"always_lived","general_pop","non_displaced",'non_deplace','Host Community',"Host community members",'host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
+    IDP_suggestion = ["Internally displaced persons (IDP)",'prl','recent_idp',"Déplacé","PDI_FA","IDP",'host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'pdi_famille','New IDPs','pdi', 'idp', 'idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
+    returnee_suggestion = ["Returnees (from internal dislpacement)",'displaced_previously',"RET","Retourné", "Retourne","RETOURNE",'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
+    refugee_suggestion = ['refugees','REF', 'prs','refugee','refugie', 'refugie','prl', 'refugiee',"REFUGIE", '3']
+    ndsp_suggestion = ['ndsp','migrant',"RAPATRIE",'Protracted IDPs', "hote affected by IDP","PDI_Site",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
-    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiee', 'Other']
+    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other'] 
     suggestions_mapping = {
         'Host/Hôte': host_suggestion,
         'IDP/PDI': IDP_suggestion,
@@ -607,17 +608,27 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
 
     if country != 'Afghanistan -- AFG':
-        # Safely get the first column that contains 'start' in its name
-        household_start_column = [col for col in household_data.columns if 'start' in col.lower()]
-        if household_start_column:
-            household_start_column = household_start_column[0]  # Take the first item directly
+        # Try to find 'start', otherwise fall back to 'today' or 'today_date'
+        possible_columns = [col.lower() for col in household_data.columns]
+        if any('start' in col for col in possible_columns):
+            household_start_column = next(col for col in household_data.columns if 'start' in col.lower())
+        elif any('today' in col for col in possible_columns):
+            household_start_column = next(col for col in household_data.columns if 'today' in col.lower())
+        elif 'today_date' in possible_columns:
+            household_start_column = 'today_date'
         else:
-            raise KeyError("No column containing 'start' found in household_data.")
+            raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data.")
     else:
-        # Assign the 'today' column if the country is Afghanistan
-        household_start_column = 'today'
-        if household_start_column not in household_data.columns:
-            raise KeyError(f"'today' column is missing in household_data for Afghanistan.")
+        # For Afghanistan, prioritize 'start', otherwise 'today' or 'today_date'
+        possible_columns = [col.lower() for col in household_data.columns]
+        if any('start' in col for col in possible_columns):
+            household_start_column = next(col for col in household_data.columns if 'start' in col.lower())
+        elif any('today' in col for col in possible_columns):
+            household_start_column = next(col for col in household_data.columns if 'today' in col.lower())
+        elif 'today_date' in possible_columns:
+            household_start_column = 'today_date'
+        else:
+            raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data for Afghanistan.")
 
     # Convert the date column to datetime and extract the month
     

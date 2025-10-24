@@ -366,13 +366,14 @@ def UPDATE_calculatePIN (country , pin_2025_updated_perc, ocha_data,
     ocha_data = ocha_data.rename(columns={'Admin': 'Admin_label'})
     ocha_data = ocha_data.drop(columns=['Admin_label'])
     
+
     host_suggestion = ["Non displaced household","Non-déplacé", "affected_pop",'lebanese',"Hote","Urban","PND",'host_community',"always_lived","general_pop","non_displaced",'non_deplace','Host Community',"Host community members",'host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
     IDP_suggestion = ["Internally displaced persons (IDP)",'prl','recent_idp',"Déplacé","PDI_FA","IDP",'host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'pdi_famille','New IDPs','pdi', 'idp', 'idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
-    returnee_suggestion = ["Returnees (from internal dislpacement)",'displaced_previously' ,"Retourné", "Retourne","RETOURNE",'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
+    returnee_suggestion = ["Returnees (from internal dislpacement)",'displaced_previously',"RET","Retourné", "Retourne","RETOURNE",'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
     refugee_suggestion = ['refugees','REF', 'prs','refugee','refugie', 'refugie','prl', 'refugiee',"REFUGIE", '3']
     ndsp_suggestion = ['ndsp','migrant',"RAPATRIE",'Protracted IDPs', "hote affected by IDP","PDI_Site",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
-    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']  
+    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other'] 
      
     suggestions_mapping = {
         'Host/Hôte': host_suggestion,        
