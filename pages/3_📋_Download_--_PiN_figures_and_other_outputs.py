@@ -298,8 +298,7 @@ hybrid_scenario_countries = [
     'Democratic Republic of the Congo -- DRC',
     #'Mali -- MLI',
     'Lebanon -- LBN',
-    'Somalia -- SOM',
-    'South Sudan -- SSD'
+    'Somalia -- SOM'
 ]
 
 hybrid_country= False
