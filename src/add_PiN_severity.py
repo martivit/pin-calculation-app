@@ -630,6 +630,8 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         else:
             raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data for Afghanistan.")
 
+
+
     # Convert the date column to datetime and extract the month
     
     household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
