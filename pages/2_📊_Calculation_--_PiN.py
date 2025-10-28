@@ -813,7 +813,7 @@ def select_indicators():
 
         age_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['age', 'âge'])]
         gender_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['sex', 'gender', 'sexe', 'genre'])]
-        education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education', 'school', 'ecole', 'scolarise', 'enseignant', 'formel', 'access'])]
+        education_indicator_suggestions = [col for col in edu_data.columns if any(kw in col.lower() for kw in ['edu', 'education','teacher','Teacher','hazard','natural', 'school', 'ecole', 'scolarise', 'enseignant', 'formel', 'access'])]
 
         # Checkbox to show/hide the data header
         if st.checkbox(translations["display_education_data_header_checkbox"]):
