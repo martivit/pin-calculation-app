@@ -70,7 +70,8 @@ COUNTRY_CYCLE_MAP = {
     'Democratic Republic of the Congo -- DRC':    [12, 0],
     'Mali -- MLI':    [12, 0],
     'Lebanon -- LBN':    [12, 0],
-    'Somalia -- SOM':    [15, 0]
+    'Somalia -- SOM':    [15, 0],
+    'South Sudan -- SSD': [11,0]
 }
 
 ##--------------------------------------------------------------------------------------------        
