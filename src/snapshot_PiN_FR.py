@@ -382,7 +382,7 @@ def plot_snapshot(ax, df, title, color_dim, fixed_height):
     return p_no_need, p_acc, p_lc, p_env, p_agg
 ####################################################################################################################################################################
 ####################################################################################################################################################################
-def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df = None, final_overview_dimension_df_in_need = None, selected_language= 'French', step1= True):
+def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df = None, final_overview_dimension_df_in_need = None, selected_language= 'French', step1= False):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
 
     print(country_name)
