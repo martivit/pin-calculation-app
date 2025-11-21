@@ -390,7 +390,7 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and not 
         doc_parameter_output = generate_word_document(parameters)
     if selected_language == "French":
         doc_parameter_output = generate_word_document_FR(parameters_FR)
-        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language, step1=False)
 
     maps = make_map_severity(country, pin_data=Tot_PiN_by_admin,hpc_df=ocha_data)
 
@@ -499,7 +499,7 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
 
     if selected_language == "French":
         doc_parameter_output = generate_word_document_FR(parameters_FR)
-        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language,step1=True)
 
     # ------------------------ B. create excel PiN by indicator file
     indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
@@ -654,7 +654,7 @@ if step_2_hpc and hybrid_country:
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA, selected_language=selected_language)
     if selected_language == "French":
-        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language)
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language, step1=False)
 
 
 
@@ -767,7 +767,7 @@ if jena_country and ocha_data is not None:
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA, selected_language=selected_language)
     if selected_language == "French":
-        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language)
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language,step1=False)
 
     
     maps_jena = make_map_severity(country, pin_data=Tot_PiN_by_admin, hpc_df=ocha_data)
@@ -876,7 +876,7 @@ if emis_country and ocha_data is not None:
     if selected_language == "English":
         doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA, selected_language=selected_language)
     if selected_language == "French":
-        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language)
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,selected_language=selected_language,step1=False)
 
     
     maps_emis = make_map_severity(country, pin_data=Tot_PiN_by_admin, hpc_df=ocha_data)

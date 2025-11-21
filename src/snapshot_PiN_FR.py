@@ -382,7 +382,7 @@ def plot_snapshot(ax, df, title, color_dim, fixed_height):
     return p_no_need, p_acc, p_lc, p_env, p_agg
 ####################################################################################################################################################################
 ####################################################################################################################################################################
-def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df = None, final_overview_dimension_df_in_need = None, selected_language= 'French'):
+def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df = None, final_overview_dimension_df_in_need = None, selected_language= 'French', step1= True):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
 
     print(country_name)
@@ -405,64 +405,6 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     label_admin_severity= 'Sévérité de la zone'
     label_tot_population= 'Population totale'
 
-
-        # Constants
-    int_2 = '2.0'
-    int_3 = '3.0'
-    int_4 = '4.0'
-    int_5 = '5.0'
-    label_perc2 = '% severity levels 1-2'
-    label_perc3 = '% severity level 3'
-    label_perc4 = '% severity level 4'
-    label_perc5 = '% severity level 5'
-    label_tot2 = '# severity levels 1-2'
-    label_tot3 = '# severity level 3'
-    label_tot4 = '# severity level 4'
-    label_tot5 = '# severity level 5'
-    label_perc_tot = '% Tot PiN (severity levels 3-5)'
-    label_tot = '# Tot PiN (severity levels 3-5)'
-    label_admin_severity = 'Area severity'
-    label_tot_population = 'TotN'
-
-    int_acc = 'access'
-    int_agg= 'aggravating circumstances'
-    int_lc = 'learning condition'
-    int_penv = 'protected environment'
-    int_out = 'Not in need'
-    label_perc_acc = '% Access'
-    label_perc_agg= '% Aggravating circumstances'
-    label_perc_lc = '% Learning conditions'
-    label_perc_penv = '% Protected environment'
-    label_perc_out = '% Not in need'
-    label_tot_acc = '# Access'
-    label_tot_agg= '# Aggravating circumstances'
-    label_tot_lc = '# Learning conditions'
-    label_tot_penv = '# Protected environment'
-    label_tot_out = '# Not in need'
-    label_dimension_perc_tot = '% Tot in PiN Dimensions'
-    label_dimension_tot = '# Tot in PiN Dimensions'
-    label_dimension_tot_population = 'TotN'
-
-    tot_5_17_label = 'TOTAL (5-17 y.o.)'
-    girl_5_17_label = 'Girls (5-17 y.o.)'
-    boy_5_17_label = 'Boys (5-17 y.o.)'
-    ece_5yo_label = 'ECE (5 y.o.)'
-  
-
-    color_mapping = {
-        label_perc2: colors["light_beige"],
-        label_tot2: colors["light_beige"],
-        label_perc3: colors["light_orange"],
-        label_tot3: colors["light_orange"],
-        label_perc4: colors["dark_orange"],
-        label_tot4: colors["dark_orange"],
-        label_perc5: colors["darker_orange"],
-        label_tot5: colors["darker_orange"],
-        label_perc_tot: colors["light_blue"],
-        label_admin_severity: colors["light_blue"],
-        label_tot: colors["light_blue"]
-    }
-
     not_pop_group_columns_overview = [tot_5_17_label]
     not_pop_group_columns = [tot_5_17_label,
         girl_5_17_label,boy_5_17_label, "Filles", "Garcons", ece_5yo_label, 
@@ -479,6 +421,65 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     school_cycle_dimension_strata_wo_ece = [ "École primaire", "Niveau scolaire intermédiaire", "École secondaire"]
     ece_strata = [ece_5yo_label]
 
+
+    if step1:
+        label_perc2 = '% severity levels 1-2'
+        label_perc3 = '% severity level 3'
+        label_perc4 = '% severity level 4'
+        label_perc5 = '% severity level 5'
+        label_tot2 = '# severity levels 1-2'
+        label_tot3 = '# severity level 3'
+        label_tot4 = '# severity level 4'
+        label_tot5 = '# severity level 5'
+        label_perc_tot = '% Tot PiN (severity levels 3-5)'
+        label_tot = '# Tot PiN (severity levels 3-5)'
+        label_admin_severity = 'Area severity'
+        label_tot_population = 'TotN'
+        label_perc_acc = '% Access'
+        label_perc_agg= '% Aggravating circumstances'
+        label_perc_lc = '% Learning conditions'
+        label_perc_penv = '% Protected environment'
+        label_perc_out = '% Not in need'
+        label_tot_acc = '# Access'
+        label_tot_agg= '# Aggravating circumstances'
+        label_tot_lc = '# Learning conditions'
+        label_tot_penv = '# Protected environment'
+        tot_5_17_label = 'TOTAL (5-17 y.o.)'
+        girl_5_17_label = 'Girls (5-17 y.o.)'
+        boy_5_17_label = 'Boys (5-17 y.o.)'
+        ece_5yo_label = 'ECE (5 y.o.)'
+  
+        not_pop_group_columns_overview = [tot_5_17_label]
+        not_pop_group_columns = [tot_5_17_label,
+            girl_5_17_label,boy_5_17_label, "Female", "Male", ece_5yo_label, 
+            "Primary school", "Intermediate school-level", "Secondary school", "Children with disability"
+        ]
+        dimension_strata = [ girl_5_17_label, boy_5_17_label, "Female", "Male", ece_5yo_label, 
+            "Primary school", "Intermediate school-level", "Secondary school"
+        ]
+        
+        dimension_gender_strata = [ girl_5_17_label, boy_5_17_label]
+        
+        school_cycle_dimension_strata = [ ece_5yo_label, 
+            "Primary school", "Intermediate school-level", "Secondary school"]
+        school_cycle_dimension_strata_wo_ece = ["Primary school", "Intermediate school-level", "Secondary school"]
+        ece_strata = [ece_5yo_label]
+
+    color_mapping = {
+        label_perc2: colors["light_beige"],
+        label_tot2: colors["light_beige"],
+        label_perc3: colors["light_orange"],
+        label_tot3: colors["light_orange"],
+        label_perc4: colors["dark_orange"],
+        label_tot4: colors["dark_orange"],
+        label_perc5: colors["darker_orange"],
+        label_tot5: colors["darker_orange"],
+        label_perc_tot: colors["light_blue"],
+        label_admin_severity: colors["light_blue"],
+        label_tot: colors["light_blue"]
+    }
+
+  
     ## reading values for different sessions
     # Retrieve data for the total row
     ## ------------------------------------------------------------------------- w/o dimension
