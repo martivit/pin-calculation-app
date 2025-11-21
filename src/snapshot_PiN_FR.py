@@ -467,6 +467,11 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
         ece_strata = [ece_5yo_label]
         label_disabilty = 'Children with disability'
 
+        group_gender ={
+            'Girls (5-17 y.o.)' : "#3c1642",
+            'Boys (5-17 y.o.)': "#1dd3b0"
+        }
+
     color_mapping = {
         label_perc2: colors["light_beige"],
         label_tot2: colors["light_beige"],
