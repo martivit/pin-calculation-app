@@ -420,6 +420,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
          "École primaire", "Niveau scolaire intermédiaire", "École secondaire"]
     school_cycle_dimension_strata_wo_ece = [ "École primaire", "Niveau scolaire intermédiaire", "École secondaire"]
     ece_strata = [ece_5yo_label]
+    label_disabilty = "Enfants en situation de handicap"
 
 
     if step1:
@@ -464,6 +465,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
             "Primary school", "Intermediate school-level", "Secondary school"]
         school_cycle_dimension_strata_wo_ece = ["Primary school", "Intermediate school-level", "Secondary school"]
         ece_strata = [ece_5yo_label]
+        label_disabilty = 'Children with disability'
 
     color_mapping = {
         label_perc2: colors["light_beige"],
@@ -508,7 +510,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     row_girl = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == girl_5_17_label]
     row_boy= final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == boy_5_17_label]
     row_ece = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == ece_5yo_label]
-    row_disability = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == "Enfants en situation de handicap"]
+    row_disability = final_overview_df_OCHA.loc[final_overview_df_OCHA['Strata'] == label_disabilty]
 
     print(row_boy)
     tot_in_need_girl = row_girl[label_tot].values[0]
