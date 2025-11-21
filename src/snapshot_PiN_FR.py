@@ -443,8 +443,11 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     label_dimension_tot = '# Tot in PiN Dimensions'
     label_dimension_tot_population = 'TotN'
 
-
-
+    tot_5_17_label = 'TOTAL (5-17 y.o.)'
+    girl_5_17_label = 'Girls (5-17 y.o.)'
+    boy_5_17_label = 'Boys (5-17 y.o.)'
+    ece_5yo_label = 'ECE (5 y.o.)'
+  
 
     color_mapping = {
         label_perc2: colors["light_beige"],
