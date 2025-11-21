@@ -131,7 +131,7 @@ def create_zip_file_FR(country_label, excel_file,indicator_output, word_paramete
     zip_buffer.seek(0)  # Reset the buffer to the beginning
     return zip_buffer
 
-def create_zip_file_step1_hybrid(country_label, formatted_output_1_2025, raw_excel, doc_parameter_output,indicator_output, maps=None, timestamp=None):
+def create_zip_file_step1_hybrid(country_label, formatted_output_1_2025, raw_excel,word_snapshot, doc_parameter_output,indicator_output, maps=None, timestamp=None):
     zip_buffer = BytesIO()  # Create an in-memory ZIP file
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         # Add the Excel file with timestamp
@@ -142,6 +142,8 @@ def create_zip_file_step1_hybrid(country_label, formatted_output_1_2025, raw_exc
         # Add the raw Excel file
         zip_file.writestr(f"{country_label}_PiN_targeted_MSNA_2025_{timestamp}.xlsx",
                           raw_excel.getvalue())
+        # Add the Word Snapshot with timestamp
+        zip_file.writestr(f"PiN_snapshot_{country_label}_{timestamp}.docx", word_snapshot.getvalue())
         # Add the Parameters Word Document
         zip_file.writestr(f"Parameters_Input_Document_{timestamp}.docx",
                           doc_parameter_output.getvalue())
@@ -490,10 +492,14 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
 
     raw_excel = dict_of_dfs_to_bytesio_excel(Tot_PiN_JIAF)
 
+   # ------------------------ C. create word PiN snapshot
     if selected_language == "English":
         doc_parameter_output = generate_word_document(parameters)
+        doc_output = create_snapshot_PiN(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need, selected_language=selected_language)
+
     if selected_language == "French":
         doc_parameter_output = generate_word_document_FR(parameters_FR)
+        doc_output = create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,selected_language=selected_language)
 
     # ------------------------ B. create excel PiN by indicator file
     indicator_output = create_indicator_output(country_label, indicator_per_admin_status, admin_var=admin_var)
@@ -505,10 +511,10 @@ if ocha_data is not None and not step_2_hpc and not alternative_country and hybr
     zip_file_name = f"PiN_Temporary_{country_label}_{timestamp}.zip"
 
     if selected_language == "English":
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output,indicator_output, maps_1step, timestamp)
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,doc_output,  doc_parameter_output,indicator_output, maps_1step, timestamp)
     if selected_language == "French":
         #zip_file = create_zip_file_FR(country_label, ocha_excel,indicator_output,  doc_parameter_output)
-        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,  doc_parameter_output , indicator_output, maps_1step, timestamp)
+        zip_file = create_zip_file_step1_hybrid(country_label,formatted_output_1_2025, raw_excel,doc_output,  doc_parameter_output , indicator_output, maps_1step, timestamp)
 
     # ------------------------ E. download zip file
     if st.download_button(
