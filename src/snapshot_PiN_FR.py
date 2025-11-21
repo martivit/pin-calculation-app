@@ -529,11 +529,11 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
     severity_5_groups = []
     percentage_tot_values = []  # Collecting percentage totals for labels
     text_data = []  
-
-    
+    label_pop_group_ste1= 'Groupe de population'
+    if step1: label_pop_group_ste1= 'Population group'
     # Iterate over the DataFrame rows to create the content
     for _, row_pop in final_overview_df.iterrows():
-        population_group = row_pop['Groupe de population'].upper()  # Convert to uppercase
+        population_group = row_pop[label_pop_group_ste1].upper()  # Convert to uppercase
         strata = row_pop['Strata']
         percentage_3_pop = row_pop[label_perc3]
         percentage_4_pop = row_pop[label_perc4]
@@ -1298,7 +1298,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
         doc.add_paragraph("")
         ## table need by pop_group
         for _, row_pop in final_overview_dimension_df_in_need.iterrows():
-            population_group = row_pop['Groupe de population'].upper()  # Convert to uppercase
+            population_group = row_pop[label_pop_group_ste1].upper()  # Convert to uppercase
             strata = row_pop['Strata']
             perc_acc = row_pop[label_perc_acc]
             num_acc = row_pop[label_tot_acc]
