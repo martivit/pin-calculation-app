@@ -116,8 +116,8 @@ def calculate_severity(country, gender, age, access, barrier,
     normalized_teacher_disruption = normalize(teacher_disruption)
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', 1, '1', '1. yes']  # keep lenient
-    no_answers  = ['no', 'non', 0, '0', '2. no']
+    yes_answers = ['yes', 'oui', 1, '1', '1. yes', '1. Yes']  # keep lenient
+    no_answers  = ['no', 'non', 0, '0', '2. no', '2. No']
 
     if country != 'Afghanistan -- AFG':
         # Main severity calculation logic

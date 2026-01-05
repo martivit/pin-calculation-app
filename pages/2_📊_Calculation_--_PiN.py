@@ -527,16 +527,74 @@ def update_combined_indicator():
 ##---------------------------------------------------------------------------------------------------------
 def find_barrier_details(barrier_variable, survey_data, choices_data, label_column, country=None):
     """
-    Fetch all barriers for a given type from choices_data.
+    Fetch all barrier labels (from choices_data[label_column]) for a given barrier question.
+
+    Matching strategy (in survey_data):
+      1) match barrier_variable to survey_data['name']
+      2) if not found, match barrier_variable to survey_data[label_column]
+         (then use the corresponding survey_data['name'] row)
+
+    Assumes survey_data has columns: 'name', 'type', and label_column
+    Assumes choices_data has columns: 'list_name' and label_column
     """
 
-    column_to_match =  "name"
+    if barrier_variable in [None, "", "no_indicator"]:
+        return []
 
+    if "name" not in survey_data.columns:
+        raise KeyError("survey_data must contain a 'name' column.")
+    if "type" not in survey_data.columns:
+        raise KeyError("survey_data must contain a 'type' column.")
+    if label_column not in survey_data.columns:
+        raise KeyError(f"survey_data must contain the label column '{label_column}'.")
+    if "list_name" not in choices_data.columns:
+        raise KeyError("choices_data must contain a 'list_name' column.")
+    if label_column not in choices_data.columns:
+        raise KeyError(f"choices_data must contain the label column '{label_column}'.")
 
-    type_info = survey_data[survey_data[column_to_match] == barrier_variable].iloc[0]['type']
-    type_barrier = type_info.replace('select_one ', '')
-    barrier_details = choices_data[choices_data['list_name'] == type_barrier]
-    return barrier_details[label_column].tolist()
+    v = str(barrier_variable).strip().lower()
+
+    # 1) Try match on NAME
+    s_name = survey_data["name"].astype(str).str.strip().str.lower()
+    hit = survey_data.loc[s_name == v]
+
+    # 2) If not found, try match on LABEL
+    if hit.empty:
+        s_lab = survey_data[label_column].astype(str).str.strip().str.lower()
+        hit = survey_data.loc[s_lab == v]
+
+    if hit.empty:
+        raise KeyError(
+            f"Barrier variable '{barrier_variable}' was not found in survey_data['name'] "
+            f"nor in survey_data['{label_column}']."
+        )
+
+    # Use the first matched row
+    type_info = str(hit.iloc[0]["type"]).strip()
+
+    # Expect: "select_one <list>" (or "select_multiple <list>")
+    if "select_one" in type_info:
+        list_name = type_info.replace("select_one", "").strip()
+    elif "select_multiple" in type_info:
+        list_name = type_info.replace("select_multiple", "").strip()
+    else:
+        raise ValueError(
+            f"survey_data['type'] for '{barrier_variable}' is '{type_info}', "
+            "expected 'select_one <list>' or 'select_multiple <list>'."
+        )
+
+    barrier_details = choices_data.loc[choices_data["list_name"].astype(str).str.strip() == list_name]
+
+    # Return barrier labels (drop blanks/NaN)
+    out = (
+        barrier_details[label_column]
+        .dropna()
+        .astype(str)
+        .str.strip()
+    )
+    out = out[out != ""].tolist()
+
+    return out
 ##---------------------------------------------------------------------------------------------------------
 def show_barrier_selection(barrier_details, label_column):
     st.write(translations["select_aggravating_circumstances_message"])
