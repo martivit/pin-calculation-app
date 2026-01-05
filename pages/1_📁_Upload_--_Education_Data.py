@@ -37,11 +37,11 @@ REQUIRED_COLUMNS = {
     'individual gender': {'ind_gender', 'edu_gender', 'ind_sex', 'sne_enfant_ind_genre', 'sex','edu_sex', 'edu_ind_sex', 'gender_member', 'genre'},
     'individual age': {'ind_age', 'age', 'edu_age', 'edu_ind_age', 'age'},
     'admin': {'admin1', 'admin2', 'admin3', 'camp', 'state', 'county', 'district'},
-    'edu access': {'edu_access', 'enrolled_school', 'e_enfant_scolarise_formel'},
+    'edu access': {'edu_access', 'enrolled_school', 'e_enfant_scolarise_formel', 'attend'},
     'distruption teacher': {'edu_disrupted_teacher', 'teacher', 'e_absence_enseignant', 'enseignant'},
     'distruption hazard': {'edu_disrupted_hazards', 'hazard', 'e_alea'},
     'distruption displaced': {'edu_disrupted_displaced', 'distrupted_idp', 'e_ecole_abris', 'displaced'},
-    'edu barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel'},
+    'edu barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel', 'reason'},
     'survey start': {'start', 'date', 'start_time', 'Start_datetime', 'survey_start_date', 'today'}
 }
 REQUIRED_FILLED_COLUMN = [
