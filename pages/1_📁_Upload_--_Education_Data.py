@@ -42,6 +42,7 @@ REQUIRED_COLUMNS = {
     'distruption hazard': {'edu_disrupted_hazards', 'hazard', 'e_alea'},
     'distruption displaced': {'edu_disrupted_displaced', 'distrupted_idp', 'e_ecole_abris', 'displaced'},
     'edu barrier': {'edu_barrier', 'resn_no_access', 'e_raison_pas_educ_formel', 'reason'},
+    
     'survey start': {'start', 'date', 'start_time', 'Start_datetime', 'survey_start_date', 'today'}
 }
 REQUIRED_FILLED_COLUMN = [
