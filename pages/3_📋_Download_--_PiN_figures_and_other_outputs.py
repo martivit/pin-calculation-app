@@ -5,6 +5,7 @@ from io import BytesIO
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
+from src.clean_dataset import clean_make_dataset
 from src.add_PiN_severity import add_severity
 from src.calculation_for_PiN_Dimension import calculatePIN
 from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
@@ -330,6 +331,35 @@ DATA_DIR_PIN2024 = "pin2024_cat"
 # 1.                                                   PiN calculation first time using MSNA
 ###################################################################################################################################################
 if not step_2_hpc and not alternative_country:
+
+    try:
+        edu_data, household_data, survey_data, choice_data, messages = clean_make_dataset (country, edu_data, household_data, choice_data, survey_data, 
+                                                                                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                                                                                natural_hazard_var,natural_hazard_var_sev,
+                                                                                additional_last_var,additional_last_sev,
+                                                                                additional_2_last_var,additional_2_last_sev,
+                                                                                barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                age_var, gender_var,
+                                                                                label, 
+                                                                                admin_var, vector_cycle, start_school, status_var,
+                                                                                selected_language)
+
+    except Exception as e:
+        st.error(str(e))
+        st.stop()
+
+    for w in messages.warning:
+        st.warning(w)
+
+    if messages.info:
+        with st.expander("Processing log"):
+            for i in messages.info:
+                st.info(i)
+    
+    status_var =  "pop_status_group"
+    age_var = "ind_age"
+    gender_var =  "ind_gender"
+   
 
     ## add indicator ---> severity
     edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 

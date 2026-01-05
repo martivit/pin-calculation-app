@@ -552,7 +552,6 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     admin_target = admin_var
     pop_group_var = status_var
 
-
     ## essential variables --------------------------------------------------------------------------------------------
 
 
@@ -595,79 +594,11 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
 
     ####### ** 1 **       ------------------------------ manipulation and join between H and edu data   ------------------------------------------     #######
-        
-    # Find the UUID columns, assuming they exist and taking only the first match for simplicity
-    edu_uuid_column = [
-        col for col in edu_data.columns 
-        if 'uuid' in col.lower() and 'edu_uuid' not in col.lower()
-        ][0] # Take the first item directly
-    household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
-    print(household_uuid_column)
-    print(edu_uuid_column)
+    edu_uuid_column = "uuid"
+    household_uuid_column =  "uuid"
+    admin_var = "admin_hno"
+    weight_column = "weights"
 
-
-
-    if country != 'Afghanistan -- AFG':
-        # Try to find 'start', otherwise fall back to 'today' or 'today_date'
-        possible_columns = [col.lower() for col in household_data.columns]
-        if any('start' in col for col in possible_columns):
-            household_start_column = next(col for col in household_data.columns if 'start' in col.lower())
-        elif any('today' in col for col in possible_columns):
-            household_start_column = next(col for col in household_data.columns if 'today' in col.lower())
-        elif 'today_date' in possible_columns:
-            household_start_column = 'today_date'
-        else:
-            raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data.")
-    else:
-        # For Afghanistan, prioritize 'start', otherwise 'today' or 'today_date'
-        possible_columns = [col.lower() for col in household_data.columns]
-        if any('start' in col for col in possible_columns):
-            household_start_column = next(col for col in household_data.columns if 'start' in col.lower())
-        elif any('today' in col for col in possible_columns):
-            household_start_column = next(col for col in household_data.columns if 'today' in col.lower())
-        elif 'today_date' in possible_columns:
-            household_start_column = 'today_date'
-        else:
-            raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data for Afghanistan.")
-
-
-
-    # Convert the date column to datetime and extract the month
-    
-    household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
-    household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors='coerce')
-
-    household_data['month'] = household_data[household_start_column].dt.month
-    #household_data['month'] = 7
-
-
-
-    admin_var = find_best_match(admin_target,  household_data)
-    print(admin_var)
-
-
-    weight_column = None
-
-    # Ensure there is a 'weights' column, renaming common aliases; else create default = 1
-    aliases = {"weights", "weight", 'weight_final'}  
-
-    cols = list(household_data.columns)
-    norm = {c: c.strip().lower() for c in cols}
-
-    if "weights" not in cols:
-        # try exact alias match first
-        found = next((c for c in cols if norm[c] in aliases), None)
-        if not found:
-            # try contains 'weight' anywhere (e.g., 'household_weight')
-            found = next((c for c in cols if "weight" in norm[c]), None)
-
-        if found:
-            household_data = household_data.rename(columns={found: "weights"})
-        else:
-            print("--------------------------- No valid 'weight' column found. Creating a default 'weights' column with value 1.")
-            household_data["weights"] = 1
-    else:
-        print("--------------------------- 'Weights' column already exists.")
 
     # Get the admin levels for the specified country
     admin_levels = admin_levels_per_country.get(country, [])
@@ -690,10 +621,13 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     # ----> Perform the joint_by
     edu_data = pd.merge(edu_data, household_data[columns_to_include], left_on=edu_uuid_column, right_on=household_uuid_column, how='left')
 
+    # --- Myanmar special case: create edu_ind_age_corrected = age_var - 1
+    if country == "Myanmar -- MMR":
+        # create/overwrite corrected age
+        edu_data["edu_ind_age_corrected"] = pd.to_numeric(edu_data[age_var], errors="coerce") - 1
+        # use corrected age going forward
+        age_var = "edu_ind_age_corrected"
 
-    ##refining for school age-children
-    #edu_data = edu_data[(edu_data[age_var] >= 5) & (edu_data[age_var] <= 18)]
-    if country == 'Myanmar -- MMR': age_var = "edu_ind_age_corrected"
 
     edu_data['edu_age_corrected'] = edu_data.apply(lambda row: row[age_var] - 1 if calculate_age_correction(start_school, row['month']) else row[age_var], axis=1)
 
@@ -718,14 +652,19 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     else:
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 6) & (edu_data['edu_age_corrected'] <= 17)]
 
-       
-    if country == 'Afghanistan -- AFG':
+    if country == "Afghanistan -- AFG":
+        female_vals = {"female", "femme", "woman_girl", "feminin"}
+        no_access_vals = {"no", "non", "0", 0}
+
+        # ensure age is numeric for the comparison (> 12)
+        age_num = pd.to_numeric(edu_data[age_var], errors="coerce")
+
         edu_data.loc[
-            (edu_data[gender_var] == 'female') & 
-            (edu_data[age_var] > 12) & 
-            (edu_data[access_var].isin(['no', 'non', '0', 0])),
+            (edu_data[gender_var].astype(str).str.strip().str.lower().isin(female_vals)) &
+            (age_num > 12) &
+            (edu_data[access_var].isin(no_access_vals)),
             barrier_var
-        ] = 'ban'
+        ] = "ban"
 
 
 

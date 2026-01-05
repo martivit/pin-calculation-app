@@ -1221,7 +1221,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ocha_pop_data = ocha_pop_data.rename(columns={'Admin Pcode': 'Admin'})
     ocha_pop_data = ocha_pop_data.drop(columns=['Admin_label'])
 
-    admin_var = find_best_match(admin_target,  household_data)
+    admin_var = 'admin_hno'
 
     admin_column_rapresentative = []
     grouped_dict = {}
@@ -1297,8 +1297,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
     # Filtering data based on gender
-    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin'])]
-    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin'])]
+    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin', '2. Female'])]
+    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin', '1. Male'])]
     # Filtering data based on school cycle
     ece_df = edu_data[edu_data['school_cycle'].isin(['ECE'])]
     primary_df = edu_data[edu_data['school_cycle'].isin(['primary'])]
