@@ -470,37 +470,60 @@ def handle_additional_2_selection(current_country, suggestions):
 
 ##---------------------------------------------------------------------------------------------------------
 def handle_column_selection(suggestions, column_type):
-    suggested_column = suggestions[0] if suggestions else 'No selection'
+    suggested_column = suggestions[0] if suggestions else "No selection"
     message_template = translations["is_this_individual_column_message"]
 
-    st.write(message_template.format(column_type=column_type.replace('_', ' ').capitalize(), suggested_column=suggested_column))
+    st.write(message_template.format(
+        column_type=column_type.replace("_", " ").capitalize(),
+        suggested_column=suggested_column
+    ))
+
     col1, col2 = st.columns(2)
-    confirm_key = f'confirm_yes_{column_type}'
-    select_key = f'{column_type}_selectbox'
-    edu_data = st.session_state['edu_data']
-    message_placeholder = st.empty()  # Place to show messages dynamically
+    edu_data = st.session_state["edu_data"]
+    select_key = f"{column_type}_selectbox"
+    show_manual_key = f"show_manual_{column_type}"
+    message_placeholder = st.empty()
+
+    # init flag
+    if show_manual_key not in st.session_state:
+        st.session_state[show_manual_key] = False
 
     with col1:
-        if st.button("Yes/Oui", key=confirm_key):
-            if suggested_column != 'No selection':
-                st.session_state[f'selected_{column_type}_column'] = suggested_column
-                st.session_state[f'{column_type}_column_confirmed'] = True
-                #st.success(f"{column_type.capitalize()} column '{suggested_column}' has been confirmed.")                                
-                message_placeholder.success(f"{column_type.capitalize()} column '{suggested_column}' has been confirmed.")
+        if st.button("Yes/Oui", key=f"confirm_yes_{column_type}"):
+            if suggested_column != "No selection":
+                st.session_state[f"selected_{column_type}_column"] = suggested_column
+                st.session_state[f"{column_type}_column_confirmed"] = True
+                st.session_state[show_manual_key] = False  # hide manual UI if previously shown
+                message_placeholder.success(
+                    f"{column_type.capitalize()} column '{suggested_column}' has been confirmed."
+                )
 
     with col2:
-        if st.button("No/Non", key=f'confirm_no_{column_type}'):
-            suggested_column = st.selectbox(
-                f"Select the individual {column_type} column:",
-                ['No selection'] + edu_data.columns.tolist(),
-                key=select_key,
-                #on_change=update_column_confirmation (column_type,message_placeholder)
-                #args=(column_type,)
-            )
-            st.session_state[f'selected_{column_type}_column'] = suggested_column
-            st.session_state[f'{column_type}_column_confirmed'] = True
-            update_column_confirmation (column_type,message_placeholder)
-    return suggested_column
+        if st.button("No/Non", key=f"confirm_no_{column_type}"):
+            st.session_state[show_manual_key] = True  # persist manual selection UI
+
+    # If user chose "No", render selectbox (persistently) and confirm
+    if st.session_state[show_manual_key]:
+        st.selectbox(
+            f"Select the individual {column_type} column:",
+            ["No selection"] + edu_data.columns.tolist(),
+            key=select_key
+        )
+
+        if st.button(translations.get("confirm_manual", "Confirm"), key=f"confirm_manual_{column_type}"):
+            selected_column = st.session_state.get(select_key, "No selection")
+            if selected_column != "No selection":
+                st.session_state[f"selected_{column_type}_column"] = selected_column
+                st.session_state[f"{column_type}_column_confirmed"] = True
+                message_placeholder.success(
+                    f"{column_type.capitalize()} column '{selected_column}' has been manually selected."
+                )
+            else:
+                message_placeholder.error(translations.get("error_message", "Please select a valid option."))
+
+    # Always return the confirmed selection if available, otherwise suggested (or No selection)
+    return st.session_state.get(f"selected_{column_type}_column", suggested_column)
+
 ##---------------------------------------------------------------------------------------------------------
 def update_column_confirmation(column_type, placeholder):
     select_key = f'{column_type}_selectbox'
