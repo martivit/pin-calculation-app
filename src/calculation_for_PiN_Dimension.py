@@ -8,6 +8,7 @@ from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
 import re
 from collections import defaultdict
+import sys
 
 
 int_2 = '2.0'
@@ -1297,7 +1298,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
     print('edu_data 1')
-    print(edu_data.columns)
+    print("=== edu_data columns ===", file=sys.stderr, flush=True)
+    for i, c in enumerate(edu_data.columns):
+        print(f"{i:03d}: {c}", file=sys.stderr, flush=True)
     print(edu_data)
     # Filtering data based on gender
     female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin', '2. Female'])]
