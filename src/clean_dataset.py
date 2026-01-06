@@ -807,9 +807,14 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
                 admin_var, vector_cycle, start_school, status_var,
                 selected_language):
 
-    messages = {"info": [], "warning": []}
-    def add_info(msg): messages["info"].append(msg)
-    def add_warn(msg): messages["warning"].append(msg)
+    messages = MsgLog()
+
+    def add_info(msg):
+        messages.add_info(msg)
+
+    def add_warn(msg):
+        messages.add_warn(msg)
+
 
     ##---------------- 1) rename the uuid columns with uuid  (Find the UUID columns, assuming they exist and taking only the first match for simplicity)
     edu_data = get_and_standardize_uuid(edu_data)
