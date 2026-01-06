@@ -1038,37 +1038,33 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
 
     ##---------------- 2)  Find or create the household collection date column as 'today' ---
     possible_columns = list(household_data.columns)
+    possible_lower = [c.lower() for c in possible_columns]
 
-    today_candidates = [c for c in possible_columns if "today" in c.lower() or c.lower() == "today_date"]
     start_candidates = [c for c in possible_columns if "start" in c.lower()]
+    today_candidates = [c for c in possible_columns if "today" in c.lower() or c.lower() == "today_date"]
 
-    household_start_column = None
-
-    if today_candidates:
+    if start_candidates:
+        household_start_column = start_candidates[0]
+    elif today_candidates:
+        # prefer exact 'today' if it exists
         exact_today = next((c for c in today_candidates if c.lower() == "today"), None)
         household_start_column = exact_today if exact_today else today_candidates[0]
-    elif start_candidates:
-        household_start_column = start_candidates[0]
     else:
-        print("No column found, assigning default value 2026-06-01 as data collection day.")
-        household_data["today"] = pd.to_datetime("2026-06-01")
-        household_start_column = "today"
+        raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data.")
 
-    # --- Parse datetime in the chosen column ---
+    # --- parse datetime ---
     household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
     household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors="coerce")
 
-    # --- Rename to 'today' only if needed ---
+    # --- rename to 'today' ONLY if needed ---
     if household_start_column != "today":
-        if "today" in household_data.columns:
-            # if 'today' already exists, fill missing values from the chosen column, then drop it
-            household_data["today"] = household_data["today"].combine_first(household_data[household_start_column])
-            household_data = household_data.drop(columns=[household_start_column])
-        else:
-            household_data = household_data.rename(columns={household_start_column: "today"})
+        household_data = household_data.rename(columns={household_start_column: "today"})
+        household_start_column = "today"
 
-    # --- Month ---
+    # --- month ---
     household_data["month"] = household_data["today"].dt.month
+
+
 
 
 
