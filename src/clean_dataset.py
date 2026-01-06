@@ -24,6 +24,15 @@ class MsgLog:
         self.warning.append(str(msg))
 
 ## ---------------------------------------------------------------------------------
+_CODE_PREFIX = re.compile(r"(?<!\d)\d{1,2}\.\s*")  # matches "1. " "21. "
+
+def strip_code_prefix(text: str) -> str:
+    if text is None:
+        return ""
+    return _CODE_PREFIX.sub("", str(text)).strip().lower()
+## ---------------------------------------------------------------------------------
+
+## ---------------------------------------------------------------------------------
 def get_and_standardize_uuid(df, log: Optional[MsgLog] = None):
     """
     Identify and standardize UUID column.
@@ -592,6 +601,23 @@ def build_severity_tbl_from_choices(choice_data, all_barriers_names, label_col, 
 ## ---------------------------------------------------------------------------------
 
 ## ---------------------------------------------------------------------------------
+def labels_to_choice_labels(choice_data, list_name, selected_labels, label_col="label"):
+    # selected_labels are what user picked (human readable)
+    # we match them against choice_data labels, normalized
+    ch = choice_data[choice_data["list_name"].astype(str).str.strip().eq(list_name)].copy()
+
+    # map normalized -> original label (as stored in choices)
+    map_norm_to_label = dict(zip(ch[label_col].map(strip_code_prefix), ch[label_col]))
+
+    out = []
+    for x in selected_labels:
+        k = strip_code_prefix(x)
+        if k in map_norm_to_label:
+            out.append(map_norm_to_label[k])
+    return out
+## ---------------------------------------------------------------------------------
+
+## ---------------------------------------------------------------------------------
 def pick_most_severe(x, valid_codes_set, rank_by_code, label_by_code, labels_in_rank_order):
     """
     Implements the SAME logic as your R function:
@@ -623,6 +649,118 @@ def pick_most_severe(x, valid_codes_set, rank_by_code, label_by_code, labels_in_
                 return lab  # return canonical-cased label
 
     return np.nan
+## ---------------------------------------------------------------------------------
+def detect_sm_values_using_choices(
+    edu_data: pd.DataFrame,
+    barrier_var: str,
+    survey_data: pd.DataFrame,
+    choice_data: pd.DataFrame,
+    label_col: str = "label",
+    name_col: str = "name",
+    type_col: str = "type",
+    list_name_col: str = "list_name",
+    sample_n: int = 200,
+    min_hits: int = 5
+) -> dict:
+
+    if barrier_var not in edu_data.columns:
+        return {"format": "unknown", "reason": f"{barrier_var} not in edu_data"}
+
+    # find the question row by NAME in survey_data
+    s_name = survey_data[name_col].astype(str).str.strip().str.lower()
+    hit = survey_data.loc[s_name.eq(str(barrier_var).strip().lower())]
+    if hit.empty:
+        return {"format": "unknown", "reason": "barrier_var not found in survey_data['name']"}
+
+    q_type = str(hit.iloc[0][type_col]).strip().lower()
+    m = re.match(r"select_multiple\s+(.+)$", q_type)
+    if not m:
+        return {"format": "unknown", "reason": f"not select_multiple: {q_type}"}
+
+    list_name = m.group(1).strip()
+
+    # choices for this list
+    ch = choice_data.loc[
+        choice_data[list_name_col].astype(str).str.strip().str.lower().eq(list_name.lower())
+    ].copy()
+    if ch.empty:
+        return {"format": "unknown", "reason": f"no choices found for list_name={list_name}"}
+
+    # reference sets
+    choice_names_set = set(ch["name"].dropna().astype(str).str.strip().str.lower())
+    choice_labels_norm = ch[label_col].dropna().astype(str).map(strip_code_prefix).tolist()
+
+    # sample edu values
+    s = edu_data[barrier_var].dropna().astype(str).str.strip()
+    s = s[s != ""]
+    if s.empty:
+        return {"format": "unknown", "reason": "no non-empty values"}
+
+    sample = s.sample(min(sample_n, len(s)), random_state=0)
+
+    # how SM is often exported when using names: space-separated tokens
+    split_pat = re.compile(r"[,\;\|\n\r\t]+|\s+")
+
+    name_hits = 0
+    label_hits = 0
+    examples_name = []
+    examples_label = []
+
+    for val in sample:
+        v = str(val).strip().lower()
+        if not v:
+            continue
+
+        # --- names hit (tokens contain choice names)
+        tokens = [t for t in split_pat.split(v) if t]
+        if any(t in choice_names_set for t in tokens):
+            name_hits += 1
+            if len(examples_name) < 3:
+                examples_name.append(val)
+
+        # --- labels hit (substring contains choice labels)
+        v_norm = strip_code_prefix(val)
+        found_label = False
+        for lab_norm in choice_labels_norm:
+            if len(lab_norm) < 8:
+                continue
+            if lab_norm in v_norm:
+                found_label = True
+                break
+        if found_label:
+            label_hits += 1
+            if len(examples_label) < 3:
+                examples_label.append(val)
+
+    n = len(sample)
+    name_score = name_hits / n
+    label_score = label_hits / n
+
+    fmt = "unknown"
+    if name_hits >= min_hits and name_score >= label_score + 0.10:
+        fmt = "names"
+    elif label_hits >= min_hits and label_score >= name_score + 0.10:
+        fmt = "labels"
+    elif name_hits >= min_hits and label_hits < min_hits:
+        fmt = "names"
+    elif label_hits >= min_hits and name_hits < min_hits:
+        fmt = "labels"
+
+    coded_score = float(sample.str.contains(r"\b\d{1,2}\.", regex=True).mean())
+
+    return {
+        "format": fmt,
+        "name_score": name_score,
+        "label_score": label_score,
+        "name_hits": name_hits,
+        "label_hits": label_hits,
+        "coded_score": coded_score,
+        "n_sampled": n,
+        "examples_name_like": examples_name,
+        "examples_label_like": examples_label,
+        "list_name": list_name
+    }
+
 ## ---------------------------------------------------------------------------------
 
 ## ---------------------------------------------------------------------------------
@@ -736,6 +874,31 @@ def detect_sm_values_are_names_or_labels(
         "examples_label_like": examples_label
     }
 
+## ---------------------------------------------------------------------------------
+
+## ---------------------------------------------------------------------------------
+def build_barrier_so_select_multiple_labels(
+    edu_data, barrier_var, labels_sev5, labels_sev4,
+    default_value="barrier_3", out_col="edu_barrier_final"
+):
+    sev5_norm = [(lab, strip_code_prefix(lab)) for lab in labels_sev5]
+    sev4_norm = [(lab, strip_code_prefix(lab)) for lab in labels_sev4]
+
+    def pick_one(val):
+        if pd.isna(val): 
+            return default_value
+        v = strip_code_prefix(val)
+
+        for orig, norm in sev5_norm:
+            if norm and norm in v:
+                return orig  # returns the canonical choice label
+        for orig, norm in sev4_norm:
+            if norm and norm in v:
+                return orig
+        return default_value
+
+    edu_data[out_col] = edu_data[barrier_var].apply(pick_one)
+    return edu_data
 ## ---------------------------------------------------------------------------------
 
 ## ---------------------------------------------------------------------------------
@@ -925,48 +1088,59 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
     )
     print("barrier_sm_yes =", barrier_sm_yes)
     fmt_info = {"format": "unknown"}
+    names_severity_4, names_severity_5 = [], []
+    labels_sev4, labels_sev5 = [], []
 
     if barrier_sm_yes:
-        fmt_info = detect_sm_values_are_names_or_labels(
+        fmt_info = detect_sm_values_using_choices(
             edu_data=edu_data,
             barrier_var=barrier_var,
             survey_data=survey_data,
-            name_col="name",
-            label_col=label,   # your label column like 'label::English (en)'
-            sample_n=200,
-            min_hits=5,log=messages
+            choice_data=choice_data,
+            label_col=label
         )
-        print("Select_multiple value format:", fmt_info)
+        list_name = fmt_info.get("list_name")
 
+        if fmt_info["format"] == "names":
+            # user selected LABELS -> map to CHOICE NAMES
+            # (your existing function does exact equality; you may want normalization too)
+            sev4_matches = find_matching_choices(choice_data, selected_severity_4_barriers, label_var=label)
+            sev5_matches = find_matching_choices(choice_data, selected_severity_5_barriers, label_var=label)
 
+            names_severity_4 = [d["name"] for d in sev4_matches if d["name"] != "notfound"]
+            names_severity_5 = [d["name"] for d in sev5_matches if d["name"] != "notfound"]
 
+            edu_data = build_barrier_so_select_multiple(
+                edu_data=edu_data,
+                barrier_var=barrier_var,
+                names_severity_5=names_severity_5,
+                names_severity_4=names_severity_4,
+                default_value="barrier_3",
+                out_col="edu_barrier_final"
+            )
 
-    # --- map selected severity LABELS -> choice NAMES
-    severity_4_matches = find_matching_choices(choice_data, selected_severity_4_barriers, label_var=label)
-    severity_5_matches = find_matching_choices(choice_data, selected_severity_5_barriers, label_var=label)
+        elif fmt_info["format"] == "labels":
+            # build canonical choice LABELS (so your strip_code_prefix matching is stable)
+            if list_name:
+                labels_sev4 = labels_to_choice_labels(choice_data, list_name, selected_severity_4_barriers, label_col=label)
+                labels_sev5 = labels_to_choice_labels(choice_data, list_name, selected_severity_5_barriers, label_col=label)
+            else:
+                labels_sev4 = selected_severity_4_barriers
+                labels_sev5 = selected_severity_5_barriers
 
-    names_severity_4 = [d["name"] for d in severity_4_matches if d["name"] != "notfound"]
-    names_severity_5 = [d["name"] for d in severity_5_matches if d["name"] != "notfound"]
+            edu_data = build_barrier_so_select_multiple_labels(
+                edu_data=edu_data,
+                barrier_var=barrier_var,
+                labels_sev5=labels_sev5,
+                labels_sev4=labels_sev4,
+                default_value="barrier_3",
+                out_col="edu_barrier_final"
+            )
 
-    # If edu values are label-based, match using label candidates instead of name candidates
-    if barrier_sm_yes and fmt_info["format"] == "labels":
-        names_severity_4 = selected_severity_4_barriers
-        names_severity_5 = selected_severity_5_barriers
+        else:
+            # unknown format → safest fallback: keep original
+            edu_data["edu_barrier_final"] = edu_data[barrier_var]
 
-    # --- build final column
-    if barrier_sm_yes:
-        edu_data = build_barrier_so_select_multiple(
-            edu_data=edu_data,
-            barrier_var=barrier_var,
-            names_severity_5=names_severity_5,
-            names_severity_4=names_severity_4,
-            default_value="barrier_3",
-            out_col="edu_barrier_final"
-        )
-    else:
-        if barrier_var not in edu_data.columns:
-            raise KeyError(f"'{barrier_var}' not found in edu_data columns.")
-        edu_data["edu_barrier_final"] = edu_data[barrier_var]
 
     add_info(f"PCODE-like columns found: {pcode_like_cols}")
     add_info(f"barrier_sm_yes = {barrier_sm_yes}")
