@@ -1169,8 +1169,8 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
         edu_data = build_barrier_so_select_multiple(
             edu_data=edu_data,
             barrier_var=barrier_var,
-            names_severity_5=names_severity_5,
-            names_severity_4=names_severity_4,
+            sev5_labels_exact=names_severity_5,
+            sev4_labels_exact=names_severity_4,
             default_value="barrier_3",
             out_col="edu_barrier_final"
         )
@@ -1181,10 +1181,10 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
         labels_sev5 = selected_severity_5_barriers
 
         edu_data = build_barrier_so_select_multiple(
-             edu_data=edu_data,
+            edu_data=edu_data,
             barrier_var=barrier_var,
-            names_severity_5=labels_sev5,
-            names_severity_4=labels_sev4,
+            sev5_labels_exact=labels_sev5,
+            sev4_labels_exact=labels_sev4,
             default_value="barrier_3",
             out_col="edu_barrier_final"
         )
