@@ -497,6 +497,8 @@ def handle_column_selection(suggestions, column_type):
                 #on_change=update_column_confirmation (column_type,message_placeholder)
                 #args=(column_type,)
             )
+            st.session_state[f'selected_{column_type}_column'] = suggested_column
+            st.session_state[f'{column_type}_column_confirmed'] = True
             update_column_confirmation (column_type,message_placeholder)
     return suggested_column
 ##---------------------------------------------------------------------------------------------------------
