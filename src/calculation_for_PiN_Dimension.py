@@ -1298,6 +1298,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
     print('edu_data 1')
+    print(pop_group_var)
     print("=== edu_data columns ===", file=sys.stderr, flush=True)
     for i, c in enumerate(edu_data.columns):
         print(f"{i:03d}: {c}", file=sys.stderr, flush=True)
