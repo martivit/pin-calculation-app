@@ -362,7 +362,7 @@ if not step_2_hpc and not alternative_country:
     status_var =  "pop_status_group"
     age_var = "ind_age"
     gender_var =  "ind_gender"
-   
+    barrier_var = "edu_barrier_final"
 
     ## add indicator ---> severity
     edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 
@@ -376,8 +376,8 @@ if not step_2_hpc and not alternative_country:
                                                                                     admin_var, vector_cycle, start_school, status_var,
                                                                                     selected_language)
 
-    st.dataframe(edu_data.head())
-    st.dataframe(household_data.head())
+    st.dataframe(edu_data)
+    st.dataframe(household_data)
     st.write (status_var)
     st.write (age_var)
     st.write (gender_var)

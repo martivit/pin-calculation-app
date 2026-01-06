@@ -788,15 +788,65 @@ def build_barrier_so_select_multiple_labels(
     edu_data[out_col] = edu_data[barrier_var].apply(pick_one)
     return edu_data
 ## ---------------------------------------------------------------------------------
+def is_missing(x) -> bool:
+    if x is None:
+        return True
+    if isinstance(x, float) and pd.isna(x):
+        return True
+    s = str(x).strip()
+    return s == "" or s.lower() in {"nan", "none"}
+## ---------------------------------------------------------------------------------
 
 ## ---------------------------------------------------------------------------------
 def build_barrier_so_select_multiple(
+  edu_data: pd.DataFrame,
+    barrier_var: str,
+    sev5_labels_exact: list[str],
+    sev4_labels_exact: list[str],
+    default_value: str = "barrier_3",
+    out_col: str = "edu_barrier_final",
+    keep_missing_blank: bool = True,
+) -> pd.DataFrame:
+
+    def is_missing(x):
+        return x is None or (pd.isna(x)) or str(x).strip() == ""
+
+    # map lowercase -> exact (so we can return exact)
+    sev5_map = {str(x).lower(): str(x) for x in sev5_labels_exact if x and x != "notfound"}
+    sev4_map = {str(x).lower(): str(x) for x in sev4_labels_exact if x and x != "notfound"}
+
+    sev5_keys = list(sev5_map.keys())
+    sev4_keys = list(sev4_map.keys())
+
+    def pick_one(val):
+        if keep_missing_blank and is_missing(val):
+            return np.nan
+
+        s_low = str(val).lower()
+
+        for k in sev5_keys:
+            if k in s_low:
+                return sev5_map[k]   # <- exact original with 1. and casing
+        for k in sev4_keys:
+            if k in s_low:
+                return sev4_map[k]
+        return default_value
+
+    edu_data[out_col] = edu_data[barrier_var].apply(pick_one)
+    return edu_data
+## ---------------------------------------------------------------------------------
+
+## ---------------------------------------------------------------------------------
+def build_barrier_so_select_multiple_test(
     edu_data: pd.DataFrame,
     barrier_var: str,
     names_severity_5: list[str],
     names_severity_4: list[str],
     default_value: str = "barrier_3",
-    out_col: str = "barrier_so", log: Optional[MsgLog] = None
+    out_col: str = "barrier_so", 
+    keep_missing_blank=True,
+
+    log: Optional[MsgLog] = None
 ) -> pd.DataFrame:
     """
     For select_multiple barrier_var values:
@@ -821,24 +871,19 @@ def build_barrier_so_select_multiple(
     sev4_low = [(x, x.lower()) for x in sev4]
 
     def pick_one(val):
-        if pd.isna(val):
-            return default_value
-        s = str(val).strip()
-        if not s:
-            return default_value
-        s_low = s.lower()
+        # NEW: preserve missing
+        if keep_missing_blank and is_missing(val):
+            return np.nan  # or ""
 
-        # 1) priority severity 5
+        s_low = str(val).strip().lower()
+
         for orig, low in sev5_low:
             if low and low in s_low:
                 return orig
-
-        # 2) then severity 4
         for orig, low in sev4_low:
             if low and low in s_low:
                 return orig
 
-        # 3) default
         return default_value
 
     edu_data[out_col] = edu_data[barrier_var].apply(pick_one)
@@ -1019,9 +1064,14 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
         else:
             household_data = household_data.rename(columns={household_start_column: 'today'})
     # Now parse/standardize 'today' and derive month
-    household_data['today'] = household_data['today'].apply(custom_to_datetime)
-    household_data['today'] = pd.to_datetime(household_data['today'], errors='coerce')
-    household_data['month'] = household_data['today'].dt.month
+    household_data["today"] = pd.to_datetime(
+        household_data["today"],
+        errors="coerce",
+        utc=True
+    ).dt.tz_convert(None)
+
+    household_data["month"] = household_data["today"].dt.month
+
 
 
     ##---------------- 3) find the admin column
@@ -1130,7 +1180,7 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
         labels_sev4 = selected_severity_4_barriers
         labels_sev5 = selected_severity_5_barriers
 
-        edu_data = build_barrier_so_select_multiple_labels(
+        edu_data = build_barrier_so_select_multiple(
             edu_data=edu_data,
             barrier_var=barrier_var,
             labels_sev5=labels_sev5,
