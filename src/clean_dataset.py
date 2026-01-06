@@ -476,12 +476,16 @@ def barrier_is_select_multiple(
     survey_data: pd.DataFrame,
     barrier_var: str,
     name_col: str = "name",
-    label_col: str | None = None
+    label_col: str | None = None, log: Optional[MsgLog] = None
 ) -> bool:
     """
     True if barrier_var corresponds to a select_multiple question in survey_data['type'].
     Matches by NAME first; if not found, optionally matches by LABEL.
     """
+    def info(m): 
+        if log: log.add_info(m)
+    def warn(m):
+        if log: log.add_warn(m)
     if barrier_var in [None, "", "no_indicator"]:
         return False
 
