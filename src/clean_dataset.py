@@ -817,8 +817,8 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
 
 
     ##---------------- 1) rename the uuid columns with uuid  (Find the UUID columns, assuming they exist and taking only the first match for simplicity)
-    edu_data = get_and_standardize_uuid(edu_data)
-    household_data = standardize_uuid_household(household_data)
+    edu_data = get_and_standardize_uuid(edu_data,log=messages)
+    household_data = standardize_uuid_household(household_data,log=messages)
     edu_uuid_column = "uuid"
     household_uuid_column =  "uuid"
 
@@ -873,7 +873,7 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
     admin_var = "admin_hno"
 
     ##---------------- 4) find the weights column
-    household_data = standardize_weights(household_data)
+    household_data = standardize_weights(household_data,log=messages)
 
     ##---------------- 5) Standardize key variable names (status, age, gender)
     # --- status_var -> pop_status_group (household level) ---
@@ -910,14 +910,14 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
         raise KeyError(f"'{gender_var}' not found in edu_data columns.")
 
     ##---------------- 6) check if it is a labeled dataset
-    labeled_dt = check_labeled(survey_data=survey_data,  access_var=access_var,  barrier_var=barrier_var, name_col="name", label_col=label)
+    labeled_dt = check_labeled(survey_data=survey_data,  access_var=access_var,  barrier_var=barrier_var, name_col="name", label_col=label,log=messages)
 
     ##---------------- 7) fix select multiple
     barrier_sm_yes = barrier_is_select_multiple(
         survey_data=survey_data,
         barrier_var=barrier_var,
         name_col="name",
-        label_col=label
+        label_col=label,log=messages
     )
     print("barrier_sm_yes =", barrier_sm_yes)
     fmt_info = {"format": "unknown"}
@@ -930,7 +930,7 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
             name_col="name",
             label_col=label,   # your label column like 'label::English (en)'
             sample_n=200,
-            min_hits=5
+            min_hits=5,log=messages
         )
         print("Select_multiple value format:", fmt_info)
 
@@ -964,6 +964,9 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
             raise KeyError(f"'{barrier_var}' not found in edu_data columns.")
         edu_data["edu_barrier_final"] = edu_data[barrier_var]
 
+    add_info(f"PCODE-like columns found: {pcode_like_cols}")
+    add_info(f"barrier_sm_yes = {barrier_sm_yes}")
+    add_info(f"Select_multiple value format: {fmt_info}")
 
 
     return edu_data, household_data, survey_data, choice_data,messages

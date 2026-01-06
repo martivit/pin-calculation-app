@@ -347,6 +347,9 @@ if not step_2_hpc and not alternative_country:
     except Exception as e:
         st.error(str(e))
         st.stop()
+    warnings = getattr(messages, "warning", None) or messages.get("warning", []) if isinstance(messages, dict) else []
+    infos    = getattr(messages, "info", None)    or messages.get("info", [])    if isinstance(messages, dict) else []
+
 
     for w in messages.warning:
         st.warning(w)
