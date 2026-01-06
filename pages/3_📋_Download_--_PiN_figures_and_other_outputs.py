@@ -376,6 +376,24 @@ if not step_2_hpc and not alternative_country:
                                                                                     admin_var, vector_cycle, start_school, status_var,
                                                                                     selected_language)
 
+    st.dataframe(edu_data.head())
+    st.dataframe(household_data.head())
+    st.write (status_var)
+    st.write (age_var)
+    st.write (gender_var)
+    st.write (access_var)
+    st.write (teacher_disruption_var)
+    st.write (idp_disruption_var)
+    st.write (armed_disruption_var)
+    st.write (natural_hazard_var)
+    st.write (natural_hazard_var_sev)
+    st.write (barrier_var)
+    st.write (selected_severity_4_barriers)
+    st.write (selected_severity_5_barriers)
+    st.write (admin_var)
+    st.write (label)
+
+
 
     ## calculate PiN
     if ocha_data is not None:
