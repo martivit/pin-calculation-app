@@ -1375,7 +1375,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 target_var=target_var,
                 country=country
             )    
-       
+            print(results_dict[analysis_var])
         # Reduce the index for all results
         for key in results_dict:
 
