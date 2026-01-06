@@ -1181,10 +1181,10 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
         labels_sev5 = selected_severity_5_barriers
 
         edu_data = build_barrier_so_select_multiple(
-            edu_data=edu_data,
+             edu_data=edu_data,
             barrier_var=barrier_var,
-            labels_sev5=labels_sev5,
-            labels_sev4=labels_sev4,
+            names_severity_5=labels_sev5,
+            names_severity_4=labels_sev4,
             default_value="barrier_3",
             out_col="edu_barrier_final"
         )
