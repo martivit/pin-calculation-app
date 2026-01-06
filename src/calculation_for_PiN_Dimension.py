@@ -1297,6 +1297,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
     print('edu_data 1')
+    print(edu_data.columns)
     print(edu_data)
     # Filtering data based on gender
     female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin', '2. Female'])]
