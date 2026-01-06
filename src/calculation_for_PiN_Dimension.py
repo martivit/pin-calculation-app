@@ -1296,7 +1296,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     edu_data = edu_data[edu_data[access_var].notna()]
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
-
+    print('edu_data 1')
+    print(edu_data)
     # Filtering data based on gender
     female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin', '2. Female'])]
     male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin', '1. Male'])]
@@ -1340,6 +1341,8 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     results_dict = {} 
     unique_pop_group = df[pop_group_var].dropna().unique().tolist()
     print(unique_pop_group)
+    print('edu_data 2')
+    print(df)
 
     if mismatch_admin:
         detailed_list = ocha_mismatch_list.iloc[:, 1].astype(str).tolist()  # Converting to string
