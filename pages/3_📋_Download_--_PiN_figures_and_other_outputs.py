@@ -332,8 +332,8 @@ DATA_DIR_PIN2024 = "pin2024_cat"
 ###################################################################################################################################################
 if not step_2_hpc and not alternative_country:
 
-    #try:
-    edu_data, household_data, survey_data, choice_data, messages = clean_make_dataset (country, edu_data, household_data, choice_data, survey_data, 
+    try:
+        edu_data, household_data, survey_data, choice_data, messages = clean_make_dataset (country, edu_data, household_data, choice_data, survey_data, 
                                                                                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                 natural_hazard_var,natural_hazard_var_sev,
                                                                                 additional_last_var,additional_last_sev,
@@ -344,20 +344,20 @@ if not step_2_hpc and not alternative_country:
                                                                                 admin_var, vector_cycle, start_school, status_var,
                                                                                 selected_language)
 
-    #except Exception as e:
-    #    st.error(str(e))
-    #    st.stop()
-    #warnings = getattr(messages, "warning", None) or messages.get("warning", []) if isinstance(messages, dict) else []
-    #infos    = getattr(messages, "info", None)    or messages.get("info", [])    if isinstance(messages, dict) else []
+    except Exception as e:
+        st.error(str(e))
+        st.stop()
+    warnings = getattr(messages, "warning", None) or messages.get("warning", []) if isinstance(messages, dict) else []
+    infos    = getattr(messages, "info", None)    or messages.get("info", [])    if isinstance(messages, dict) else []
 
 
-    #for w in messages.warning:
-    #    st.warning(w)
+    for w in messages.warning:
+        st.warning(w)
 
-    #if messages.info:
-    #    with st.expander("Processing log"):
-    #        for i in messages.info:
-    #            st.info(i)
+    if messages.info:
+        with st.expander("Processing log"):
+            for i in messages.info:
+                st.info(i)
     
     status_var =  "pop_status_group"
     age_var = "ind_age"
