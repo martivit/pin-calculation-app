@@ -1005,7 +1005,17 @@ def detect_sm_format_from_choices(
         "list_name": list_name
     }
 ## ---------------------------------------------------------------------------------
+def parse_kobo_start(x):
+    if pd.isna(x):
+        return pd.NaT
+    s = str(x).strip()
+    if not s:
+        return pd.NaT
 
+    # drop timezone suffixes like +03:00, -05:00, or trailing Z
+    s = re.sub(r'([+-]\d{2}:\d{2}|Z)$', '', s)
+
+    return pd.to_datetime(s, errors="coerce")
 
 ########################################################### 
 ########################################################### 
@@ -1038,30 +1048,25 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
 
     ##---------------- 2)  Find or create the household collection date column as 'today' ---
     possible_columns = list(household_data.columns)
-    possible_lower = [c.lower() for c in possible_columns]
-
     start_candidates = [c for c in possible_columns if "start" in c.lower()]
     today_candidates = [c for c in possible_columns if "today" in c.lower() or c.lower() == "today_date"]
 
     if start_candidates:
         household_start_column = start_candidates[0]
     elif today_candidates:
-        # prefer exact 'today' if it exists
         exact_today = next((c for c in today_candidates if c.lower() == "today"), None)
         household_start_column = exact_today if exact_today else today_candidates[0]
     else:
         raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data.")
 
-    # --- parse datetime ---
-    household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
-    household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors="coerce")
+    # parse with the robust parser
+    household_data[household_start_column] = household_data[household_start_column].apply(parse_kobo_start)
 
-    # --- rename to 'today' ONLY if needed ---
+    # rename only if needed
     if household_start_column != "today":
         household_data = household_data.rename(columns={household_start_column: "today"})
         household_start_column = "today"
 
-    # --- month ---
     household_data["month"] = household_data["today"].dt.month
 
 
