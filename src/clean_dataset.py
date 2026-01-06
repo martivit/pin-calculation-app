@@ -1059,14 +1059,16 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
     else:
         raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data.")
 
-    # parse with the robust parser
-    household_data[household_start_column] = household_data[household_start_column].apply(parse_kobo_start)
 
     # rename only if needed
     if household_start_column != "today":
         household_data = household_data.rename(columns={household_start_column: "today"})
-        household_start_column = "today"
 
+    # 1) parse to datetime (force dtype)
+    household_data["today"] = household_data["today"].apply(parse_kobo_start)  # or custom_to_datetime
+    household_data["today"] = pd.to_datetime(household_data["today"], errors="coerce")
+
+    # 2) now .dt works
     household_data["month"] = household_data["today"].dt.month
 
 
