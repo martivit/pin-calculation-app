@@ -863,18 +863,26 @@ def handle_displacement_value_mapping():
 
     # --- confirm ---
     if st.button(confirm_lbl, key="confirm_pop_group_mapping"):
-        required_ok = (host_val != "No selection") and (idp_val != "No selection")
+        required_ok = (host_val != "No selection")
 
-        # avoid duplicates between required fields
-        no_dupes = len({host_val, idp_val} - {"No selection"}) == 2
 
-        if required_ok and no_dupes:
+        # Build the set of selected single-choice values (exclude "No selection")
+        singles = [host_val, idp_val, ret_val]
+        singles_clean = [v for v in singles if v and v != "No selection"]
+
+        # Avoid duplicates among single-choice selections
+        no_dupes = (len(set(singles_clean)) == len(singles_clean))
+
+        # Avoid selecting in "other" something already chosen in host/idp/returnee
+        other_ok = all(v not in set(singles_clean) for v in other_vals)
+
+        if required_ok and no_dupes and other_ok:
             st.session_state["pop_group_value_map"] = {
                 "status_column": status_col,
-                "host": host_val,
-                "idp": idp_val,
+                "host": host_val,  # required
+                "idp": None if idp_val == "No selection" else idp_val,
                 "returnee": None if ret_val == "No selection" else ret_val,
-                "other": other_vals
+                "other": other_vals  # can be empty or many
             }
             st.session_state["pop_group_value_map_confirmed"] = True
             st.success(translations.get("mapping_saved", "Mapping saved."))
