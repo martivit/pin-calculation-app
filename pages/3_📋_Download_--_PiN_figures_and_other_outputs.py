@@ -268,7 +268,18 @@ ocha_data = st.session_state.get('uploaded_ocha_data')
 mismatch_ocha_data = st.session_state.get('ocha_mismatch_data')
 updated_2025_pin_file = st.session_state.get('updated_2025_pin_file') 
 uploaded_covered_2025_pin = st.session_state.get('uploaded_covered_2025_pin')
+pop_map = st.session_state.get("pop_group_value_map", {})
+pop_map_ok = st.session_state.get("pop_group_value_map_confirmed", False)
 
+host_value     = pop_map.get("host")       # REQUIRED (string)
+idp_value      = pop_map.get("idp")        # optional (string or None)
+returnee_value = pop_map.get("returnee")   # optional (string or None)
+other_value    = pop_map.get("other")      # optional (string or None)
+
+st.write(host_value)
+st.write(idp_value)
+st.write(returnee_value)
+st.write(other_value)
 
 #st.write(additional_last_var)
 #st.write(additional_last_sev)

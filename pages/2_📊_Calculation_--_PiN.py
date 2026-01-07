@@ -791,10 +791,10 @@ def _get_status_values(df: pd.DataFrame, col: str):
 def handle_displacement_value_mapping():
     """
     After displacement column is confirmed, show dropdowns to map:
-      - host/non-displaced/general population
-      - idp/displaced
-      - returnee
-      - other (multi)
+      - host/non-displaced/general population (MANDATORY)
+      - idp/displaced (optional)
+      - returnee (optional)
+      - other (optional, SINGLE value)
     Saves results into session_state["pop_group_value_map"].
     """
     if not st.session_state.get("displacement_column_confirmed", False):
@@ -803,7 +803,7 @@ def handle_displacement_value_mapping():
     df = st.session_state.get("household_data")
     status_col = st.session_state.get("status_var")
 
-    if df is None or status_col is None:
+    if df is None or not status_col:
         return
 
     values = _get_status_values(df, status_col)
@@ -815,22 +815,21 @@ def handle_displacement_value_mapping():
         ))
         return
 
-    st.markdown(translations.get(
-        "status_value_mapping_title",
-        "<b>Map population groups to the values in your status column</b>"
-    ), unsafe_allow_html=True)
+    st.markdown(
+        translations.get(
+            "status_value_mapping_title",
+            "<b>Map population groups to the values in your status column</b>"
+        ),
+        unsafe_allow_html=True
+    )
 
-    # --- store defaults / init ---
-    if "pop_group_value_map" not in st.session_state:
-        st.session_state["pop_group_value_map"] = {}
-    if "pop_group_value_map_confirmed" not in st.session_state:
-        st.session_state["pop_group_value_map_confirmed"] = False
+    # --- init ---
+    st.session_state.setdefault("pop_group_value_map", {})
+    st.session_state.setdefault("pop_group_value_map_confirmed", False)
 
-    # Optional: show the values to help users
     with st.expander(translations.get("show_status_values", "Show available values")):
         st.write(values)
 
-    # --- dropdowns ---
     host_label = translations.get(
         "map_host_label",
         "Which value corresponds to Host community / Non-displaced / General population?"
@@ -845,44 +844,47 @@ def handle_displacement_value_mapping():
     )
     other_label = translations.get(
         "map_other_label",
-        "Other categories (optional): select any remaining values (camp IDPs, migrants, NDSP, etc.)"
+        "Other category (optional): select one remaining value (camp IDPs, migrants, NDSP, etc.)"
     )
     confirm_lbl = translations.get("confirm_mapping", "Confirm mapping")
-    error_lbl = translations.get("mapping_error", "Please complete the required mappings and avoid duplicates.")
+    error_lbl = translations.get(
+        "mapping_error",
+        "Please select at least the Host value and avoid duplicates."
+    )
 
-    # Allow "No selection" for returnee if it doesn't exist
+    # --- dropdowns ---
     host_val = st.selectbox(host_label, ["No selection"] + values, key="map_host_value")
     idp_val  = st.selectbox(idp_label,  ["No selection"] + values, key="map_idp_value")
     ret_val  = st.selectbox(ret_label,  ["No selection"] + values, key="map_returnee_value")
 
-    # "Other" as multiselect is handy because there can be several
     used = {v for v in [host_val, idp_val, ret_val] if v and v != "No selection"}
     remaining = [v for v in values if v not in used]
 
-    other_vals = st.multiselect(other_label, remaining, key="map_other_values")
+    other_val = st.selectbox(
+        other_label,
+        ["No selection"] + remaining,
+        key="map_other_value"
+    )
 
     # --- confirm ---
     if st.button(confirm_lbl, key="confirm_pop_group_mapping"):
         required_ok = (host_val != "No selection")
 
+        # normalize optionals to None
+        idp_norm = None if idp_val == "No selection" else idp_val
+        ret_norm = None if ret_val == "No selection" else ret_val
+        oth_norm = None if other_val == "No selection" else other_val
 
-        # Build the set of selected single-choice values (exclude "No selection")
-        singles = [host_val, idp_val, ret_val]
-        singles_clean = [v for v in singles if v and v != "No selection"]
+        chosen = [host_val] + [v for v in [idp_norm, ret_norm, oth_norm] if v is not None]
+        no_dupes = (len(set(chosen)) == len(chosen))
 
-        # Avoid duplicates among single-choice selections
-        no_dupes = (len(set(singles_clean)) == len(singles_clean))
-
-        # Avoid selecting in "other" something already chosen in host/idp/returnee
-        other_ok = all(v not in set(singles_clean) for v in other_vals)
-
-        if required_ok and no_dupes and other_ok:
+        if required_ok and no_dupes:
             st.session_state["pop_group_value_map"] = {
                 "status_column": status_col,
-                "host": host_val,  # required
-                "idp": None if idp_val == "No selection" else idp_val,
-                "returnee": None if ret_val == "No selection" else ret_val,
-                "other": other_vals  # can be empty or many
+                "host": host_val,      # required
+                "idp": idp_norm,       # optional
+                "returnee": ret_norm,  # optional
+                "other": oth_norm      # optional, SINGLE
             }
             st.session_state["pop_group_value_map_confirmed"] = True
             st.success(translations.get("mapping_saved", "Mapping saved."))
