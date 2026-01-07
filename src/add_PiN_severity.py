@@ -743,11 +743,13 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     to_drop = age17 & sev_missing
     n_drop = int(to_drop.sum())
 
+    drop_msg = None
+
     if n_drop > 0:
         edu_data = edu_data.loc[~to_drop].copy()
-        print(f"Dropped {to_drop.sum()} rows where severity_category is empty and edu_age_corrected == 17, it is possible that the education indicators were not collected for indivuals who are 18 y.o.")
+        drop_msg = (f"Dropped {to_drop.sum()} Rows with an empty severity_category and edu_age_corrected == 17 likely indicate cases where education indicators were not collected for individuals aged 18")
 
 
-    return edu_data
+    return edu_data, drop_msg
 
 

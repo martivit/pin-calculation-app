@@ -365,7 +365,7 @@ if not step_2_hpc and not alternative_country:
     barrier_var = "edu_barrier_final"
 
     ## add indicator ---> severity
-    edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data, 
+    edu_data_severity, drop_msg = add_severity (country, edu_data, household_data, choice_data, survey_data, 
                                                                                     access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                     natural_hazard_var,natural_hazard_var_sev,
                                                                                     additional_last_var,additional_last_sev,
@@ -376,22 +376,24 @@ if not step_2_hpc and not alternative_country:
                                                                                     admin_var, vector_cycle, start_school, status_var,
                                                                                     selected_language)
 
-    st.dataframe(edu_data)
-    st.dataframe(household_data)
-    st.write (status_var)
-    st.write (age_var)
-    st.write (gender_var)
-    st.write (access_var)
-    st.write (teacher_disruption_var)
-    st.write (idp_disruption_var)
-    st.write (armed_disruption_var)
-    st.write (natural_hazard_var)
-    st.write (natural_hazard_var_sev)
-    st.write (barrier_var)
-    st.write (selected_severity_4_barriers)
-    st.write (selected_severity_5_barriers)
-    st.write (admin_var)
-    st.write (label)
+    if (drop_msg): 
+        st.warning(drop_msg)   
+    #st.dataframe(edu_data)
+    #st.dataframe(household_data)
+    #st.write (status_var)
+    #st.write (age_var)
+    #st.write (gender_var)
+    #st.write (access_var)
+    #st.write (teacher_disruption_var)
+    #st.write (idp_disruption_var)
+    #st.write (armed_disruption_var)
+    #st.write (natural_hazard_var)
+    #st.write (natural_hazard_var_sev)
+    #st.write (barrier_var)
+    #st.write (selected_severity_4_barriers)
+    #st.write (selected_severity_5_barriers)
+    #st.write (admin_var)
+    #st.write (label)
 
 
 
