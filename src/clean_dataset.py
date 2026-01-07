@@ -1130,6 +1130,8 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
 
     # rename only if needed
     if household_start_column != "today":
+        if "today" in household_data.columns:
+            household_start_column = "today"
         household_data = household_data.rename(columns={household_start_column: "today"})
 
     # 1) parse to datetime (force dtype)
