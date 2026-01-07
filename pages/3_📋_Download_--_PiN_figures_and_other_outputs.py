@@ -378,7 +378,7 @@ if not step_2_hpc and not alternative_country:
 
     if (drop_msg): 
         st.warning(drop_msg)   
-    #st.dataframe(edu_data)
+    st.dataframe(edu_data_severity)
     #st.dataframe(household_data)
     #st.write (status_var)
     #st.write (age_var)
