@@ -745,7 +745,7 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
     drop_msg = None
 
-    if n_drop > 0:
+    if n_drop > 50:
         edu_data = edu_data.loc[~to_drop].copy()
         drop_msg = (f"Dropped {to_drop.sum()} Rows with an empty severity_category and edu_age_corrected == 17 likely indicate cases where education indicators were not collected for individuals aged 18")
 
