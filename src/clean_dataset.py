@@ -765,28 +765,60 @@ def detect_sm_values_are_names_or_labels(
 ## ---------------------------------------------------------------------------------
 
 ## ---------------------------------------------------------------------------------
-def build_barrier_so_select_multiple_labels(
-    edu_data, barrier_var, labels_sev5, labels_sev4,
-    default_value="barrier_3", out_col="edu_barrier_final"
-):
-    sev5_norm = [(lab, strip_code_prefix(lab)) for lab in labels_sev5]
-    sev4_norm = [(lab, strip_code_prefix(lab)) for lab in labels_sev4]
+def build_barrier_so_select_multiple_label(
+    edu_data: pd.DataFrame,
+    barrier_var: str,
+    sev5_labels_exact: list[str],
+    sev4_labels_exact: list[str],
+    sev4_matches: list[dict],
+    sev5_matches: list[dict],
+    default_value: str = "barrier_3",
+    out_col: str = "edu_barrier_final",
+    keep_missing_blank: bool = True,
+) -> pd.DataFrame:
+
+    def _is_missing(x):
+        return x is None or (pd.isna(x)) or str(x).strip() == ""
+
+    # Build label->name maps (case-insensitive). Drop notfound.
+    sev5_label_to_name = {
+        str(d["label"]).strip().lower(): str(d["name"]).strip()
+        for d in (sev5_matches or [])
+        if d.get("label") not in [None, ""] and d.get("name") not in [None, "", "notfound"]
+    }
+    sev4_label_to_name = {
+        str(d["label"]).strip().lower(): str(d["name"]).strip()
+        for d in (sev4_matches or [])
+        if d.get("label") not in [None, ""] and d.get("name") not in [None, "", "notfound"]
+    }
+
+    # Keys to search for inside the select_multiple cell text
+    # (keep your original substring behavior; make it case-insensitive)
+    sev5_keys = [str(x).strip().lower() for x in (sev5_labels_exact or []) if x and x != "notfound"]
+    sev4_keys = [str(x).strip().lower() for x in (sev4_labels_exact or []) if x and x != "notfound"]
 
     def pick_one(val):
-        if pd.isna(val): 
-            return default_value
-        v = strip_code_prefix(val)
+        if keep_missing_blank and _is_missing(val):
+            return np.nan
 
-        for orig, norm in sev5_norm:
-            if norm and norm in v:
-                return orig  # returns the canonical choice label
-        for orig, norm in sev4_norm:
-            if norm and norm in v:
-                return orig
+        s_low = str(val).lower()
+
+        # Severity 5 has priority
+        for k in sev5_keys:
+            if k and k in s_low:
+                # output NAME corresponding to this LABEL
+                return sev5_label_to_name.get(k, default_value)
+
+        # Then severity 4
+        for k in sev4_keys:
+            if k and k in s_low:
+                return sev4_label_to_name.get(k, default_value)
+
         return default_value
 
     edu_data[out_col] = edu_data[barrier_var].apply(pick_one)
     return edu_data
+
 ## ---------------------------------------------------------------------------------
 def is_missing(x) -> bool:
     if x is None:
@@ -1006,16 +1038,52 @@ def detect_sm_format_from_choices(
     }
 ## ---------------------------------------------------------------------------------
 def parse_kobo_start(x):
-    if pd.isna(x):
+    """
+    Parse dates coming from:
+      - Excel serial numbers (e.g. 45932)
+      - Kobo/ISO strings with timezone (e.g. ...+03:00 or Z)
+      - Standard date strings (dd/mm/yyyy, yyyy-mm-dd, etc.)
+    Returns pandas.Timestamp or pd.NaT.
+    """
+    if x is None or (isinstance(x, float) and np.isnan(x)):
         return pd.NaT
+
+    # --- 1) Excel serial date handling ---
+    # Excel dates are days since 1899-12-30 (Excel's leap-year bug included)
+    # Typical modern serials are ~ 40000-50000.
+    if isinstance(x, (int, float, np.integer, np.floating)):
+        # if it's a plausible Excel serial day number
+        if 20000 <= float(x) <= 80000:
+            return pd.to_datetime(float(x), unit="D", origin="1899-12-30", errors="coerce")
+        # otherwise treat as invalid numeric date
+        return pd.NaT
+
+    # --- 2) String handling ---
     s = str(x).strip()
     if not s:
         return pd.NaT
 
-    # drop timezone suffixes like +03:00, -05:00, or trailing Z
-    s = re.sub(r'([+-]\d{2}:\d{2}|Z)$', '', s)
+    # If it's numeric-as-text (e.g. "45932")
+    if re.fullmatch(r"\d+(\.\d+)?", s):
+        v = float(s)
+        if 20000 <= v <= 80000:
+            return pd.to_datetime(v, unit="D", origin="1899-12-30", errors="coerce")
+        return pd.NaT
 
-    return pd.to_datetime(s, errors="coerce")
+    # Kobo ISO with Z
+    if s.endswith("Z"):
+        # pandas can parse Z, but let's normalize anyway
+        s = s[:-1] + "+00:00"
+
+    # Let pandas parse timezone-aware strings properly
+    dt = pd.to_datetime(s, errors="coerce", utc=True)
+    if pd.notna(dt):
+        # convert back to naive local/UTC-less timestamp if you want
+        return dt.tz_convert(None)
+
+    # Fallback: try dayfirst formats like dd/mm/yyyy
+    return pd.to_datetime(s, errors="coerce", dayfirst=True)
+
 
 ########################################################### 
 ########################################################### 
@@ -1181,11 +1249,13 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
         labels_sev4 = selected_severity_4_barriers
         labels_sev5 = selected_severity_5_barriers
 
-        edu_data = build_barrier_so_select_multiple(
+        edu_data = build_barrier_so_select_multiple_label(
             edu_data=edu_data,
             barrier_var=barrier_var,
             sev5_labels_exact=labels_sev5,
             sev4_labels_exact=labels_sev4,
+            sev5_matches= sev5_matches,
+            sev4_matches= sev4_matches,
             default_value="barrier_3",
             out_col="edu_barrier_final"
         )

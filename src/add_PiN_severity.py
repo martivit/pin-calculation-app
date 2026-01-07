@@ -249,8 +249,8 @@ def add_indicator_columns(data, access_var, teacher_disruption_var, natural_haza
         return ""  # Default to empty string if input is not a string or number
 
     # Define the conditions for yes and no answers
-    yes_answers = ['yes', 'oui', 1, '1', '1. Yes']
-    no_answers = ['no', 'non', 0, '0','2. No' ]
+    yes_answers = ['yes', 'oui', 1, '1', '1. yes', '1. Yes']  # keep lenient
+    no_answers  = ['no', 'non', 0, '0', '2. no', '2. No']
 
     no_indicator = 'no_indicator'
 
@@ -319,8 +319,8 @@ def add_indicator_columns_for_EMIS(data, access_var, teacher_disruption_var, nat
         return ""  # Default to empty string if input is not a string or number
 
     # Define the conditions for yes and no answers
-    yes_answers = ['yes', 'oui', 1, '1', '1. Yes']
-    no_answers = ['no', 'non', 0, '0','2. No' ]
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes', '1. yes', ]
+    no_answers = ['no', 'non', 0, '0','2. No' , '2. no' ]
 
     no_indicator = 'no_indicator'
 
@@ -374,13 +374,13 @@ def assign_dimension_pin(access, severity):
         if isinstance(input_string, str):
             return input_string.lower()
         return ""  # Default to empty string if input is not a string
-    
+
     # Normalize the input to handle different cases and languages
     normalized_access = normalize(access)
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', 1, '1', '1. Yes']
-    no_answers = ['no', 'non', 0, '0','2. No' ]
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes','1. yes']
+    no_answers = ['no', 'non', 0, '0','2. No' , '2. no']
 
     # Mapping severity to dimension labels
     if normalized_access in no_answers:
@@ -669,8 +669,13 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
 
     ####### ** 2 **       ------------------------------ severity definition and calculation ------------------------------------------     #######
+   
     severity_4_matches = find_matching_choices(choice_data, selected_severity_4_barriers, label_var=label)
     severity_5_matches = find_matching_choices(choice_data, selected_severity_5_barriers, label_var=label)
+    print('severity_4_matches =======> ')
+    print(selected_severity_4_barriers)
+    print(severity_4_matches)
+
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
 
@@ -727,6 +732,20 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         names_severity_4=names_severity_4,
         names_severity_5=names_severity_5
     )
+    # --- Drop rows where severity_category is missing AND edu_age_corrected == 17 ---
+    age17 = pd.to_numeric(edu_data["edu_age_corrected"], errors="coerce").eq(17)
+
+    sev_missing = (
+        edu_data["severity_category"].isna()
+        | edu_data["severity_category"].astype(str).str.strip().isin(["", "None", "nan"])
+    )
+
+    to_drop = age17 & sev_missing
+    n_drop = int(to_drop.sum())
+
+    if n_drop > 0:
+        edu_data = edu_data.loc[~to_drop].copy()
+        print(f"Dropped {to_drop.sum()} rows where severity_category is empty and edu_age_corrected == 17, it is possible that the education indicators were not collected for indivuals who are 18 y.o.")
 
 
     return edu_data
