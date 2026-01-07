@@ -704,7 +704,7 @@ def update_other_parameters_status():
     if (st.session_state.get('admin_level_confirmed', False) and
         st.session_state.get('school_start_month_confirmed', False) and
         (st.session_state.get('single_cycle', False) or st.session_state.get('upper_primary_end_confirmed', False)) and
-        st.session_state.get('displacement_column_confirmed', False)) :
+        st.session_state.get('displacement_column_confirmed', False) and st.session_state.get('pop_group_value_map_confirmed', False)) :
         st.session_state['other_parameters_confirmed'] = True
     else:
         st.session_state['other_parameters_confirmed'] = False
@@ -777,7 +777,116 @@ def handle_displacement_column_selection():
                 st.session_state['status_var'] = selected_displacement
                 st.success(f"Displacement column '{selected_displacement}' has been manually selected.")
                 st.session_state['displacement_column_confirmed'] = True
-                    
+##---------------------------------------------------------------------------------------------------------
+def _get_status_values(df: pd.DataFrame, col: str):
+    """Return sorted unique non-empty string values from a column."""
+    if col not in df.columns:
+        return []
+    s = df[col].dropna().astype(str).str.strip()
+    s = s[s != ""]
+    # Keep stable ordering-ish but sorted is usually nicest:
+    return sorted(s.unique().tolist())
+
+##---------------------------------------------------------------------------------------------------------
+def handle_displacement_value_mapping():
+    """
+    After displacement column is confirmed, show dropdowns to map:
+      - host/non-displaced/general population
+      - idp/displaced
+      - returnee
+      - other (multi)
+    Saves results into session_state["pop_group_value_map"].
+    """
+    if not st.session_state.get("displacement_column_confirmed", False):
+        return
+
+    df = st.session_state.get("household_data")
+    status_col = st.session_state.get("status_var")
+
+    if df is None or status_col is None:
+        return
+
+    values = _get_status_values(df, status_col)
+
+    if not values:
+        st.warning(translations.get(
+            "no_status_values_found",
+            "No values found in the selected status column."
+        ))
+        return
+
+    st.markdown(translations.get(
+        "status_value_mapping_title",
+        "<b>Map population groups to the values in your status column</b>"
+    ), unsafe_allow_html=True)
+
+    # --- store defaults / init ---
+    if "pop_group_value_map" not in st.session_state:
+        st.session_state["pop_group_value_map"] = {}
+    if "pop_group_value_map_confirmed" not in st.session_state:
+        st.session_state["pop_group_value_map_confirmed"] = False
+
+    # Optional: show the values to help users
+    with st.expander(translations.get("show_status_values", "Show available values")):
+        st.write(values)
+
+    # --- dropdowns ---
+    host_label = translations.get(
+        "map_host_label",
+        "Which value corresponds to Host community / Non-displaced / General population?"
+    )
+    idp_label = translations.get(
+        "map_idp_label",
+        "Which value corresponds to IDP / Displaced (hosted in family, etc.)?"
+    )
+    ret_label = translations.get(
+        "map_returnee_label",
+        "Which value corresponds to Returnee?"
+    )
+    other_label = translations.get(
+        "map_other_label",
+        "Other categories (optional): select any remaining values (camp IDPs, migrants, NDSP, etc.)"
+    )
+    confirm_lbl = translations.get("confirm_mapping", "Confirm mapping")
+    error_lbl = translations.get("mapping_error", "Please complete the required mappings and avoid duplicates.")
+
+    # Allow "No selection" for returnee if it doesn't exist
+    host_val = st.selectbox(host_label, ["No selection"] + values, key="map_host_value")
+    idp_val  = st.selectbox(idp_label,  ["No selection"] + values, key="map_idp_value")
+    ret_val  = st.selectbox(ret_label,  ["No selection"] + values, key="map_returnee_value")
+
+    # "Other" as multiselect is handy because there can be several
+    used = {v for v in [host_val, idp_val, ret_val] if v and v != "No selection"}
+    remaining = [v for v in values if v not in used]
+
+    other_vals = st.multiselect(other_label, remaining, key="map_other_values")
+
+    # --- confirm ---
+    if st.button(confirm_lbl, key="confirm_pop_group_mapping"):
+        required_ok = (host_val != "No selection") and (idp_val != "No selection")
+
+        # avoid duplicates between required fields
+        no_dupes = len({host_val, idp_val} - {"No selection"}) == 2
+
+        if required_ok and no_dupes:
+            st.session_state["pop_group_value_map"] = {
+                "status_column": status_col,
+                "host": host_val,
+                "idp": idp_val,
+                "returnee": None if ret_val == "No selection" else ret_val,
+                "other": other_vals
+            }
+            st.session_state["pop_group_value_map_confirmed"] = True
+            st.success(translations.get("mapping_saved", "Mapping saved."))
+        else:
+            st.error(error_lbl)
+
+    display_status(
+        translations.get("mapping_confirmed_status", "Population group mapping confirmed"),
+        st.session_state.get("pop_group_value_map_confirmed", False)
+    )
+
+
 
 ###########################################################################################################
 ##-----------------------------
@@ -1211,6 +1320,8 @@ def finalize_details():
 
         with st.container(border=True):    
             handle_displacement_column_selection()
+        with st.container(border=True):
+            handle_displacement_value_mapping()
 
         if st.button(translations["last_confirm"]):
             st.session_state.final_confirmed = True
@@ -1455,6 +1566,7 @@ def display_step_content():
         st.session_state['barriers_column_confirmed'] = True
         st.session_state['indicators_confirmed'] = True
         st.session_state['displacement_column_confirmed'] = True
+        st.session_state['pop_group_value_map_confirmed'] = True
 
         finalize_details_nomsna()  # Call modified finalize_details directly
 
