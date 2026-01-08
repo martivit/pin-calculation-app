@@ -276,10 +276,10 @@ idp_value      = pop_map.get("idp")        # optional (string or None)
 returnee_value = pop_map.get("returnee")   # optional (string or None)
 other_value    = pop_map.get("other")      # optional (string or None)
 
-st.write(host_value)
-st.write(idp_value)
-st.write(returnee_value)
-st.write(other_value)
+#st.write(host_value)
+#st.write(idp_value)
+#st.write(returnee_value)
+#st.write(other_value)
 
 #st.write(additional_last_var)
 #st.write(additional_last_sev)
@@ -421,7 +421,7 @@ if not step_2_hpc and not alternative_country:
                                                                                         barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                         age_var, gender_var,
                                                                                         label, 
-                                                                                        admin_var, vector_cycle, start_school, status_var,
+                                                                                        admin_var, vector_cycle, start_school, status_var,host_value ,idp_value ,returnee_value ,other_value ,
                                                                                         mismatch_admin,
                                                                                         selected_language= selected_language, hybrid_country= hybrid_country)
         
