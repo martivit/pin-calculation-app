@@ -1121,25 +1121,38 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
 
     if start_candidates:
         household_start_column = start_candidates[0]
+
+        # rename only if needed
+        if household_start_column != "today":
+            if "today" in household_data.columns:
+                household_start_column = "today"
+            else:
+                household_data = household_data.rename(columns={household_start_column: "today"})
+
+        # parse + month
+        household_data["today"] = household_data["today"].apply(parse_kobo_start)
+        household_data["today"] = pd.to_datetime(household_data["today"], errors="coerce")
+        household_data["month"] = household_data["today"].dt.month
+
     elif today_candidates:
         exact_today = next((c for c in today_candidates if c.lower() == "today"), None)
         household_start_column = exact_today if exact_today else today_candidates[0]
+
+        # rename only if needed
+        if household_start_column != "today":
+            if "today" in household_data.columns:
+                household_start_column = "today"
+            else:
+                household_data = household_data.rename(columns={household_start_column: "today"})
+
+        # parse + month
+        household_data["today"] = household_data["today"].apply(parse_kobo_start)
+        household_data["today"] = pd.to_datetime(household_data["today"], errors="coerce")
+        household_data["month"] = household_data["today"].dt.month
+
     else:
-        raise KeyError("No column containing 'start', 'today', or 'today_date' found in household_data.")
-
-
-    # rename only if needed
-    if household_start_column != "today":
-        if "today" in household_data.columns:
-            household_start_column = "today"
-        household_data = household_data.rename(columns={household_start_column: "today"})
-
-    # 1) parse to datetime (force dtype)
-    household_data["today"] = household_data["today"].apply(parse_kobo_start)  # or custom_to_datetime
-    household_data["today"] = pd.to_datetime(household_data["today"], errors="coerce")
-
-    # 2) now .dt works
-    household_data["month"] = household_data["today"].dt.month
+        # ✅ No start/today column: don't parse anything, default month to 6
+        household_data["month"] = 6
 
 
 
