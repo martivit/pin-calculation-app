@@ -163,7 +163,22 @@
     "extrapolation_summary" : "En nous appuyant sur les résultats PiN des zones couvertes par le MSNA 2025 et en intégrant les contributions de la CE et d'experts, nous calculons les PiN actualisés et extrapolons les distributions de gravité pour les zones pour lesquelles nous ne disposons pas de nouvelles données pour 2025.",
     "istruction_upload_pin_covered": "B)  Veuillez télécharger le fichier contenant le PiN calculé pour les zones couvertes uniquement, le nom du fichier est *votrepays_PiN_targeted_MSNA_2025.xlsx*",
     "download_covered_area": "Télécharger les chiffres PiN calculés pour les zones couvertes uniquement",
-    "download_all_temporary": "Télécharger les documents PiN temporaires"
+    "download_all_temporary": "Télécharger les documents PiN temporaires",
+     "pop_group_mapping_ocha_logic_note": "⚠️ **Important :** Veuillez mapper les valeurs ci-dessous en utilisant la **même logique de groupes de population** que celle utilisée pour renseigner le modèle OCHA. Ces correspondances doivent refléter les colonnes OCHA suivantes :\n\n- Host/Hôte -- Children/Enfants (5-17)\n- IDP/PDI -- Children/Enfants (5-17)\n- Returnees/Retournés -- Children/Enfants (5-17)\n- Refugees/Refugiees -- Children/Enfants (5-17)\n- Other -- Children/Enfants (5-17)",
+
+    "status_value_mapping_title": "<b>Associer les groupes de population aux valeurs de votre colonne de statut</b>",
+    "show_status_values": "Afficher les valeurs disponibles",
+
+    "map_host_label": "Quelle valeur correspond à la communauté hôte / non déplacés / population générale ?",
+    "map_idp_label": "Quelle valeur correspond aux PDI / déplacés (hébergés en famille, etc.) ?",
+    "map_returnee_label": "Quelle valeur correspond aux retournés ?",
+    "map_refugee_label": "Quelle valeur correspond aux réfugiés ?",
+    "map_other_label": "Autre catégorie (optionnel) : sélectionnez une valeur restante (PDI en camp, migrants, NDSP, etc.)",
+
+    "confirm_mapping": "Confirmer l’association",
+    "mapping_error": "Veuillez sélectionner au minimum la valeur « Hôte » et éviter les doublons.",
+    "mapping_saved": "Association enregistrée.",
+    "mapping_confirmed_status": "Association des groupes de population confirmée"
 
 
 

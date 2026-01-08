@@ -794,6 +794,7 @@ def handle_displacement_value_mapping():
       - host/non-displaced/general population (MANDATORY)
       - idp/displaced (optional)
       - returnee (optional)
+      - refugees (optional)
       - other (optional, SINGLE value)
     Saves results into session_state["pop_group_value_map"].
     """
@@ -807,7 +808,6 @@ def handle_displacement_value_mapping():
         return
 
     values = _get_status_values(df, status_col)
-
     if not values:
         st.warning(translations.get(
             "no_status_values_found",
@@ -815,49 +815,41 @@ def handle_displacement_value_mapping():
         ))
         return
 
-    st.markdown(
-        translations.get(
-            "status_value_mapping_title",
-            "<b>Map population groups to the values in your status column</b>"
-        ),
-        unsafe_allow_html=True
-    )
+    # --- Intro / warning about OCHA template logic ---
+    st.info(translations[
+        "pop_group_mapping_ocha_logic_note"])
+
+    st.markdown(translations["status_value_mapping_title"], unsafe_allow_html=True)
+
 
     # --- init ---
     st.session_state.setdefault("pop_group_value_map", {})
     st.session_state.setdefault("pop_group_value_map_confirmed", False)
 
-    with st.expander(translations.get("show_status_values", "Show available values")):
+    with st.expander(translations["show_status_values"]):
         st.write(values)
 
-    host_label = translations.get(
-        "map_host_label",
-        "Which value corresponds to Host community / Non-displaced / General population?"
-    )
-    idp_label = translations.get(
-        "map_idp_label",
-        "Which value corresponds to IDP / Displaced (hosted in family, etc.)?"
-    )
-    ret_label = translations.get(
-        "map_returnee_label",
-        "Which value corresponds to Returnee?"
-    )
-    other_label = translations.get(
-        "map_other_label",
-        "Other category (optional): select one remaining value (camp IDPs, migrants, NDSP, etc.)"
-    )
-    confirm_lbl = translations.get("confirm_mapping", "Confirm mapping")
-    error_lbl = translations.get(
-        "mapping_error",
-        "Please select at least the Host value and avoid duplicates."
-    )
+    host_label = translations[
+        "map_host_label"]
+    idp_label = translations[
+        "map_idp_label"]
+    ret_label = translations[
+        "map_returnee_label"]
+    ref_label = translations[
+        "map_refugee_label"]
+    other_label = translations[
+        "map_other_label"]
+    confirm_lbl = translations["confirm_mapping"]
+    error_lbl = translations[
+        "mapping_error"]
 
     # --- dropdowns ---
     host_val = st.selectbox(host_label, ["No selection"] + values, key="map_host_value")
     idp_val  = st.selectbox(idp_label,  ["No selection"] + values, key="map_idp_value")
     ret_val  = st.selectbox(ret_label,  ["No selection"] + values, key="map_returnee_value")
+    ref_val  = st.selectbox(ref_label,  ["No selection"] + values, key="map_refugee_value")
 
-    used = {v for v in [host_val, idp_val, ret_val] if v and v != "No selection"}
+    used = {v for v in [host_val, idp_val, ret_val, ref_val] if v and v != "No selection"}
     remaining = [v for v in values if v not in used]
 
     other_val = st.selectbox(
@@ -873,21 +865,23 @@ def handle_displacement_value_mapping():
         # normalize optionals to None
         idp_norm = None if idp_val == "No selection" else idp_val
         ret_norm = None if ret_val == "No selection" else ret_val
+        ref_norm = None if ref_val == "No selection" else ref_val
         oth_norm = None if other_val == "No selection" else other_val
 
-        chosen = [host_val] + [v for v in [idp_norm, ret_norm, oth_norm] if v is not None]
+        chosen = [host_val] + [v for v in [idp_norm, ret_norm, ref_norm, oth_norm] if v is not None]
         no_dupes = (len(set(chosen)) == len(chosen))
 
         if required_ok and no_dupes:
             st.session_state["pop_group_value_map"] = {
                 "status_column": status_col,
-                "host": host_val,      # required
-                "idp": idp_norm,       # optional
-                "returnee": ret_norm,  # optional
-                "other": oth_norm      # optional, SINGLE
+                "host": host_val,       # required
+                "idp": idp_norm,        # optional
+                "returnee": ret_norm,   # optional
+                "refugee": ref_norm,    # optional
+                "other": oth_norm       # optional, SINGLE
             }
             st.session_state["pop_group_value_map_confirmed"] = True
-            st.success(translations.get("mapping_saved", "Mapping saved."))
+            st.success(translations["mapping_saved"])
         else:
             st.error(error_lbl)
 

@@ -164,6 +164,19 @@
     "missing_pin_columns": "Missing required columns: {cols}",
     "empty_pin_column" : "Empty required columns: {cols}",
     "extrapolation_summary" : "Building on PiN results from MSNA 2025-covered areas and incorporating EC and expert input, we calculate updated PiN and extrapolate severity distributions for areas with no new 2025 data.",
-    "istruction_upload_pin_covered": "B) Please upload the file containing the calculated PiN for covered areas only, the file-name is *yourCountry_PiN_targeted_MSNA_2025.xlsx*"
+    "istruction_upload_pin_covered": "B) Please upload the file containing the calculated PiN for covered areas only, the file-name is *yourCountry_PiN_targeted_MSNA_2025.xlsx*",
+    "pop_group_mapping_ocha_logic_note": "⚠️ **Important:** Please map the values below using the **same population-group logic** you used to fill the OCHA template. These mappings must correspond to the OCHA columns:\n\n- Host/Hôte -- Children/Enfants (5-17)\n- IDP/PDI -- Children/Enfants (5-17)\n- Returnees/Retournés -- Children/Enfants (5-17)\n- Refugees/Refugiees -- Children/Enfants (5-17)\n- Other -- Children/Enfants (5-17)",
+    "status_value_mapping_title": "<b>Map population groups to the values in your status column</b>",
+    "show_status_values": "Show available values",
 
+    "map_host_label": "Which value corresponds to Host community / Non-displaced / General population?",
+    "map_idp_label": "Which value corresponds to IDP / Displaced (hosted in family, etc.)?",
+    "map_returnee_label": "Which value corresponds to Returnee?",
+    "map_refugee_label": "Which value corresponds to Refugees?",
+    "map_other_label": "Other category (optional): select one remaining value (camp IDPs, migrants, NDSP, etc.)",
+
+    "confirm_mapping": "Confirm mapping",
+    "mapping_error": "Please select at least the Host value and avoid duplicates.",
+    "mapping_saved": "Mapping saved.",
+    "mapping_confirmed_status": "Population group mapping confirmed"
   }
