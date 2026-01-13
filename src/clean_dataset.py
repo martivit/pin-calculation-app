@@ -1116,8 +1116,8 @@ def clean_make_dataset (country, edu_data, household_data, choice_data, survey_d
 
     ##---------------- 2)  Find or create the household collection date column as 'today' ---
     possible_columns = list(household_data.columns)
-    start_candidates = [c for c in possible_columns if "start" in c.lower()]
-    today_candidates = [c for c in possible_columns if "today" in c.lower() or c.lower() == "today_date"]
+    start_candidates = [c for c in possible_columns if "start" in c.lower()  ]
+    today_candidates = [c for c in possible_columns if "today" in c.lower() or c.lower() == "today_date" or c.lower() == "submission.time"]
 
     if start_candidates:
         household_start_column = start_candidates[0]

@@ -1041,7 +1041,7 @@ def calculatePIN_with_JENA (data_combination, country, edu_data, household_data,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
                 label, 
-                admin_var, vector_cycle, start_school, status_var,
+                admin_var, vector_cycle, start_school, status_var,host_value ,idp_value ,returnee_value ,refugee_value, other_value ,
                 mismatch_admin,
                 selected_language):
     
@@ -1081,7 +1081,7 @@ def calculatePIN_with_JENA (data_combination, country, edu_data, household_data,
 
     print(ocha_pop_data)
 
-    admin_var = find_best_match(admin_target,  household_data)
+    admin_var = 'admin_hno'
 
     admin_column_rapresentative = []
     grouped_dict = {}
@@ -1258,6 +1258,13 @@ def calculatePIN_with_JENA (data_combination, country, edu_data, household_data,
         suggestions_mapping[key] = suggestions  # keeping original case
 
     mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
+    print (mapped_statuses)
+    mapped_statuses = {
+        "Host/Hôte": host_value,
+        "IDP/PDI": idp_value,
+        "Returnees/Retournés": returnee_value,
+        'Refugees/Refugiees': refugee_value,
+        "Other": other_value    }
     print (mapped_statuses)
     category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)# Extract population figures based on mapped statuses without modifying the case
 

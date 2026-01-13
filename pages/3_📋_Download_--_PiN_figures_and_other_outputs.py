@@ -788,8 +788,42 @@ if step_2_hpc and hybrid_country:
 if jena_country and ocha_data is not None:
     country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
 
-    if 'm' in data_combination:  
-        edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
+    if 'm' in data_combination:
+
+        try:
+            edu_data, household_data, survey_data, choice_data, messages = clean_make_dataset (country, edu_data, household_data, choice_data, survey_data, 
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                                                                                    natural_hazard_var,natural_hazard_var_sev,
+                                                                                    additional_last_var,additional_last_sev,
+                                                                                    additional_2_last_var,additional_2_last_sev,
+                                                                                    barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                    age_var, gender_var,
+                                                                                    label, 
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    selected_language)
+
+        except Exception as e:
+            st.error(str(e))
+            st.stop()
+        warnings = getattr(messages, "warning", None) or messages.get("warning", []) if isinstance(messages, dict) else []
+        infos    = getattr(messages, "info", None)    or messages.get("info", [])    if isinstance(messages, dict) else []
+
+
+        for w in messages.warning:
+            st.warning(w)
+
+        if messages.info:
+            with st.expander("Processing log"):
+                for i in messages.info:
+                    st.info(i)
+        
+        status_var =  "pop_status_group"
+        age_var = "ind_age"
+        gender_var =  "ind_gender"
+        barrier_var = "edu_barrier_final"
+
+        ## add indicator ---> severity
+        edu_data_severity, drop_msg = add_severity (country, edu_data, household_data, choice_data, survey_data, 
                                                                                         access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                         natural_hazard_var,natural_hazard_var_sev,
                                                                                         additional_last_var,additional_last_sev,
@@ -798,7 +832,10 @@ if jena_country and ocha_data is not None:
                                                                                         age_var, gender_var,
                                                                                         label, 
                                                                                         admin_var, vector_cycle, start_school, status_var,
-                                                                                        selected_language= selected_language)
+                                                                                        selected_language)
+
+        if (drop_msg): 
+            st.warning(drop_msg)   
 
 
         (jena_df, merged_ocha_jena, merged_ocha_jena_msna,pin_jena_msna, Tot_PiN_JIAF,Tot_Dimension_JIAF,
@@ -808,7 +845,7 @@ if jena_country and ocha_data is not None:
                                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                                     age_var, gender_var,
                                                                                                     label, 
-                                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                                    admin_var, vector_cycle, start_school, status_var,host_value ,idp_value ,returnee_value ,refugee_value, other_value ,
                                                                                                     mismatch_admin,
                                                                                                     selected_language)
 
@@ -897,7 +934,41 @@ if emis_country and ocha_data is not None:
     country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
 
     if 'm' in data_combination:  
-        edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
+
+        try:
+            edu_data, household_data, survey_data, choice_data, messages = clean_make_dataset (country, edu_data, household_data, choice_data, survey_data, 
+                                                                                    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                                                                                    natural_hazard_var,natural_hazard_var_sev,
+                                                                                    additional_last_var,additional_last_sev,
+                                                                                    additional_2_last_var,additional_2_last_sev,
+                                                                                    barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+                                                                                    age_var, gender_var,
+                                                                                    label, 
+                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    selected_language)
+
+        except Exception as e:
+            st.error(str(e))
+            st.stop()
+        warnings = getattr(messages, "warning", None) or messages.get("warning", []) if isinstance(messages, dict) else []
+        infos    = getattr(messages, "info", None)    or messages.get("info", [])    if isinstance(messages, dict) else []
+
+
+        for w in messages.warning:
+            st.warning(w)
+
+        if messages.info:
+            with st.expander("Processing log"):
+                for i in messages.info:
+                    st.info(i)
+        
+        status_var =  "pop_status_group"
+        age_var = "ind_age"
+        gender_var =  "ind_gender"
+        barrier_var = "edu_barrier_final"
+
+        ## add indicator ---> severity
+        edu_data_severity, drop_msg = add_severity (country, edu_data, household_data, choice_data, survey_data, 
                                                                                         access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
                                                                                         natural_hazard_var,natural_hazard_var_sev,
                                                                                         additional_last_var,additional_last_sev,
@@ -906,18 +977,22 @@ if emis_country and ocha_data is not None:
                                                                                         age_var, gender_var,
                                                                                         label, 
                                                                                         admin_var, vector_cycle, start_school, status_var,
-                                                                                        selected_language= selected_language)
+                                                                                        selected_language)
+
+        if (drop_msg): 
+            st.warning(drop_msg)   
+
 
 
         (pin_by_indicator_status_list, enrollment_df, pop_figures_E_OoS_by_pop_group, severity_by_pop_group, 
             pin_by_pop_group, 
             pin_by_dimension_in_need_pop_group,pin_by_indicator_pop_group, test_intermediate_step,
-            Tot_PiN_JIAF, final_overview_df_OCHA, final_overview_df, Tot_PiN_by_admin)=  calculatePIN_with_EMIS (data_combination, country, edu_data, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,emis_data,
+            Tot_PiN_JIAF, final_overview_df_OCHA, final_overview_df, Tot_PiN_by_admin)=  calculatePIN_with_EMIS (data_combination, country, edu_data, household_data, choice_data, survey_data, ocha_data,mismatch_ocha_data,other_data,
                                                                                                 access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
                                                                                                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                                 age_var, gender_var,
                                                                                                 label, 
-                                                                                                admin_var, vector_cycle, start_school, status_var,
+                                                                                                admin_var, vector_cycle, start_school, status_var,host_value ,idp_value ,returnee_value ,refugee_value, other_value ,
                                                                                                 mismatch_admin,
                                                                                                 selected_language)
 
