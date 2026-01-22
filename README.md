@@ -8,9 +8,6 @@ A Streamlit-based web application for calculating People in Need (PiN) figures f
 - [Application Structure](#application-structure)
   - [Main Application Files](#main-application-files)
   - [Pages Structure](#pages-structure)
-    - [Page 1: Upload -- Education Data](#page-1-upload----education-data)
-    - [Page 2: Calculation -- PiN](#page-2-calculation----pin)
-    - [Page 3: Download -- PiN Figures and Other Outputs](#page-3-download----pin-figures-and-other-outputs)
   - [Source Functions (`src/`)](#source-functions-src)
     - [Core Calculation Functions](#core-calculation-functions)
     - [Output Generation Functions](#output-generation-functions)
@@ -27,37 +24,24 @@ A Streamlit-based web application for calculating People in Need (PiN) figures f
   - [Alternative Data Sources (JENA/EMIS)](#alternative-data-sources-jenaemis)
   - [No OCHA Data Scenario](#no-ocha-data-scenario)
 - [Installation and Setup](#installation-and-setup)
-  - [Prerequisites](#prerequisites)
-  - [Installation Steps](#installation-steps)
 - [Usage](#usage)
-  - [Basic Workflow](#basic-workflow)
-  - [Data Requirements](#data-requirements)
-  - [Configuration Tips](#configuration-tips)
 - [Output Files](#output-files)
-  - [Excel Files](#excel-files)
-  - [Word Documents](#word-documents)
-  - [Maps](#maps)
-  - [GitHub Archive](#github-archive)
 - [Debugging Outside Streamlit](#debugging-outside-streamlit)
-  - [Why Debug Outside Streamlit?](#why-debug-outside-streamlit)
-  - [Using Debug Scripts](#using-debug-scripts)
-  - [Debugging Tips](#debugging-tips)
-- [Contributing](#contributing)
-  - [Development Priorities](#development-priorities)
-- [License](#license)
+
 
 ## Overview
 
-The PiN Calculation App automates the calculation of People in Need (PiN) figures for the Education sector in humanitarian crises. It processes Multi-Sectoral Needs Assessment (MSNA) data, applies JIAF severity scoring, and generates formatted Excel outputs with snapshots and visualizations.
+The PiN Calculation App automates the calculation of People in Need (PiN) figures for the Education sector in humanitarian crises. It processes Multi-Sectoral Needs Assessment (MSNA) data and school-level assestment data, applies the global methodology, and generates formatted Excel outputs with snapshots and visualizations.
 
 **Key Features:**
-- Multi-language support (English and French)
+
 - Multiple data source support (MSNA, JENA, EMIS)
 - Hybrid calculation workflows for specific countries
-- Automated severity scoring based on JIAF framework
+- Automated severity identification 
 - Geographic visualization with severity maps
-- GitHub integration for automatic file archiving
-- PDF snapshot generation for HNO (Humanitarian Needs Overview) submissions
+- GitHub integration for automatic file archiving (**the token needs to be updated**)
+- word snapshot generation for HNO (Humanitarian Needs Overview) submissions
+- Multi-language support (English and French)
 
 ## Application Structure
 
@@ -91,8 +75,7 @@ pages/
 - **Purpose**: Data upload and initial configuration
 - **User Actions**:
   - Select country and education cycle parameters
-  - Upload MSNA dataset (household and education data)
-  - Upload KoBoToolbox form (survey structure)
+  - Upload MSNA dataset (household and education data) + KoBoToolbox form (survey structure)
   - Upload OCHA population figures
   - For alternative scenarios: upload JENA or EMIS data
 - **Key Functions Called**:
@@ -106,7 +89,7 @@ pages/
   - Map dataset columns to PiN indicators (access, disruption, barriers)
   - Define severity thresholds for barriers (what constitutes severity 4 vs 5)
   - Configure population group mappings (host, IDP, returnee, refugee)
-  - Select administrative boundary variables
+  - Select HNO unit of the analysis 
   - Enable/disable additional custom indicators
 - **Key Functions Called**:
   - Column mapping validation
@@ -122,7 +105,7 @@ pages/
   3. Calculate PiN figures → `calculatePIN()` (or variant)
   4. Generate outputs → `create_output()`, `create_snapshot_PiN()`
   5. Create downloadable ZIP file
-  6. Upload results to GitHub repository
+  6. Upload results to GitHub repository (to be updated)
 - **Key Functions Called**: See [Source Functions](#source-functions-src) section
 - **Output**: ZIP file containing Excel results, Word snapshots, parameter documents, and severity maps
 
@@ -149,7 +132,7 @@ src/
 ├── make_output1_platform.py                     # Hybrid step 1 output merger
 ├── create_output1_excel.py                      # Hybrid step 1 Excel formatting
 ├── extrapolation.py                             # Delta method extrapolation
-└── cases_country_helpers.py                     # Country-specific helper functions
+└── cases_country_helpers.py                     # Country variables to be used in the run_PiNcalculation_outside_streamlit.py
 ```
 
 #### **Core Calculation Functions**
@@ -247,13 +230,13 @@ These JSON files contain all user-facing text, allowing complete interface trans
 #### **Data Directories**
 ```
 input/              # User-uploaded data files
-input_map/          # Geographic boundary files for mapping
+input_map/          # shapefiles for mapping
 context_DB/         # Secondary data (ACLED, II) for hybrid countries
 pin2024_cat/        # 2024 PiN data for extrapolation
 platform_PiN_output/  # Archived outputs (uploaded to GitHub)
 pics/               # Logo and UI images
 icon/               # App icon
-output_validation/  # Quality check outputs (if enabled)
+output_validation/  # Quality check outputs when the run_PiNcalculation_outside_streamlit is run
 ```
 
 #### **Debugging Scripts**
@@ -287,7 +270,7 @@ results = calculatePIN(country, edu_data, household_data, ...)
 
 ### Standard MSNA Countries
 
-**Countries**: Most humanitarian contexts with comprehensive MSNA coverage
+**Countries**: Most humanitarian contexts with the MSNA coverage == HPC scope
 
 **Flow**:
 1. **Upload** (Page 1): MSNA dataset + OCHA figures
@@ -437,57 +420,8 @@ The app will open in your browser at `http://localhost:8501`
 - 2024 PiN data (for hybrid step 2)
 - Completed temporary file (for hybrid step 2)
 
-### Configuration Tips
 
-**Indicator Mapping**:
-- Access: Use "currently attending school" type questions
-- Disruption: Use "reasons for missing school" or "disruption experienced"
-- Barriers: Use "main barrier to education" type questions
-
-**Severity Thresholds**:
-- Severity 4: Moderate barriers (e.g., "lack of school supplies")
-- Severity 5: Critical barriers (e.g., "school too dangerous", "forced marriage")
-
-**Population Groups**:
-- Ensure consistent naming between MSNA and OCHA data
-- Use mapping feature if names don't match exactly
-
-## Output Files
-
-### Excel Files
-
-**`PiN_results_{country}_{timestamp}.xlsx`**:
-- Main output file with multiple sheets
-- PiN by severity, admin area, population group, age, gender
-- Formatted with color-coding and conditional formatting
-
-**`PiN_by_indicator_{country}_{timestamp}.xlsx`**:
-- Detailed breakdown showing which indicators contribute to each severity level
-- Useful for programmatic targeting decisions
-
-**`PiN_temporary_to_fill_{country}_{timestamp}.xlsx`** (Hybrid only):
-- Partially completed file requiring manual input
-- Color-coded cells show what needs completion
-
-### Word Documents
-
-**`PiN_snapshot_{country}_{timestamp}.docx`**:
-- Summary document for HNO submission
-- Key figures, charts, and breakdowns
-- Ready for inclusion in reports
-
-**`Parameters_Input_Document_{timestamp}.docx`**:
-- Complete record of all calculation parameters
-- Critical for transparency and reproducibility
-
-### Maps
-
-**`{country}_{admin_level}_severity.png`**:
-- Geographic visualization of PiN severity
-- Color-coded by severity level
-- One map per administrative level
-
-### GitHub Archive
+### GitHub Archive -- the token must be updated 
 
 All outputs are automatically uploaded to the GitHub repository at:
 ```
@@ -535,48 +469,3 @@ python run_PiNcalculation_outside_streamlit.py
 ```
 
 5. **Inspect outputs**: Results are saved to `output/` directory
-
-### Debugging Tips
-
-- Use `print()` statements liberally to trace data flow
-- Add `import pdb; pdb.set_trace()` for interactive debugging
-- Check intermediate dataframes with `df.head()`, `df.info()`
-- Validate severity scoring by checking severity column distributions
-- Compare outputs against known good results from Streamlit runs
-
-## Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/improvement`
-3. **Follow coding standards**:
-   - Use descriptive variable names
-   - Add docstrings to all functions
-   - Comment complex logic
-   - Follow PEP 8 style guide
-4. **Test thoroughly**:
-   - Test with multiple countries
-   - Test edge cases (missing data, etc.)
-   - Verify outputs match expected results
-5. **Submit a pull request** with clear description of changes
-
-### Development Priorities
-
-- [ ] Add automated testing suite
-- [ ] Improve error handling and user feedback
-- [ ] Optimize calculation performance for large datasets
-- [ ] Expand geographic visualization options
-- [ ] Add data quality check dashboards
-
-## License
-
-This project is developed by the Global Education Cluster for humanitarian use. 
-
-For questions or support, contact: [global.education.cluster@humanitarianresponse.info]
-
----
-
-**Version**: 2.0 (2025 HNO Cycle)  
-**Last Updated**: January 2026  
-**Maintained by**: Global Education Cluster Technical Team
