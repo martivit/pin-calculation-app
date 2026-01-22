@@ -1,7 +1,6 @@
 # PiN Calculation App
 
-A Streamlit-based web application to calculate People in Need (PiN) figures for education in humanitarian contexts, aligned with the Global Education Cluster (GEC) PiN methodology and integrated into the JIAF 2.0 framework.
-Designed for Information Management Officers (IMOs) and Cluster Coordinators (CCs) to support Education PiN calculations for the HNO, through a step-by-step workflow.
+A Streamlit-based web application to calculate Education People in Need (PiN) figures.
 
 ## Table of Contents
 
