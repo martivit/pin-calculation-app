@@ -26,6 +26,7 @@ A Streamlit-based web application for calculating People in Need (PiN) figures f
 - [Installation and Setup](#installation-and-setup)
 - [Usage](#usage)
 - [Output Files](#output-files)
+- [Configuration: Country Lists](#configuration-country-lists)
 - [Debugging Outside Streamlit](#debugging-outside-streamlit)
 
 
@@ -358,7 +359,6 @@ results = calculatePIN(country, edu_data, household_data, ...)
 - `Parameters_Input_Document_{timestamp}.docx`
 
 ## Installation and Setup
-
 ### Prerequisites
 
 - Python 3.8 or higher
@@ -429,6 +429,146 @@ platform_PiN_output/{country}/
 ```
 
 This creates a historical archive of all calculations for audit and comparison purposes.
+
+
+
+## Configuration: Country Lists
+
+### Overview
+
+The application categorizes countries into different workflow types. When adding or removing countries from these categories, you must update the country lists in **multiple locations** to ensure consistent behavior across the application.
+
+### Country Categories
+
+**1. Hybrid Scenario Countries** (Two-step PiN calculation with extrapolation)
+- Central African Republic, Ethiopia, DRC, Lebanon, Somalia, South Sudan
+
+**2. Alternative Countries** (JENA/EMIS data integration)
+- Niger, Nigeria, Mozambique
+
+**3. Overall Countries** (Special aggregation logic)
+- Haiti, Sudan, DRC, South Sudan
+
+### Files Requiring Updates
+
+When modifying country lists, you must update **ALL** of the following locations:
+
+#### **1. Page 1: Upload -- Education Data**
+**File:** `pages/1_📁_Upload_--_Education_Data.py`
+
+**Line ~276-284:** Hybrid scenario countries list
+```python
+hybrid_scenario_countries = [
+    'Central African Republic -- CAR',
+    'Ethiopia -- ETH',
+    'Democratic Republic of the Congo -- DRC',
+    'Lebanon -- LBN',
+    'Somalia -- SOM',
+    'South Sudan -- SSD'
+]
+```
+
+**Line ~341:** Alternative countries list
+```python
+alternative_countries = ['Niger -- NER', 'Nigeria -- NRA', 'Mozambique -- MOZ']
+```
+
+#### **2. Page 3: Download -- PiN Figures and Other Outputs**
+**File:** `pages/3_📋_Download_--_PiN_figures_and_other_outputs.py`
+
+**Line ~321-329:** Hybrid scenario countries list
+```python
+hybrid_scenario_countries = [
+    'Central African Republic -- CAR',
+    'Ethiopia -- ETH',
+    'Democratic Republic of the Congo -- DRC',
+    'Lebanon -- LBN',
+    'Somalia -- SOM',
+    'South Sudan -- SSD'
+]
+```
+
+**Line ~337:** Alternative countries list
+```python
+alternative_countries = ['Niger -- NER', 'Nigeria -- NRA','Mozambique -- MOZ' ]
+```
+
+#### **3. Main PiN Calculation Function**
+**File:** `src/calculation_for_PiN_Dimension.py`
+
+**Line ~447-448:** Overall countries list
+```python
+OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN', 'Democratic Republic of the Congo -- DRC', 'South Sudan -- SSD'}
+```
+
+**Line ~572 (inside `reduce_index` function):** Overall countries check
+```python
+OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN', 'Democratic Republic of the Congo -- DRC', 'South Sudan -- SSD'}
+```
+
+**Line ~788 (inside `calculate_prop` function):** Overall countries logic
+```python
+OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN', 'Democratic Republic of the Congo -- DRC','South Sudan -- SSD'}
+```
+
+### Update Checklist
+
+When adding or removing a country from a category, follow this checklist:
+
+- [ ] Update `hybrid_scenario_countries` in `1_📁_Upload_--_Education_Data.py` (Line ~276)
+- [ ] Update `alternative_countries` in `1_📁_Upload_--_Education_Data.py` (Line ~341)
+- [ ] Update `hybrid_scenario_countries` in `3_📋_Download_--_PiN_figures_and_other_outputs.py` (Line ~321)
+- [ ] Update `alternative_countries` in `3_📋_Download_--_PiN_figures_and_other_outputs.py` (Line ~337)
+- [ ] Update `OVERALL_COUNTRIES` in `calculation_for_PiN_Dimension.py` (Lines ~447, ~572, ~788)
+- [ ] Test the workflow for the affected country
+- [ ] Update corresponding country list in debugging scripts if applicable
+
+### Example: Adding a New Hybrid Country
+
+To add Mali as a hybrid country:
+
+1. In `pages/1_📁_Upload_--_Education_Data.py` (Line ~276):
+```python
+hybrid_scenario_countries = [
+    'Central African Republic -- CAR',
+    'Ethiopia -- ETH',
+    'Democratic Republic of the Congo -- DRC',
+    'Mali -- MLI',  # ← ADD HERE
+    'Lebanon -- LBN',
+    'Somalia -- SOM',
+    'South Sudan -- SSD'
+]
+```
+
+2. In `pages/3_📋_Download_--_PiN_figures_and_other_outputs.py` (Line ~321):
+```python
+hybrid_scenario_countries = [
+    'Central African Republic -- CAR',
+    'Ethiopia -- ETH',
+    'Democratic Republic of the Congo -- DRC',
+    'Mali -- MLI',  # ← ADD HERE
+    'Lebanon -- LBN',
+    'Somalia -- SOM',
+    'South Sudan -- SSD'
+]
+```
+
+3. Ensure Mali has the required secondary data in `context_DB/` folder
+4. Ensure Mali has 2024 PiN data in `pin2024_cat/` folder for extrapolation
+
+### Important Notes
+
+⚠️ **Country Code Format**: Always use the format `"Country Name -- CODE"` (e.g., `'Mali -- MLI'`)
+
+⚠️ **Case Sensitivity**: Country codes are case-sensitive
+
+⚠️ **Data Dependencies**: 
+- Hybrid countries require data in `context_DB/` and `pin2024_cat/`
+- Alternative countries require JENA or EMIS template files in `input/`
+
+⚠️ **Testing**: After updating country lists, test the full workflow for affected countries before deploying
+
+
 
 ## Debugging Outside Streamlit
 
