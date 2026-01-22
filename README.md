@@ -609,3 +609,8 @@ python run_PiNcalculation_outside_streamlit.py
 ```
 
 5. **Inspect outputs**: Results are saved to `output/` directory
+
+
+**Version**: 2.0 (2025 HNO Cycle)  
+**Last Updated**: January 2026  
+**Maintained by**: Global Education Cluster (developed by Martina Vit)
