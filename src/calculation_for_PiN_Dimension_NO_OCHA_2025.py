@@ -1108,14 +1108,14 @@ def calculatePIN_NO_OCHA_2025 (country, edu_data, household_data, choice_data, s
                                                                                     barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                                                                                     age_var, gender_var,
                                                                                     label, 
-                                                                                    admin_var, vector_cycle, start_school, status_var,
+                                                                                    admin_var, vector_cycle, start_school, status_var,host_value ,idp_value ,returnee_value ,refugee_value, other_value ,
                                                                                     mismatch_admin,
                                                                                     selected_language):
 
     admin_target = admin_var
     pop_group_var = status_var
 
-    admin_var = find_best_match(admin_target,  household_data)
+    admin_var = 'admin_hno'
 
     admin_column_rapresentative = []
     grouped_dict = {}
