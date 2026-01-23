@@ -87,9 +87,13 @@ def find_matching_choices(choices_df, barriers_list, label_var):
     return results
 
         
-##--------------------------------------------------------------------------------------------
 
-def calculate_severity(country, gender, age, access, barrier, armed_disruption, natural_hazard,idp_disruption, teacher_disruption,names_severity_4, names_severity_5):
+##--------------------------------------------------------------------------------------------
+def calculate_severity(country, gender, age, access, barrier,
+                       armed_disruption, natural_hazard, additional_ind,additional_2_ind,
+                       natural_hazard_severity, additional_ind_severity,additional_2_ind_severity,
+                       idp_disruption, teacher_disruption,
+                       names_severity_4, names_severity_5):
 
     # Helper function to safely normalize string inputs
     def normalize(input_value):
@@ -105,17 +109,18 @@ def calculate_severity(country, gender, age, access, barrier, armed_disruption, 
     normalized_access = normalize(access)
     normalized_armed_disruption = normalize(armed_disruption) if armed_disruption is not None else None
     normalized_natural_hazard = normalize(natural_hazard) if natural_hazard is not None else None
+    normalized_additional_ind = normalize(additional_ind) if additional_ind is not None else None
+    normalized_additional_2_ind = normalize(additional_2_ind) if additional_2_ind is not None else None
+
     normalized_idp_disruption = normalize(idp_disruption)
     normalized_teacher_disruption = normalize(teacher_disruption)
-    #normalized_protection_at_school = normalize(protection_at_school) if protection_at_school is not None else None
-    #normalized_protection_to_school = normalize(protection_to_school) if protection_to_school is not None else None
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', '1', 1]
-    no_answers = ['no', 'non', '0', 0]
+    yes_answers = ['yes', 'oui', 1, '1', '1. yes', '1. Yes']  # keep lenient
+    no_answers  = ['no', 'non', 0, '0', '2. no', '2. No']
 
     if country != 'Afghanistan -- AFG':
-    # Main severity calculation logic
+        # Main severity calculation logic
         if normalized_access in no_answers:
             if barrier in names_severity_5:
                 return 5
@@ -123,47 +128,245 @@ def calculate_severity(country, gender, age, access, barrier, armed_disruption, 
                 return 4
             else:
                 return 3
-        elif normalized_access in yes_answers:
-            # Check if 'armed_disruption' is valid and not None
-            if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
-                return 5
-            elif normalized_idp_disruption in yes_answers:
-                return 4
-            elif normalized_teacher_disruption in yes_answers:
-                return 3
-            elif normalized_natural_hazard is not None and normalized_natural_hazard in yes_answers:
-                return 3
-            else:
-                return 2
-        
-        return None  # Default fallback in case none of the conditions are met
 
-    else: 
-         # Main severity calculation logic
+        elif normalized_access in yes_answers:
+            # Accumulator pattern (start from 2 and raise as triggers fire)
+            sev = 2
+
+            # Armed disruption → immediate 5 if yes
+            if (normalized_armed_disruption is not None) and (normalized_armed_disruption in yes_answers):
+                return 5
+
+            # IDP disruption → at least 4
+            if normalized_idp_disruption in yes_answers:
+                sev = max(sev, 4)
+
+            # Teacher disruption → at least 3
+            if normalized_teacher_disruption in yes_answers:
+                sev = max(sev, 3)
+
+            # Natural hazard → use its configured severity (3 or 4)
+            if (normalized_natural_hazard is not None) and (normalized_natural_hazard in yes_answers):
+                if isinstance(natural_hazard_severity, int):
+                    sev = max(sev, natural_hazard_severity)
+                else:
+                    sev = max(sev, 3)  # conservative default
+
+            # Additional indicator → use its configured severity (3 or 4)
+            if (normalized_additional_ind is not None) and (normalized_additional_ind in yes_answers):
+                if isinstance(additional_ind_severity, int):
+                    sev = max(sev, additional_ind_severity)
+                else:
+                    sev = max(sev, 3)  # conservative default
+            # Additional indicator → use its configured severity (3 or 4)
+            if (normalized_additional_2_ind is not None) and (normalized_additional_2_ind in yes_answers):
+                if isinstance(additional_2_ind_severity, int):
+                    sev = max(sev, additional_2_ind_severity)
+                else:
+                    sev = max(sev, 3)  # conservative default        
+
+            return sev
+
+        return None  # Default fallback
+
+    else:
+        # Afghanistan branch (same as yours, plus accumulator for access==yes)
         if normalized_access in no_answers:
             if barrier in names_severity_5:
                 return 5
-            elif gender == 'female' and age > 12:
+            elif normalized_gender == 'female' and (isinstance(normalized_age, (int, float)) and normalized_age > 12):
                 return 5
             elif barrier in names_severity_4:
                 return 4
             else:
                 return 3
-        elif normalized_access in yes_answers:
-            # Check if 'armed_disruption' is valid and not None
-            if normalized_armed_disruption is not None and normalized_armed_disruption in yes_answers:
-                return 5
-            elif normalized_idp_disruption in yes_answers:
-                return 4
-            elif normalized_teacher_disruption in yes_answers:
-                return 3
-            elif normalized_natural_hazard is not None and normalized_natural_hazard in yes_answers:
-                return 3
-            else:
-                return 2
-        
-        return None  # Default fallback in case none of the conditions are met
 
+        elif normalized_access in yes_answers:
+            sev = 2
+
+            if (normalized_armed_disruption is not None) and (normalized_armed_disruption in yes_answers):
+                return 5
+
+            if normalized_idp_disruption in yes_answers:
+                sev = max(sev, 4)
+
+            if normalized_teacher_disruption in yes_answers:
+                sev = max(sev, 3)
+
+            if (normalized_natural_hazard is not None) and (normalized_natural_hazard in yes_answers):
+                if isinstance(natural_hazard_severity, int):
+                    sev = max(sev, natural_hazard_severity)
+                else:
+                    sev = max(sev, 3)
+
+            if (normalized_additional_ind is not None) and (normalized_additional_ind in yes_answers):
+                if isinstance(additional_ind_severity, int):
+                    sev = max(sev, additional_ind_severity)
+                else:
+                    sev = max(sev, 3)
+            # Additional indicator → use its configured severity (3 or 4)
+            if (normalized_additional_2_ind is not None) and (normalized_additional_2_ind in yes_answers):
+                if isinstance(additional_2_ind_severity, int):
+                    sev = max(sev, additional_2_ind_severity)
+                else:
+                    sev = max(sev, 3)  # conservative default             
+
+            return sev
+
+        return None  # Default fallback
+
+
+##--------------------------------------------------------------------------------------------
+##--------------------------------------------------------------------------------------------
+
+##--------------------------------------------------------------------------------------------
+def add_indicator_columns(data, access_var, teacher_disruption_var, natural_hazard_var, idp_disruption_var, armed_disruption_var, barrier_var, names_severity_4, names_severity_5):
+    """
+    Add indicator columns to the dataset and set their values based on conditions,
+    taking severity into account.
+
+    Args:
+        data (pd.DataFrame): The input DataFrame.
+        access_var (str): Column name for access indicator.
+        teacher_disruption_var (str): Column name for teacher disruption indicator.
+        natural_hazard_var (str): Column name for natural hazard indicator.
+        idp_disruption_var (str): Column name for IDP disruption indicator.
+        armed_disruption_var (str): Column name for armed disruption indicator.
+        barrier_var (str): Column name for barrier indicator.
+        names_severity_4 (list): List of barrier names for severity 4.
+        names_severity_5 (list): List of barrier names for severity 5.
+
+    Returns:
+        pd.DataFrame: The updated DataFrame with new indicator columns.
+    """
+
+    # Helper function to normalize string inputs
+    def normalize(input_value):
+        if isinstance(input_value, str):
+            return input_value.lower()
+        elif isinstance(input_value, (int, float)):  # Handle numeric values directly
+            return input_value
+        return ""  # Default to empty string if input is not a string or number
+
+    # Define the conditions for yes and no answers
+    yes_answers = ['yes', 'oui', 1, '1', '1. yes', '1. Yes']  # keep lenient
+    no_answers  = ['no', 'non', 0, '0', '2. no', '2. No']
+
+    no_indicator = 'no_indicator'
+
+    # Initialize new columns with 0
+    data['indicator.access'] = 0
+    data['indicator.teacher'] = 0
+    data['indicator.hazard'] = 0
+    data['indicator.idp'] = 0
+    data['indicator.occupation'] = 0
+    data['indicator.barrier4'] = 0
+    data['indicator.barrier5'] = 0
+
+    # Apply conditions with severity filtering
+    data['indicator.access'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 3 and normalize(row[access_var]) in no_answers else 0, axis=1
+    )
+
+    # Ensure teacher and hazard are mutually exclusive (teacher has priority)
+    def set_teacher_hazard(row):
+        """ Ensure teacher has priority over hazard, and handle missing hazard data """
+        t_val = normalize(row[teacher_disruption_var]) if teacher_disruption_var != no_indicator else ""
+        h_val = normalize(row[natural_hazard_var]) if natural_hazard_var != no_indicator else ""
+
+        if row['severity_category'] not in [4, 5]:  # Apply only if severity is not 4 or 5
+            if t_val in yes_answers:
+                return 1, 0  # Teacher = 1, Hazard = 0 (teacher takes priority)
+            elif h_val in yes_answers:
+                return 0, 1  # Teacher = 0, Hazard = 1
+        
+        return 0, 0  # Default case if none of the conditions are met
+
+    # Apply mutually exclusive logic
+    data[['indicator.teacher', 'indicator.hazard']] = data.apply(
+        lambda row: set_teacher_hazard(row), axis=1, result_type='expand'
+    )
+
+    if idp_disruption_var != no_indicator:
+        data['indicator.idp'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 4 and normalize(row[idp_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    if armed_disruption_var != no_indicator:
+        data['indicator.occupation'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 5 and normalize(row[armed_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    data['indicator.barrier4'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 4 and row[barrier_var] in names_severity_4 else 0, axis=1
+    )
+
+    data['indicator.barrier5'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 5 and row[barrier_var] in names_severity_5 else 0, axis=1
+    )
+
+    return data
+
+
+##--------------------------------------------------------------------------------------------
+def add_indicator_columns_for_EMIS(data, access_var, teacher_disruption_var, natural_hazard_var, idp_disruption_var, armed_disruption_var, barrier_var, names_severity_4, names_severity_5):
+    # Helper function to normalize string inputs
+    def normalize(input_value):
+        if isinstance(input_value, str):
+            return input_value.lower()
+        elif isinstance(input_value, (int, float)):  # Handle numeric values directly
+            return input_value
+        return ""  # Default to empty string if input is not a string or number
+
+    # Define the conditions for yes and no answers
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes', '1. yes', ]
+    no_answers = ['no', 'non', 0, '0','2. No' , '2. no' ]
+
+    no_indicator = 'no_indicator'
+
+    # Initialize new columns with 0
+    data['var.access'] = 0
+    data['var.teacher'] = 0
+    data['var.hazard'] = 0
+    data['var.idp'] = 0
+    data['var.occupation'] = 0
+    data['var.barrier4'] = 0
+    data['var.barrier5'] = 0
+
+    # Apply conditions with severity filtering
+    data['var.access'] = data.apply(
+        lambda row: 1 if normalize(row[access_var]) in yes_answers else 0, axis=1
+    )
+
+    if teacher_disruption_var != no_indicator:
+        data['var.teacher'] = data.apply(
+            lambda row: 1 if row['severity_category'] not in [4, 5] and normalize(row[teacher_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    if natural_hazard_var != no_indicator:
+        data['var.hazard'] = data.apply(
+            lambda row: 1 if row['severity_category'] not in [4, 5] and row[teacher_disruption_var] != 1 and normalize(row[natural_hazard_var]) in yes_answers else 0, axis=1
+        )
+
+    if idp_disruption_var != no_indicator:
+        data['var.idp'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 4 and row['severity_category'] != 5 and normalize(row[idp_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    if armed_disruption_var != no_indicator:
+        data['var.occupation'] = data.apply(
+            lambda row: 1 if row['severity_category'] == 5 and normalize(row[armed_disruption_var]) in yes_answers else 0, axis=1
+        )
+
+    data['var.barrier4'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 4 and row[barrier_var] in names_severity_4 else 0, axis=1
+    )
+
+    data['var.barrier5'] = data.apply(
+        lambda row: 1 if row['severity_category'] == 5 and row[barrier_var] in names_severity_5 else 0, axis=1
+    )
+
+    return data
 ##--------------------------------------------------------------------------------------------
 def assign_dimension_pin(access, severity):
     # Normalize access status
@@ -171,13 +374,13 @@ def assign_dimension_pin(access, severity):
         if isinstance(input_string, str):
             return input_string.lower()
         return ""  # Default to empty string if input is not a string
-    
+
     # Normalize the input to handle different cases and languages
     normalized_access = normalize(access)
 
     # Normalize to handle English and French variations of "yes" and "no"
-    yes_answers = ['yes', 'oui', 1, '1']
-    no_answers = ['no', 'non', 0, '0']
+    yes_answers = ['yes', 'oui', 1, '1', '1. Yes','1. yes']
+    no_answers = ['no', 'non', 0, '0','2. No' , '2. no']
 
     # Mapping severity to dimension labels
     if normalized_access in no_answers:
@@ -204,22 +407,6 @@ def print_subtables(severity_admin_status, pop_group_var):
         print(f"\nSubtable for {pop_group_var} = {group}")
         print(subtable)
         print("\n" + "-"*50 + "\n")
-
-##--------------------------------------------------------------------------------------------
-def save_subtables_to_excel(severity_admin_status, pop_group_var, file_path):
-    # Get the level number for pop_group_var
-    level_number = severity_admin_status.index.names.index(pop_group_var)
-    
-    # Get unique groups
-    unique_groups = severity_admin_status.index.get_level_values(level_number).unique()
-    
-    # Create a Pandas Excel writer using XlsxWriter as the engine
-    with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
-        # Iterate and save subtables
-        for group in unique_groups:
-            subtable = severity_admin_status.xs(group, level=level_number)
-            subtable.to_excel(writer, sheet_name=f"{pop_group_var}_{group}")
-            print(f"-------------------- Subtable for {pop_group_var} = {group} saved to sheet {pop_group_var}_{group}")
 
 
 ##--------------------------------------------------------------------------------------------
@@ -273,56 +460,89 @@ def assign_school_cycle(edu_age_corrected, single_cycle=False, lower_primary_sta
         
 ##--------------------------------------------------------------------------------------------
 ## finding admin        
-def extract_number(s):
-    match = re.search(r'\d+', s)
-    return int(match.group()) if match else None
-def find_similar_columns(admin_target, columns):
-    # Extract the base target without numbers for string comparison
-    base_target = re.sub(r'\d+', '', admin_target).lower()
+def extract_number(col_name: str) -> int|None:
+    nums = re.findall(r'\d+', col_name or "")
+    return int(nums[-1]) if nums else None
 
-    # Find columns that have high string similarity with the base target
-    similar_columns = []
-    for col in columns:
-        base_col = re.sub(r'\d+', '', col).lower()
-        similarity_score = fuzz.partial_ratio(base_target, base_col)
-        if similarity_score > 70:  # Set a threshold for similarity
-            similar_columns.append(col)
-    
-    return similar_columns
-def find_best_match(admin_target, columns):
-    # Extract the target number
-    target_number = extract_number(admin_target)
+def looks_like_pcode(series, min_fraction=0.8):
+    p = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]+$')
+    vals = series.dropna().astype(str)
+    if len(vals)==0: return False
+    return (vals.str.match(p).sum() / len(vals)) >= min_fraction
 
-    # Step 1: Find columns similar in text content
-    similar_columns = find_similar_columns(admin_target, columns)
+def find_best_match(admin_target: str,
+                    household_df,
+                    similarity_threshold=70,
+                    pcode_fraction=0.8,
+                    fallback_threshold=50) -> str:
+    cols = list(household_df.columns)
+    target_num = extract_number(admin_target)
 
-    if not similar_columns:
-        # Fallback to fuzzy matching across all columns if no similar columns are found
-        return process.extractOne(admin_target, columns)[0]
+    # — Step 0: All columns that *share* that number in their name
+    num_cols = [c for c in cols if extract_number(c)==target_num]
 
-    # Step 2: Among similar columns, prioritize those with matching numbers
-    candidates_with_same_number = [col for col in similar_columns if extract_number(col) == target_number]
-
-    if candidates_with_same_number:
-        # Further prioritize candidates that include the word 'code'
-        candidates_with_code = [col for col in candidates_with_same_number if 'code' in col.lower()]
-
-        if candidates_with_code:
-            # If there are candidates with 'code', return the best match among them
-            return process.extractOne(admin_target, candidates_with_code)[0]
-        else:
-            # If no candidates with 'code', return the best match among all candidates with the same number
-            return process.extractOne(admin_target, candidates_with_same_number)[0]
+    # — Step 1: Among those, pick any with “code”
+    code_cols = [c for c in num_cols if 'code' in c.lower()]
+    if code_cols:
+        candidates = code_cols
+    elif num_cols:
+        candidates = num_cols
     else:
-        # Fallback to fuzzy matching among the similar columns
-        return process.extractOne(admin_target, similar_columns)[0]
+        candidates = []
+
+    # — Step 2: If we still have nothing, use your fuzzy + number + code logic:
+    if not candidates:
+        # fuzzy find “similar” by text
+        base = re.sub(r'\d+','', admin_target).lower()
+        similar = [c for c in cols
+                   if fuzz.partial_ratio(base, re.sub(r'\d+','',c).lower())
+                      >= similarity_threshold]
+
+        # among “similar” pick same-number, then code, then rest
+        same_num = [c for c in similar if extract_number(c)==target_num]
+        code_in_same = [c for c in same_num if 'code' in c.lower()]
+
+        if code_in_same:
+            candidates = code_in_same
+        elif same_num:
+            candidates = same_num
+        else:
+            candidates = similar
+
+    # — Step 3: fallback global fuzzy if we still have nothing
+    if not candidates:
+        matches = process.extract(admin_target, cols,
+                                  scorer=fuzz.partial_ratio,
+                                  limit=len(cols))
+        candidates = [m[0] for m in matches if m[1]>=fallback_threshold]
+
+    # — Step 4: If STILL nothing, just take the single best
+    if not candidates:
+        return process.extractOne(admin_target, cols)[0]
+
+    # Debug print
+    print("→ ordered candidates:", candidates)
+
+    # — Step 5: pick first whose values *look* like P-codes
+    for c in candidates:
+        if looks_like_pcode(household_df[c], min_fraction=pcode_fraction):
+            print(f"→ picking {c} (passed P-code check)")
+            return c
+
+    # — Step 6: fallback to single best fuzzy match
+    print("→ none passed P-code check; falling back")
+    return process.extractOne(admin_target, cols,
+                              scorer=fuzz.partial_ratio)[0]
 ########################################################################################################################################
 ########################################################################################################################################
 ##############################################    PIN CALCULATION FUNCTION    ##########################################################
 ########################################################################################################################################
 ########################################################################################################################################
 def add_severity (country, edu_data, household_data, choice_data, survey_data, 
-                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
+                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+                natural_hazard_var,natural_hazard_var_sev,
+                additional_last_var,additional_last_sev,
+                additional_2_last_var,additional_2_last_sev,
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
                 label, 
@@ -333,22 +553,6 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     pop_group_var = status_var
 
 
-    ## essential variables --------------------------------------------------------------------------------------------
-
-    host_suggestion = ["Urban","always_lived",'Host Community','host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ["Rural","displaced", 'New IDPs','pdi', 'idp', 'site', 'camp', 'migrant', 'Out-of-camp', 'In-camp','no', 'pdi_site', 'pdi_fam', '2', '1' ]
-    returnee_suggestion = ['displaced_previously' ,'cb_returnee','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
-    refugee_suggestion = ['refugees', 'refugee', 'prl', 'refugiee', '3']
-    ndsp_suggestion = ['ndsp','Protracted IDPs']
-    status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
-    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiee', 'Other']
-    suggestions_mapping = {
-        'Host/Hôte': host_suggestion,
-        'IDP/PDI': IDP_suggestion,
-        'Returnees/Retournés': returnee_suggestion,
-        'Refugees/Refugiee': refugee_suggestion,
-        'Other': ndsp_suggestion
-    }
     # --------------------------------------------------------------------------------------------
     admin_levels_per_country = {
         'Afghanistan -- AFG': ['Admin_1: Region', 'Admin_2: Province', 'Admin_3: Districts'],
@@ -374,50 +578,11 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
 
 
     ####### ** 1 **       ------------------------------ manipulation and join between H and edu data   ------------------------------------------     #######
-        
-    # Find the UUID columns, assuming they exist and taking only the first match for simplicity
-    edu_uuid_column = [col for col in edu_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
-    household_uuid_column = [col for col in household_data.columns if 'uuid' in col.lower()][0]  # Take the first item directly
-    print(household_uuid_column)
-    print(edu_uuid_column)
+    edu_uuid_column = "uuid"
+    household_uuid_column =  "uuid"
+    admin_var = "admin_hno"
+    weight_column = "weights"
 
-
-
-    if country != 'Afghanistan -- AFG':
-        # Safely get the first column that contains 'start' in its name
-        household_start_column = [col for col in household_data.columns if 'start' in col.lower()]
-        if household_start_column:
-            household_start_column = household_start_column[0]  # Take the first item directly
-        else:
-            raise KeyError("No column containing 'start' found in household_data.")
-    else:
-        # Assign the 'today' column if the country is Afghanistan
-        household_start_column = 'today'
-        if household_start_column not in household_data.columns:
-            raise KeyError(f"'today' column is missing in household_data for Afghanistan.")
-
-    # Convert the date column to datetime and extract the month
-    
-    household_data[household_start_column] = household_data[household_start_column].apply(custom_to_datetime)
-    household_data[household_start_column] = pd.to_datetime(household_data[household_start_column], errors='coerce')
-
-    household_data['month'] = household_data[household_start_column].dt.month
-    #household_data['month'] = 7
-
-
-
-    admin_var = find_best_match(admin_target,  household_data.columns)
-    print(admin_var)
-
-
-    weight_column = None
-
-    # Check if 'weights' column exists, if not, find and rename the correct weight column
-    if 'weights' not in household_data.columns:
-        weight_column = [col for col in household_data.columns if 'weight' in col.lower()][0]  # Take the first matching weight column
-        household_data = household_data.rename(columns={weight_column: 'weights'})
-    else:
-        print("--------------------------- Weights column already exists.")
 
     # Get the admin levels for the specified country
     admin_levels = admin_levels_per_country.get(country, [])
@@ -433,21 +598,27 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
     # Ensure there are no duplicate column names in columns_to_include
     columns_to_include = list(set(columns_to_include))
 
-    print(columns_to_include)
 
     columns_to_drop = [col for col in columns_to_include if col in edu_data.columns and col != edu_uuid_column and col != household_uuid_column]
     edu_data = edu_data.drop(columns=columns_to_drop, errors='ignore')
 
     # ----> Perform the joint_by
     edu_data = pd.merge(edu_data, household_data[columns_to_include], left_on=edu_uuid_column, right_on=household_uuid_column, how='left')
-    ##refining for school age-children
-    #edu_data = edu_data[(edu_data[age_var] >= 5) & (edu_data[age_var] <= 18)]
+
+    # --- Myanmar special case: create edu_ind_age_corrected = age_var - 1
+    if country == "Myanmar -- MMR":
+        # create/overwrite corrected age
+        edu_data["edu_ind_age_corrected"] = pd.to_numeric(edu_data[age_var], errors="coerce") - 1
+        # use corrected age going forward
+        age_var = "edu_ind_age_corrected"
+
 
     edu_data['edu_age_corrected'] = edu_data.apply(lambda row: row[age_var] - 1 if calculate_age_correction(start_school, row['month']) else row[age_var], axis=1)
 
     single_cycle = (vector_cycle[1] == 0)
     if country != 'Afghanistan -- AFG': primary_start = 6
     else: primary_start = 7
+
     edu_data['school_cycle'] = edu_data['edu_age_corrected'].apply(
         lambda x: assign_school_cycle(
             x, 
@@ -460,15 +631,39 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
    
     if country != 'Afghanistan -- AFG':
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 5) & (edu_data['edu_age_corrected'] <= 17)]
+    #elif    country == 'Haiti -- HTI':
+        #edu_data = edu_data[(edu_data['edu_age_corrected'] >= 3) & (edu_data['edu_age_corrected'] <= 17)]          
     else:
         edu_data = edu_data[(edu_data['edu_age_corrected'] >= 6) & (edu_data['edu_age_corrected'] <= 17)]
 
+    if country == "Afghanistan -- AFG":
+        female_vals = {"female", "femme", "woman_girl", "feminin"}
+        no_access_vals = {"no", "non", "0", 0}
+
+        # ensure age is numeric for the comparison (> 12)
+        age_num = pd.to_numeric(edu_data[age_var], errors="coerce")
+
+        edu_data.loc[
+            (edu_data[gender_var].astype(str).str.strip().str.lower().isin(female_vals)) &
+            (age_num > 12) &
+            (edu_data[access_var].isin(no_access_vals)),
+            barrier_var
+        ] = "ban"
+
+
 
     ####### ** 2 **       ------------------------------ severity definition and calculation ------------------------------------------     #######
+   
     severity_4_matches = find_matching_choices(choice_data, selected_severity_4_barriers, label_var=label)
     severity_5_matches = find_matching_choices(choice_data, selected_severity_5_barriers, label_var=label)
+    print('severity_4_matches =======> ')
+    print(selected_severity_4_barriers)
+    print(severity_4_matches)
+
     names_severity_4 = [entry['name'] for entry in severity_4_matches]
     names_severity_5 = [entry['name'] for entry in severity_5_matches]
+
+    print('access_var ' + access_var + " gender_var " , gender_var)
 
     edu_data['severity_category'] = edu_data.apply(lambda row: calculate_severity(
         country = country,
@@ -478,12 +673,18 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         barrier=row[barrier_var], 
         armed_disruption=row[armed_disruption_var] if armed_disruption_var != 'no_indicator' else None, 
         natural_hazard=row[natural_hazard_var] if natural_hazard_var != 'no_indicator' else None, 
+        additional_ind=row[additional_last_var] if additional_last_var != 'no_indicator' else None, 
+        additional_2_ind=row[additional_2_last_var] if additional_2_last_var != 'no_indicator' else None, 
+        natural_hazard_severity= natural_hazard_var_sev if natural_hazard_var != 'no_indicator' else None, 
+        additional_ind_severity=additional_last_sev if additional_last_var != 'no_indicator' else None,
+        additional_2_ind_severity=additional_2_last_sev if additional_2_last_var != 'no_indicator' else None, 
         idp_disruption=row[idp_disruption_var], 
         teacher_disruption=row[teacher_disruption_var], 
         #protection_at_school=row['e_incident_ecol'] if country == 'Burkina Faso -- BFA'  else None,
         #protection_to_school=row['e_incident_trajet'] if country == 'Burkina Faso -- BFA'  else None,
         names_severity_4=names_severity_4, 
         names_severity_5=names_severity_5
+
     ), axis=1)
 
     # Add the new column 'dimension_pin' to edu_data
@@ -492,9 +693,47 @@ def add_severity (country, edu_data, household_data, choice_data, survey_data,
         severity= row['severity_category']
         ), axis=1)
 
+    edu_data = add_indicator_columns(
+        data=edu_data,
+        access_var=access_var,
+        teacher_disruption_var=teacher_disruption_var,
+        natural_hazard_var=natural_hazard_var,
+        idp_disruption_var=idp_disruption_var,
+        armed_disruption_var=armed_disruption_var,
+        barrier_var=barrier_var,
+        names_severity_4=names_severity_4,
+        names_severity_5=names_severity_5
+    )
+
+    edu_data = add_indicator_columns_for_EMIS(
+        data=edu_data,
+        access_var=access_var,
+        teacher_disruption_var=teacher_disruption_var,
+        natural_hazard_var=natural_hazard_var,
+        idp_disruption_var=idp_disruption_var,
+        armed_disruption_var=armed_disruption_var,
+        barrier_var=barrier_var,
+        names_severity_4=names_severity_4,
+        names_severity_5=names_severity_5
+    )
+    # --- Drop rows where severity_category is missing AND edu_age_corrected == 17 ---
+    age17 = pd.to_numeric(edu_data["edu_age_corrected"], errors="coerce").eq(17)
+
+    sev_missing = (
+        edu_data["severity_category"].isna()
+        | edu_data["severity_category"].astype(str).str.strip().isin(["", "None", "nan"])
+    )
+
+    to_drop = age17 & sev_missing
+    n_drop = int(to_drop.sum())
+
+    drop_msg = None
+
+    if n_drop > 50:
+        edu_data = edu_data.loc[~to_drop].copy()
+        drop_msg = (f"Dropped {to_drop.sum()} Rows with an empty severity_category and edu_age_corrected == 17 likely indicate cases where education indicators were not collected for individuals aged 18")
 
 
-
-    return edu_data
+    return edu_data, drop_msg
 
 

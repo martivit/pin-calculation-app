@@ -8,6 +8,7 @@ from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
 import re
 from collections import defaultdict
+import sys
 
 
 int_2 = '2.0'
@@ -46,6 +47,21 @@ label_dimension_perc_tot = '% Tot in PiN Dimensions'
 label_dimension_tot = '# Tot in PiN Dimensions'
 label_dimension_tot_population = 'TotN'
 
+label_perc_sev3_indicator_access= 'severity level 3 -- OoS children -- % of children not accessing education who dot not face any aggravating circumstances'
+label_perc_sev3_indicator_teacher = 'severity level 3 -- in-school children -- % of children whose ducation was disrupted by teacher absence'
+label_perc_sev3_indicator_hazard = 'severity level 3 -- in-school children -- % of children whose education was disrupted by natural hazard'
+label_perc_sev4_indicator_idp = 'severity level 4 -- in-school children -- % of children whose education was disrupted by the school being used as shelter'
+label_perc_sev5_indicator_occupation = 'severity level 5 -- in-school children -- % of children whose education was disrupted by the school being occupied by armed groups'
+label_perc_sev4_aggravating_circumstances = 'severity level 4, indicator: individual aggravating circumstances (cumulative of all Level 4 aggravating circumstances) -- % of children'
+label_perc_sev5_aggravating_circumstances = 'severity level 5, indicator: individual aggravating circumstances (cumulative of all Level 5 aggravating circumstances) -- % of children'
+
+label_tot_sev3_indicator_access= 'severity level 3 -- OoS children -- # of children not accessing education who dot not face any aggravating circumstances'
+label_tot_sev3_indicator_teacher = 'severity level 3 -- in-school children -- # of children whose ducation was disrupted by teacher absence'
+label_tot_sev3_indicator_hazard = 'severity level 3 -- in-school children -- # of children whose education was disrupted by natural hazard'
+label_tot_sev4_indicator_idp = 'severity level 4 -- in-school children -- # of children whose education was disrupted by the school being used as shelter'
+label_tot_sev5_indicator_occupation = 'severity level 5 -- in-school children -- # of children whose education was disrupted by the school being occupied by armed groups'
+label_tot_sev4_aggravating_circumstances = 'severity level 4, indicator: individual aggravating circumstances (cumulative of all Level 4 aggravating circumstances) -- % of children'
+label_tot_sev5_aggravating_circumstances = 'severity level 5, indicator: individual aggravating circumstances (cumulative of all Level 5 aggravating circumstances) -- % of children'
 
 
 
@@ -215,20 +231,62 @@ def calculate_cycle_factors(df, factor_cycle, primary_start, secondary_end, vect
         result[category] = temp_df[columns_to_keep]
     return result
 ##--------------------------------------------------------------------------------------------
-def reduce_index(df, level, pop_group_var):
-    df.columns = df.columns.get_level_values(1)
-    df=df.droplevel(0, axis=0) 
-    df=df.droplevel(0, axis=0) 
-    if level == 0: df = df.reset_index( level = [0 , 1] ) 
-    if level == 1: df = df.reset_index( level = [0 , 1, 2] ) 
 
-    # Splitting the DataFrame based on pop_group_var
-    groups = df.groupby(pop_group_var)
-    df_list = {name: group for name, group in groups}
-
-    return df_list
+def replicate_for_popgroups(df_flat, pop_group_var, pop_groups):
+    """Return {pop_group: df_with_pop_group_col} using identical % values."""
+    return {
+        pg: df_flat.copy().assign(**{pop_group_var: pg})
+        for pg in pop_groups
+    }
 
 ##--------------------------------------------------------------------------------------------
+def reduce_index(df, level, pop_group_var, country, unique_pop_group):
+
+    OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN', 'Democratic Republic of the Congo -- DRC', 'South Sudan -- SSD'}
+    print('--------------------------------------------')
+    print(df)
+    # ---- Standard mode (unchanged, and keeps 2-level columns) ----
+    if country not in OVERALL_COUNTRIES:
+        df.columns = df.columns.get_level_values(1)
+        df=df.droplevel(0, axis=0) 
+        df=df.droplevel(0, axis=0) 
+        if level == 0: df = df.reset_index( level = [0 , 1] ) 
+        if level == 1: df = df.reset_index( level = [0 , 1, 2] ) 
+
+        # Splitting the DataFrame based on pop_group_var
+        groups = df.groupby(pop_group_var)
+        df_list = {name: group for name, group in groups}
+
+        return df_list
+
+
+    else:
+         
+        df.columns = df.columns.get_level_values(-1)
+        df = df.droplevel(0)  # drop level 0 (severity_category)
+
+        # collapse duplicated admin levels to a single one
+        if df.index.nlevels > 1:
+            lv0 = df.index.get_level_values(0)
+            lv1 = df.index.get_level_values(1)
+            df.index = lv0 if (lv0 == lv1).all() else lv1
+        df = df.reset_index()
+
+    # make a dict of identical dataframes, one per pop group
+        df_list = replicate_for_popgroups(
+            df_flat=df,
+            pop_group_var=pop_group_var,
+            pop_groups=unique_pop_group
+        )
+        print('after reducing index and duplicate for pop group:         ******************************************')  
+        print(df_list) 
+        return df_list
+
+
+
+
+##--------------------------------------------------------------------------------------------
+
 def add_disability_factor(df,factor=0.1, category = 'Disability'):
     # Copy the dataframe to avoid altering the original data
     result_df = df.copy()
@@ -584,8 +642,6 @@ def ensure_columns(pin_list, needed_columns):
     for category, grouped_df in pin_list.items():
         # Check if columns are missing and add them
         missing_columns = [col for col in needed_columns if col not in grouped_df.columns]
-        #print(grouped_df.columns)
-        #print(missing_columns)
         # Add missing columns only, without duplicating any existing ones
         for column in missing_columns:
             grouped_df[column] = 0  # Add the missing column with a default value of zero
@@ -593,6 +649,21 @@ def ensure_columns(pin_list, needed_columns):
         # Update the DataFrame in the dictionary
         pin_list[category] = grouped_df
 
+    return pin_list
+##--------------------------------------------------------------------------------------------
+def clean_indicator_columns(pin_list, dataframe_name):
+    # Remove column named `0` if it exists
+
+    for category, grouped_df in pin_list.items():
+
+        if 0 in grouped_df.columns:
+            grouped_df = grouped_df.drop(columns=[0])
+        # Rename column `1` to match the DataFrame name without `_list`
+        new_column_name = dataframe_name.replace('_list', '')
+        if 1 in grouped_df.columns:
+            grouped_df = grouped_df.rename(columns={1: new_column_name})
+    
+        pin_list[category] = grouped_df
     return pin_list
 ##--------------------------------------------------------------------------------------------
 def custom_to_datetime(date_str):
@@ -615,53 +686,83 @@ def rounding_dataframe(df, figures_round, percentage_round):
             df[col] = pd.to_numeric(df[col], errors='coerce').apply(lambda x: round(x * 100, percentage_round))        
 ##--------------------------------------------------------------------------------------------
 ## finding admin        
-def extract_number(s):
-    match = re.search(r'\d+', s)
-    return int(match.group()) if match else None
-def find_similar_columns(admin_target, columns):
-    # Extract the base target without numbers for string comparison
-    base_target = re.sub(r'\d+', '', admin_target).lower()
+def extract_number(col_name: str) -> int|None:
+    nums = re.findall(r'\d+', col_name or "")
+    return int(nums[-1]) if nums else None
 
-    # Find columns that have high string similarity with the base target
-    similar_columns = []
-    for col in columns:
-        base_col = re.sub(r'\d+', '', col).lower()
-        similarity_score = fuzz.partial_ratio(base_target, base_col)
-        if similarity_score > 70:  # Set a threshold for similarity
-            similar_columns.append(col)
-    
-    return similar_columns
-def find_best_match(admin_target, columns):
-    # Extract the target number
-    target_number = extract_number(admin_target)
+def looks_like_pcode(series, min_fraction=0.8):
+    p = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]+$')
+    vals = series.dropna().astype(str)
+    if len(vals)==0: return False
+    return (vals.str.match(p).sum() / len(vals)) >= min_fraction
 
-    # Step 1: Find columns similar in text content
-    similar_columns = find_similar_columns(admin_target, columns)
+def find_best_match(admin_target: str,
+                    household_df,
+                    similarity_threshold=70,
+                    pcode_fraction=0.8,
+                    fallback_threshold=50) -> str:
+    cols = list(household_df.columns)
+    target_num = extract_number(admin_target)
 
-    if not similar_columns:
-        # Fallback to fuzzy matching across all columns if no similar columns are found
-        return process.extractOne(admin_target, columns)[0]
+    # — Step 0: All columns that *share* that number in their name
+    num_cols = [c for c in cols if extract_number(c)==target_num]
 
-    # Step 2: Among similar columns, prioritize those with matching numbers
-    candidates_with_same_number = [col for col in similar_columns if extract_number(col) == target_number]
-
-    if candidates_with_same_number:
-        # Further prioritize candidates that include the word 'code'
-        candidates_with_code = [col for col in candidates_with_same_number if 'code' in col.lower()]
-
-        if candidates_with_code:
-            # If there are candidates with 'code', return the best match among them
-            return process.extractOne(admin_target, candidates_with_code)[0]
-        else:
-            # If no candidates with 'code', return the best match among all candidates with the same number
-            return process.extractOne(admin_target, candidates_with_same_number)[0]
+    # — Step 1: Among those, pick any with “code”
+    code_cols = [c for c in num_cols if 'code' in c.lower()]
+    if code_cols:
+        candidates = code_cols
+    elif num_cols:
+        candidates = num_cols
     else:
-        # Fallback to fuzzy matching among the similar columns
-        return process.extractOne(admin_target, similar_columns)[0]
+        candidates = []
+
+    # — Step 2: If we still have nothing, use your fuzzy + number + code logic:
+    if not candidates:
+        # fuzzy find “similar” by text
+        base = re.sub(r'\d+','', admin_target).lower()
+        similar = [c for c in cols
+                   if fuzz.partial_ratio(base, re.sub(r'\d+','',c).lower())
+                      >= similarity_threshold]
+
+        # among “similar” pick same-number, then code, then rest
+        same_num = [c for c in similar if extract_number(c)==target_num]
+        code_in_same = [c for c in same_num if 'code' in c.lower()]
+
+        if code_in_same:
+            candidates = code_in_same
+        elif same_num:
+            candidates = same_num
+        else:
+            candidates = similar
+
+    # — Step 3: fallback global fuzzy if we still have nothing
+    if not candidates:
+        matches = process.extract(admin_target, cols,
+                                  scorer=fuzz.partial_ratio,
+                                  limit=len(cols))
+        candidates = [m[0] for m in matches if m[1]>=fallback_threshold]
+
+    # — Step 4: If STILL nothing, just take the single best
+    if not candidates:
+        return process.extractOne(admin_target, cols)[0]
+
+    # Debug print
+    print("→ ordered candidates:", candidates)
+
+    # — Step 5: pick first whose values *look* like P-codes
+    for c in candidates:
+        if looks_like_pcode(household_df[c], min_fraction=pcode_fraction):
+            print(f"→ picking {c} (passed P-code check)")
+            return c
+
+    # — Step 6: fallback to single best fuzzy match
+    print("→ none passed P-code check; falling back")
+    return process.extractOne(admin_target, cols,
+                              scorer=fuzz.partial_ratio)[0]
     
 ##--------------------------------------------------------------------------------------------
 def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_group_var, analysis_variable, 
-                                admin_low_ok_list, prefix_list, grouped_dict):
+                                admin_low_ok_list, prefix_list, grouped_dict, country, unique_pop_group):
     all_expanded_results_admin_up = {}  # Collect results from both levels by category
     admin_var_dummy = 'admin_var_dummy'
 
@@ -669,13 +770,10 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
     # Check if the `admin_var` column is empty
     if df[admin_var].notna().any():
         # 1. Run the analysis grouped by 'admin_var' (Analysis A)
-        results_analysis_admin_low = df.groupby([admin_var, pop_group_var, analysis_variable]).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        results_analysis_admin_low = reduce_index(results_analysis_admin_low, 0, pop_group_var)
-
+        results_analysis_admin_low = calculate_prop (df=df, admin_var=admin_var, pop_group_var=pop_group_var, target_var= analysis_variable, country = country)
+        results_analysis_admin_low = reduce_index(results_analysis_admin_low, 0, pop_group_var,country, unique_pop_group)
+        #print('after having calculate calculate_prop and reduce_index in the run_mismatch_admin_analysis -----> results_analysis_admin_low')    
+        #print(results_analysis_admin_low)
         # 3. Filter results_analysis_admin_low to only include rows where 'admin_var' is in 'admin_low_ok_list'
         if admin_low_ok_list:
             for category, pop_group_df in results_analysis_admin_low.items():
@@ -699,13 +797,10 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
             length, admin_col = list(admin_column_rapresentative.items())[0]
             
             # Run the analysis grouped by this single admin column
-            results_analysis_admin_up = df.groupby([admin_col, pop_group_var, analysis_variable]).agg(
-                total_weight=('weights', 'sum')
-            ).groupby(level=[0, 1]).apply(
-                lambda x: x / x.sum()
-            ).unstack(fill_value=0)
-            results_analysis_admin_up = reduce_index(results_analysis_admin_up, 0, pop_group_var)
-
+            results_analysis_admin_up = calculate_prop (df=df, admin_var=admin_col, pop_group_var=pop_group_var, target_var= analysis_variable, country = country)
+            results_analysis_admin_up = reduce_index(results_analysis_admin_up, 0, pop_group_var,country, unique_pop_group)
+            #print('after having calculate calculate_prop and reduce_index in the run_mismatch_admin_analysis -----> results_analysis_admin_up')    
+            #print(results_analysis_admin_up)
             admin_var_dummy = 'admin_var_dummy'
             for category, pop_group_df in results_analysis_admin_up.items():
                     pop_group_df.rename(columns={admin_col: admin_var_dummy}, inplace=True)
@@ -739,12 +834,8 @@ def run_mismatch_admin_analysis(df, admin_var, admin_column_rapresentative, pop_
                 #print(f"Running analysis for length {length} with column {admin_col} (index {idx})")
 
                 # Perform analysis grouped by each admin column
-                results_analysis_admin_up[idx] = df.groupby([admin_col, pop_group_var, analysis_variable]).agg(
-                    total_weight=('weights', 'sum')
-                ).groupby(level=[0, 1]).apply(
-                    lambda x: x / x.sum()
-                ).unstack(fill_value=0)
-                results_analysis_admin_up[idx] = reduce_index(results_analysis_admin_up[idx], 0, pop_group_var)
+                results_analysis_admin_up[idx] = calculate_prop (df=df, admin_var=admin_col, pop_group_var=pop_group_var, target_var= analysis_variable, country = country)
+                results_analysis_admin_up[idx] = reduce_index(results_analysis_admin_up[idx], 0, pop_group_var,country, unique_pop_group)
                 
                 admin_var_dummy = 'admin_var_dummy'
                 for category, pop_group_df in results_analysis_admin_up[idx].items():
@@ -862,17 +953,16 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
 
     # Get the available columns from the `edu_data` and `household_data` dataframes
     edu_columns = edu_data.columns
-    household_columns = household_data.columns
 
-    # Find the best match for `admin_var` in `household_data`
-    best_match_for_admin_var = find_similar_columns(admin_var, household_columns)
-    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var[0]}")
+    # Use the new best-match finder that checks P-codes etc.
+    best_match_for_admin_var = find_best_match(admin_var, household_data)
+    print(f"Best match for admin_var ({admin_var}) is: {best_match_for_admin_var}")
 
     # Iterate through each column in the edu_data dataframe
     for col in edu_columns:
         # Convert the column to strings to ensure type consistency
         column_data = edu_data[col].astype(str)
-        
+
         # For each length group in the `length_dict`, check for matches
         for length, codes in length_dict.items():
             matching_values = column_data.isin(codes)
@@ -884,28 +974,23 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
                 admin_columns_representative[length].append(col)
                 print(f"Matching column found: {col} for length {length}")
 
-    # Prioritize columns based on the number of non-empty values
+    # Helper to pick the column with the most non-empty values
     def prioritize_non_empty_columns(columns):
         non_empty_counts = {col: edu_data[col].notna().sum() for col in columns}
         sorted_columns = sorted(non_empty_counts, key=non_empty_counts.get, reverse=True)
         return sorted_columns[0] if sorted_columns else None
 
-    # Handle the case where multiple levels (lengths) are detected
+    # Handle multiple or single admin levels
     if len(length_dict) > 1:
         print("Multiple levels detected:")
         for length, codes in length_dict.items():
             print(f"Level {length}: {codes}")
 
-        # Match columns based on length and prioritize based on the number of non-empty values
         best_columns = {}
         for length, columns in admin_columns_representative.items():
-            # Prioritize based on the number of non-empty values
-            best_columns_for_level = prioritize_non_empty_columns(columns)
-            best_columns[length] = best_columns_for_level
-
+            best_columns[length] = prioritize_non_empty_columns(columns)
         admin_columns_representative = best_columns
     else:
-        # For single level case, directly prioritize the column with non-empty values
         if length_dict:
             single_level = next(iter(length_dict.keys()))
             columns_for_single_level = admin_columns_representative.get(single_level, [])
@@ -917,26 +1002,204 @@ def find_matching_columns_for_admin_levels(edu_data, household_data, prefix_list
     return admin_columns_representative
 
 
+
+##--------------------------------------------------------------------------------------------
 # Function to translate labels
 def translate_labels(data, translation_dict):
+    """
+    Translates column names and text values inside a DataFrame or dictionary of DataFrames.
+    Supports partial matches in column names.
+
+    Args:
+        data (pd.DataFrame or dict): DataFrame or dictionary of DataFrames to be translated.
+        translation_dict (dict): Dictionary where keys are words/phrases to translate and values are translations.
+
+    Returns:
+        Translated DataFrame(s).
+    """
+    
+    def translate_column_names(column_name):
+        """Apply translation to parts of column names based on dictionary."""
+        for eng, fr in translation_dict.items():
+            if eng in column_name:  # Check if part of the column matches
+                column_name = column_name.replace(eng, fr)  # Replace only that part
+        return column_name
+    
     # Check if 'data' is a DataFrame or a dictionary of DataFrames
     if isinstance(data, pd.DataFrame):
-        # Translate column names
-        data.columns = [translation_dict.get(col, col) for col in data.columns]
-        # Translate values inside the DataFrame
+        # Translate column names with partial replacements
+        data.columns = [translate_column_names(col) for col in data.columns]
+
+        # Translate values inside the DataFrame (only for string columns)
         for col in data.columns:
             if data[col].dtype == 'object':  # Apply replacement only for string columns
-                data[col] = data[col].replace(translation_dict)
+                for eng, fr in translation_dict.items():
+                    data[col] = data[col].str.replace(eng, fr, regex=True)
+
         return data
+
     elif isinstance(data, dict):
         # If 'data' is a dictionary, apply translation to each DataFrame
         for key in data:
             data[key] = translate_labels(data[key], translation_dict)
         return data
+
     else:
         raise TypeError("Input must be a pandas DataFrame or a dictionary of DataFrames.")
 
+##--------------------------------------------------------------------------------------------
+def calculate_prop(df, admin_var, pop_group_var, target_var, agg_var='weights', country=None):
+    """
+    Weighted proportions of `target_var` by admin and population group.
 
+    Default: group by population group (current behavior).
+    If `country` is in OVERALL_COUNTRIES, compute per-admin overall
+    (ignoring population groups) and broadcast the same proportions
+    to each (admin, pop_group) pair — while preserving:
+      • row MultiIndex: (admin_var, pop_group_var)
+      • column MultiIndex: ('total_weight', <target category>)
+    """
+
+    #OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN'}#, 'Myanmar -- MMR'
+    OVERALL_COUNTRIES = {'Haiti -- HTI', 'Sudan -- SDN', 'Democratic Republic of the Congo -- DRC','South Sudan -- SSD'}
+
+    # ---- Standard mode (unchanged, and keeps 2-level columns) ----
+    if country not in OVERALL_COUNTRIES:
+        print('i am in the startdard mode')
+        df_results = (
+            df.groupby([admin_var, pop_group_var, target_var])
+              .agg(total_weight=(agg_var, 'sum'))
+              .groupby(level=[0, 1])
+              .apply(lambda x: x / x.sum())
+              .unstack(fill_value=0)     # columns: MultiIndex ('total_weight', target)
+        )
+        return df_results               
+
+
+     # 1) per-admin proportions (ignore pop_group)
+    overall = (
+        df.groupby([admin_var, target_var])
+          .agg(total_weight=(agg_var, 'sum'))
+          .groupby(level=0)
+          .apply(lambda x: x / x.sum())
+          .unstack(fill_value=0)
+    )
+
+    return overall
+
+##--------------------------------------------------------------------------------------------   -----------------------------------
+def find_matching_choices(choices_df, barriers_list, label_var):
+    # List to hold the results
+    results = []
+    
+    # Iterate over each barrier in the list
+    for barrier in barriers_list:
+        # Filter choices where the label_var matches the current barrier
+        matched_choices = choices_df[choices_df[label_var] == barrier]
+        
+        # If no matches are found, add a 'notfound' entry
+        if matched_choices.empty:
+            result_entry = {'name': 'notfound', 'label': barrier}
+            results.append(result_entry)
+        else:
+            # For each matched choice, create an entry in the results list
+            for _, choice in matched_choices.iterrows():
+                result_entry = {'name': choice['name'], 'label': barrier}
+                results.append(result_entry)
+    
+    return results
+
+##--------------------------------------------------------------------------------------------
+def process_indicator_dataframes(indicator_access_list, indicator_dataframes, choice_data, 
+                                 selected_severity_4_barriers, selected_severity_5_barriers, 
+                                 label_var, admin_var, pop_group_var):
+
+    pin_by_indicator_status = {}
+
+    # Step 1: Merge Indicator DataFrames
+    for category, grouped_ind_df in indicator_access_list.items():
+        # Start with the base DataFrame for this category
+        pop_group_ind_df = grouped_ind_df.copy()
+        
+        # Merge with other indicator DataFrames
+        for indicator_df in indicator_dataframes:
+            if category in indicator_df:  # Check if the category exists in the current indicator DataFrame
+                pop_group_ind_df = pd.merge(
+                    pop_group_ind_df,
+                    indicator_df[category],
+                    on=[admin_var, pop_group_var],
+                    how='left',  # Preserve rows from the base DataFrame
+                    suffixes=('', '_dup')  # Add a suffix to duplicate columns
+                )
+        for col in pop_group_ind_df.columns:
+            if col.endswith('_dup'):
+                original_col = col.replace('_dup', '')
+                if original_col in pop_group_ind_df.columns:  # If original exists, remove duplicate
+                    pop_group_ind_df.drop(columns=[col], inplace=True)
+                else:
+                    pop_group_ind_df.rename(columns={col: original_col}, inplace=True)
+
+        pin_by_indicator_status[category] = pop_group_ind_df 
+
+    # Step 2: Identify Severity Names and Prepare Column Renaming
+    severity_4_matches = find_matching_choices(choice_data, selected_severity_4_barriers, label_var=label_var)
+    severity_5_matches = find_matching_choices(choice_data, selected_severity_5_barriers, label_var=label_var)
+
+    names_severity_4 = [entry['name'] for entry in severity_4_matches]
+    names_severity_5 = [entry['name'] for entry in severity_5_matches]
+
+    # Step 3: Ensure only relevant columns are kept
+    if pin_by_indicator_status:
+        sample_category = next(iter(pin_by_indicator_status))  # Get sample category
+        sample_df = pin_by_indicator_status[sample_category]  # Get DataFrame
+
+        # Essential columns that must be kept
+        essential_columns = [admin_var, pop_group_var]
+        optional_columns = [
+            'indicator_teacher', 'indicator_hazard','indicator_access', 
+            'indicator_idp', 'indicator_occupation', 'indicator_barrier4', 'indicator_barrier5'
+        ]
+        essential_columns += [col for col in optional_columns if col in sample_df.columns]
+
+        # Step 4: Prepare Column Renaming
+        essential_column_rename = {
+            col: new_name for col, new_name in {
+                'indicator_teacher': 'sev3_indicator_teacher',
+                'indicator_hazard': 'sev3_indicator_hazard',
+                'indicator_access': 'sev3_indicator_access',
+                'indicator_idp': 'sev4_indicator_idp',
+                'indicator_occupation': 'sev5_indicator_occupation',
+                'indicator_barrier4': 'sev4_aggravating_circumstances',
+                'indicator_barrier5': 'sev5_aggravating_circumstances'
+            }.items() if col in essential_columns
+        }
+
+        # Severity 4 and 5 column renaming
+        severity_4_rename = {entry['name']: f"severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance: {entry['label']}" for entry in severity_4_matches}
+        severity_5_rename = {entry['name']: f"severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance: {entry['label']}" for entry in severity_5_matches}
+
+        # Merge all renaming mappings
+        rename_mapping = {**essential_column_rename, **severity_4_rename, **severity_5_rename}
+
+        # Step 5: Apply filtering & renaming to each category DataFrame
+        for category, grouped_ind_df in pin_by_indicator_status.items():
+            pop_group_ind_df = grouped_ind_df.copy()
+
+            # Identify severity columns that exist
+            severity_columns = set(names_severity_4 + names_severity_5)
+            available_severity_columns = [col for col in pop_group_ind_df.columns if col in severity_columns]
+
+            # Keep only necessary columns
+            final_columns = [col for col in essential_columns + available_severity_columns if col in pop_group_ind_df.columns]
+            pop_group_ind_df = pop_group_ind_df[final_columns]
+
+            # Rename columns based on severity mapping
+            pop_group_ind_df.rename(columns=rename_mapping, inplace=True)
+
+            # Store processed DataFrame
+            pin_by_indicator_status[category] = pop_group_ind_df
+
+    return pin_by_indicator_status        
 
 ########################################################################################################################################
 ########################################################################################################################################
@@ -948,9 +1211,9 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
                 barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
                 age_var, gender_var,
                 label, 
-                admin_var, vector_cycle, start_school, status_var,
+                admin_var, vector_cycle, start_school, status_var,host_value ,idp_value ,returnee_value ,refugee_value, other_value ,
                 mismatch_admin,
-                selected_language):
+                selected_language,hybrid_country):
 
     admin_target = admin_var
     pop_group_var = status_var
@@ -960,7 +1223,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     ocha_pop_data = ocha_pop_data.rename(columns={'Admin Pcode': 'Admin'})
     ocha_pop_data = ocha_pop_data.drop(columns=['Admin_label'])
 
-    admin_var = find_best_match(admin_target,  household_data.columns)
+    admin_var = 'admin_hno'
 
     admin_column_rapresentative = []
     grouped_dict = {}
@@ -984,15 +1247,15 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         # Convert defaultdict to a regular dictionary for better readability
         grouped_dict = dict(grouped_dict)
 
-        # Print the resulting dictionary
+        # Print the resulting 
         for key, value in grouped_dict.items():
             print(f"{key}: {value}")
 
         
         length_dict = categorize_levels_dynamic(prefix_list)
-        #print("Codes grouped by length:")
-        #for length, codes in length_dict.items():
-            #print(f"Length {length}: {codes}")
+        print("Codes grouped by length:")
+        for length, codes in length_dict.items():
+            print(f"Length {length}: {codes}")
 
 
 
@@ -1007,15 +1270,16 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     secondary_end = 17
 
-    host_suggestion = ["Urban","PND","always_lived","general_pop",'non_deplace','Host Community',"Host community members",'host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
-    IDP_suggestion = ['host_family','PDI',"Rural","displaced","IDP", 'New IDPs','pdi', 'idp', 'site','idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
-    returnee_suggestion = ['displaced_previously' ,'cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
-    refugee_suggestion = ['refugees','REF', 'refugee','refugie', 'refugie','prl', 'refugiee', '3']
-    ndsp_suggestion = ['ndsp','Protracted IDPs', "hote affected by IDP",'displaced_camp', 'idp_site','pdi_site', "In-camp"]
+    host_suggestion = ["Non displaced household","Non-déplacé", "affected_pop",'lebanese',"Hote","Urban","PND",'host_community',"always_lived","general_pop","non_displaced",'non_deplace','Host Community',"Host community members",'host_communi', "always_lived","non_displaced_vulnerable",'host',"non_pdi","hote","menage_n_deplace","resident","lebanese","Populationnondéplacée","ocap","non_deplacee","Residents","yes","4"]
+    IDP_suggestion = ["Internally displaced persons (IDP)",'prl','recent_idp',"Déplacé","PDI_FA","IDP",'host_family','idp_host', 'PDI',"Rural","displaced","IDP", 'pdi_famille','New IDPs','pdi', 'idp', 'idp_host' ,"menage_deplace_interne", 'Out-of-camp','no',  'pdi_fam', '2', '1' ]
+    returnee_suggestion = ["Returnees (from internal dislpacement)",'displaced_previously',"RET","Retourné", "Retourne","RETOURNE",'retournee','cb_returnee','retourne','ret','Returnee HH','returnee' ,'ukrainian moldovan','Returnees','5']
+    refugee_suggestion = ['refugees','REF', 'prs','refugee','refugie', 'refugie','prl', 'refugiee',"REFUGIE", '3']
+    ndsp_suggestion = ['ndsp','migrant',"RAPATRIE",'Protracted IDPs', "hote affected by IDP","PDI_Site",'displaced_camp','idp_site','pdi_site', "In-camp"]
     status_to_be_excluded = ['dnk', 'other', 'pnta', 'dont_know', 'no_answer', 'prefer_not_to_answer', 'pnpr', 'nsp', 'autre', 'do_not_know', 'decline']
-    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other']
+    template_values = ['Host/Hôte',	'IDP/PDI',	'Returnees/Retournés', 'Refugees/Refugiees', 'Other'] 
+    
     suggestions_mapping = {
-        'Host/Hôte': host_suggestion,
+        'Host/Hôte': host_suggestion,        
         'IDP/PDI': IDP_suggestion,
         'Returnees/Retournés': returnee_suggestion,
         'Refugees/Refugiees': refugee_suggestion,
@@ -1033,11 +1297,15 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     edu_data = edu_data[edu_data[access_var].notna()]
     edu_data = edu_data[edu_data['severity_category'].notna()]
 
-
-    df = pd.DataFrame(edu_data)
+    print('edu_data 1')
+    print(pop_group_var)
+    print("=== edu_data columns ===", file=sys.stderr, flush=True)
+    for i, c in enumerate(edu_data.columns):
+        print(f"{i:03d}: {c}", file=sys.stderr, flush=True)
+    print(edu_data)
     # Filtering data based on gender
-    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin'])]
-    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin'])]
+    female_df = edu_data[edu_data[gender_var].isin(['female', 'femme', 'woman_girl', 'feminin', '2. Female'])]
+    male_df = edu_data[edu_data[gender_var].isin(['male', 'homme', 'man_boy', 'masculin', '1. Male'])]
     # Filtering data based on school cycle
     ece_df = edu_data[edu_data['school_cycle'].isin(['ECE'])]
     primary_df = edu_data[edu_data['school_cycle'].isin(['primary'])]
@@ -1047,6 +1315,40 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # filtering only kids in need == 3+
     in_need_df = edu_data[edu_data['severity_category'].isin([3, 4, 5])]
 
+    edu_data["barrier_var_copy"] = edu_data[barrier_var].apply(
+        lambda x: x if pd.notna(x) and x != "" else "in-school-child"
+    )
+    df = pd.DataFrame(edu_data)
+    analysis_config = {
+            'severity_category': {'df': df, 'target_var': 'severity_category'},
+            'dimension_pin': {'df': df, 'target_var': 'dimension_pin'},
+            'dimension_pin_in_need': {'df': in_need_df, 'target_var': 'dimension_pin'},
+            'severity_female': {'df': female_df, 'target_var': 'severity_category'},
+            'severity_male': {'df': male_df, 'target_var': 'severity_category'},
+            'dimension_female': {'df': female_df, 'target_var': 'dimension_pin'},
+            'dimension_male': {'df': male_df, 'target_var': 'dimension_pin'},
+            'dimension_ece': {'df': ece_df, 'target_var': 'dimension_pin'},
+            'dimension_primary': {'df': primary_df, 'target_var': 'dimension_pin'},
+            'dimension_secondary': {'df': secondary_df, 'target_var': 'dimension_pin'},
+            'indicator.access': {'df': df, 'target_var': 'indicator.access'},
+            'indicator.teacher': {'df': df, 'target_var': 'indicator.teacher'},
+            'indicator.hazard': {'df': df, 'target_var': 'indicator.hazard'},
+            'indicator.idp': {'df': df, 'target_var': 'indicator.idp'},
+            'indicator.occupation': {'df': df, 'target_var': 'indicator.occupation'},
+            'indicator.barrier4': {'df': df, 'target_var': 'indicator.barrier4'},
+            'indicator.barrier5': {'df': df, 'target_var': 'indicator.barrier5'},
+            'barrier_var_copy': {'df': df, 'target_var': 'barrier_var_copy'}
+            }
+
+    if not single_cycle:
+        analysis_config['dimension_intermediate'] = {'df': intermediate_df, 'target_var': 'dimension_pin'}
+
+    results_dict = {} 
+    unique_pop_group = df[pop_group_var].dropna().unique().tolist()
+    print(unique_pop_group)
+    print('edu_data 2')
+    print(df)
+
     if mismatch_admin:
         detailed_list = ocha_mismatch_list.iloc[:, 1].astype(str).tolist()  # Converting to string
         admin_up_msna = ocha_mismatch_list.iloc[:, 2].dropna().astype(str).tolist()  # Drop NaN and convert to string
@@ -1054,129 +1356,74 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
         #print(admin_up_msna)
 
-        severity_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='severity_category',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        dimension_admin_status_list = run_mismatch_admin_analysis(df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)
-        dimension_admin_status_in_need_list = run_mismatch_admin_analysis(in_need_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)      
-        severity_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='severity_category',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
-        severity_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='severity_category',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
-        dimension_female_list = run_mismatch_admin_analysis(female_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)        
-        dimension_male_list = run_mismatch_admin_analysis(male_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
-        dimension_ece_list = run_mismatch_admin_analysis(ece_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
-        dimension_primary_list = run_mismatch_admin_analysis(primary_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict) 
-        dimension_secondary_list = run_mismatch_admin_analysis(secondary_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)  
-        if not single_cycle:      
-            dimension_intermediate_list = run_mismatch_admin_analysis(intermediate_df, admin_var,admin_column_rapresentative,pop_group_var,
-                                analysis_variable='dimension_pin',
-                                admin_low_ok_list = admin_low_ok_list, prefix_list = admin_up_msna,grouped_dict = grouped_dict)   
-                        
+        for analysis_var, config in analysis_config.items():
+            source_df = config['df']
+            target_var = config['target_var']
+            results_dict[analysis_var] = run_mismatch_admin_analysis(
+                source_df,
+                admin_var,
+                admin_column_rapresentative,
+                pop_group_var,
+                analysis_variable=target_var,
+                admin_low_ok_list=admin_low_ok_list,
+                prefix_list=admin_up_msna,
+                grouped_dict=grouped_dict,
+                country = country,
+                unique_pop_group = unique_pop_group
 
-    else:
-        print(df.columns)
-        if 'weights' in df.columns:
-            print("Weights column exists")
-        else:
-            print("Weights column does not exist")
-        #------    CORRECT PIN    -------            
-        severity_admin_status = df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        #-------    CORRECT TARGETTING    -------          
-        dimension_admin_status = df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        ## subset in need
-        dimension_admin_status_in_need = in_need_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        # -------- GENDER DISAGGREGATION  ---------    
-        severity_female = female_df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        severity_male = male_df.groupby([admin_var, pop_group_var, 'severity_category']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        dimension_female = female_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        dimension_male = male_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        # -------- SCHOOL-CYCLE DISAGGREGATION  ---------    
-        dimension_ece = ece_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        dimension_primary = primary_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        dimension_secondary = secondary_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-        ).groupby(level=[0, 1]).apply(
-            lambda x: x / x.sum()
-        ).unstack(fill_value=0)
-        if not single_cycle:
-            dimension_intermediate = intermediate_df.groupby([admin_var, pop_group_var, 'dimension_pin']).agg(
-            total_weight=('weights', 'sum')
-            ).groupby(level=[0, 1]).apply(
-                lambda x: x / x.sum()
-            ).unstack(fill_value=0)
-        ## reducing the multiindex of the panda dataframe
-        severity_admin_status_list = reduce_index(severity_admin_status, 0, pop_group_var)
-        dimension_admin_status_list = reduce_index(dimension_admin_status, 0, pop_group_var)
-        dimension_admin_status_in_need_list = reduce_index(dimension_admin_status_in_need,  0, pop_group_var) ## only who is in need we check the distriburion of need
-        severity_female_list = reduce_index(severity_female, 0, pop_group_var)
-        severity_male_list = reduce_index(severity_male, 0, pop_group_var)
-        dimension_female_list = reduce_index(dimension_female, 0, pop_group_var)
-        dimension_male_list = reduce_index(dimension_male, 0, pop_group_var)
-        dimension_ece_list = reduce_index(dimension_ece, 0, pop_group_var)
-        dimension_primary_list = reduce_index(dimension_primary, 0, pop_group_var)
-        dimension_secondary_list = reduce_index(dimension_secondary, 0, pop_group_var)
-        if not single_cycle: dimension_intermediate_list = reduce_index(dimension_intermediate, 0, pop_group_var)
+            )
+                   
+    else: ## no mistmach on admin and unit of analysis
+        for analysis_var, config in analysis_config.items():
+            source_df = config['df']
+            target_var = config['target_var']
+            results_dict[analysis_var] = calculate_prop(
+                df=source_df,
+                admin_var=admin_var,
+                pop_group_var=pop_group_var,
+                target_var=target_var,
+                country=country
+            )    
+            print(results_dict[analysis_var])
+        # Reduce the index for all results
+        for key in results_dict:
+
+            print( results_dict[key])
+            results_dict[key] = reduce_index(results_dict[key], 0, pop_group_var, country, unique_pop_group)
+
+
+    # Extract results into individual variables if needed
+    severity_admin_status_list = results_dict.get('severity_category')
+    dimension_admin_status_list = results_dict.get('dimension_pin')
+    dimension_admin_status_in_need_list = results_dict.get('dimension_pin_in_need')
+    severity_female_list = results_dict.get('severity_female')
+    severity_male_list = results_dict.get('severity_male')
+    dimension_female_list = results_dict.get('dimension_female')
+    dimension_male_list = results_dict.get('dimension_male')
+    dimension_ece_list = results_dict.get('dimension_ece')
+    dimension_primary_list = results_dict.get('dimension_primary')
+    dimension_secondary_list = results_dict.get('dimension_secondary')
+    dimension_intermediate_list = results_dict.get('dimension_intermediate') if not single_cycle else None
+    indicator_access_list = results_dict.get('indicator.access')
+    indicator_teacher_list = results_dict.get('indicator.teacher')
+    indicator_hazard_list = results_dict.get('indicator.hazard')
+    indicator_idp_list = results_dict.get('indicator.idp')
+    indicator_occupation_list = results_dict.get('indicator.occupation')
+    indicator_barrier4_list = results_dict.get('indicator.barrier4')
+    indicator_barrier5_list = results_dict.get('indicator.barrier5')
+    indicator_barrier_list = results_dict.get('barrier_var_copy')
 
 
     ## checking number of columns
+    # Ensure columns for severity
     severity_needed_columns = [2.0, 3.0, 4.0, 5.0]
-    dimension_needed_columns = ['access','aggravating circumstances', 'learning condition', 'protected environment']
     severity_admin_status_list = ensure_columns(severity_admin_status_list, severity_needed_columns)
     severity_female_list = ensure_columns(severity_female_list, severity_needed_columns)
     severity_male_list = ensure_columns(severity_male_list, severity_needed_columns)
+
+
+    # Ensure columns for dimension
+    dimension_needed_columns = ['access', 'aggravating circumstances', 'learning condition', 'protected environment']
     dimension_admin_status_list = ensure_columns(dimension_admin_status_list, dimension_needed_columns)
     dimension_admin_status_in_need_list = ensure_columns(dimension_admin_status_in_need_list, dimension_needed_columns)
     dimension_female_list = ensure_columns(dimension_female_list, dimension_needed_columns)
@@ -1184,7 +1431,44 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     dimension_ece_list = ensure_columns(dimension_ece_list, dimension_needed_columns)
     dimension_primary_list = ensure_columns(dimension_primary_list, dimension_needed_columns)
     dimension_secondary_list = ensure_columns(dimension_secondary_list, dimension_needed_columns)
-    if not single_cycle:    dimension_intermediate_list = ensure_columns(dimension_intermediate_list, dimension_needed_columns)
+    if not single_cycle:
+        dimension_intermediate_list = ensure_columns(dimension_intermediate_list, dimension_needed_columns)
+
+    # Clean indicator columns
+    indicator_access_list = clean_indicator_columns(indicator_access_list, 'indicator_access_list')
+    indicator_teacher_list = clean_indicator_columns(indicator_teacher_list, 'indicator_teacher_list')
+    indicator_hazard_list = clean_indicator_columns(indicator_hazard_list, 'indicator_hazard_list')
+    indicator_idp_list = clean_indicator_columns(indicator_idp_list, 'indicator_idp_list')
+    indicator_occupation_list = clean_indicator_columns(indicator_occupation_list, 'indicator_occupation_list')
+    indicator_barrier4_list = clean_indicator_columns(indicator_barrier4_list, 'indicator_barrier4_list')
+    indicator_barrier5_list = clean_indicator_columns(indicator_barrier5_list, 'indicator_barrier5_list')
+    #indicator_barrier_list = clean_indicator_columns(indicator_barrier_list, 'indicator_barrier_list')
+
+
+    pin_by_indicator_status = {}
+    # List of all indicator DataFrames grouped by category
+    indicator_dataframes = [
+        indicator_access_list,
+        indicator_teacher_list,
+        indicator_hazard_list,
+        indicator_idp_list,
+        indicator_occupation_list,
+        indicator_barrier4_list,
+        indicator_barrier5_list,
+        indicator_barrier_list
+    ]
+
+    pin_by_indicator_status_list = process_indicator_dataframes(
+        indicator_access_list=indicator_access_list,
+        indicator_dataframes=indicator_dataframes,
+        choice_data=choice_data,
+        selected_severity_4_barriers=selected_severity_4_barriers,
+        selected_severity_5_barriers=selected_severity_5_barriers,
+        label_var=label,
+        admin_var=admin_var,
+        pop_group_var=pop_group_var
+    )
+
 
 
     ####### ** 4 **       ------------------------------ matching between the admin and the ocha population data ------------------------------------------     #######
@@ -1195,6 +1479,14 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
     mapped_statuses = map_template_to_status(template_values, suggestions_mapping, status_values)
     print (mapped_statuses)
+    mapped_statuses = {
+        "Host/Hôte": host_value,
+        "IDP/PDI": idp_value,
+        "Returnees/Retournés": returnee_value,
+        'Refugees/Refugiees': refugee_value,
+        "Other": other_value    }
+    print (mapped_statuses)
+
     category_data_frames = extract_status_data(ocha_pop_data, mapped_statuses, pop_group_var)# Extract population figures based on mapped statuses without modifying the case
 
     for category, df in category_data_frames.items():
@@ -1373,6 +1665,118 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
             cols.insert( cols.index('Population group') + 1, label_dimension_tot_population)
             pop_group_df = pop_group_df[cols]
             dimension_per_admin_status[category] = pop_group_df
+
+
+    ####### ** 6.C **       ------------------------------PiN by indicator ----  %PiN AND #PiN PER ADMIN AND POPULATION GROUP using ocha figures ------------------------------------------     #######
+    indicator_per_admin_status = {}
+    # Assume category_data_frames is a dictionary of DataFrames, indexed by category
+    for category, df in category_data_frames.items():
+        # Ensure both DataFrames are ready to merge
+        if category in pin_by_indicator_status_list:
+            # Fetch the corresponding DataFrame from the grouped data
+            grouped_df = pin_by_indicator_status_list[category]     
+            # Merge on specified columns
+            pop_group_df = pd.merge(grouped_df, df, on=[admin_var, pop_group_var])
+            pop_group_df.columns = [str(col) for col in pop_group_df.columns]
+
+            ## ✅ Ensure `label_tot_population` is numeric before using it
+            pop_group_df[label_tot_population] = pd.to_numeric(pop_group_df[label_tot_population], errors='coerce').fillna(0)
+
+            ## ✅ Rename columns
+            pop_group_df = pop_group_df.rename(columns={
+                pop_group_var: 'Population group',
+                'sev3_indicator_access': 'severity level 3: indicator Access',
+                'sev3_indicator_teacher': 'severity level 3: indicator Teacher Absence Disruption',
+                'sev3_indicator_hazard': 'severity level 3: indicator Natural Hazard Disruption',
+                'sev4_indicator_idp': 'severity level 4: indicator School Used As Shelter Disruption',
+                'sev5_indicator_occupation': 'severity level 5: indicator School Occupation Disruption',
+                'sev4_aggravating_circumstances': 'severity level 4: indicator aggravating circumstances (cumulative of all Level 4 aggravating circumstances)',
+                'sev5_aggravating_circumstances': 'severity level 5: indicator aggravating circumstances (cumulative of all Level 5 aggravating circumstances)'
+            })
+
+
+            if 'Category' in pop_group_df.columns:
+                del pop_group_df['Category']
+
+            ## ✅ Find matching columns for percentage & total number calculation
+            total_columns = {}
+            for col in pop_group_df.columns:
+                if col not in ["Population group", admin_var]:  # Exclude these
+                    if "severity level" in col and "(ToT # children)" not in col:
+                        total_columns[col] = col.replace(":", ": (ToT # children)", 1)
+
+            print(total_columns)            
+
+            ## ✅ Debug: Print column pairs to verify matching
+            print("\n🔹 Matching Columns for Multiplication:")
+            for perc_col, tot_col in total_columns.items():
+                print(f"✔ {perc_col}  --->  {tot_col}")
+
+            ## ✅ Ensure percentage columns are numeric before multiplying
+            for perc_col in total_columns.keys():
+                pop_group_df[perc_col] = pd.to_numeric(pop_group_df[perc_col], errors='coerce').fillna(0)
+
+            ## ✅ Compute (ToT # children) values correctly
+            for perc_col, tot_col in total_columns.items():
+                if tot_col not in pop_group_df.columns:
+                    pop_group_df[tot_col] = 0  # Ensure column exists
+
+                # Extract values for debugging
+                percentages = pop_group_df[perc_col]
+                populations = pop_group_df[label_tot_population]
+                computed_totals = (percentages * populations).round(0)
+
+                # ✅ Perform correct multiplication and rounding
+                pop_group_df[tot_col] = computed_totals
+
+                # ✅ Debugging: Print each calculation for verification
+                #print(f"\n🔍 Debugging Calculation for {perc_col} --> {tot_col}")
+                #debug_df = pd.DataFrame({
+                    #'Admin': pop_group_df[admin_var],
+                    #'Population Group': pop_group_df['Population group'],
+                    #'Total Population': populations,
+                    #'Percentage': percentages,
+                    #'Computed Total': computed_totals
+                #})
+                #print(debug_df.head(20))  # Show first 10 rows for verification
+
+            ## ✅ Column Reordering
+            all_columns = list(pop_group_df.columns)
+
+            admin_cols = [admin_var, "Population group", "TotN"]
+            # Extract severity levels and corresponding total columns dynamically
+            severity_groups = {3: [], 4: [], 5: []}
+            total_columns_map = {}
+
+            for col in all_columns:
+                if "severity level 3" in col and "(ToT # children)" not in col:
+                    severity_groups[3].append(col)
+                elif "severity level 4" in col and "(ToT # children)" not in col:
+                    severity_groups[4].append(col)
+                elif "severity level 5" in col and "(ToT # children)" not in col:
+                    severity_groups[5].append(col)
+
+                if "(ToT # children)" in col:
+                    base_col = col.replace(" (ToT # children)", "")
+                    total_columns_map[base_col] = col  # Map to its corresponding ToT column
+
+            # Build ordered columns ensuring (ToT # children) comes immediately after its indicator
+            final_columns = admin_cols
+            for severity in [3, 4, 5]:  # Ordered severity levels
+                for col in severity_groups[severity]:
+                    final_columns.append(col)
+                    if col in total_columns_map:  # Insert its total column immediately after
+                        final_columns.append(total_columns_map[col])
+
+            # Apply new order
+            pop_group_df = pop_group_df[final_columns]
+
+            # ✅ Debugging: Print sample data to verify calculations
+            print("\n📌 Sample Data After Calculation:")
+            print(pop_group_df.columns)  # Show first few rows to verify correctness
+
+            # Save modified DataFrame back into the dictionary under the category key
+            indicator_per_admin_status[category] = pop_group_df
 
 
 
@@ -1810,8 +2214,6 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
     # Concatenate all DataFrames in the list into a single DataFrame
     final_overview_df_OCHA = pd.concat(small_overview, ignore_index=True) ## table to reduce with all the population figures numbers
 
-
-
     ## organization and manipulation 
     cols = list(final_overview_df.columns)
     cols.insert(cols.index(admin_var) + 1, cols.pop(cols.index('Category')))
@@ -1931,6 +2333,7 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         rounding_dataframe(df, figures_round, percentage_round)
         df[label_tot_population] = pd.to_numeric(df[label_tot_population], errors='coerce').round(figures_round)
 
+
     rounding_dataframe(Tot_PiN_by_admin, figures_round, percentage_round)
     Tot_PiN_by_admin[label_tot_population] = pd.to_numeric(Tot_PiN_by_admin[label_tot_population], errors='coerce').round(figures_round)
     
@@ -1956,6 +2359,130 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
 
 
 
+
+
+        # Process Tot_PiN_JIAF DataFrames
+    for category, df in indicator_per_admin_status.items():
+            df[label_tot_population] = pd.to_numeric(df[label_tot_population], errors='coerce').round(figures_round)
+
+            for col in df.columns:
+                if "(ToT # children)" in col:
+                    # Convert to numeric and round (total numbers)
+                    df[col] = pd.to_numeric(df[col], errors='coerce').round(figures_round)
+                elif "severity level" in col and "(ToT # children)" not in col:
+                    # Convert to numeric, multiply by 100, and round as percentage
+                    df[col] = pd.to_numeric(df[col], errors='coerce').multiply(100).round(2)
+
+
+
+            # Ensure no NaNs remain
+            df.fillna(0, inplace=True)
+
+            # Save modified DataFrame back into the dictionary
+            indicator_per_admin_status[category] = df
+
+    
+    for category, df in indicator_per_admin_status.items():
+        print(f"pin by indicartor before  '{category}':")
+        print(df.columns)
+
+    columns_to_remove = [
+        'severity level 4: indicator aggravating circumstances (cumulative of all Level 4 aggravating circumstances)',
+        'severity level 4: (ToT # children) indicator aggravating circumstances (cumulative of all Level 4 aggravating circumstances)',
+        'severity level 5: indicator aggravating circumstances (cumulative of all Level 5 aggravating circumstances)',
+        'severity level 5: (ToT # children) indicator aggravating circumstances (cumulative of all Level 5 aggravating circumstances)'
+    ]
+    for category, df in indicator_per_admin_status.items():
+        print(f"\n📌 Processing Category: {category}")
+        
+        # Print original column names before renaming
+        print("\n🔹 Columns BEFORE renaming:")
+        print(df.columns.tolist())
+
+        df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
+
+
+
+        updated_columns = {}  # Track renamed columns
+
+        # Loop through column names and replace parts of the strings
+        for col in df.columns:
+            new_col = col.replace(
+                "% of children not accessing education due to the aggravating circumstance: (ToT # children)", 
+                "ToT # of children not accessing education due to the aggravating circumstance: "
+            ).replace(
+                "severity level 3: indicator Teacher Absence Disruption",
+                "severity level 3 -- in-school children -- % of children whose education was disrupted by teacher absence"
+            ).replace(
+                "severity level 3: (ToT # children) indicator Teacher Absence Disruption",
+                "severity level 3 -- in-school children -- ToT # of children whose education was disrupted by teacher absence"
+            ).replace(
+                "severity level 4: indicator School Used As Shelter Disruption",
+                "severity level 4 -- in-school children -- % of children whose education was disrupted by the school being used as shelter"
+            ).replace(
+                "severity level 4: (ToT # children) indicator School Used As Shelter Disruption",
+                "severity level 4 -- in-school children -- ToT # of children whose education was disrupted by the school being used as shelter"
+            ).replace(
+                "severity level 5: indicator School Occupation Disruption",
+                "severity level 5 -- in-school children -- % of children whose education was disrupted by the school being occupied by armed groups"
+            ).replace(
+                "severity level 5: (ToT # children) indicator School Occupation Disruption",
+                "severity level 5 -- in-school children -- ToT # of children whose education was disrupted by the school being occupied by armed groups"
+            ).replace(
+                "severity level 3: indicator Access",
+                "severity level 3 -- OoS children -- % of children not accessing education who do not face any aggravating circumstances"
+            ).replace(
+                "severity level 3: (ToT # children) indicator Access",
+                "severity level 3 -- OoS children -- ToT # of children not accessing education who do not face any aggravating circumstances"
+            ).replace(
+                "severity level 3: indicator Natural Hazard Disruption",
+                "severity level 3 -- in-school children -- % of children whose education was disrupted by natural hazard"
+            ).replace(
+                "severity level 3: (ToT # children) indicator Natural Hazard Disruption",
+                "severity level 3 -- in-school children -- ToT # of children whose education was disrupted by natural hazard"
+            )
+
+            # Track renaming changes
+            if new_col != col:
+                updated_columns[col] = new_col
+
+        # Apply renaming if changes exist
+        if updated_columns:
+            df.rename(columns=updated_columns, inplace=True)
+
+        # Save updated DataFrame back into dictionary
+        indicator_per_admin_status[category] = df
+
+        # Print updated column names for verification
+        print("\n✅ Columns AFTER renaming:")
+        print(df.columns.tolist())
+
+        # Print column name changes
+        if updated_columns:
+            print("\n🔄 Renamed Columns:")
+            for old_col, new_col in updated_columns.items():
+                print(f"✔ '{old_col}' → '{new_col}'")
+        else:
+            print("⚠ No columns were renamed in this category.")
+
+
+
+
+    for category, df in indicator_per_admin_status.items():
+        print("Fetch the corresponding DataFrame from the pin_per_admin_status")
+        pin_df = pin_per_admin_status.get(category)
+
+        if pin_df is not None:
+            # Select only the necessary columns for merging
+            pin_df_subset = pin_df[[admin_var, label_admin_severity]]
+
+            # Merge the severity label into the indicator DataFrame
+            df = df.merge(pin_df_subset, on=admin_var, how='left')
+
+
+        indicator_per_admin_status[category] = df
+
+
     country_label = country.replace(" ", "_").replace("--", "_").replace("/", "_")
 
     translation_dict = {
@@ -1971,28 +2498,48 @@ def calculatePIN (country, edu_data, household_data, choice_data, survey_data, o
         label_tot: '# Tot PiN (niveaux de sévérité 3-5)',
         label_admin_severity: 'Sévérité de la zone',
         label_tot_population: 'Population totale',
-        tot_5_17_label: 'TOTAL (5-17 ans)',
-        girl_5_17_label: 'Filles (5-17 ans)',
-        boy_5_17_label: 'Garcons (5-17 ans)',
-        ece_5yo_label: 'Éducation préscolaire (5 ans)',
+        '5-17 y.o.': '5-17 ans',
+        'Girls': 'Filles',
+        'Boys': 'Garcons',
+        '5 y.o.': "5 ans",
+        'ECE': 'Éducation préscolaire',
         'All population groups': 'Tous les groupes de population',
         'Population group': 'Groupe de population',
         'Children with disability': 'Enfants en situation de handicap',
         "Primary school": "École primaire",
         "Intermediate school-level": "Niveau scolaire intermédiaire",
-        "Secondary school":"École secondaire"
-    }
+        "Secondary school":"École secondaire",
+        "severity level 3 -- OoS children -- % of children not accessing education who do not face any aggravating circumstances": "Niveau de sévérité 3 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+        "severity level 3 -- in-school children -- % of children whose education was disrupted by teacher absence" : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+        "severity level 3 -- in-school children -- % of children whose education was disrupted by natural hazard" : "Niveau de sévérité 3 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par un risque naturel",
+        "severity level 4 -- in-school children -- % of children whose education was disrupted by the school being used as shelter" : "Niveau de sévérité 4 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+        "severity level 5 -- in-school children -- % of children whose education was disrupted by the school being occupied by armed groups" : "Niveau de sévérité 5 -- enfants scolarisés -- % d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+        "severity level 3 -- OoS children -- ToT # of children not accessing education who do not face any aggravating circumstances": "Niveau de sévérité 3 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation et ne souffrant d'aucune circonstance aggravante",
+        "severity level 3 -- in-school children -- ToT # of children whose education was disrupted by teacher absence" : "Niveau de sévérité 3 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'absence d'un enseignant",
+        "severity level 3 -- in-school children -- ToT # of children whose education was disrupted by natural hazard" : "Niveau de sévérité 3 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par un risque naturel",
+        "severity level 4 -- in-school children -- ToT # of children whose education was disrupted by the school being used as shelter" : "Niveau de sévérité 4 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'utilisation de l'école comme abri",
+        "severity level 5 -- in-school children -- ToT # of children whose education was disrupted by the school being occupied by armed groups" : "Niveau de sévérité 5 -- enfants scolarisés -- # d'enfants dont l'éducation a été perturbée par l'occupation de l'école par des groupes armés",
+        "severity level 4 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+        "severity level 5 -- OoS children -- % of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés -- % d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+        "severity level 4 -- OoS children -- ToT # of children not accessing education due to the aggravating circumstance": "niveau de sévérité 4 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante ",
+        "severity level 5 -- OoS children -- ToT # of children not accessing education due to the aggravating circumstance": "niveau de sévérité 5 -- enfants non scolarisés -- # d'enfants n'ayant pas accès à l'éducation en raison de la circonstance aggravante "
+        }
+
+    print("final_overview_df['Strata']")
+    print(final_overview_df['Strata'].unique())
 
 
-    if selected_language == 'French':
+    if selected_language == 'French' and not hybrid_country :
         final_overview_df = translate_labels(final_overview_df, translation_dict)
         final_overview_df_OCHA = translate_labels(final_overview_df_OCHA, translation_dict)
         final_overview_dimension_df = translate_labels(final_overview_dimension_df, translation_dict)
         final_overview_dimension_df_in_need = translate_labels(final_overview_dimension_df_in_need, translation_dict)
         Tot_PiN_by_admin = translate_labels(Tot_PiN_by_admin, translation_dict)
         Tot_PiN_JIAF = translate_labels(Tot_PiN_JIAF,translation_dict)
+        pin_per_admin_status = translate_labels(pin_per_admin_status, translation_dict)
+        indicator_per_admin_status = translate_labels(indicator_per_admin_status, translation_dict)
+        pin_per_admin_status = translate_labels(pin_per_admin_status, translation_dict)
 
-    print(final_overview_df_OCHA)
-    
+    print("after transaltion")
 
-    return severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,Tot_PiN_by_admin, country_label
+    return indicator_barrier4_list,indicator_barrier_list,severity_admin_status_list, dimension_admin_status_list, severity_female_list, severity_male_list, factor_category, pin_per_admin_status, dimension_per_admin_status,indicator_per_admin_status,female_pin_per_admin_status, male_pin_per_admin_status, pin_per_admin_status_girl, pin_per_admin_status_boy,pin_per_admin_status_ece, pin_per_admin_status_primary, pin_per_admin_status_upper_primary, pin_per_admin_status_secondary,Tot_PiN_JIAF, Tot_Dimension_JIAF, final_overview_df,final_overview_df_OCHA,final_overview_dimension_df, final_overview_dimension_df_in_need,Tot_PiN_by_admin, country_label

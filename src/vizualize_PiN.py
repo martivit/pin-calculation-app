@@ -5,6 +5,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
 from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.utils import get_column_letter
 
 
 int_2 = '2.0'
@@ -106,7 +107,7 @@ color_mapping_dimension = {
 alignment_columns = list(color_mapping.keys())
 def apply_final_formatting(country_name, workbook, overview_df, small_overview_df, admin_var, selected_language= 'English'):
 
-
+    print("inside apply_final_formatting")
     label_perc2 = '% severity levels 1-2'
     label_perc3 = '% severity level 3'
     label_perc4 = '% severity level 4'
@@ -376,9 +377,9 @@ def apply_final_formatting(country_name, workbook, overview_df, small_overview_d
 
 
 # Function to create output with final formatting
-def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None, selected_language='English'):
+def create_output(country_label, dataframes, overview_df, small_overview_df, overview_sheet_name, admin_var, ocha=True, tot_severity=None, selected_language='English', parameters=None):
     country_name = country_label.split('__')[0]  # Extract the part before the "__"
-
+    print("inside create_output")
     label_overall_severity = 'Overall PiN and severity'
     if selected_language == "French":
         label_overall_severity = 'PiN total par admin'
@@ -396,13 +397,192 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
         for category, df in dataframes.items():
             sheet_name = f"{overview_sheet_name.split()[0]} -- {category}"
             df.to_excel(writer, sheet_name=sheet_name, index=False)
-    
+
+        if parameters:
+            if selected_language == "English":
+                parameters_df = pd.DataFrame(
+                    [{"Category": "General Information", "Key": key, "Value": value}
+                    for key, value in parameters["general_info"].items()] +
+                    [{"Category": "MSNA Indicators per PiN dimension", "Key": f"{key} - {sub_key}", "Value": sub_value}
+                    for key, sub_dict in parameters["msna_indicators_per_PiN_dimension"].items()
+                    for sub_key, sub_value in (sub_dict.items() if isinstance(sub_dict, dict) else [(key, sub_dict)])] +
+                    [{"Category": "Severity Classification", "Key": f"{key} - {sub_key}", "Value": sub_value}
+                    for key, sub_dict in parameters["severity_classification"].items()
+                    for sub_key, sub_value in sub_dict.items()] +
+                    [{"Category": "HNO Unit of analysis", "Key": key, "Value": value}
+                    for key, value in parameters["admin_unit"].items()] +
+                    [{"Category": "School Cycles", "Key": key, "Value": value}
+                    for key, value in parameters["school_cycles"].items()]
+                )
+                parameters_df.to_excel(writer, sheet_name="Parameters Used", index=False)
+            elif selected_language == "French":
+                parameters_df = pd.DataFrame(
+                    [{"Catégorie": "Informations générales", "Clé": key, "Valeur": value}
+                    for key, value in parameters["informations_generales"].items()] +
+                    [{"Catégorie": "Indicateurs MSNA par dimension du PiN", "Clé": f"{key} - {sub_key}", "Valeur": sub_value}
+                    for key, sub_dict in parameters["indicateurs_msna_par_dimension"].items()
+                    for sub_key, sub_value in (sub_dict.items() if isinstance(sub_dict, dict) else [(key, sub_dict)])] +
+                    [{"Catégorie": "Classification de la sévérité", "Clé": f"{key} - {sub_key}", "Valeur": sub_value}
+                    for key, sub_dict in parameters["classification_de_sévérité"].items()
+                    for sub_key, sub_value in sub_dict.items()] +
+                    [{"Catégorie": "Unité d’analyse HNO", "Clé": key, "Valeur": value}
+                    for key, value in parameters["unité_administrative"].items()] +
+                    [{"Catégorie": "Cycles scolaires", "Clé": key, "Valeur": value}
+                    for key, value in parameters["cycles_scolaires"].items()]
+                )
+                parameters_df.to_excel(writer, sheet_name="Paramètres Utilisés", index=False)
+
+    print("after parameter")
+
     output.seek(0)
     workbook = load_workbook(output)
 
     # Apply the final formatting to the workbook
     workbook = apply_final_formatting(country_name,workbook, overview_df, small_overview_df, admin_var, selected_language=selected_language)
+    print("after apply_final_formatting")
+
+    formatted_output = BytesIO()
+    workbook.save(formatted_output)
+    formatted_output.seek(0)
+
+    return formatted_output
+
+
+def create_indicator_output(country_label, indicator_dataframes, admin_var, selected_language='English'):
+    """
+    Creates an Excel file for indicator-based data, applying formatting.
+
+    Parameters:
+    - country_label (str): The name of the country (used in the file name).
+    - indicator_dataframes (dict): Dictionary of DataFrames categorized by indicator.
+    - admin_var (str): The administrative variable used in the dataset.
+    - selected_language (str, default='English'): Language setting for headers.
+
+    Returns:
+    - BytesIO: The formatted Excel file as an in-memory object.
+    """
+    country_name = country_label.split('__')[0]  # Extract country name
+    print("--------> inside create_indicator_output")
+
+    # File output buffer
+    output = BytesIO()
     
+    with pd.ExcelWriter(output) as writer:
+        # Modify column names BEFORE writing them to the Excel file
+        modified_dataframes = {}
+
+        for category, df in indicator_dataframes.items():
+            # Rename columns: Add (% of children) after ":" unless they have (ToT # children)
+            modified_dataframes[category] = df
+
+            # Write to Excel, ensuring sheet names stay within limits
+            df.to_excel(writer, sheet_name=category[:30], index=False)
+
+    # Load the workbook for formatting
+    output.seek(0)
+    workbook = load_workbook(output)
+    print("--------> after     workbook = load_workbook(output)")
+
+    for ws in workbook.worksheets:
+        ws.insert_rows(1, 4)  # Add empty rows at the top
+        ws.insert_cols(1, 4)  # Add empty columns on the left
+
+        # **Increase header row thickness more**
+        ws.row_dimensions[5].height = 90  # Make row even thicker
+
+        # Title formatting
+        title = ws.title
+        max_col = ws.max_column
+        ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
+        title_cell = ws.cell(row=1, column=5)
+        if selected_language.lower() == 'French':
+            title_cell.value = "Enfants (5-17 ans) classés par niveau de sévérité et indicateurs"
+        else:
+            title_cell.value = "Children (5–17 years old) classified by severity and indicators"
+        title_cell.font = Font(bold=True, size=14)
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        # Extract headers from row 5
+        headers = [ws.cell(row=5, column=col).value for col in range(1, ws.max_column + 1)]
+        print("--------> before      for col_idx, col_name in enumerate(headers, start=1)")
+
+        # **Increase Column Widths Based on Content & Enable Wrap Text**
+        for col_idx, col_name in enumerate(headers, start=1):
+            max_length = max((len(str(ws.cell(row=row_idx, column=col_idx).value)) for row_idx in range(5, ws.max_row + 1)), default=10)
+            adjusted_width = max(15, min(max_length + 2, 25))  # Ensure minimum width but not too wide
+            ws.column_dimensions[ws.cell(row=5, column=col_idx).column_letter].width = adjusted_width
+
+            # Apply **wrap text** to headers
+            header_cell = ws.cell(row=5, column=col_idx)
+            header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            header_cell.font = Font(bold=True, size=10)  # **Reduce font size**
+        print("--------> after      for col_idx, col_name in enumerate(headers, start=1)")
+
+        
+        # 🔍 DEBUGGING BLOCK — Add this before formatting loop
+        print(f"\n--- Debugging worksheet: {ws.title} ---")
+        print(f"ws.max_row: {ws.max_row}, ws.max_column: {ws.max_column}")
+
+        from openpyxl.utils.cell import range_boundaries
+        try:
+            min_cell, max_cell = ws.calculate_dimension().split(':')
+            min_col, min_row, max_col, max_row = range_boundaries(f"{min_cell}:{max_cell}")
+            print(f"calculate_dimension(): min_row={min_row}, max_row={max_row}, "
+                  f"min_col={min_col}, max_col={max_col}")
+        except Exception as e:
+            print(f"calculate_dimension() failed: {e}")
+
+        # Check a few non-empty rows (avoid huge loops)
+        non_empty_rows = []
+        for r in range(1, min(ws.max_row, 200) + 1):  # only scan first 200 rows
+            if any(ws.cell(row=r, column=c).value is not None for c in range(1, ws.max_column + 1)):
+                non_empty_rows.append(r)
+        print(f"First non-empty rows (up to 200): {non_empty_rows[:10]}")
+        if ws.max_row > 100:
+            print(f"... Sheet has {ws.max_row} total rows (showing first 200 only).")
+
+        # Check the corresponding DataFrame info
+        if ws.title in indicator_dataframes:
+            df = indicator_dataframes[ws.title]
+            print(f"DataFrame for {ws.title}: shape={df.shape}")
+            print(df.head(3))
+        else:
+            print(f"No matching DataFrame found for sheet {ws.title}")
+
+        # 🚨 End of debug section
+
+        # Apply color to specific columns and make borders visible
+        for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+
+            for cell in row:
+                col_index = cell.column  # Get column index
+                col_name = headers[col_index - 1] if col_index - 1 < len(headers) else None  # Prevent index error
+
+                if col_name and isinstance(col_name, str):  # Ensure col_name is valid
+                    # Apply color based on severity level
+                    if "severity level 3" in col_name or "Niveau de sévérité 3" in col_name:
+                        cell.fill = PatternFill(start_color=colors["light_orange"], end_color=colors["light_orange"], fill_type="solid")
+                    elif "severity level 4" in col_name or "Niveau de sévérité 4" in col_name or "niveau de sévérité 4" in col_name:
+                        cell.fill = PatternFill(start_color=colors["dark_orange"], end_color=colors["dark_orange"], fill_type="solid")
+                    elif "severity level 5" in col_name or "Niveau de sévérité 5" in col_name or "niveau de sévérité 5" in col_name:
+                        cell.fill = PatternFill(start_color=colors["darker_orange"], end_color=colors["darker_orange"], fill_type="solid")
+                    elif "Area severity" in col_name or "Sévérité de la zone" in col_name:  # Apply light blue for "Area severity"
+                        cell.fill = PatternFill(start_color=colors["light_blue"], end_color=colors["light_blue"], fill_type="solid")
+
+                # Apply wrap text and reduce font size for all data cells
+                cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
+                cell.font = Font(size=10)  # Reduce font size for better readability
+
+                # Apply border formatting
+                if col_index > 4:
+                    if row[0].row == 5:  # Bold top border for header
+                        cell.border = Border(top=Side(style="medium"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+                    elif row[0].row == ws.max_row:  # Bold bottom border for last row
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="medium"))
+                    else:
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+
+    # Save formatted workbook
     formatted_output = BytesIO()
     workbook.save(formatted_output)
     formatted_output.seek(0)
@@ -411,3 +591,224 @@ def create_output(country_label, dataframes, overview_df, small_overview_df, ove
 
 
 
+
+
+
+def create_indicator_output_no_ocha(country_label, indicator_dataframes, admin_var, selected_language='English'):
+    
+    country_name = country_label.split('__')[0]  # Extract country name
+
+    # File output buffer
+    output = BytesIO()
+    
+    with pd.ExcelWriter(output) as writer:
+        # Modify column names BEFORE writing them to the Excel file
+        modified_dataframes = {}
+
+        for category, df in indicator_dataframes.items():
+            # Rename columns: Add (% of children) after ":" unless they have (ToT # children)
+            new_columns = {}
+
+            df = df.rename(columns=new_columns)
+            modified_dataframes[category] = df
+
+            # Write to Excel, ensuring sheet names stay within limits
+            df.to_excel(writer, sheet_name=category[:30], index=False)
+
+    # Load the workbook for formatting
+    output.seek(0)
+    workbook = load_workbook(output)
+
+    for ws in workbook.worksheets:
+        ws.insert_rows(1, 4)  # Add empty rows at the top
+        ws.insert_cols(1, 4)  # Add empty columns on the left
+
+        # **Increase header row thickness more**
+        ws.row_dimensions[5].height = 90  # Make row even thicker
+
+        # Title formatting
+        title = ws.title
+        max_col = ws.max_column
+        ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
+        title_cell = ws.cell(row=1, column=5)
+        if selected_language.lower() == 'French':
+            title_cell.value = "Enfants (5-17 ans) classés par niveau de sévérité et indicateurs"
+        else:
+            title_cell.value = "Children (5–17 years old) classified by severity and indicators"
+        title_cell.font = Font(bold=True, size=14)
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        # Extract headers from row 5
+        headers = [ws.cell(row=5, column=col).value for col in range(1, ws.max_column + 1)]
+        
+        # **Increase Column Widths Based on Content & Enable Wrap Text**
+        for col_idx, col_name in enumerate(headers, start=1):
+            max_length = max((len(str(ws.cell(row=row_idx, column=col_idx).value)) for row_idx in range(5, ws.max_row + 1)), default=10)
+            adjusted_width = max(15, min(max_length + 2, 28))  # Ensure minimum width but not too wide
+            ws.column_dimensions[ws.cell(row=5, column=col_idx).column_letter].width = adjusted_width
+
+            # Apply **wrap text** to headers
+            header_cell = ws.cell(row=5, column=col_idx)
+            header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            header_cell.font = Font(bold=True, size=10)  # **Reduce font size**
+            # Apply bold formatting to "OoS children" and "in-school children"
+            bold_parts = ["OoS children", "in-school children"]
+            if any(part in str(col_name) for part in bold_parts):
+                header_cell.font = Font(bold=True, size=10)
+            else:
+                header_cell.font = Font(size=10)  # Reduce font size for readability
+
+
+
+
+        # Apply color to specific columns and make borders visible
+        for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+            print("--------> inside      for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row)")
+
+
+        # Apply color to specific columns and make borders visible
+        for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+            for cell in row:
+                col_index = cell.column  # Get column index
+                col_name = headers[col_index - 1] if col_index - 1 < len(headers) else None  # Prevent index error
+
+                if col_name and isinstance(col_name, str):  # Ensure col_name is valid
+                    # Apply color based on severity level
+                    if "severity level 3" in col_name or "Niveau de sévérité 3" in col_name:
+                        cell.fill = PatternFill(start_color=colors["light_orange"], end_color=colors["light_orange"], fill_type="solid")
+                    elif "severity level 4" in col_name or "Niveau de sévérité 4" in col_name:
+                        cell.fill = PatternFill(start_color=colors["dark_orange"], end_color=colors["dark_orange"], fill_type="solid")
+                    elif "severity level 5" in col_name or "Niveau de sévérité 5" in col_name:
+                        cell.fill = PatternFill(start_color=colors["darker_orange"], end_color=colors["darker_orange"], fill_type="solid")
+                    elif "Area severity" in col_name or "Sévérité de la zone" in col_name:  # Apply light blue for "Area severity"
+                        cell.fill = PatternFill(start_color=colors["light_blue"], end_color=colors["light_blue"], fill_type="solid")
+
+                # Apply wrap text and reduce font size for all data cells
+                cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
+                cell.font = Font(size=10)  # Reduce font size for better readability
+
+                # Apply border formatting
+                if col_index > 4:
+                    if row[0].row == 5:  # Bold top border for header
+                        cell.border = Border(top=Side(style="medium"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+                    elif row[0].row == ws.max_row:  # Bold bottom border for last row
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="medium"))
+                    else:
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+
+    # Save formatted workbook
+    formatted_output = BytesIO()
+    workbook.save(formatted_output)
+    formatted_output.seek(0)
+
+    return formatted_output
+
+
+
+
+
+def create_pin_raw_output(country_label, indicator_dataframes, admin_var, selected_language='English'):
+    """
+    Creates an Excel file for indicator-based data, applying formatting.
+
+    Parameters:
+    - country_label (str): The name of the country (used in the file name).
+    - indicator_dataframes (dict): Dictionary of DataFrames categorized by indicator.
+    - admin_var (str): The administrative variable used in the dataset.
+    - selected_language (str, default='English'): Language setting for headers.
+
+    Returns:
+    - BytesIO: The formatted Excel file as an in-memory object.
+    """
+    country_name = country_label.split('__')[0]  # Extract country name
+
+    # File output buffer
+    output = BytesIO()
+    
+    with pd.ExcelWriter(output) as writer:
+        # Modify column names BEFORE writing them to the Excel file
+        modified_dataframes = {}
+
+        for category, df in indicator_dataframes.items():
+            # Rename columns: Add (% of children) after ":" unless they have (ToT # children)
+            new_columns = {}
+            for col in df.columns:
+                if ":" in col and "(ToT # children)" not in col:
+                    new_columns[col] = col.replace(":", ": (% of children)", 1)
+
+            df = df.rename(columns=new_columns)
+            modified_dataframes[category] = df
+
+            # Write to Excel, ensuring sheet names stay within limits
+            df.to_excel(writer, sheet_name=category[:30], index=False)
+
+    # Load the workbook for formatting
+    output.seek(0)
+    workbook = load_workbook(output)
+
+    for ws in workbook.worksheets:
+        ws.insert_rows(1, 4)  # Add empty rows at the top
+        ws.insert_cols(1, 4)  # Add empty columns on the left
+
+        # **Increase header row thickness more**
+        ws.row_dimensions[5].height = 50  # Make row even thicker
+
+        # Title formatting
+        title = ws.title
+        max_col = ws.max_column
+        ws.merge_cells(start_row=1, start_column=5, end_row=1, end_column=max_col)
+        title_cell = ws.cell(row=1, column=5)
+        title_cell.value = f"Children (5–17 years old) classified by severity and indicators"
+        title_cell.font = Font(bold=True, size=14)
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        # Extract headers from row 5
+        headers = [ws.cell(row=5, column=col).value for col in range(1, ws.max_column + 1)]
+        
+        # **Increase Column Widths Based on Content & Enable Wrap Text**
+        for col_idx, col_name in enumerate(headers, start=1):
+            max_length = max((len(str(ws.cell(row=row_idx, column=col_idx).value)) for row_idx in range(5, ws.max_row + 1)), default=10)
+            adjusted_width = max(15, min(max_length + 2, 25))  # Ensure minimum width but not too wide
+            ws.column_dimensions[ws.cell(row=5, column=col_idx).column_letter].width = adjusted_width
+
+            # Apply **wrap text** to headers
+            header_cell = ws.cell(row=5, column=col_idx)
+            header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            header_cell.font = Font(bold=True, size=10)  # **Reduce font size**
+
+        # Apply color to specific columns and make borders visible
+        for row in ws.iter_rows(min_row=5, max_col=ws.max_column, max_row=ws.max_row):
+            for cell in row:
+                col_index = cell.column  # Get column index
+                col_name = headers[col_index - 1] if col_index - 1 < len(headers) else None  # Prevent index error
+
+                if col_name and isinstance(col_name, str):  # Ensure col_name is valid
+                    # Apply color based on severity level
+                    if "severity level 3" in col_name or "Niveau de sévérité 3" in col_name:
+                        cell.fill = PatternFill(start_color=colors["light_orange"], end_color=colors["light_orange"], fill_type="solid")
+                    elif "severity level 4" in col_name or "Niveau de sévérité 4" in col_name:
+                        cell.fill = PatternFill(start_color=colors["dark_orange"], end_color=colors["dark_orange"], fill_type="solid")
+                    elif "severity level 5" in col_name or "Niveau de sévérité 5" in col_name:
+                        cell.fill = PatternFill(start_color=colors["darker_orange"], end_color=colors["darker_orange"], fill_type="solid")
+                    elif "Area severity" in col_name or "Sévérité de la zone" in col_name:  # Apply light blue for "Area severity"
+                        cell.fill = PatternFill(start_color=colors["light_blue"], end_color=colors["light_blue"], fill_type="solid")
+
+                # Apply wrap text and reduce font size for all data cells
+                cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
+                cell.font = Font(size=10)  # Reduce font size for better readability
+
+                # Apply border formatting
+                if col_index > 4:
+                    if row[0].row == 5:  # Bold top border for header
+                        cell.border = Border(top=Side(style="medium"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+                    elif row[0].row == ws.max_row:  # Bold bottom border for last row
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="medium"))
+                    else:
+                        cell.border = Border(top=Side(style="thin"), left=Side(style="thin"), right=Side(style="thin"), bottom=Side(style="thin"))
+
+    # Save formatted workbook
+    formatted_output = BytesIO()
+    workbook.save(formatted_output)
+    formatted_output.seek(0)
+
+    return formatted_output
