@@ -8,6 +8,7 @@ from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
 from openpyxl.cell.cell import MergedCell  # Import MergedCell
 from io import BytesIO
 from src.add_PiN_severity import add_severity
+from src.clean_dataset import clean_make_dataset
 from src.calculation_for_PiN_Dimension import calculatePIN
 from src.calculation_for_PiN_Dimension_NO_OCHA import calculatePIN_NO_OCHA
 from src.calculation_for_PiN_Dimension_NO_OCHA_2025 import calculatePIN_NO_OCHA_2025
@@ -42,46 +43,52 @@ hybrid_country= True
 step_2_hpc= False
 
 
-
-
-
-
-## DRC
+## MMR
 
 status_var = 'pop_group'
 access_var = 'edu_access'
-teacher_disruption_var = 'edu_disruption_teacher'
-idp_disruption_var = 'edu_disruption_displaced'
-armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
-natural_hazard_var = 'no_indicator'
-
+teacher_disruption_var = 'edu_disrupted_teacher'
+idp_disruption_var = 'edu_disrupted_displaced'
+natural_hazard_var ='no_indicator'
+natural_hazard_var_sev = None
+additional_last_var = 'no_indicator'
+additional_last_sev = None
+additional_2_last_var = 'no_indicator'
+additional_2_last_sev = None
+armed_disruption_var = 'edu_disrupted_attack'#'edu_disrupted_occupation'no_indicator
 barrier_var = 'edu_barrier'
-selected_severity_4_barriers = ["Risques de protection pendant le trajet vers l'école",
-"Risques de protection à l'école",
-"Enfant aidant à la maison / à la ferme", "Impossibilité d'enregistrer ou d'inscrire l'enfant à l'école" ,  "Mariage et/ou grossesse"                                                            
-]
-selected_severity_5_barriers = ["Les enfants rejoignent ou sont recrutés par des groupes armés"]
+selected_severity_4_barriers = [
+    "Protection/safety risks while commuting to school",
+    "Protection/safety risks while at school",
+    "Child needs to work at home or on the household's own farm (i.e. is not earning an income for these activities, but may allow other family members to earn an income)",
+    "Child participating in income generating activities outside of the home",
+    "Child marriage, engagement or pregnancies",
+    "Discrimination or stigmatization of the child for any reason",
+    "Unable to enroll in school due to lack of documentation"]
+selected_severity_5_barriers = ["Child is associated with armed forces or armed groups", "Pregnancy"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
-age_var = 'age_years'
+age_var = 'ind_age'
 gender_var = 'ind_gender'
 start_school = 'September'
-country= 'Democratic Republic of the Congo -- DRC'
+country= 'Myanmar -- MMR'
 
-admin_var = 'Admin_3'#'Admin_2: Regions'
+selected_language = 'label::english (en)'
+
+#admin_var = 'Admin_3: Townships'#'Admin_2: Regions'
  
 # 'Admin_3: Townships'
-#admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
+admin_var = 'admin1'#'Admin_2: Regions' 
 
-vector_cycle = [11,0]
+vector_cycle = [10,14]
 single_cycle = (vector_cycle[1] == 0)
 primary_start = 6
 secondary_end = 17
-label = 'label'
+label = 'label::english (en)'
 
 # Path to your Excel file
-excel_path = 'input/REACH_MSNA_2023_DRC_clean dataset_v2.xlsx'
-excel_path_ocha = 'input/DRC_ocha_2025.xlsx'
+excel_path = 'input/MMR/REACH_MSNA 2026_Dataset.xlsx'
+excel_path_ocha = 'input/MMR/Template_Population_figures.xlsx'
 #excel_path_ocha = 'input/test_ocha.xlsx'
 
 # Load the Excel file
@@ -95,21 +102,17 @@ for sheet_name in xls.sheet_names:
     dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
 # Access specific dataframes
-edu_data = dfs['HH roster']
-household_data = dfs['BDD nettoyée']
-survey_data = dfs['Questionnaire']
-choice_data = dfs['Options']
-
+edu_data = dfs['indiv_clean_data']
+household_data = dfs['main_clean_data']
+survey_data = dfs['survey']
+choice_data = dfs['choices']
 
 ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
 
 # Read specific sheets into separate dataframes
 ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
 mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
-mismatch_admin = False
-no_ocha_data = False
-
-selected_language = "French"
+mismatch_admin = True
 
 
 
@@ -121,16 +124,57 @@ selected_language = "French"
 ##################################################################################################################################################################################################################
 ##################################################################################################################################################################################################################
 
-edu_data_severity = add_severity (country, edu_data, household_data, choice_data, survey_data,
-                                                                                access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,natural_hazard_var,
-                                                                                barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
-                                                                                age_var, gender_var,
-                                                                                label, 
-                                                                                admin_var, vector_cycle, start_school, status_var,
-                                                                                selected_language= selected_language)
+edu_data, household_data, survey_data, choice_data, messages = clean_make_dataset(
+    country, edu_data, household_data, choice_data, survey_data,
+    access_var, teacher_disruption_var, idp_disruption_var, armed_disruption_var,
+    natural_hazard_var, natural_hazard_var_sev,
+    additional_last_var, additional_last_sev,
+    additional_2_last_var, additional_2_last_sev,
+    barrier_var, selected_severity_4_barriers, selected_severity_5_barriers,
+    age_var, gender_var,
+    label,
+    admin_var, vector_cycle, start_school, status_var,
+    selected_language)
+
+# status_var = "pop_status_group"
+# age_var = "ind_age"
+# gender_var = "ind_gender"
+# barrier_var = "edu_barrier_final"
+
+edu_data_severity = add_severity(country,
+                                edu_data,
+                                household_data,
+                                choice_data,
+                                survey_data,
+                                access_var,
+                                teacher_disruption_var,
+                                idp_disruption_var,
+                                armed_disruption_var,
+                                natural_hazard_var,
+                                natural_hazard_var_sev,
+                                additional_last_var,
+                                additional_last_sev,
+                                additional_2_last_var,
+                                additional_2_last_sev,
+                                barrier_var,
+                                selected_severity_4_barriers,
+                                selected_severity_5_barriers,
+                                age_var,
+                                gender_var,
+                                label,
+                                admin_var,
+                                vector_cycle,
+                                start_school,
+                                status_var,
+                                selected_language=selected_language)
 
 
 
-file_path = 'output_validation/00_edu_data_with_severity.xlsx'
+file_path = 'output_validation/00_edu_data_with_severity_MMR.xlsx'
 # Save the DataFrame to an Excel file
-edu_data_severity.to_excel(file_path, index=False, engine='openpyxl')
+
+if(type(edu_data_severity) is tuple):
+    edu_data_severity_df=pd.DataFrame(edu_data_severity[0]).copy()
+    edu_data_severity_df.to_excel(file_path, index=False, engine='openpyxl')
+else:
+    edu_data_severity[0].to_excel(file_path, index=False, engine='openpyxl')
