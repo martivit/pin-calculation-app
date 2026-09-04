@@ -670,7 +670,7 @@ def create_snapshot_PiN_FR(country_label, final_overview_df, final_overview_df_O
             'Enfants déscolarisés, confrontés à des circonstances individuelles aggravantes'
         ]
 
-        fig_subsection.legend([p_no_need, p_acc, p_lc, p_env, p_agg], labels=legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.05),
+        fig_subsection.legend([p_no_need, p_acc, p_lc, p_env, p_agg], legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.05),
                 fontsize=14, ncol=2, prop={'size': 14}, handlelength=3, handleheight=4)
         
         plt.text(0.5, -0.1, "* si le pourcentage du besoin est <1%, la valeur n'est pas reportée dans le graphique",

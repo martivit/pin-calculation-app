@@ -467,7 +467,73 @@ selected_language = "French"
 
 
 
-## CAR
+## DRC-2
+
+status_var = 'pop_group'
+access_var = 'edu_access'
+teacher_disruption_var = 'edu_disruption_teacher'
+idp_disruption_var = 'edu_disruption_displaced'
+armed_disruption_var = 'no_indicator'#'edu_disrupted_occupation'no_indicator
+natural_hazard_var = 'no_indicator'
+
+barrier_var = 'edu_barrier'
+selected_severity_4_barriers = ["Risques de protection pendant le trajet vers l'école",
+"Risques de protection à l'école",
+"Enfant aidant à la maison / à la ferme", "Impossibilité d'enregistrer ou d'inscrire l'enfant à l'école" ,  "Mariage et/ou grossesse"                                                            
+]
+selected_severity_5_barriers = ["Les enfants rejoignent ou sont recrutés par des groupes armés"]
+#"---> None of the listed barriers <---"
+#"Child is associated with armed forces or armed groups "
+age_var = 'age_years'
+gender_var = 'ind_gender'
+start_school = 'September'
+country= 'Democratic Republic of the Congo -- DRC'
+
+admin_var = 'Admin_3'#'Admin_2: Regions'
+ 
+# 'Admin_3: Townships'
+#admin_var = 'Admin_1: States/Regions'#'Admin_2: Regions' 
+
+vector_cycle = [11,0]
+single_cycle = (vector_cycle[1] == 0)
+primary_start = 6
+secondary_end = 17
+label = 'label'
+
+# Path to your Excel file
+excel_path = 'input/REACH_MSNA_2023_DRC_clean dataset_v2.xlsx'
+excel_path_ocha = 'input/DRC_ocha_2025.xlsx'
+#excel_path_ocha = 'input/test_ocha.xlsx'
+
+# Load the Excel file
+xls = pd.ExcelFile(excel_path, engine='openpyxl')
+# Print all sheet names (optional)
+print(xls.sheet_names)
+# Dictionary to hold your dataframes
+dfs = {}
+# Read each sheet into a dataframe
+for sheet_name in xls.sheet_names:
+    dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
+
+# Access specific dataframes
+edu_data = dfs['HH roster']
+household_data = dfs['BDD nettoyée']
+survey_data = dfs['Questionnaire']
+choice_data = dfs['Options']
+
+
+ocha_xls = pd.ExcelFile(excel_path_ocha, engine='openpyxl')
+
+# Read specific sheets into separate dataframes
+ocha_data = pd.read_excel(ocha_xls, sheet_name='ocha')  # 'ocha' sheet
+mismatch_ocha_data = pd.read_excel(ocha_xls, sheet_name='scope-fix')  # 'scope-fix' sheet
+mismatch_admin = False
+no_ocha_data = False
+
+selected_language = "French"
+
+
+## CAR   
 status_var = 'type_population'
 access_var = 'edu_access'
 teacher_disruption_var = 'edu_disrupted_teacher'
@@ -751,7 +817,7 @@ selected_severity_4_barriers = [
     "Child marriage, engagement or pregnancies",
     "Discrimination or stigmatization of the child for any reason",
     "Unable to enroll in school due to lack of documentation"]
-selected_severity_5_barriers = ["Child is associated with armed forces or armed groups "]
+selected_severity_5_barriers = ["Child is associated with armed forces or armed groups", "Pregnancy"]
 #"---> None of the listed barriers <---"
 #"Child is associated with armed forces or armed groups "
 age_var = 'ind_age'
